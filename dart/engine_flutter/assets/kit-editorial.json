@@ -1,0 +1,127 @@
+{
+  "id": "editorial",
+  "name": "Editorial",
+  "version": "1.0.0",
+  "catalogId": "urn:engine:catalog:core:1",
+  "tokens": {
+    "light": {
+      "background": "#f5f1e8",
+      "surface": "#fffcf4",
+      "foreground": "#253c31",
+      "muted": "#54695c",
+      "accent": "#285d48",
+      "onAccent": "#ffffff",
+      "border": "#c6cbbd",
+      "danger": "#a53227",
+      "success": "#285d48"
+    },
+    "dark": {
+      "background": "#17241e",
+      "surface": "#21332a",
+      "foreground": "#f4f0e6",
+      "muted": "#b7c5b8",
+      "accent": "#b4d8b6",
+      "onAccent": "#17241e",
+      "border": "#4c6354",
+      "danger": "#f4aaa0",
+      "success": "#b4d8b6"
+    },
+    "typography": {
+      "body": "system-ui, sans-serif",
+      "heading": "Georgia, serif",
+      "baseSize": 16
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 36
+    },
+    "radius": 6,
+    "motionMs": 140
+  },
+  "components": {
+    "Form": {
+      "implementation": "Form"
+    },
+    "Row": {
+      "implementation": "Row"
+    },
+    "Column": {
+      "implementation": "Column"
+    },
+    "Grid": {
+      "implementation": "Grid"
+    },
+    "Card": {
+      "implementation": "EditorialCard"
+    },
+    "Divider": {
+      "implementation": "Divider"
+    },
+    "Tabs": {
+      "implementation": "Tabs"
+    },
+    "Accordion": {
+      "implementation": "Accordion"
+    },
+    "Heading": {
+      "implementation": "EditorialHeading"
+    },
+    "Text": {
+      "implementation": "Text"
+    },
+    "Image": {
+      "implementation": "Image"
+    },
+    "Icon": {
+      "implementation": "Icon"
+    },
+    "Badge": {
+      "implementation": "Badge"
+    },
+    "Callout": {
+      "implementation": "Callout"
+    },
+    "CodeBlock": {
+      "implementation": "CodeBlock"
+    },
+    "List": {
+      "implementation": "List"
+    },
+    "Table": {
+      "implementation": "Table"
+    },
+    "Progress": {
+      "implementation": "Progress"
+    },
+    "Button": {
+      "implementation": "EditorialButton"
+    },
+    "TextField": {
+      "implementation": "TextField"
+    },
+    "Select": {
+      "implementation": "Select"
+    },
+    "Checkbox": {
+      "implementation": "Checkbox"
+    },
+    "Slider": {
+      "implementation": "Slider"
+    },
+    "DatePicker": {
+      "implementation": "DatePicker"
+    },
+    "Chart": {
+      "implementation": "Chart"
+    }
+  },
+  "guide": "Build readable, thoughtful interfaces. Use a strong heading, short explanatory paragraphs, and generous group spacing. Favor lists and tables for detailed information. Use cards only for independent tools. Keep native controls recognizable. All state, props and actions follow the core catalog exactly; never use kit-specific component names in model output.",
+  "examples": [
+    "explanation",
+    "comparison",
+    "calculator"
+  ]
+}

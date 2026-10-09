@@ -1,0 +1,517 @@
+import { Catalog, type ComponentApi } from "@a2ui/web_core/catalog";
+import { MessageProcessor } from "@a2ui/web_core/processing";
+import { batchWrite, getValue } from "@a2ui/web_core/reactivity";
+import { DataModel } from "@a2ui/web_core/state";
+import {
+  type Action,
+  ActionSchema,
+  CATALOG_ID,
+  type Capabilities,
+  type Component,
+  componentSchemas,
+  type Diagnostic,
+  type Expr,
+  functionDefinitions,
+  MessageSchema,
+  PROTOCOL_VERSION,
+  parseComponent,
+  type UIMessage,
+  type UserAction,
+} from "@engine/protocol";
+import { assertSafeJson, evaluateExpression, resolvePath } from "./expression.js";
+import { NDJSONDecoder } from "./stream.js";
+
+export * from "./expression.js";
+export * from "./stream.js";
+
+export type UIModelEvent =
+  | { type: "message"; message: UIMessage }
+  | { type: "diagnostic"; diagnostic: Diagnostic }
+  | { type: "usage"; inputTokens?: number; outputTokens?: number; model?: string }
+  | { type: "complete"; status: "completed" | "cancelled" | "failed" };
+export type ModelRequest = {
+  messages: { role: "system" | "user" | "assistant"; content: string }[];
+  model: string;
+  maxTokens?: number;
+};
+export interface UIModelAdapter {
+  stream(request: ModelRequest, options?: { signal?: AbortSignal }): AsyncIterable<UIModelEvent>;
+}
+export type NodeSnapshot = {
+  id: string;
+  component?: string;
+  raw?: Component;
+  props: Record<string, any>;
+  scope: string;
+  error?: string;
+};
+export type RuntimeOptions = {
+  catalogId?: string;
+  components?: ComponentApi[];
+  onAction?: (action: UserAction) => void | Promise<void>;
+  clientActions?: Record<string, (args: Record<string, unknown>) => void | Promise<void>>;
+  onDiagnostic?: (diagnostic: Diagnostic) => void;
+  limits?: Partial<{
+    messageBytes: number;
+    streamBytes: number;
+    surfaces: number;
+    components: number;
+  }>;
+};
+const defaultLimits = {
+  messageBytes: 256 * 1024,
+  streamBytes: 8 * 1024 * 1024,
+  surfaces: 16,
+  components: 2000,
+};
+const overlapping = (a: string, b: string) =>
+  a === "/" || b === "/" || a === b || a.startsWith(`${b}/`) || b.startsWith(`${a}/`);
+
+/** A small policy layer around upstream A2UI state and component models. */
+export class UIRuntime {
+  readonly processor: MessageProcessor<any>;
+  readonly diagnostics: Diagnostic[] = [];
+  readonly limits;
+  private listeners = new Set<() => void>();
+  private nodeListeners = new Map<string, Set<() => void>>();
+  private snapshots = new Map<string, { signature: string; snapshot: NodeSnapshot }>();
+  private dirty = new Map<string, Set<string>>();
+  private errors = new Map<string, string>();
+  private seenEvents = new Set<string>();
+  private revision = 0;
+  private diagnosticSequence = 0;
+  private diagnosticEvents: { sequence: number; diagnostic: Diagnostic }[] = [];
+  private disposed = false;
+  private runs = new Map<string, AbortController>();
+  private cleanups = new Set<() => void>();
+  constructor(readonly options: RuntimeOptions = {}) {
+    this.limits = { ...defaultLimits, ...options.limits };
+    const components =
+      options.components ??
+      Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema }));
+    const functions = functionDefinitions.map((definition) => ({
+      ...definition,
+      execute: (args: Record<string, unknown>, context: any) => {
+        if (!definition.pure) throw new Error("ACTION_DISPATCH_REQUIRED");
+        return evaluateExpression(args.expr as Expr, (path) =>
+          getValue(context.dataModel.getSignal(resolvePath(path, context.path))),
+        );
+      },
+    }));
+    this.processor = new MessageProcessor(
+      [new Catalog(options.catalogId ?? CATALOG_ID, PROTOCOL_VERSION, components, functions)],
+      undefined,
+      {
+        version: PROTOCOL_VERSION,
+        validationConfig: {
+          targetVersion: PROTOCOL_VERSION,
+          allowMissingRoot: true,
+          allowDanglingReferences: true,
+          allowOrphanComponents: true,
+          allowUnknownElements: false,
+          maxDepth: 50,
+        },
+      },
+    );
+  }
+  /** Runtime-level subscription: surface lifecycle and diagnostics only. */
+  subscribe = (fn: () => void) => {
+    this.listeners.add(fn);
+    return () => {
+      this.listeners.delete(fn);
+    };
+  };
+  getRevision = () => this.revision;
+  get surfaceIds() {
+    return [...this.processor.getSurfaces().keys()];
+  }
+  getSurface(id: string) {
+    return this.processor.getSurface(id);
+  }
+  capabilities(platform: Capabilities["platform"]): Capabilities {
+    return {
+      catalogIds: [this.options.catalogId ?? CATALOG_ID],
+      platform,
+      clientActions: Object.keys(this.options.clientActions ?? {}),
+    };
+  }
+  private changed() {
+    this.revision++;
+    for (const fn of this.listeners) fn();
+  }
+  report(diagnostic: Diagnostic) {
+    this.diagnosticEvents.push({ sequence: ++this.diagnosticSequence, diagnostic });
+    if (this.diagnosticEvents.length > 200) this.diagnosticEvents.shift();
+    if (this.diagnostics.length >= 200) this.diagnostics.shift();
+    this.diagnostics.push(diagnostic);
+    this.options.onDiagnostic?.(diagnostic);
+    this.changed();
+  }
+  private notifyNode(surfaceId: string, id: string) {
+    for (const fn of this.nodeListeners.get(`${surfaceId}\0${id}`) ?? []) fn();
+  }
+  /** Validate and apply one envelope. Invalid nodes do not replace valid state. */
+  accept(input: unknown, eventId?: string): Diagnostic[] {
+    if (this.disposed) throw new Error("RUNTIME_DISPOSED");
+    if (eventId && this.seenEvents.has(eventId)) return [];
+    const before = this.diagnosticSequence;
+    let surfaceId: string | undefined;
+    try {
+      assertSafeJson(input);
+      if (new TextEncoder().encode(JSON.stringify(input)).length > this.limits.messageBytes)
+        throw new Error("MESSAGE_LIMIT");
+      const message = MessageSchema.parse(input);
+      const body =
+        "createSurface" in message
+          ? message.createSurface
+          : "updateComponents" in message
+            ? message.updateComponents
+            : "updateDataModel" in message
+              ? message.updateDataModel
+              : message.deleteSurface;
+      surfaceId = body.surfaceId;
+      if (!("createSurface" in message) && !this.getSurface(surfaceId))
+        throw new Error("UNKNOWN_SURFACE");
+      if ("createSurface" in message) {
+        if (this.surfaceIds.length >= this.limits.surfaces) throw new Error("SURFACE_LIMIT");
+        if (this.getSurface(surfaceId)) throw new Error("DUPLICATE_SURFACE");
+        this.processor.processMessages(message);
+        this.changed();
+      } else if ("updateComponents" in message) {
+        const surface = this.getSurface(surfaceId)!;
+        const incoming = message.updateComponents.components;
+        const ids = new Set(incoming.map((c) => c.id));
+        if (ids.size !== incoming.length) throw new Error("DUPLICATE_COMPONENT_ID");
+        const added = [...ids].filter((id) => !surface.componentsModel.has(id)).length;
+        if (surface.componentsModel.size + added > this.limits.components)
+          throw new Error("COMPONENT_LIMIT");
+        for (const raw of incoming) {
+          try {
+            const schemas = this.options.components
+              ? Object.fromEntries(
+                  this.options.components.map((entry) => [entry.name, entry.schema]),
+                )
+              : componentSchemas;
+            const component = parseComponent(raw, schemas as Parameters<typeof parseComponent>[1]);
+            this.processor.processMessages({
+              version: PROTOCOL_VERSION,
+              updateComponents: { surfaceId, components: [component] },
+            });
+            this.errors.delete(`${surfaceId}\0${component.id}`);
+          } catch (error) {
+            const diagnostic = this.errorDiagnostic(error, surfaceId, raw.id);
+            this.errors.set(`${surfaceId}\0${raw.id}`, diagnostic.message);
+            this.report(diagnostic);
+          }
+          this.notifyNode(surfaceId, raw.id);
+        }
+      } else if ("updateDataModel" in message) {
+        const path = resolvePath(message.updateDataModel.path ?? "/");
+        if ([...(this.dirty.get(surfaceId) ?? [])].some((edited) => overlapping(edited, path))) {
+          this.report({
+            code: "LOCAL_EDIT_CONFLICT",
+            message: "A model update overlaps a local edit; the local value was preserved.",
+            surfaceId,
+            path,
+            severity: "warning",
+          });
+        } else this.processor.processMessages(message);
+      } else {
+        this.runs.get(surfaceId)?.abort();
+        this.runs.delete(surfaceId);
+        this.processor.processMessages(message);
+        this.dirty.delete(surfaceId);
+        for (const key of this.snapshots.keys())
+          if (key.startsWith(`${surfaceId}\0`)) this.snapshots.delete(key);
+        for (const key of this.nodeListeners.keys())
+          if (key.startsWith(`${surfaceId}\0`))
+            for (const fn of this.nodeListeners.get(key) ?? []) fn();
+        this.changed();
+      }
+      if (eventId) {
+        if (this.seenEvents.size >= 10000)
+          this.seenEvents.delete(this.seenEvents.values().next().value!);
+        this.seenEvents.add(eventId);
+      }
+    } catch (error) {
+      this.report(this.errorDiagnostic(error, surfaceId));
+    }
+    return this.diagnosticEvents
+      .filter((event) => event.sequence > before)
+      .map((event) => event.diagnostic);
+  }
+  private errorDiagnostic(error: unknown, surfaceId?: string, componentId?: string): Diagnostic {
+    const zod = error as {
+      issues?: { path: (string | number)[]; code: string; message: string }[];
+    };
+    if (zod.issues?.length) {
+      const issue = zod.issues[0];
+      return {
+        code: "INVALID_SCHEMA",
+        message: `Invalid ${issue.code} at ${issue.path.join(".") || "message"}.`,
+        path: issue.path.join("/"),
+        surfaceId,
+        componentId,
+        severity: "error",
+      };
+    }
+    const code = error instanceof Error ? error.message : "INVALID_MESSAGE";
+    return {
+      code: /^[A-Z_]+$/.test(code) ? code : "INVALID_COMPONENT",
+      message: /^[A-Z_]+$/.test(code)
+        ? code
+        : "The component does not satisfy the catalog or graph contract.",
+      surfaceId,
+      componentId,
+      severity: "error",
+    };
+  }
+  /** Mark a new generation. Local edits after this point win over model writes. */
+  beginRun(surfaceId: string): AbortSignal {
+    this.runs.get(surfaceId)?.abort();
+    const controller = new AbortController();
+    this.runs.set(surfaceId, controller);
+    return controller.signal;
+  }
+  cancel(surfaceId: string) {
+    this.runs.get(surfaceId)?.abort();
+  }
+  async consume(stream: AsyncIterable<unknown>, options: { signal?: AbortSignal } = {}) {
+    let objectBytes = 0;
+    const decoder = new NDJSONDecoder(
+      (d) => this.report(d),
+      this.limits.messageBytes,
+      this.limits.streamBytes,
+    );
+    try {
+      for await (const chunk of stream) {
+        if (options.signal?.aborted || this.disposed) break;
+        if (typeof chunk === "string" || chunk instanceof Uint8Array)
+          for (const message of decoder.push(chunk)) this.accept(message);
+        else {
+          objectBytes += new TextEncoder().encode(JSON.stringify(chunk)).length;
+          if (objectBytes > this.limits.streamBytes) throw new Error("STREAM_LIMIT");
+          this.accept(chunk);
+        }
+      }
+      if (!options.signal?.aborted && !this.disposed) {
+        for (const message of decoder.finish()) this.accept(message);
+        this.finish();
+      }
+    } catch (error) {
+      if (!options.signal?.aborted) this.report(this.errorDiagnostic(error));
+    }
+  }
+  /** At stream completion, unresolved references become reportable errors. */
+  finish() {
+    for (const surfaceId of this.surfaceIds) {
+      for (const node of this.getSurface(surfaceId)!.componentsModel.values) {
+        const snapshot = this.getNodeSnapshot(surfaceId, node.id);
+        if (snapshot.error)
+          this.report({
+            code: snapshot.error,
+            message: "The expression cannot resolve to its declared type.",
+            surfaceId,
+            componentId: node.id,
+            severity: "error",
+          });
+      }
+    }
+    for (const surfaceId of this.surfaceIds) {
+      try {
+        this.getSurface(surfaceId)!.componentsModel.validateTopology({
+          allowMissingRoot: false,
+          allowDanglingReferences: false,
+          allowOrphanComponents: true,
+        });
+      } catch (error) {
+        this.report(this.errorDiagnostic(error, surfaceId));
+      }
+    }
+  }
+  read(surfaceId: string, path: string, scope = "/"): any {
+    return this.getSurface(surfaceId)?.dataModel.get(resolvePath(path, scope));
+  }
+  /** Resolve values without exposing host objects or invoking side effects. */
+  resolve(surfaceId: string, value: any, scope = "/"): any {
+    if (!value || typeof value !== "object") return value;
+    if (Array.isArray(value)) return value.map((v) => this.resolve(surfaceId, v, scope));
+    if (typeof value.path === "string" && Object.keys(value).length === 1)
+      return this.read(surfaceId, value.path, scope);
+    if (typeof value.call === "string") {
+      if (
+        !["computeNumber", "computeString", "computeBoolean", "computeArray"].includes(value.call)
+      )
+        throw new Error("IMPURE_EXPRESSION");
+      const result = evaluateExpression(value.args.expr, (path) =>
+        this.read(surfaceId, path, scope),
+      );
+      const expected = value.call.slice(7).toLowerCase();
+      if (expected === "array" ? !Array.isArray(result) : typeof result !== expected)
+        throw new Error("EXPRESSION_TYPE");
+      return result;
+    }
+    return Object.fromEntries(
+      Object.entries(value).map(([key, v]) => [key, this.resolve(surfaceId, v, scope)]),
+    );
+  }
+  getNodeSnapshot(surfaceId: string, id: string, scope = "/"): NodeSnapshot {
+    const key = `${surfaceId}\0${id}\0${scope}`;
+    const component = this.getSurface(surfaceId)?.componentsModel.get(id);
+    let snapshot: NodeSnapshot = {
+      id,
+      props: {},
+      scope,
+      error: this.errors.get(`${surfaceId}\0${id}`),
+    };
+    if (component) {
+      const raw = { id, component: component.type, ...component.properties } as Component;
+      try {
+        const props = Object.fromEntries(
+          Object.entries(component.properties).map(([k, v]) => [
+            k,
+            ["action", "onSubmit", "children", "tabs", "items"].includes(k)
+              ? v
+              : this.resolve(surfaceId, v, scope),
+          ]),
+        );
+        snapshot = { id, component: component.type, raw, props, scope };
+      } catch (error) {
+        snapshot = {
+          ...snapshot,
+          component: component.type,
+          raw,
+          error: error instanceof Error ? error.message : "EXPRESSION_ERROR",
+        };
+      }
+    }
+    const signature = JSON.stringify(snapshot);
+    if (this.snapshots.get(key)?.signature === signature) return this.snapshots.get(key)!.snapshot;
+    this.snapshots.set(key, { signature, snapshot });
+    return snapshot;
+  }
+  /** Subscribe only to this component and data paths its props actually reference. */
+  subscribeNode(surfaceId: string, id: string, scope: string, listener: () => void): () => void {
+    const key = `${surfaceId}\0${id}`;
+    const set = this.nodeListeners.get(key) ?? new Set();
+    this.nodeListeners.set(key, set);
+    let unsubscribers: (() => void)[] = [];
+    const bind = () => {
+      for (const fn of unsubscribers) fn();
+      unsubscribers = [];
+      const surface = this.getSurface(surfaceId);
+      const component = surface?.componentsModel.get(id);
+      const paths = new Set<string>();
+      const walk = (v: unknown) => {
+        if (!v || typeof v !== "object") return;
+        for (const [k, val] of Object.entries(v)) {
+          if ((k === "path" || k === "ref") && typeof val === "string")
+            paths.add(resolvePath(val, scope));
+          else walk(val);
+        }
+      };
+      if (component) {
+        walk(component.properties);
+        for (const path of paths) {
+          const sub = surface!.dataModel.subscribe(path, listener);
+          unsubscribers.push(() => sub.unsubscribe());
+        }
+      }
+      listener();
+    };
+    set.add(bind);
+    bind();
+    const cleanup = () => {
+      set.delete(bind);
+      if (!set.size) this.nodeListeners.delete(key);
+      for (const fn of unsubscribers) fn();
+      this.cleanups.delete(cleanup);
+    };
+    this.cleanups.add(cleanup);
+    return cleanup;
+  }
+  /** Commit a user edit synchronously before resolving a following action. */
+  setValue(surfaceId: string, path: string, value: unknown, scope = "/") {
+    assertSafeJson(value);
+    const resolved = resolvePath(path, scope);
+    const surface = this.getSurface(surfaceId);
+    if (!surface) throw new Error("UNKNOWN_SURFACE");
+    surface.dataModel.set(resolved, value);
+    const edited = this.dirty.get(surfaceId) ?? new Set();
+    edited.add(resolved);
+    this.dirty.set(surfaceId, edited);
+  }
+  /** Dispatch only from a trusted host interaction, never from model ingestion. */
+  async dispatch(surfaceId: string, componentId: string, input: Action, scope = "/") {
+    try {
+      const action = ActionSchema.parse(input);
+      if (!this.getSurface(surfaceId)?.componentsModel.has(componentId))
+        throw new Error("UNKNOWN_COMPONENT");
+      if ("event" in action) {
+        const context = this.resolve(surfaceId, action.event.context ?? {}, scope);
+        await this.options.onAction?.({
+          name: action.event.name,
+          surfaceId,
+          sourceComponentId: componentId,
+          context,
+        });
+        return;
+      }
+      const { call, args } = action.functionCall;
+      functionDefinitions.find((definition) => definition.name === call)!.schema.parse(args);
+      if (call === "setValue" || call === "setValues") {
+        const updates = call === "setValue" ? [args] : args.updates;
+        if (!Array.isArray(updates) || updates.length > 20) throw new Error("ACTION_LIMIT");
+        const resolved = updates.map((entry) => {
+          if (!entry || typeof entry.path !== "string") throw new Error("INVALID_POINTER");
+          const value =
+            entry.expr !== undefined
+              ? evaluateExpression(entry.expr as Expr, (path) => this.read(surfaceId, path, scope))
+              : this.resolve(surfaceId, entry.value, scope);
+          assertSafeJson(value);
+          return { path: resolvePath(entry.path, scope), value };
+        });
+        const validationModel = new DataModel(
+          JSON.parse(JSON.stringify(this.read(surfaceId, "/"))),
+        );
+        try {
+          for (const update of resolved) validationModel.set(update.path, update.value);
+        } finally {
+          validationModel.dispose();
+        }
+        batchWrite(() => {
+          for (const update of resolved) this.setValue(surfaceId, update.path, update.value);
+        });
+      } else {
+        const handler = this.options.clientActions?.[call];
+        if (!handler) throw new Error("CLIENT_ACTION_DENIED");
+        const values = this.resolve(surfaceId, args, scope);
+        if (call === "openUrl") {
+          const url = new URL(String(values.url));
+          if (url.protocol !== "https:" || url.username || url.password)
+            throw new Error("UNSAFE_URL");
+        }
+        await handler(values);
+      }
+    } catch (error) {
+      this.report(this.errorDiagnostic(error, surfaceId, componentId));
+    }
+  }
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    for (const run of this.runs.values()) run.abort();
+    for (const cleanup of [...this.cleanups]) cleanup();
+    this.processor.dispose();
+    this.listeners.clear();
+    this.nodeListeners.clear();
+    this.snapshots.clear();
+    this.dirty.clear();
+    this.errors.clear();
+  }
+}
+
+/** Create an isolated runtime per conversation/session. */
+export function createUIRuntime(options?: RuntimeOptions) {
+  return new UIRuntime(options);
+}

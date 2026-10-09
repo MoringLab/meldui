@@ -1,0 +1,15 @@
+appId: dev.engine.lab.expo
+---
+- launchApp
+- assertVisible: "Engine"
+- tapOn: "예제 선택"
+- tapOn: "여행 예산 나누기"
+- assertVisible: "인원"
+- tapOn: "Editorial로 전환"
+- assertVisible: "Neutral로 전환"
+- tapOn: "다크 모드"
+- assertVisible: "라이트 모드"
+- takeScreenshot: artifacts/expo-dark
+- swipe:
+    direction: UP
+- assertVisible: "만들기"

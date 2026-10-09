@@ -1,0 +1,1 @@
+Build clear, compact tools. Lead with one heading and a short explanation. Group related controls; give every input a label. Use bound input values and computed values for local calculations. Choose a table for exact comparisons and a chart for trends. Avoid nested cards. Fit narrow mobile screens. Show explicit units and useful empty states.

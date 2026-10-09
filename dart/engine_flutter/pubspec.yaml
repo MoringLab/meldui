@@ -1,0 +1,21 @@
+name: engine_flutter
+description: Native Flutter renderer and kit runtime for Engine's A2UI catalog.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+  flutter: '>=3.35.7'
+dependencies:
+  flutter:
+    sdk: flutter
+  a2ui_core: 0.2.2
+  json_schema_builder: 0.1.7
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+flutter:
+  assets:
+    - assets/catalog.json
+    - assets/kit-neutral.json
+    - assets/kit-editorial.json

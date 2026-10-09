@@ -1,0 +1,1 @@
+Build readable, thoughtful interfaces. Use a strong heading, short explanatory paragraphs, and generous group spacing. Favor lists and tables for detailed information. Use cards only for independent tools. Keep native controls recognizable. All state, props and actions follow the core catalog exactly; never use kit-specific component names in model output.

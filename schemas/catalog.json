@@ -1,0 +1,3477 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:engine:catalog:core:1",
+  "catalogId": "urn:engine:catalog:core:1",
+  "protocolVersion": "v0.9",
+  "$defs": {
+    "Expr": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "maxLength": 1024
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "div",
+                "mod",
+                "eq",
+                "ne",
+                "lt",
+                "lte",
+                "gt",
+                "gte",
+                "and",
+                "or",
+                "not",
+                "if",
+                "format",
+                "sum",
+                "count",
+                "min",
+                "max",
+                "array",
+                "round"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Expr"
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "op",
+            "args"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "components": {
+    "Form": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Form/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Form/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              },
+              "maxItems": 2000
+            },
+            {
+              "type": "object",
+              "properties": {
+                "componentId": {
+                  "$ref": "#/components/Form/properties/children/anyOf/0/items"
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "componentId",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/ChildList"
+        },
+        "onSubmit": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "context": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "functionCall": {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "enum": [
+                        "setValue",
+                        "setValues",
+                        "copyText",
+                        "openUrl"
+                      ]
+                    },
+                    "args": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "const": "void"
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "functionCall"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/Action"
+        },
+        "component": {
+          "type": "string",
+          "const": "Form"
+        }
+      },
+      "required": [
+        "label",
+        "children",
+        "onSubmit",
+        "component"
+      ]
+    },
+    "Row": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              },
+              "maxItems": 2000
+            },
+            {
+              "type": "object",
+              "properties": {
+                "componentId": {
+                  "$ref": "#/components/Row/properties/children/anyOf/0/items"
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "componentId",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/ChildList"
+        },
+        "gap": {
+          "type": "string",
+          "enum": [
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl"
+          ]
+        },
+        "align": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ]
+        },
+        "component": {
+          "type": "string",
+          "const": "Row"
+        }
+      },
+      "required": [
+        "children",
+        "component"
+      ]
+    },
+    "Column": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              },
+              "maxItems": 2000
+            },
+            {
+              "type": "object",
+              "properties": {
+                "componentId": {
+                  "$ref": "#/components/Column/properties/children/anyOf/0/items"
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "componentId",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/ChildList"
+        },
+        "gap": {
+          "type": "string",
+          "enum": [
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl"
+          ]
+        },
+        "align": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ]
+        },
+        "component": {
+          "type": "string",
+          "const": "Column"
+        }
+      },
+      "required": [
+        "children",
+        "component"
+      ]
+    },
+    "Grid": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              },
+              "maxItems": 2000
+            },
+            {
+              "type": "object",
+              "properties": {
+                "componentId": {
+                  "$ref": "#/components/Grid/properties/children/anyOf/0/items"
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "componentId",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/ChildList"
+        },
+        "gap": {
+          "type": "string",
+          "enum": [
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl"
+          ]
+        },
+        "align": {
+          "type": "string",
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ]
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 2
+        },
+        "component": {
+          "type": "string",
+          "const": "Grid"
+        }
+      },
+      "required": [
+        "children",
+        "component"
+      ]
+    },
+    "Card": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              },
+              "maxItems": 2000
+            },
+            {
+              "type": "object",
+              "properties": {
+                "componentId": {
+                  "$ref": "#/components/Card/properties/children/anyOf/0/items"
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "componentId",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/ChildList"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Card/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Card/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "component": {
+          "type": "string",
+          "const": "Card"
+        }
+      },
+      "required": [
+        "children",
+        "component"
+      ]
+    },
+    "Divider": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "component": {
+          "type": "string",
+          "const": "Divider"
+        }
+      },
+      "required": [
+        "component"
+      ]
+    },
+    "Tabs": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "tabs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 32768
+                  },
+                  {
+                    "$ref": "#/components/Tabs/properties/visible/anyOf/1"
+                  },
+                  {
+                    "$ref": "#/components/Tabs/properties/visible/anyOf/2"
+                  }
+                ],
+                "description": "REF:#/$defs/DynamicString"
+              },
+              "child": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "child"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "value": {
+          "$ref": "#/components/Tabs/properties/tabs/items/properties/label"
+        },
+        "component": {
+          "type": "string",
+          "const": "Tabs"
+        }
+      },
+      "required": [
+        "tabs",
+        "value",
+        "component"
+      ]
+    },
+    "Accordion": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 32768
+                  },
+                  {
+                    "$ref": "#/components/Accordion/properties/visible/anyOf/1"
+                  },
+                  {
+                    "$ref": "#/components/Accordion/properties/visible/anyOf/2"
+                  }
+                ],
+                "description": "REF:#/$defs/DynamicString"
+              },
+              "child": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "child"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 30
+        },
+        "value": {
+          "$ref": "#/components/Accordion/properties/items/items/properties/label"
+        },
+        "component": {
+          "type": "string",
+          "const": "Accordion"
+        }
+      },
+      "required": [
+        "items",
+        "value",
+        "component"
+      ]
+    },
+    "Heading": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Heading/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Heading/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 2
+        },
+        "component": {
+          "type": "string",
+          "const": "Heading"
+        }
+      },
+      "required": [
+        "text",
+        "component"
+      ]
+    },
+    "Text": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Text/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Text/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "default",
+            "muted",
+            "success",
+            "danger"
+          ]
+        },
+        "component": {
+          "type": "string",
+          "const": "Text"
+        }
+      },
+      "required": [
+        "text",
+        "component"
+      ]
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "asset": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "aspectRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10
+        },
+        "component": {
+          "type": "string",
+          "const": "Image"
+        }
+      },
+      "required": [
+        "asset",
+        "alt",
+        "component"
+      ]
+    },
+    "Icon": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "name": {
+          "type": "string",
+          "enum": [
+            "check",
+            "info",
+            "arrow",
+            "plus",
+            "star",
+            "close"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "component": {
+          "type": "string",
+          "const": "Icon"
+        }
+      },
+      "required": [
+        "name",
+        "component"
+      ]
+    },
+    "Badge": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Badge/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Badge/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "default",
+            "success",
+            "warning"
+          ]
+        },
+        "component": {
+          "type": "string",
+          "const": "Badge"
+        }
+      },
+      "required": [
+        "text",
+        "component"
+      ]
+    },
+    "Callout": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Callout/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Callout/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "text": {
+          "$ref": "#/components/Callout/properties/title"
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warning",
+            "success",
+            "danger"
+          ],
+          "default": "info"
+        },
+        "component": {
+          "type": "string",
+          "const": "Callout"
+        }
+      },
+      "required": [
+        "title",
+        "text",
+        "component"
+      ]
+    },
+    "CodeBlock": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/CodeBlock/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/CodeBlock/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "language": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "component": {
+          "type": "string",
+          "const": "CodeBlock"
+        }
+      },
+      "required": [
+        "code",
+        "component"
+      ]
+    },
+    "List": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "description": "REF:#/$defs/ComponentId"
+              },
+              "maxItems": 2000
+            },
+            {
+              "type": "object",
+              "properties": {
+                "componentId": {
+                  "$ref": "#/components/List/properties/children/anyOf/0/items"
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "componentId",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/ChildList"
+        },
+        "ordered": {
+          "type": "boolean"
+        },
+        "component": {
+          "type": "string",
+          "const": "List"
+        }
+      },
+      "required": [
+        "children",
+        "component"
+      ]
+    },
+    "Table": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Table/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Table/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "key",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {},
+              "maxItems": 1000
+            },
+            {
+              "$ref": "#/components/Table/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Table/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicValue"
+        },
+        "component": {
+          "type": "string",
+          "const": "Table"
+        }
+      },
+      "required": [
+        "caption",
+        "columns",
+        "rows",
+        "component"
+      ]
+    },
+    "Progress": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Progress/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Progress/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/components/Progress/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Progress/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicNumber"
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 100
+        },
+        "component": {
+          "type": "string",
+          "const": "Progress"
+        }
+      },
+      "required": [
+        "label",
+        "value",
+        "component"
+      ]
+    },
+    "Button": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Button/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Button/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "action": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "context": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "functionCall": {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "enum": [
+                        "setValue",
+                        "setValues",
+                        "copyText",
+                        "openUrl"
+                      ]
+                    },
+                    "args": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "const": "void"
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "functionCall"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/Action"
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary",
+            "quiet"
+          ],
+          "default": "primary"
+        },
+        "disabled": {
+          "$ref": "#/components/Button/properties/visible",
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "component": {
+          "type": "string",
+          "const": "Button"
+        }
+      },
+      "required": [
+        "label",
+        "action",
+        "component"
+      ]
+    },
+    "TextField": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/TextField/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/TextField/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "#/components/TextField/properties/label"
+        },
+        "disabled": {
+          "$ref": "#/components/TextField/properties/visible",
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "error": {
+          "$ref": "#/components/TextField/properties/label",
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "multiline": {
+          "type": "boolean"
+        },
+        "component": {
+          "type": "string",
+          "const": "TextField"
+        }
+      },
+      "required": [
+        "label",
+        "value",
+        "component"
+      ]
+    },
+    "Select": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Select/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Select/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "#/components/Select/properties/label"
+        },
+        "disabled": {
+          "$ref": "#/components/Select/properties/visible",
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "error": {
+          "$ref": "#/components/Select/properties/label",
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "component": {
+          "type": "string",
+          "const": "Select"
+        }
+      },
+      "required": [
+        "label",
+        "value",
+        "options",
+        "component"
+      ]
+    },
+    "Checkbox": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Checkbox/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Checkbox/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "#/components/Checkbox/properties/visible"
+        },
+        "disabled": {
+          "$ref": "#/components/Checkbox/properties/visible",
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "error": {
+          "$ref": "#/components/Checkbox/properties/label",
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "component": {
+          "type": "string",
+          "const": "Checkbox"
+        }
+      },
+      "required": [
+        "label",
+        "value",
+        "component"
+      ]
+    },
+    "Slider": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Slider/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Slider/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/components/Slider/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Slider/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicNumber"
+        },
+        "disabled": {
+          "$ref": "#/components/Slider/properties/visible",
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "error": {
+          "$ref": "#/components/Slider/properties/label",
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "min": {
+          "type": "number",
+          "default": 0
+        },
+        "max": {
+          "type": "number",
+          "default": 100
+        },
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1
+        },
+        "component": {
+          "type": "string",
+          "const": "Slider"
+        }
+      },
+      "required": [
+        "label",
+        "value",
+        "component"
+      ]
+    },
+    "DatePicker": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/DatePicker/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/DatePicker/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "#/components/DatePicker/properties/label"
+        },
+        "disabled": {
+          "$ref": "#/components/DatePicker/properties/visible",
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "error": {
+          "$ref": "#/components/DatePicker/properties/label",
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "min": {
+          "type": "string"
+        },
+        "max": {
+          "type": "string"
+        },
+        "component": {
+          "type": "string",
+          "const": "DatePicker"
+        }
+      },
+      "required": [
+        "label",
+        "value",
+        "component"
+      ]
+    },
+    "Chart": {
+      "type": "object",
+      "properties": {
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:#/$defs/DataBinding"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "enum": [
+                    "computeNumber",
+                    "computeString",
+                    "computeBoolean",
+                    "computeArray"
+                  ]
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "expr": {
+                      "$ref": "#/$defs/Expr"
+                    }
+                  },
+                  "required": [
+                    "expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "string",
+                    "boolean",
+                    "array"
+                  ]
+                }
+              },
+              "required": [
+                "call",
+                "args",
+                "returnType"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "REF:#/$defs/DynamicBoolean"
+        },
+        "accessibilityLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32768
+            },
+            {
+              "$ref": "#/components/Chart/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Chart/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicString"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "line",
+            "bar",
+            "scatter"
+          ]
+        },
+        "values": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {},
+              "maxItems": 1000
+            },
+            {
+              "$ref": "#/components/Chart/properties/visible/anyOf/1"
+            },
+            {
+              "$ref": "#/components/Chart/properties/visible/anyOf/2"
+            }
+          ],
+          "description": "REF:#/$defs/DynamicValue"
+        },
+        "xKey": {
+          "type": "string",
+          "default": "x"
+        },
+        "yKey": {
+          "type": "string",
+          "default": "y"
+        },
+        "component": {
+          "type": "string",
+          "const": "Chart"
+        }
+      },
+      "required": [
+        "title",
+        "kind",
+        "values",
+        "component"
+      ]
+    }
+  },
+  "functions": {
+    "computeNumber": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "computeNumber"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "expr": {
+              "$ref": "#/$defs/Expr"
+            }
+          },
+          "required": [
+            "expr"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "number"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "number"
+    },
+    "computeString": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "computeString"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "expr": {
+              "$ref": "#/$defs/Expr"
+            }
+          },
+          "required": [
+            "expr"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "string"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "string"
+    },
+    "computeBoolean": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "computeBoolean"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "expr": {
+              "$ref": "#/$defs/Expr"
+            }
+          },
+          "required": [
+            "expr"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "boolean"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "boolean"
+    },
+    "computeArray": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "computeArray"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "expr": {
+              "$ref": "#/$defs/Expr"
+            }
+          },
+          "required": [
+            "expr"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "array"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "array"
+    },
+    "setValue": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "setValue"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "value": {},
+            "expr": {
+              "$ref": "#/$defs/Expr"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "void"
+    },
+    "setValues": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "setValues"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "updates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "maxLength": 1024
+                  },
+                  "value": {},
+                  "expr": {
+                    "$ref": "#/$defs/Expr"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "updates"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "void"
+    },
+    "copyText": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "copyText"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 32768
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:#/$defs/DataBinding"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "enum": [
+                        "computeNumber",
+                        "computeString",
+                        "computeBoolean",
+                        "computeArray"
+                      ]
+                    },
+                    "args": {
+                      "type": "object",
+                      "properties": {
+                        "expr": {
+                          "$ref": "#/$defs/Expr"
+                        }
+                      },
+                      "required": [
+                        "expr"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "enum": [
+                        "number",
+                        "string",
+                        "boolean",
+                        "array"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args",
+                    "returnType"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "REF:#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "void"
+    },
+    "openUrl": {
+      "type": "object",
+      "properties": {
+        "call": {
+          "const": "openUrl"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 32768
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:#/$defs/DataBinding"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "enum": [
+                        "computeNumber",
+                        "computeString",
+                        "computeBoolean",
+                        "computeArray"
+                      ]
+                    },
+                    "args": {
+                      "type": "object",
+                      "properties": {
+                        "expr": {
+                          "$ref": "#/$defs/Expr"
+                        }
+                      },
+                      "required": [
+                        "expr"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "enum": [
+                        "number",
+                        "string",
+                        "boolean",
+                        "array"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args",
+                    "returnType"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "REF:#/$defs/DynamicString"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        "returnType": {
+          "const": "void"
+        }
+      },
+      "required": [
+        "call",
+        "args"
+      ],
+      "returnType": "void"
+    }
+  },
+  "instructions": "Use only this catalog. Prefer local bindings for interactive state."
+}

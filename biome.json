@@ -1,0 +1,7 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
+  "files": { "includes": ["**", "!**/dist", "!**/node_modules", "!**/android", "!**/ios"] },
+  "formatter": { "indentStyle": "space", "lineWidth": 100 },
+  "linter": { "enabled": true, "rules": { "recommended": true, "suspicious": { "noExplicitAny": "off" }, "a11y": { "useSemanticElements": "off" } } },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+}

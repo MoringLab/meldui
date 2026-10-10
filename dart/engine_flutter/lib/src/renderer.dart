@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'runtime.dart';
 import 'expression.dart';
@@ -12,6 +13,8 @@ typedef EngineWidgetBuilder =
       String,
       String,
     );
+/// CSS-style numeric weight (100-900) to a Flutter weight.
+FontWeight fontWeightFor(int w) => FontWeight.values[((w / 100).round().clamp(1, 9)) - 1];
 final _colorCache = <String, Color>{};
 Color _color(String value) {
   final cached = _colorCache[value];
@@ -28,6 +31,10 @@ class UIProvider extends InheritedWidget {
   final bool dark;
   final Map<String, ImageProvider> assets;
   final Map<String, EngineWidgetBuilder> components;
+
+  /// Called with true while a control is being dragged and false when it ends, so a host list
+  /// can stop scrolling during the drag.
+  final void Function(bool locked)? onGestureLock;
   const UIProvider({
     super.key,
     required this.runtime,
@@ -35,6 +42,7 @@ class UIProvider extends InheritedWidget {
     this.dark = false,
     this.assets = const {},
     this.components = const {},
+    this.onGestureLock,
     required super.child,
   });
   static UIProvider of(BuildContext context) =>
@@ -55,11 +63,14 @@ class UISurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final host = UIProvider.of(context);
+    final ty = host.kit.typography(ios: defaultTargetPlatform == TargetPlatform.iOS);
     return DefaultTextStyle.merge(
       style: TextStyle(
         color: _color(host.kit.colors(host.dark)['foreground'] as String),
-        fontSize: 16,
-        height: 1.5,
+        fontSize: ty.bodySize,
+        height: ty.bodyLineHeight / ty.bodySize,
+        fontWeight: fontWeightFor(ty.bodyWeight),
+        fontFamily: ty.bodyFamily,
       ),
       child: ListenableBuilder(
         listenable: host.runtime,
@@ -224,6 +235,7 @@ class _ComponentState extends State<_Component> {
     final node = widget.node;
     final p = Map<String, dynamic>.from(node['props'] as Map);
     final colors = host.kit.colors(host.dark);
+    final ty = host.kit.typography(ios: defaultTargetPlatform == TargetPlatform.iOS);
     final foreground = _color(colors['foreground'] as String);
     final muted = _color(colors['muted'] as String);
     final accent = _color(colors['accent'] as String);
@@ -268,7 +280,7 @@ class _ComponentState extends State<_Component> {
     Widget field(Widget control) => column([
       Text(
         label,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        style: TextStyle(fontSize: ty.smallSize, fontWeight: FontWeight.w600),
       ),
       control,
       if (p['error'] != null)
@@ -341,7 +353,7 @@ class _ComponentState extends State<_Component> {
       case 'Grid':
         return LayoutBuilder(
           builder: (context, constraints) {
-            final count = constraints.maxWidth < 600
+            final count = constraints.maxWidth < 560
                 ? 1
                 : (p['columns'] as num? ?? 2).toInt();
             return Wrap(
@@ -372,13 +384,9 @@ class _ComponentState extends State<_Component> {
                 child: Text(
                   displayValue(p['title']),
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: ty.headingSizes[3],
                     fontWeight: FontWeight.w600,
-                    fontFamily:
-                        host.kit.manifest['components'][node['component']]['implementation'] ==
-                            'Editorial${node['component']}'
-                        ? 'serif'
-                        : null,
+                    fontFamily: ty.headingFamily,
                   ),
                 ),
               ),
@@ -394,28 +402,17 @@ class _ComponentState extends State<_Component> {
       case 'Divider':
         return Divider(color: border);
       case 'Heading':
+        final headingLevel = ((p['level'] as num? ?? 2).toInt() - 1).clamp(0, 5);
         return Semantics(
           header: true,
           child: Text(
             displayValue(p['text']),
             key: ValueKey('node-${node['id']}'),
             style: TextStyle(
-              fontSize: p['level'] == 1
-                  ? 30
-                  : p['level'] == 2
-                  ? 26
-                  : 21,
-              height: 1.25,
-              fontWeight:
-                  host.kit.manifest['components'][node['component']]['implementation'] ==
-                      'Editorial${node['component']}'
-                  ? FontWeight.w500
-                  : FontWeight.w600,
-              fontFamily:
-                  host.kit.manifest['components'][node['component']]['implementation'] ==
-                      'Editorial${node['component']}'
-                  ? 'serif'
-                  : null,
+              fontSize: ty.headingSizes[headingLevel],
+              height: ty.headingLineHeights[headingLevel] / ty.headingSizes[headingLevel],
+              fontWeight: fontWeightFor(ty.headingWeight),
+              fontFamily: ty.headingFamily,
             ),
           ),
         );
@@ -546,13 +543,24 @@ class _ComponentState extends State<_Component> {
           label: label,
           child: column([
             Text('$label: ${displayValue(value)} / ${p['max'] ?? 100}'),
-            LinearProgressIndicator(
-              value: ((value as num? ?? 0) / (p['max'] as num? ?? 100)).clamp(
-                0,
-                1,
+            // Motion follows the kit token and drops to zero under the OS reduced-motion setting.
+            TweenAnimationBuilder<double>(
+              tween: Tween(
+                end: ((value as num? ?? 0) / (p['max'] as num? ?? 100))
+                    .clamp(0, 1)
+                    .toDouble(),
               ),
-              backgroundColor: border,
-              color: accent,
+              duration: Duration(
+                milliseconds: MediaQuery.of(context).disableAnimations
+                    ? 0
+                    : host.kit.motionMs,
+              ),
+              curve: Curves.easeOutQuad,
+              builder: (context, ratio, _) => LinearProgressIndicator(
+                value: ratio,
+                backgroundColor: border,
+                color: accent,
+              ),
             ),
           ], 8),
         );
@@ -634,6 +642,8 @@ class _ComponentState extends State<_Component> {
                 max: max,
                 divisions: ((max - min) / step).round().clamp(1, 10000),
                 label: displayValue(value),
+                onChangeStart: (_) => host.onGestureLock?.call(true),
+                onChangeEnd: (_) => host.onGestureLock?.call(false),
                 onChanged: disabled
                     ? null
                     : (v) => write((v / step).round() * step),

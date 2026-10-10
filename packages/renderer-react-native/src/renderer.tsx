@@ -1,5 +1,5 @@
 import { type NodeSnapshot, resolvePath, type UIRuntime } from "@engine/core";
-import { type UIKit, validateKit } from "@engine/kit-spec";
+import { resolveTypography, type UIKit, validateKit } from "@engine/kit-spec";
 import type { ChildList } from "@engine/protocol";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Slider from "@react-native-community/slider";
@@ -14,6 +14,9 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
   Image,
   type ImageSourcePropType,
   Platform,
@@ -43,7 +46,51 @@ type NativeContext = {
   components: Record<string, React.ComponentType<NativeViewProps>>;
 };
 const Context = createContext<NativeContext | null>(null);
-function useUI() {
+/** Width of the surface's own container (a chat column), measured with onLayout. */
+const ContainerWidth = createContext(0);
+export const useContainerWidth = () => useContext(ContainerWidth);
+/** Hosts with a scrolling list implement this to stop the list scrolling while a control is dragged. */
+const GestureLock = createContext<(locked: boolean) => void>(() => {});
+/** Motion duration from the kit token; 0 when the OS asks for reduced motion. */
+export function useMotion() {
+  const { kit } = useUI();
+  const [reduced, setReduced] = useState(false);
+  React.useEffect(() => {
+    let active = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((v) => active && setReduced(v));
+    const sub = AccessibilityInfo.addEventListener("reduceMotionChanged", setReduced);
+    return () => {
+      active = false;
+      sub.remove();
+    };
+  }, []);
+  return { reduced, durationMs: reduced ? 0 : kit.tokens.motionMs };
+}
+function AnimatedFill({ ratio, color }: { ratio: number; color: string }) {
+  const { durationMs } = useMotion();
+  const value = React.useRef(new Animated.Value(ratio)).current;
+  React.useEffect(() => {
+    if (durationMs === 0) value.setValue(ratio);
+    else
+      Animated.timing(value, {
+        toValue: ratio,
+        duration: durationMs,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: false,
+      }).start();
+  }, [ratio, durationMs, value]);
+  return (
+    <Animated.View
+      style={{
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: color,
+        width: value.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }),
+      }}
+    />
+  );
+}
+export function useUI() {
   const value = useContext(Context);
   if (!value) throw new Error("UIProvider is required");
   return value;
@@ -56,6 +103,7 @@ export function UIProvider({
   mode = "light",
   assets = {},
   components = {},
+  onGestureLock,
   children,
 }: {
   runtime: UIRuntime;
@@ -63,12 +111,16 @@ export function UIProvider({
   mode?: "light" | "dark";
   assets?: NativeContext["assets"];
   components?: NativeContext["components"];
+  /** Called with true while a control (slider) is being dragged and false when it ends. */
+  onGestureLock?: (locked: boolean) => void;
   children: ReactNode;
 }) {
   validateKit(kit);
   return (
     <Context.Provider value={{ runtime, kit, mode, assets, components }}>
-      <View style={{ backgroundColor: kit.tokens[mode].background }}>{children}</View>
+      <GestureLock.Provider value={onGestureLock ?? (() => {})}>
+        <View style={{ backgroundColor: kit.tokens[mode].background }}>{children}</View>
+      </GestureLock.Provider>
     </Context.Provider>
   );
 }
@@ -76,12 +128,15 @@ export function UIProvider({
 export function UISurface({ surfaceId }: { surfaceId?: string }) {
   const { runtime } = useUI();
   useSyncExternalStore(runtime.subscribe, runtime.getRevision, runtime.getRevision);
+  const [width, setWidth] = useState(0);
   return (
-    <>
-      {(surfaceId ? [surfaceId] : runtime.surfaceIds).map((id) => (
-        <NativeNode key={id} surfaceId={id} id="root" />
-      ))}
-    </>
+    <ContainerWidth.Provider value={width}>
+      <View onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width))}>
+        {(surfaceId ? [surfaceId] : runtime.surfaceIds).map((id) => (
+          <NativeNode key={id} surfaceId={id} id="root" />
+        ))}
+      </View>
+    </ContainerWidth.Provider>
   );
 }
 const NativeNode = memo(function NativeNode({
@@ -210,6 +265,13 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
   const { kit, mode, assets } = useUI();
   const t = kit.tokens[mode];
   const p = node.props;
+  const ty = React.useMemo(
+    () => resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android"),
+    [kit],
+  );
+  const family = ty.body.nativeFamily ? { fontFamily: ty.body.nativeFamily } : {};
+  const containerWidth = useContainerWidth();
+  const lockGesture = useContext(GestureLock);
   const [dateOpen, setDateOpen] = useState(false);
   const [showData, setShowData] = useState(false);
   const bound = node.raw?.value as { path?: string } | undefined;
@@ -219,7 +281,13 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
   const label = String(p.label ?? "");
   const value = p.value ?? "";
   const disabled = Boolean(p.disabled) || !bound?.path;
-  const body = { color: t.foreground, fontSize: 16, lineHeight: 25 } as const;
+  const body = {
+    color: t.foreground,
+    fontSize: ty.body.size,
+    lineHeight: ty.body.lineHeight,
+    fontWeight: String(ty.body.weight) as "400",
+    ...family,
+  } as const;
   const container = {
     gap: kit.tokens.spacing[(p.gap ?? "md") as keyof UIKit["tokens"]["spacing"]],
   };
@@ -231,7 +299,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
     paddingHorizontal: 12,
     color: t.foreground,
     backgroundColor: t.surface,
-    fontSize: 16,
+    fontSize: ty.body.size,
+    ...family,
   };
   const button = (
     title: string,
@@ -263,7 +332,12 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       })}
     >
       <Text
-        style={{ color: secondary ? t.foreground : t.onAccent, fontSize: 16, fontWeight: "600" }}
+        style={{
+          color: secondary ? t.foreground : t.onAccent,
+          fontSize: ty.body.size,
+          fontWeight: "600",
+          ...family,
+        }}
       >
         {title}
       </Text>
@@ -271,7 +345,9 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
   );
   const field = (widget: ReactNode) => (
     <View style={{ gap: 8 }}>
-      <Text style={{ ...body, fontSize: 14, fontWeight: "600" }}>{label}</Text>
+      <Text style={{ ...body, fontSize: ty.small.size, fontWeight: "600", ...family }}>
+        {label}
+      </Text>
       {widget}
       {p.error && (
         <Text accessibilityRole="alert" style={{ color: t.danger }}>
@@ -300,8 +376,25 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           ))}
         </View>
       );
-    case "Grid":
-      return <View style={container}>{children}</View>;
+    case "Grid": {
+      // Columns follow the container width: one column below 560dp, otherwise as many as fit in 220dp.
+      const columns =
+        containerWidth < 560
+          ? 1
+          : Math.max(1, Math.min(Number(p.columns) || 2, Math.floor(containerWidth / 220)));
+      const gap = container.gap;
+      return columns === 1 ? (
+        <View style={container}>{children}</View>
+      ) : (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap }}>
+          {React.Children.map(children, (child) => (
+            <View style={{ width: (containerWidth - gap * (columns - 1)) / columns - 0.5 }}>
+              {child}
+            </View>
+          ))}
+        </View>
+      );
+    }
     case "Card":
       return (
         <View
@@ -320,7 +413,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
               style={{
                 ...body,
                 fontWeight: "600",
-                fontSize: 20,
+                fontSize: ty.heading.sizes[3],
                 fontFamily:
                   kit.components[node.component ?? ""]?.implementation ===
                   `Editorial${node.component}`
@@ -356,18 +449,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           testID={`node-${node.id}`}
           style={{
             color: t.foreground,
-            fontSize: p.level === 1 ? 30 : p.level === 2 ? 26 : 21,
-            lineHeight: p.level === 1 ? 38 : 32,
-            fontWeight:
-              kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`
-                ? "500"
-                : "600",
-            fontFamily:
-              kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`
-                ? Platform.OS === "ios"
-                  ? "Georgia"
-                  : "serif"
-                : undefined,
+            fontSize: ty.heading.sizes[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
+            lineHeight: ty.heading.lineHeights[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
+            fontWeight: String(ty.heading.weight) as "600",
+            ...(ty.heading.nativeFamily ? { fontFamily: ty.heading.nativeFamily } : {}),
           }}
         >
           {String(p.text ?? "")}
@@ -464,8 +549,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             style={{
               color: t.foreground,
               fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-              fontSize: 14,
-              lineHeight: 22,
+              fontSize: ty.small.size,
+              lineHeight: ty.small.lineHeight,
               padding: 16,
             }}
           >
@@ -498,13 +583,9 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             {label}: {String(value)} / {p.max}
           </Text>
           <View style={{ height: 8, borderRadius: 4, backgroundColor: t.border }}>
-            <View
-              style={{
-                height: 8,
-                borderRadius: 4,
-                width: `${Math.min(100, Math.max(0, (Number(value) / p.max) * 100))}%`,
-                backgroundColor: t.accent,
-              }}
+            <AnimatedFill
+              ratio={Math.min(1, Math.max(0, Number(value) / p.max))}
+              color={t.accent}
             />
           </View>
         </View>
@@ -591,6 +672,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             maximumValue={p.max}
             step={p.step}
             onValueChange={write}
+            onSlidingStart={() => lockGesture(true)}
+            onSlidingComplete={() => lockGesture(false)}
             minimumTrackTintColor={t.accent}
             maximumTrackTintColor={t.border}
             thumbTintColor={t.accent}
@@ -747,10 +830,18 @@ function NativeTable({
 }) {
   const { kit, mode } = useUI();
   const t = kit.tokens[mode];
-  const cell = { padding: 12, width: 150, color: t.foreground, fontSize: 14, lineHeight: 22 };
+  const ty = resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android");
+  const cell = {
+    padding: 12,
+    width: 150,
+    color: t.foreground,
+    fontSize: ty.small.size,
+    lineHeight: ty.small.lineHeight,
+    ...(ty.body.nativeFamily ? { fontFamily: ty.body.nativeFamily } : {}),
+  };
   return (
     <View style={{ gap: 8 }}>
-      <Text accessibilityRole="header" style={{ color: t.muted, fontSize: 14 }}>
+      <Text accessibilityRole="header" style={{ color: t.muted, fontSize: ty.small.size }}>
         {title}
       </Text>
       <ScrollView horizontal>
@@ -804,7 +895,12 @@ function NativeChart({ node }: { node: NodeSnapshot }) {
     <View style={{ gap: 8 }}>
       <Text
         accessibilityRole="header"
-        style={{ color: t.foreground, fontSize: 18, fontWeight: "600" }}
+        style={{
+          color: t.foreground,
+          fontSize: resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android").heading
+            .sizes[3],
+          fontWeight: "600",
+        }}
       >
         {String(p.title)}
       </Text>

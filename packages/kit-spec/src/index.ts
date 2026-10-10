@@ -14,6 +14,30 @@ const colors = z
     success: z.string(),
   })
   .strict();
+/**
+ * Typography tokens. `body`/`heading` are web font stacks. `native` names registered font families
+ * for React Native / Flutter (system font when absent). Everything after `baseSize` is optional so
+ * existing kits keep validating; defaults match the previous hard-coded values.
+ */
+const nativeFamily = z.union([
+  z.string(),
+  z.object({ ios: z.string().optional(), android: z.string().optional() }),
+]);
+const typographySchema = z.object({
+  body: z.string(),
+  heading: z.string(),
+  baseSize: z.number().min(14),
+  bodyWeight: z.number().int().min(100).max(900).default(400),
+  headingWeight: z.number().int().min(100).max(900).default(600),
+  lineHeight: z.number().min(1).max(2.2).default(1.55),
+  headingLineHeight: z.number().min(1).max(2).default(1.2),
+  /** Multipliers of baseSize for Heading levels 1-6. */
+  scale: z
+    .array(z.number().min(0.75).max(4))
+    .length(6)
+    .default([2.25, 1.75, 1.375, 1.125, 1, 0.875]),
+  native: z.object({ body: nativeFamily.optional(), heading: nativeFamily.optional() }).default({}),
+});
 export const KitSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -22,7 +46,7 @@ export const KitSchema = z.object({
   tokens: z.object({
     light: colors,
     dark: colors,
-    typography: z.object({ body: z.string(), heading: z.string(), baseSize: z.number().min(14) }),
+    typography: typographySchema,
     spacing: z.object({
       xs: z.number(),
       sm: z.number(),
@@ -38,6 +62,8 @@ export const KitSchema = z.object({
   examples: z.array(z.string()),
 });
 export type UIKit = z.infer<typeof KitSchema>;
+/** Authoring shape: optional tokens may be omitted and take their defaults. */
+export type UIKitInput = z.input<typeof KitSchema>;
 export type ThemeColors = z.infer<typeof colors>;
 
 /** Validate the portable part of a kit before a host registers its code. */
@@ -63,6 +89,48 @@ export function validateKit(input: unknown): UIKit {
   return kit;
 }
 /** Author a kit with an immediately checked manifest. */
-export function defineKit(kit: UIKit): UIKit {
+export function defineKit(kit: UIKitInput): UIKit {
   return validateKit(kit);
+}
+
+export type ResolvedTypography = {
+  body: { family: string; nativeFamily?: string; size: number; weight: number; lineHeight: number };
+  small: { size: number; lineHeight: number };
+  heading: {
+    family: string;
+    nativeFamily?: string;
+    weight: number;
+    /** Font sizes for levels 1-6, rounded to whole units. */
+    sizes: number[];
+    /** Absolute line heights (size × heading line-height), rounded. */
+    lineHeights: number[];
+  };
+};
+/** The single place typography tokens become concrete numbers; the Dart port mirrors this. */
+export function resolveTypography(
+  kit: UIKit,
+  os: "ios" | "android" = "android",
+): ResolvedTypography {
+  const t = kit.tokens.typography;
+  const pick = (family: z.infer<typeof nativeFamily> | undefined) =>
+    typeof family === "string" || family === undefined ? family : family[os];
+  const sizes = t.scale.map((m) => Math.round(t.baseSize * m));
+  const small = Math.max(12, Math.round(t.baseSize * 0.875));
+  return {
+    body: {
+      family: t.body,
+      nativeFamily: pick(t.native.body),
+      size: t.baseSize,
+      weight: t.bodyWeight,
+      lineHeight: Math.round(t.baseSize * t.lineHeight),
+    },
+    small: { size: small, lineHeight: Math.round(small * t.lineHeight) },
+    heading: {
+      family: t.heading,
+      nativeFamily: pick(t.native.heading),
+      weight: t.headingWeight,
+      sizes,
+      lineHeights: sizes.map((size) => Math.round(size * t.headingLineHeight)),
+    },
+  };
 }

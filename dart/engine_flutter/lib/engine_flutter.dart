@@ -2,6 +2,7 @@
 library;
 
 export 'src/answer.dart';
+export 'src/answer_view.dart';
 export 'src/runtime.dart';
 export 'src/renderer.dart';
 export 'src/expression.dart';

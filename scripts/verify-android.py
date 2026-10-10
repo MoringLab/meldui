@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--serial', default=os.environ.get('ANDROID_SERIAL'))
 parser.add_argument('--platform', choices=['expo', 'flutter', 'all'], default='all')
 parser.add_argument('--live', action='store_true', help='Call the configured local model server')
+parser.add_argument('--install-only', action='store_true', help='Install the APKs and stop (no flows)')
 parser.add_argument('--video', action='store_true', help='Record the form flow, outside benchmarks')
 args = parser.parse_args()
 if not args.serial:
@@ -54,6 +55,9 @@ for platform, (app_id, apk) in apps.items():
         time.sleep(1)
     if installer.returncode:
         raise RuntimeError('Local demo installation failed')
+    if args.install_only:
+        results.append({'platform': platform, 'installed': True})
+        continue
     flows = ([f'{platform}-benchmark'] if platform == 'expo' else []) + [f'{platform}-input', platform]
     if args.live:
         flows.append('live')

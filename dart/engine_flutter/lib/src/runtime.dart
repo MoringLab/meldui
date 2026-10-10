@@ -8,6 +8,25 @@ import 'expression.dart';
 const catalogId = 'urn:engine:catalog:core:1';
 typedef JsonMap = Map<String, dynamic>;
 
+class KitTypography {
+  final double bodySize, bodyLineHeight, smallSize, smallLineHeight;
+  final int bodyWeight, headingWeight;
+  final String? bodyFamily, headingFamily;
+  final List<double> headingSizes, headingLineHeights;
+  const KitTypography({
+    required this.bodySize,
+    required this.bodyWeight,
+    required this.bodyLineHeight,
+    required this.bodyFamily,
+    required this.smallSize,
+    required this.smallLineHeight,
+    required this.headingWeight,
+    required this.headingSizes,
+    required this.headingLineHeights,
+    required this.headingFamily,
+  });
+}
+
 /// Portable kit manifest. Renderer implementations are registered by the host.
 class UIKit {
   final JsonMap manifest;
@@ -23,6 +42,38 @@ class UIKit {
     manifest['tokens'][dark ? 'dark' : 'light'] as Map,
   );
   double get radius => (manifest['tokens']['radius'] as num).toDouble();
+  int get motionMs => (manifest['tokens']['motionMs'] as num? ?? 140).toInt();
+
+  /// Concrete typography; mirrors `resolveTypography` in @engine/kit-spec (shared via parity tests).
+  KitTypography typography({bool ios = false}) {
+    final t = Map<String, dynamic>.from(manifest['tokens']['typography'] as Map);
+    final base = (t['baseSize'] as num).toDouble();
+    final lineHeight = (t['lineHeight'] as num? ?? 1.55).toDouble();
+    final headingLine = (t['headingLineHeight'] as num? ?? 1.2).toDouble();
+    final scale = ((t['scale'] as List?) ?? const [2.25, 1.75, 1.375, 1.125, 1, 0.875])
+        .map((e) => (e as num).toDouble())
+        .toList();
+    final native = Map<String, dynamic>.from((t['native'] as Map?) ?? const {});
+    String? pick(dynamic family) => family is String
+        ? family
+        : family is Map
+        ? (family[ios ? 'ios' : 'android'] as String?)
+        : null;
+    final sizes = [for (final m in scale) (base * m).roundToDouble()];
+    final small = (base * 0.875).roundToDouble().clamp(12.0, double.infinity);
+    return KitTypography(
+      bodySize: base,
+      bodyWeight: (t['bodyWeight'] as num? ?? 400).toInt(),
+      bodyLineHeight: (base * lineHeight).roundToDouble(),
+      bodyFamily: pick(native['body']),
+      smallSize: small,
+      smallLineHeight: (small * lineHeight).roundToDouble(),
+      headingWeight: (t['headingWeight'] as num? ?? 600).toInt(),
+      headingSizes: sizes,
+      headingLineHeights: [for (final s in sizes) (s * headingLine).roundToDouble()],
+      headingFamily: pick(native['heading']),
+    );
+  }
   static Future<UIKit> load(String id) async => UIKit(
     jsonDecode(
           await rootBundle.loadString(

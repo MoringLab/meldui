@@ -16,7 +16,10 @@ class EngineLab extends StatefulWidget {
 
 class EngineLabState extends State<EngineLab> {
   List<dynamic> fixtures = [];
-  UIRuntime? runtime;
+  List<dynamic> hybridFixtures = [];
+  AnswerSession? session;
+  UIRuntime? get runtime => session?.runtime;
+  bool scrollLocked = false;
   final Map<String, UIKit> kits = {};
   String kitId = 'neutral';
   String model = 'cx/gpt-5.6-sol-medium';
@@ -39,19 +42,23 @@ class EngineLabState extends State<EngineLab> {
   Future<void> initialize() async {
     fixtures =
         jsonDecode(await rootBundle.loadString('assets/cases.json')) as List;
+    hybridFixtures =
+        jsonDecode(await rootBundle.loadString('assets/hybrid.json')) as List;
     kits['neutral'] = await UIKit.load('neutral');
     kits['editorial'] = await UIKit.load('editorial');
     await replay('calculator', animate: false);
   }
 
-  void displayRuntime(UIRuntime next) {
-    final previous = runtime;
-    setState(() => runtime = next);
-    WidgetsBinding.instance.addPostFrameCallback((_) => previous?.dispose());
+  void displaySession(AnswerSession next) {
+    final previous = session;
+    setState(() => session = next);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => previous?.runtime.dispose(),
+    );
   }
 
-  Future<UIRuntime> fresh({bool display = true}) async {
-    final next = await UIRuntime.create(
+  Future<AnswerSession> fresh({bool display = true}) async {
+    final created = await UIRuntime.create(
       onAction: (action) {
         generate(
           '사용자가 ${action['name']} 작업을 요청했습니다. 현재 화면에 결과를 반영하세요.',
@@ -63,12 +70,13 @@ class EngineLabState extends State<EngineLab> {
             Clipboard.setData(ClipboardData(text: displayValue(args['text']))),
       },
     );
+    final next = AnswerSession(created);
     if (!mounted) {
-      next.dispose();
+      created.dispose();
       return next;
     }
     if (!display) return next;
-    displayRuntime(next);
+    displaySession(next);
     setState(() {
       diagnostics = [];
       messages = 0;
@@ -87,22 +95,29 @@ class EngineLabState extends State<EngineLab> {
       busy = false;
       status = '예제를 표시하고 있습니다.';
     });
+    final hybrid = hybridFixtures.where((f) => f['id'] == id).firstOrNull;
     final fixture =
         fixtures.firstWhere((f) => f['id'] == id, orElse: () => fixtures.first)
             as Map;
-    for (final message in fixture['messages'] as List) {
+    // Legacy fixtures replay as one JSON control line per message; hybrid ones as mixed text.
+    final lines = hybrid != null
+        ? (hybrid['wire'] as String).split('\n')
+        : [for (final m in fixture['messages'] as List) jsonEncode(m)];
+    for (final line in lines) {
       if (!mounted || run != generation) return;
-      next.accept(message);
+      next.push('$line\n');
       setState(() {
         messages++;
       });
       if (animate) await Future<void>.delayed(const Duration(milliseconds: 25));
     }
-    next.finish();
+    next.end();
     if (mounted && run == generation) {
       setState(() {
         status = '준비되었습니다. 입력값을 바꿔보세요.';
-        diagnostics = next.diagnostics.map((d) => d['code'] as String).toList();
+        diagnostics = next.runtime.diagnostics
+            .map((d) => d['code'] as String)
+            .toList();
       });
     }
     if (scroll.hasClients) scroll.jumpTo(0);
@@ -112,13 +127,14 @@ class EngineLabState extends State<EngineLab> {
     if (text.trim().isEmpty) return;
     client?.close(force: true);
     final run = ++generation;
-    final next = action != null ? runtime! : await fresh(display: false);
+    final next = action != null ? session! : await fresh(display: false);
     var displayed = action != null;
     if (!mounted || run != generation) {
-      if (!displayed) next.dispose();
+      if (!displayed) next.runtime.dispose();
       return;
     }
-    next.beginRun('main');
+    if (action != null) next.beginTurn();
+    next.runtime.beginRun('main');
     prompt.clear();
     setState(() {
       if (action == null) {
@@ -147,6 +163,7 @@ class EngineLabState extends State<EngineLab> {
           'model': model,
           'kitId': kitId,
           'platform': 'flutter',
+          'format': 'hybrid',
           'sessionId': sessionId,
         }),
       );
@@ -167,13 +184,10 @@ class EngineLabState extends State<EngineLab> {
         if (event['type'] == 'session') {
           sessionId = event['sessionId'] as String;
         }
-        if (event['type'] == 'message') {
-          next.accept(event['message']);
-          if (!displayed &&
-              next.surfaceIds.any(
-                (sid) => next.node(sid, 'root')['component'] != null,
-              )) {
-            displayRuntime(next);
+        if (event['type'] == 'text') {
+          next.push(event['text'] as String);
+          if (!displayed && next.blocks.isNotEmpty) {
+            displaySession(next);
             displayed = true;
           }
           setState(() => messages++);
@@ -184,9 +198,11 @@ class EngineLabState extends State<EngineLab> {
           );
         }
         if (event['type'] == 'repair') {
+          next.beginTurn();
           setState(() => status = '일부 항목 수정 중 (${event['attempt']}/2)');
         }
         if (event['type'] == 'complete') {
+          next.end();
           setState(
             () => status = event['status'] == 'completed'
                 ? '완료되었습니다.'
@@ -199,7 +215,7 @@ class EngineLabState extends State<EngineLab> {
         setState(() => status = '연결을 확인하고 다시 시도하세요.');
       }
     } finally {
-      if (!displayed) next.dispose();
+      if (!displayed) next.runtime.dispose();
       activeClient.close(force: true);
       if (mounted && run == generation) setState(() => busy = false);
     }
@@ -208,7 +224,7 @@ class EngineLabState extends State<EngineLab> {
   void cancel() {
     generation++;
     client?.close(force: true);
-    runtime?.cancel();
+    session?.runtime.cancel();
     setState(() {
       busy = false;
       status = '생성을 중단했습니다.';
@@ -219,7 +235,7 @@ class EngineLabState extends State<EngineLab> {
   void dispose() {
     generation++;
     client?.close(force: true);
-    runtime?.dispose();
+    session?.runtime.dispose();
     prompt.dispose();
     scroll.dispose();
     super.dispose();
@@ -274,7 +290,7 @@ class EngineLabState extends State<EngineLab> {
           ],
         ),
         body: SafeArea(
-          child: runtime == null || kit == null
+          child: session == null || kit == null
               ? const Center(child: CircularProgressIndicator())
               : Column(
                   children: [
@@ -298,6 +314,14 @@ class EngineLabState extends State<EngineLab> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                          for (final fixture in hybridFixtures)
+                            DropdownMenuItem(
+                              value: fixture['id'] as String,
+                              child: Text(
+                                '섞어 보기 · ${fixture['title']}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                         ],
                         onChanged: (id) {
                           if (id != null && id.isNotEmpty) replay(id);
@@ -307,6 +331,9 @@ class EngineLabState extends State<EngineLab> {
                     Expanded(
                       child: SingleChildScrollView(
                         controller: scroll,
+                        physics: scrollLocked
+                            ? const NeverScrollableScrollPhysics()
+                            : null,
                         padding: const EdgeInsets.all(18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -315,7 +342,21 @@ class EngineLabState extends State<EngineLab> {
                               runtime: runtime!,
                               kit: kit,
                               dark: dark,
-                              child: const UISurface(),
+                              onGestureLock: (locked) {
+                                if (mounted) setState(() => scrollLocked = locked);
+                              },
+                              child: AnswerView(
+                                session: session!,
+                                labels: const AnswerLabels(
+                                  surface: '인터랙티브 콘텐츠',
+                                  reset: '초기화',
+                                  expand: '크게 보기',
+                                  close: '닫기',
+                                  viewAsText: '텍스트로 보기',
+                                  viewAsInterface: '화면으로 보기',
+                                  incomplete: '일부 내용을 표시하지 못했습니다.',
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 28),
                             Semantics(

@@ -6,7 +6,7 @@ import {
   resolvePath,
   type UIRuntime,
 } from "@engine/core";
-import { type UIKit, validateKit } from "@engine/kit-spec";
+import { resolveTypography, type UIKit, validateKit } from "@engine/kit-spec";
 import { type ChildList, componentSchemas } from "@engine/protocol";
 import React, {
   type CSSProperties,
@@ -77,13 +77,25 @@ export function UIProvider({
 }) {
   validateKit(kit);
   const colors = kit.tokens[mode];
+  const ty = resolveTypography(kit);
   const style: CSSProperties = {
     colorScheme: mode,
-    fontFamily: kit.tokens.typography.body,
-    fontSize: kit.tokens.typography.baseSize,
+    fontFamily: ty.body.family,
+    fontSize: ty.body.size,
+    fontWeight: ty.body.weight,
+    lineHeight: `${ty.body.lineHeight}px`,
     ...Object.fromEntries(Object.entries(colors).map(([k, v]) => [`--ui-${k}`, v])),
-    "--ui-heading": kit.tokens.typography.heading,
+    "--ui-heading": ty.heading.family,
+    "--ui-heading-weight": ty.heading.weight,
+    ...Object.fromEntries(
+      ty.heading.sizes.flatMap((size, i) => [
+        [`--ui-h${i + 1}`, `${size}px`],
+        [`--ui-h${i + 1}-line`, `${ty.heading.lineHeights[i]}px`],
+      ]),
+    ),
+    "--ui-small": `${ty.small.size}px`,
     "--ui-radius": `${kit.tokens.radius}px`,
+    "--ui-motion": `${kit.tokens.motionMs}ms`,
   } as CSSProperties;
   return (
     <Context.Provider value={{ runtime, kit, mode, assets, views: components }}>

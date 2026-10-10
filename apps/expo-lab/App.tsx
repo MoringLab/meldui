@@ -1,8 +1,8 @@
-import { NDJSONDecoder, readBytes, type UIModelEvent, type UIRuntime } from "@engine/core";
+import { AnswerSession, NDJSONDecoder, readBytes, type UIModelEvent } from "@engine/core";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { UserAction } from "@engine/protocol";
-import { createUIRuntime, UIProvider, UISurface } from "@engine/renderer-react-native";
+import { AnswerView, createUIRuntime, UIProvider } from "@engine/renderer-react-native";
 import { Picker } from "@react-native-picker/picker";
 import { fetch } from "expo/fetch";
 import { StatusBar } from "expo-status-bar";
@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import fixtures from "../../fixtures/cases.json";
+import hybridFixtures from "../../fixtures/hybrid/cases.json";
 import { Verification } from "./Verification";
 
 const server = process.env.EXPO_PUBLIC_ENGINE_URL ?? "http://127.0.0.1:8787";
@@ -44,9 +45,11 @@ function Lab() {
   const [verifying, setVerifying] = useState(false);
   const [diagnostics, setDiagnostics] = useState<string[]>([]);
   const [messageCount, setMessageCount] = useState(0);
-  const [runtime, setRuntime] = useState<UIRuntime>(() => createUIRuntime());
-  const runtimeRef = useRef(runtime);
-  runtimeRef.current = runtime;
+  const [session, setSession] = useState<AnswerSession>(() => new AnswerSession(createUIRuntime()));
+  const runtime = session.runtime;
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const [scrollLocked, setScrollLocked] = useState(false);
   const actionRef = useRef<(action: UserAction) => void>(() => {});
   const abortRef = useRef<AbortController | null>(null);
   const sessionId = useRef<string | undefined>(undefined);
@@ -54,13 +57,13 @@ function Lab() {
   const surfaceScroll = useRef<ScrollView>(null);
   const kit = kitId === "editorial" ? editorial : neutral;
   const colors = kit.tokens[mode];
-  const activate = (next: UIRuntime) => {
-    runtimeRef.current.dispose();
-    runtimeRef.current = next;
-    setRuntime(next);
+  const activate = (next: AnswerSession) => {
+    sessionRef.current.runtime.dispose();
+    sessionRef.current = next;
+    setSession(next);
   };
   const fresh = (display = true) => {
-    const next = createUIRuntime({
+    const runtime = createUIRuntime({
       onAction: (action) => actionRef.current(action),
       onDiagnostic: (diagnostic) => setDiagnostics((d) => [...d.slice(-39), diagnostic.code]),
       clientActions: {
@@ -77,6 +80,7 @@ function Lab() {
         },
       },
     });
+    const next = new AnswerSession(runtime);
     if (display) activate(next);
     setDiagnostics([]);
     setMessageCount(0);
@@ -89,16 +93,18 @@ function Lab() {
     setBusy(false);
     setSelected(id);
     const next = fresh();
+    const hybrid = hybridFixtures.find((f) => f.id === id);
     const fixture = fixtures.find((f) => f.id === id) ?? fixtures[0];
+    const lines = hybrid ? hybrid.wire.split("\n") : fixture.messages.map((m) => JSON.stringify(m));
     setStatus("예제를 표시하고 있습니다.");
-    for (const message of fixture.messages) {
+    for (const line of lines) {
       if (run !== runId.current) return;
-      next.accept(message);
+      next.push(`${line}\n`);
       setMessageCount((n) => n + 1);
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
     if (run !== runId.current) return;
-    next.finish();
+    next.end();
     surfaceScroll.current?.scrollTo({ y: 0, animated: false });
     setStatus("준비되었습니다. 입력값을 바꿔보세요.");
   }
@@ -108,9 +114,10 @@ function Lab() {
     ++runId.current;
     const controller = new AbortController();
     abortRef.current = controller;
-    const next = action ? runtimeRef.current : fresh(false);
+    const next = action ? sessionRef.current : fresh(false);
+    if (action) next.beginTurn();
     let displayed = !!action;
-    next.beginRun("main");
+    next.runtime.beginRun("main");
     setBusy(true);
     setSelected("");
     setPrompt("");
@@ -126,6 +133,7 @@ function Lab() {
           model,
           kitId,
           platform: "react-native",
+          format: "hybrid",
           sessionId: sessionId.current,
         }),
       });
@@ -138,23 +146,24 @@ function Lab() {
           | { type: "session"; sessionId: string }
           | { type: "repair"; attempt: number };
         if (event.type === "session") sessionId.current = event.sessionId;
-        else if (event.type === "message") {
-          next.accept(event.message);
-          if (
-            !displayed &&
-            next.surfaceIds.some((sid) => next.getNodeSnapshot(sid, "root").component)
-          ) {
+        else if (event.type === "text") {
+          next.push(event.text);
+          if (!displayed && next.blocks.length) {
             activate(next);
             displayed = true;
           }
           setMessageCount((n) => n + 1);
         } else if (event.type === "diagnostic")
           setDiagnostics((d) => [...d.slice(-39), event.diagnostic.code]);
-        else if (event.type === "repair") setStatus(`일부 항목 수정 중 (${event.attempt}/2)`);
-        else if (event.type === "complete")
+        else if (event.type === "repair") {
+          next.beginTurn();
+          setStatus(`일부 항목 수정 중 (${event.attempt}/2)`);
+        } else if (event.type === "complete") {
+          next.end();
           setStatus(
             event.status === "completed" ? "완료되었습니다." : "일부 항목을 완료하지 못했습니다.",
           );
+        }
       };
       for await (const bytes of readBytes(
         response.body as ReadableStream<Uint8Array>,
@@ -168,7 +177,7 @@ function Lab() {
       if (abortRef.current !== controller) return;
       setStatus(controller.signal.aborted ? "생성을 중단했습니다." : String(error));
     } finally {
-      if (!displayed) next.dispose();
+      if (!displayed) next.runtime.dispose();
       if (abortRef.current === controller) setBusy(false);
     }
   }
@@ -181,7 +190,7 @@ function Lab() {
     return () => {
       ++runId.current;
       abortRef.current?.abort();
-      runtimeRef.current.dispose();
+      sessionRef.current.runtime.dispose();
     };
   }, []);
   const smallButton = (title: string, press: () => void) => (
@@ -244,15 +253,34 @@ function Lab() {
             {fixtures.map((fixture) => (
               <Picker.Item key={fixture.id} label={fixture.title} value={fixture.id} />
             ))}
+            {hybridFixtures.map((fixture) => (
+              <Picker.Item
+                key={fixture.id}
+                label={`섞어 보기 · ${fixture.title}`}
+                value={fixture.id}
+              />
+            ))}
           </Picker>
         </View>
         <ScrollView
           ref={surfaceScroll}
           keyboardShouldPersistTaps="handled"
+          scrollEnabled={!scrollLocked}
           contentContainerStyle={{ padding: 18, gap: 24 }}
         >
-          <UIProvider runtime={runtime} kit={kit} mode={mode}>
-            <UISurface />
+          <UIProvider runtime={runtime} kit={kit} mode={mode} onGestureLock={setScrollLocked}>
+            <AnswerView
+              session={session}
+              labels={{
+                surface: "인터랙티브 콘텐츠",
+                reset: "초기화",
+                expand: "크게 보기",
+                close: "닫기",
+                viewAsText: "텍스트로 보기",
+                viewAsInterface: "화면으로 보기",
+                incomplete: "일부 내용을 표시하지 못했습니다.",
+              }}
+            />
           </UIProvider>
           <Text accessibilityLiveRegion="polite" style={{ color: colors.muted, fontSize: 13 }}>
             {status}

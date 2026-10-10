@@ -24,11 +24,17 @@
     "build": "tsup src/index.ts --format esm --dts --sourcemap --clean"
   },
   "dependencies": {
-    "@engine/core": "workspace:*",
-    "@engine/protocol": "workspace:*",
-    "@engine/kit-spec": "workspace:*",
     "@a2ui/react": "0.12.0",
-    "@a2ui/web_core": "0.12.0"
+    "@a2ui/web_core": "0.12.0",
+    "@engine/core": "workspace:*",
+    "@engine/kit-spec": "workspace:*",
+    "@engine/protocol": "workspace:*",
+    "katex": "0.16.22",
+    "react-markdown": "10.1.0",
+    "rehype-highlight": "7.0.2",
+    "rehype-katex": "7.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-math": "6.0.0"
   },
   "peerDependencies": {
     "react": ">=18 <20",

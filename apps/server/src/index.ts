@@ -36,7 +36,7 @@ try {
   if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
 }
 const port = Number(process.env.PORT ?? 8787);
-const modelIds = process.env.ENGINE_MODELS?.split(",").filter(Boolean) ?? [
+const modelIds: string[] = process.env.ENGINE_MODELS?.split(",").filter(Boolean) ?? [
   "cx/gpt-5.6-sol-medium",
   "agy/claude-sonnet-4-6",
   "agy/gemini-3.7-flash-medium",
@@ -89,6 +89,31 @@ const server = createServer(async (req, res) => {
   const json = (value: unknown, status = 200) => {
     res.writeHead(status, { "Content-Type": "application/json" }).end(JSON.stringify(value));
   };
+  if (req.url?.startsWith("/api/attachments/")) {
+    const name = req.url.slice("/api/attachments/".length);
+    const types: Record<string, string> = {
+      "coast.png": "image/png",
+      "mountain.png": "image/png",
+      "sample.mp4": "video/mp4",
+      "sample.wav": "audio/wav",
+      "report.pdf": "application/pdf",
+    };
+    if (!Object.hasOwn(types, name)) {
+      json({ error: "UNKNOWN_ATTACHMENT" }, 404);
+      return;
+    }
+    const bytes = await readFile(
+      fileURLToPath(new URL(`../../../fixtures/media/assets/${name}`, import.meta.url)),
+    );
+    res
+      .writeHead(200, {
+        "Content-Type": types[name],
+        "Content-Length": bytes.length,
+        "Referrer-Policy": "no-referrer",
+      })
+      .end(bytes);
+    return;
+  }
   if (req.url === "/api/health") {
     json({
       status: "ok",
@@ -180,7 +205,10 @@ const server = createServer(async (req, res) => {
         accessed: Date.now(),
         registry: new AttachmentRegistry({ defaultVisibility: input.visibility ?? {} }),
       };
-      created.runtime = createUIRuntime({ onDiagnostic: (d) => created.sink?.(d) });
+      created.runtime = createUIRuntime({
+        attachments: created.registry,
+        onDiagnostic: (d) => created.sink?.(d),
+      });
       session = created;
       sessions.set(id, session);
     }

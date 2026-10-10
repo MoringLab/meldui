@@ -93,6 +93,36 @@
     "Image": {
       "implementation": "Image"
     },
+    "Markdown": {
+      "implementation": "Markdown"
+    },
+    "Gallery": {
+      "implementation": "Gallery"
+    },
+    "Carousel": {
+      "implementation": "Carousel"
+    },
+    "MediaGrid": {
+      "implementation": "MediaGrid"
+    },
+    "ImageCompare": {
+      "implementation": "ImageCompare"
+    },
+    "ImageAnnotations": {
+      "implementation": "ImageAnnotations"
+    },
+    "Video": {
+      "implementation": "Video"
+    },
+    "Audio": {
+      "implementation": "Audio"
+    },
+    "FileCard": {
+      "implementation": "FileCard"
+    },
+    "DocumentPreview": {
+      "implementation": "DocumentPreview"
+    },
     "Icon": {
       "implementation": "Icon"
     },

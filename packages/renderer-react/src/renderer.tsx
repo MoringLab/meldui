@@ -1,4 +1,5 @@
 import { A2uiSurface, createBinderlessComponentImplementation } from "@a2ui/react/v0_9";
+import type { ContentHost } from "@engine/core";
 import {
   createUIRuntime as createCoreRuntime,
   type NodeSnapshot,
@@ -19,6 +20,8 @@ import React, {
   useId,
   useSyncExternalStore,
 } from "react";
+import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
+import { SafeMarkdown } from "./markdown.js";
 
 export type ComponentViewProps = {
   node: NodeSnapshot;
@@ -66,6 +69,7 @@ export function UIProvider({
   mode = "light",
   assets = {},
   components = {},
+  content,
   children,
 }: {
   runtime: UIRuntime;
@@ -73,6 +77,7 @@ export function UIProvider({
   mode?: "light" | "dark";
   assets?: Record<string, string>;
   components?: ComponentViews;
+  content?: ContentHost;
   children: ReactNode;
 }) {
   validateKit(kit);
@@ -99,9 +104,11 @@ export function UIProvider({
   } as CSSProperties;
   return (
     <Context.Provider value={{ runtime, kit, mode, assets, views: components }}>
-      <div className={`engine-ui kit-${kit.id}`} style={style}>
-        {children}
-      </div>
+      <ContentProvider host={content}>
+        <div className={`engine-ui kit-${kit.id}`} style={style}>
+          {children}
+        </div>
+      </ContentProvider>
     </Context.Provider>
   );
 }
@@ -365,7 +372,52 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
           {text(p.text)}
         </p>
       );
+    case "Markdown":
+      return <SafeMarkdown text={String(p.text ?? "")} />;
+    case "Gallery":
+    case "Carousel":
+    case "MediaGrid":
+    case "ImageCompare":
+      return (
+        <MediaContent
+          ids={p.attachmentIds as string[]}
+          layout={
+            node.component === "Carousel"
+              ? "carousel"
+              : node.component === "MediaGrid"
+                ? "grid"
+                : node.component === "ImageCompare"
+                  ? "compare"
+                  : String(p.layout ?? "auto")
+          }
+          caption={p.caption as string | undefined}
+        />
+      );
+    case "Video":
+    case "Audio":
+    case "ImageAnnotations":
+    case "FileCard":
+    case "DocumentPreview":
+      return (
+        <AttachmentMedia
+          id={String(p.attachmentId)}
+          caption={p.caption as string | undefined}
+          seek={p.seek as number | undefined}
+          muted={p.muted as boolean | undefined}
+          autoplay={p.autoplay as boolean | undefined}
+          file={["FileCard", "DocumentPreview"].includes(node.component)}
+          regionIds={p.regionIds as string[] | undefined}
+        />
+      );
     case "Image":
+      if (p.attachmentId)
+        return (
+          <AttachmentMedia
+            id={String(p.attachmentId)}
+            alt={String(p.alt)}
+            caption={p.caption as string | undefined}
+          />
+        );
       return Object.hasOwn(assets, p.asset) && assets[p.asset] ? (
         <img
           className="ui-image"

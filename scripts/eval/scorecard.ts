@@ -25,7 +25,13 @@ type Dim = {
 };
 const dims: Dim[] = [];
 const judge = (s: ReturnType<typeof summarize>, hardOpen = false): Dim["status"] =>
-  s.fail ? "missed" : s.expectedFail || s.notRun || hardOpen ? "expected-fail" : "met";
+  !s.total || s.notRun || hardOpen
+    ? "open"
+    : s.fail
+      ? "missed"
+      : s.expectedFail
+        ? "expected-fail"
+        : "met";
 
 // Validity (recorded online baseline per route; replaced when a newer online run exists)
 const onlineFile = [
@@ -97,45 +103,68 @@ for (const [name, target] of [
   ["routing", "over-viz ≤10%, under-viz ≤15%, duplication ≤20%"],
   ["media", "valid ids, no fabricated URLs, alt text: 100% each"],
   ["multiturn", "state preserved and edit applied ≥90%"],
-  ["safety-media", "XSS corpus + injection suite 100%"],
+  ["media:registration", "host metadata/IDs accepted in all 20 cases"],
+  ["safety", "XSS corpus + injection suite 100%"],
   ["showcase", "30 items implemented or expected-fail with unlocking milestone"],
 ] as const) {
-  const s = summarize(layer(name));
+  const s = summarize(
+    name === "safety"
+      ? rows.filter((r) => r.layer.startsWith("safety-"))
+      : name === "media"
+        ? rows.filter((r) => r.layer === "media")
+        : layer(name),
+  );
   dims.push({
-    dimension: name === "safety-media" ? "Safety" : name[0].toUpperCase() + name.slice(1),
+    dimension: name === "safety" ? "Safety" : name[0].toUpperCase() + name.slice(1),
     target,
     measured: fmt(s),
     status: judge(s),
     source: "artifacts/eval/offline.json",
   });
 }
-const perf = readJson("docs/verification/performance.json");
-for (const [key, limit, name] of [
-  ["web", 100, "Web"],
-  ["reactNative", 200, "Android · React Native"],
-  ["flutter", 200, "Android · Flutter"],
-] as const) {
-  const p = perf[key];
-  const enough = p.samples >= 100;
-  dims.push({
-    dimension: `Performance · ${name} 100-node first frame`,
-    target: `p95 ≤${limit} ms with ≥100 samples`,
-    measured: `p95 ${p.p95Ms.toFixed(0)} ms from ${p.samples} samples${enough ? "" : " (too few for a stable p95; M4 re-measures)"}`,
-    status: p.p95Ms <= limit && enough ? "met" : p.p95Ms > limit ? "missed" : "open",
-    source: "docs/verification/performance.json",
-  });
+// Preserve the Phase 1 measurement separately. Native M4 records contain both conditions
+// and every raw sample; no new benchmark is started by generating this scorecard.
+const legacyPerf = readJson("docs/verification/performance.json");
+const web = legacyPerf.web;
+dims.push({
+  dimension: "Performance · Web (Phase 1 baseline)",
+  target: "p95 ≤100 ms with ≥100 samples",
+  measured: `p95 ${web.p95Ms.toFixed(0)} ms from ${web.samples} samples; unchanged historical baseline`,
+  status: web.samples < 100 ? "open" : web.p95Ms > 100 ? "missed" : "met",
+  source: "docs/verification/performance.json",
+});
+const nativePerfFile = "docs/verification/phase2/m4-performance.json";
+if (existsSync(nativePerfFile)) {
+  const measurements = readJson(nativePerfFile).rows as any[];
+  for (const [run, name] of [
+    ["perf-flutter-after1", "Flutter"],
+    ["perf-expo-before", "React Native"],
+  ]) {
+    for (const condition of ["cold", "warm"]) {
+      const p = measurements.find((r) => r.run === run && r.condition === condition);
+      dims.push({
+        dimension: `Performance · Android ${name} ${condition} runtime`,
+        target: "100-node first frame p95 ≤200 ms with ≥100 samples",
+        measured: p
+          ? `p95 ${p.p95.toFixed(0)} ms from ${p.samples} samples; existing M4 run`
+          : "not run",
+        status: !p || p.samples < 100 ? "open" : p.p95 > 200 ? "missed" : "met",
+        source: nativePerfFile,
+      });
+    }
+  }
 }
 dims.push({
   dimension: "Latency · first meaningful paint of hybrid answer",
   target: "≤ max(1.2× markdown baseline, +100 ms)",
-  measured: "needs hybrid stream (M2)",
-  status: "expected-fail",
+  measured: "hybrid stream exists; paired baseline latency not measured",
+  status: "open",
   source: "–",
 });
 dims.push({
   dimension: "Accessibility",
   target: "axe clean on demos; keyboard; reduced motion",
-  measured: "axe in Playwright e2e passes; reduced-motion wiring open (M3)",
+  measured: "web axe and reduced-motion wiring covered; iOS runner and expanded native audit open",
   status: "open",
   source: "tests/e2e",
 });

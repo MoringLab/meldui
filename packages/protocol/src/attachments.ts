@@ -33,6 +33,21 @@ export const AttachmentManifestSchema = z
     transcript: transcript.optional(),
     textExtract: z.string().max(200_000).optional(),
     expiresAt: z.number().optional(),
+    regions: z
+      .array(
+        z
+          .object({
+            id: z.string().max(128),
+            x: z.number().min(0).max(1),
+            y: z.number().min(0).max(1),
+            width: z.number().min(0).max(1),
+            height: z.number().min(0).max(1),
+            label: z.string().max(200),
+          })
+          .strict(),
+      )
+      .max(50)
+      .optional(),
   })
   .strict();
 export type AttachmentManifest = z.infer<typeof AttachmentManifestSchema>;
@@ -95,9 +110,12 @@ export function inferMime(name: string, mime?: string) {
 
 /** Redact signed URLs and query strings for logs, artifacts and history. */
 export function redactUrl(value: string) {
-  return value.replace(/(https?:\/\/[^\s"'<>?#]+)[?#][^\s"'<>]*/g, "$1?[redacted]");
+  return value.replace(/(https?:\/\/[^\s"'<>?#]+)[?#][^\s"'<>]*/gi, "$1?[redacted]");
 }
-const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}…` : s);
+const omitUrls = (s: string) =>
+  s.replace(/(?:https?:|data:|file:|blob:)[^\s<>"']+/gi, "[host URL omitted]");
+const clip = (s: string, n: number) =>
+  omitUrls(s).length > n ? `${omitUrls(s).slice(0, n)}…` : omitUrls(s);
 /** The only view of an attachment the model may see. Binary, URLs and handles are never included. */
 export function promptView(a: AttachmentManifest, visibility: AttachmentVisibility = {}) {
   const view: Record<string, unknown> = {
@@ -110,6 +128,7 @@ export function promptView(a: AttachmentManifest, visibility: AttachmentVisibili
     height: a.height,
     duration: a.duration,
     alt: a.alt ? clip(a.alt, 300) : undefined,
+    regions: a.regions?.map((r) => ({ ...r, label: clip(r.label, 200) })),
   };
   if (visibility.text) {
     view.description = a.description ? clip(a.description, 1000) : undefined;
@@ -120,4 +139,15 @@ export function promptView(a: AttachmentManifest, visibility: AttachmentVisibili
     view.textExtract = a.textExtract ? clip(a.textExtract, 6000) : undefined;
   }
   return Object.fromEntries(Object.entries(view).filter(([, v]) => v !== undefined));
+}
+
+/** Remove signed/query URL data from persisted histories and diagnostic/eval artifacts. */
+export function redactContent<T>(value: T): T {
+  if (typeof value === "string") return redactUrl(value) as T;
+  if (Array.isArray(value)) return value.map(redactContent) as T;
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([key, child]) => [key, redactContent(child)]),
+    ) as T;
+  return value;
 }

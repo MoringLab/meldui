@@ -3,11 +3,19 @@ import { brand } from "@engine/kit-brand";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { HostPolicy, UserAction } from "@engine/protocol";
-import { AnswerView, createUIRuntime, UIProvider } from "@engine/renderer-react";
+import {
+  AnswerView,
+  createUIRuntime,
+  MediaContent,
+  SafeMarkdown,
+  UIProvider,
+} from "@engine/renderer-react";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import fixtures from "../../../fixtures/cases.json";
 import hybridFixtures from "../../../fixtures/hybrid/cases.json";
+import mediaFixtures from "../../../fixtures/media/cases.json";
+import { sampleContent } from "../../../fixtures/media/host";
 import "@engine/renderer-react/styles.css";
 import { brandComponents } from "./brand";
 
@@ -30,11 +38,15 @@ const runtime = createUIRuntime({
   },
 });
 const policy = JSON.parse(q.get("policy") ?? "{}") as Partial<HostPolicy>;
+const content = sampleContent(runtime.attachments, location.origin, (id) => {
+  w.__actions.push({ name: id } as UserAction);
+});
 const session = new AnswerSession(runtime, { policy });
 w.__session = session;
 const id = q.get("fixture") ?? fixtures[0].id;
 const hybrid = hybridFixtures.find((f) => f.id === id);
 const legacy = fixtures.find((f) => f.id === id) ?? fixtures[0];
+const media = mediaFixtures.find((f) => f.id === id);
 const declaration = JSON.stringify({
   engine: "v1",
   block: "surface",
@@ -42,7 +54,11 @@ const declaration = JSON.stringify({
   fallbackText: `${legacy.title}. ${legacy.prompt}`,
 });
 session.push(
-  hybrid ? hybrid.wire : [declaration, ...legacy.messages.map((m) => JSON.stringify(m))].join("\n"),
+  hybrid
+    ? hybrid.wire
+    : [declaration, ...(media?.messages ?? legacy.messages).map((m) => JSON.stringify(m))].join(
+        "\n",
+      ),
 );
 session.end();
 const width = Number(q.get("width") ?? 720);
@@ -55,8 +71,15 @@ createRoot(document.getElementById("root") as HTMLElement).render(
       kit={kits[(q.get("kit") as keyof typeof kits) ?? "neutral"] ?? neutral}
       mode={mode}
       components={brandComponents}
+      content={content}
     >
-      <AnswerView session={session} maxSurfaceHeight={maxHeight} />
+      {q.has("markdown") ? (
+        <SafeMarkdown text={q.get("markdown") ?? ""} />
+      ) : q.has("media") ? (
+        <MediaContent ids={(q.get("media") ?? "").split(",")} />
+      ) : (
+        <AnswerView session={session} maxSurfaceHeight={maxHeight} />
+      )}
     </UIProvider>
   </div>,
 );

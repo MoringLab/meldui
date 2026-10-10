@@ -14,7 +14,7 @@ parser.add_argument('--serial', default=os.environ.get('ANDROID_SERIAL'))
 parser.add_argument('--platform', choices=['expo', 'flutter', 'all'], default='all')
 parser.add_argument('--live', action='store_true', help='Call the configured local model server')
 parser.add_argument('--install-only', action='store_true', help='Install the APKs and stop (no flows)')
-parser.add_argument('--video', action='store_true', help='Record the form flow, outside benchmarks')
+parser.add_argument('--video', action='store_true', help='Record the form flow (functional checks only)')
 args = parser.parse_args()
 if not args.serial:
     devices = [line.split()[0] for line in subprocess.check_output(['adb', 'devices'], text=True).splitlines()[1:] if line.endswith('\tdevice')]
@@ -58,7 +58,8 @@ for platform, (app_id, apk) in apps.items():
     if args.install_only:
         results.append({'platform': platform, 'installed': True})
         continue
-    flows = ([f'{platform}-benchmark'] if platform == 'expo' else []) + [f'{platform}-input', platform]
+    # Performance is a separate explicit bounded command, never part of functional verification.
+    flows = [f'{platform}-input', platform]
     if args.live:
         flows.append('live')
     for flow in flows:
@@ -81,35 +82,6 @@ for platform, (app_id, apk) in apps.items():
             print(name, 'PASS' if completed.returncode == 0 else 'FAIL', flush=True)
             if completed.returncode:
                 raise SystemExit(completed.returncode)
-            if flow == 'expo-benchmark':
-                def find_report(value):
-                    if isinstance(value, str) and value.startswith('{'):
-                        try:
-                            report = json.loads(value)
-                            if report.get('platform') == 'react-native' and report.get('nodes') == 100:
-                                return report
-                        except (ValueError, AttributeError):
-                            pass
-                    children = value.values() if isinstance(value, dict) else value if isinstance(value, list) else []
-                    for child in children:
-                        found = find_report(child)
-                        if found:
-                            return found
-                report = None
-                # Continuous accessibility-tree polling biases the layout clock.
-                for attempt in range(3):
-                    time.sleep(20)
-                    hierarchy = subprocess.check_output([maestro, '--udid', args.serial, 'hierarchy', '--no-reinstall-driver'], env=env, text=True, timeout=60)
-                    (destination / 'hierarchy.json').write_text(hierarchy)
-                    report = find_report(json.loads(hierarchy[hierarchy.index('{'):]))
-                    if report:
-                        break
-                if not report:
-                    results[-1]['passed'] = False
-                    (output / 'results.json').write_text(json.dumps({'device': args.serial, 'results': results}, indent=2))
-                    raise RuntimeError('Native performance report was not exposed by the verification app')
-                report['observer'] = 'No continuous accessibility polling during sampling'
-                (output / 'expo-performance.json').write_text(json.dumps(report, indent=2))
         finally:
             if recording:
                 subprocess.run(adb + ['shell', 'kill', '-INT', str(recording_pid)], stdout=subprocess.DEVNULL, check=False)

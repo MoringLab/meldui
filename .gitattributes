@@ -1,0 +1,5 @@
+# Binary test assets retain format-required bytes (including PDF xref padding).
+*.png binary
+*.mp4 binary
+*.wav binary
+*.pdf binary

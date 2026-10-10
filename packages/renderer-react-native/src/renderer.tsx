@@ -1,3 +1,4 @@
+import type { ContentHost } from "@engine/core";
 import { type NodeSnapshot, resolvePath, type UIRuntime } from "@engine/core";
 import { resolveTypography, type UIKit, validateKit } from "@engine/kit-spec";
 import type { ChildList } from "@engine/protocol";
@@ -27,7 +28,9 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle, Line, Path, Polyline, Rect, Text as SvgText } from "react-native-svg";
+import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
 import { localCalendarDate } from "./date.js";
+import { SafeMarkdown } from "./markdown.js";
 
 export { createUIRuntime } from "@engine/core";
 
@@ -104,6 +107,7 @@ export function UIProvider({
   assets = {},
   components = {},
   onGestureLock,
+  content,
   children,
 }: {
   runtime: UIRuntime;
@@ -114,13 +118,16 @@ export function UIProvider({
   /** Called with true while a control (slider) is being dragged and false when it ends. */
   onGestureLock?: (locked: boolean) => void;
   children: ReactNode;
+  content?: ContentHost;
 }) {
   validateKit(kit);
   return (
     <Context.Provider value={{ runtime, kit, mode, assets, components }}>
-      <GestureLock.Provider value={onGestureLock ?? (() => {})}>
-        <View style={{ backgroundColor: kit.tokens[mode].background }}>{children}</View>
-      </GestureLock.Provider>
+      <ContentProvider host={content}>
+        <GestureLock.Provider value={onGestureLock ?? (() => {})}>
+          <View style={{ backgroundColor: kit.tokens[mode].background }}>{children}</View>
+        </GestureLock.Provider>
+      </ContentProvider>
     </Context.Provider>
   );
 }
@@ -476,6 +483,42 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         >
           {String(p.text ?? "")}
         </Text>
+      );
+    case "Markdown":
+      return <SafeMarkdown text={String(p.text ?? "")} />;
+    case "Gallery":
+    case "Carousel":
+    case "MediaGrid":
+    case "ImageCompare":
+      return (
+        <MediaContent
+          ids={p.attachmentIds as string[]}
+          layout={
+            node.component === "Carousel"
+              ? "carousel"
+              : node.component === "MediaGrid"
+                ? "grid"
+                : node.component === "ImageCompare"
+                  ? "compare"
+                  : String(p.layout ?? "auto")
+          }
+          caption={p.caption as string | undefined}
+        />
+      );
+    case "Video":
+    case "Audio":
+    case "ImageAnnotations":
+    case "FileCard":
+    case "DocumentPreview":
+      return (
+        <AttachmentMedia
+          id={String(p.attachmentId)}
+          caption={p.caption as string | undefined}
+          seek={p.seek as number | undefined}
+          muted={p.muted as boolean | undefined}
+          file={["FileCard", "DocumentPreview"].includes(node.component)}
+          regionIds={p.regionIds as string[] | undefined}
+        />
       );
     case "Image":
       return Object.hasOwn(assets, p.asset) && assets[p.asset] ? (

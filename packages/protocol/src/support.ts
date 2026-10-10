@@ -13,7 +13,11 @@ export const PLATFORM_SUPPORT: Record<
 > = {
   web: { unsupported: [], fallbacks: {}, unsupportedOps: [] },
   "react-native": { unsupported: [], fallbacks: {}, unsupportedOps: [] },
-  flutter: { unsupported: [], fallbacks: {}, unsupportedOps: [] },
+  flutter: {
+    unsupported: ["Audio"],
+    fallbacks: { Audio: "FileCard", DocumentPreview: "FileCard" },
+    unsupportedOps: [],
+  },
 };
 
 export function capabilitiesFor(

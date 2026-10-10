@@ -39,7 +39,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "controls", "result", "note"]
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
             },
             {
               "id": "heading",
@@ -65,7 +71,10 @@
               "id": "controls",
               "component": "Grid",
               "columns": 2,
-              "children": ["_a", "_b"]
+              "children": [
+                "_a",
+                "_b"
+              ]
             }
           ]
         }
@@ -117,7 +126,9 @@
               "id": "result",
               "component": "Card",
               "title": "계산 결과",
-              "children": ["_result"]
+              "children": [
+                "_result"
+              ]
             }
           ]
         }
@@ -214,7 +225,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "controls", "result", "note"]
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
             },
             {
               "id": "heading",
@@ -240,7 +257,10 @@
               "id": "controls",
               "component": "Grid",
               "columns": 2,
-              "children": ["_a", "_b"]
+              "children": [
+                "_a",
+                "_b"
+              ]
             }
           ]
         }
@@ -292,7 +312,9 @@
               "id": "result",
               "component": "Card",
               "title": "계산 결과",
-              "children": ["_result"]
+              "children": [
+                "_result"
+              ]
             }
           ]
         }
@@ -389,7 +411,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "controls", "result", "note"]
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
             },
             {
               "id": "heading",
@@ -415,7 +443,10 @@
               "id": "controls",
               "component": "Grid",
               "columns": 2,
-              "children": ["_a", "_b"]
+              "children": [
+                "_a",
+                "_b"
+              ]
             }
           ]
         }
@@ -467,7 +498,9 @@
               "id": "result",
               "component": "Card",
               "title": "계산 결과",
-              "children": ["_result"]
+              "children": [
+                "_result"
+              ]
             }
           ]
         }
@@ -564,7 +597,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "controls", "result", "note"]
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
             },
             {
               "id": "heading",
@@ -590,7 +629,10 @@
               "id": "controls",
               "component": "Grid",
               "columns": 2,
-              "children": ["_a", "_b"]
+              "children": [
+                "_a",
+                "_b"
+              ]
             }
           ]
         }
@@ -642,7 +684,9 @@
               "id": "result",
               "component": "Card",
               "title": "계산 결과",
-              "children": ["_result"]
+              "children": [
+                "_result"
+              ]
             }
           ]
         }
@@ -739,7 +783,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "controls", "result", "note"]
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
             },
             {
               "id": "heading",
@@ -765,7 +815,10 @@
               "id": "controls",
               "component": "Grid",
               "columns": 2,
-              "children": ["_a", "_b"]
+              "children": [
+                "_a",
+                "_b"
+              ]
             }
           ]
         }
@@ -817,7 +870,9 @@
               "id": "result",
               "component": "Card",
               "title": "계산 결과",
-              "children": ["_result"]
+              "children": [
+                "_result"
+              ]
             }
           ]
         }
@@ -930,7 +985,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "table", "choice", "selection"]
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
             },
             {
               "id": "heading",
@@ -1092,7 +1153,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "table", "choice", "selection"]
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
             },
             {
               "id": "heading",
@@ -1254,7 +1321,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "table", "choice", "selection"]
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
             },
             {
               "id": "heading",
@@ -1416,7 +1489,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "table", "choice", "selection"]
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
             },
             {
               "id": "heading",
@@ -1565,7 +1644,11 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "form"]
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
             },
             {
               "id": "heading",
@@ -1591,7 +1674,13 @@
               "id": "form",
               "component": "Form",
               "label": "참가 신청",
-              "children": ["_name", "_date", "_topic", "_memo", "_consent"],
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
               "onSubmit": {
                 "event": {
                   "name": "submit_form",
@@ -1755,7 +1844,11 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "form"]
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
             },
             {
               "id": "heading",
@@ -1781,7 +1874,13 @@
               "id": "form",
               "component": "Form",
               "label": "방문 예약",
-              "children": ["_name", "_date", "_topic", "_memo", "_consent"],
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
               "onSubmit": {
                 "event": {
                   "name": "submit_form",
@@ -1945,7 +2044,11 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "form"]
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
             },
             {
               "id": "heading",
@@ -1971,7 +2074,13 @@
               "id": "form",
               "component": "Form",
               "label": "의견 남기기",
-              "children": ["_name", "_date", "_topic", "_memo", "_consent"],
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
               "onSubmit": {
                 "event": {
                   "name": "submit_form",
@@ -2135,7 +2244,11 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "form"]
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
             },
             {
               "id": "heading",
@@ -2161,7 +2274,13 @@
               "id": "form",
               "component": "Form",
               "label": "연락 요청",
-              "children": ["_name", "_date", "_topic", "_memo", "_consent"],
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
               "onSubmit": {
                 "event": {
                   "name": "submit_form",
@@ -2325,7 +2444,11 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "form"]
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
             },
             {
               "id": "heading",
@@ -2351,7 +2474,13 @@
               "id": "form",
               "component": "Form",
               "label": "시작 설정",
-              "children": ["_name", "_date", "_topic", "_memo", "_consent"],
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
               "onSubmit": {
                 "event": {
                   "name": "submit_form",
@@ -2514,7 +2643,12 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "tabs", "add"]
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
             },
             {
               "id": "heading",
@@ -2566,7 +2700,11 @@
             {
               "id": "_today",
               "component": "Column",
-              "children": ["_task1", "_task2", "_progress"]
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
             }
           ]
         }
@@ -2721,7 +2859,12 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "tabs", "add"]
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
             },
             {
               "id": "heading",
@@ -2773,7 +2916,11 @@
             {
               "id": "_today",
               "component": "Column",
-              "children": ["_task1", "_task2", "_progress"]
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
             }
           ]
         }
@@ -2928,7 +3075,12 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "tabs", "add"]
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
             },
             {
               "id": "heading",
@@ -2980,7 +3132,11 @@
             {
               "id": "_today",
               "component": "Column",
-              "children": ["_task1", "_task2", "_progress"]
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
             }
           ]
         }
@@ -3135,7 +3291,12 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "tabs", "add"]
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
             },
             {
               "id": "heading",
@@ -3187,7 +3348,11 @@
             {
               "id": "_today",
               "component": "Column",
-              "children": ["_task1", "_task2", "_progress"]
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
             }
           ]
         }
@@ -3360,7 +3525,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "chart", "slider", "badge"]
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
             },
             {
               "id": "heading",
@@ -3491,7 +3662,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "chart", "slider", "badge"]
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
             },
             {
               "id": "heading",
@@ -3622,7 +3799,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "chart", "slider", "badge"]
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
             },
             {
               "id": "heading",
@@ -3753,7 +3936,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "chart", "slider", "badge"]
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
             },
             {
               "id": "heading",
@@ -3884,7 +4073,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "chart", "slider", "badge"]
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
             },
             {
               "id": "heading",
@@ -3994,7 +4189,15 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "callout", "accordion", "divider", "icon", "image"]
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
             },
             {
               "id": "heading",
@@ -4076,7 +4279,10 @@
               "id": "_list",
               "component": "List",
               "ordered": true,
-              "children": ["_line1", "_line2"]
+              "children": [
+                "_line1",
+                "_line2"
+              ]
             }
           ]
         }
@@ -4189,7 +4395,15 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "callout", "accordion", "divider", "icon", "image"]
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
             },
             {
               "id": "heading",
@@ -4271,7 +4485,10 @@
               "id": "_list",
               "component": "List",
               "ordered": true,
-              "children": ["_line1", "_line2"]
+              "children": [
+                "_line1",
+                "_line2"
+              ]
             }
           ]
         }
@@ -4384,7 +4601,15 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "callout", "accordion", "divider", "icon", "image"]
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
             },
             {
               "id": "heading",
@@ -4466,7 +4691,10 @@
               "id": "_list",
               "component": "List",
               "ordered": true,
-              "children": ["_line1", "_line2"]
+              "children": [
+                "_line1",
+                "_line2"
+              ]
             }
           ]
         }
@@ -4579,7 +4807,15 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "callout", "accordion", "divider", "icon", "image"]
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
             },
             {
               "id": "heading",
@@ -4661,7 +4897,10 @@
               "id": "_list",
               "component": "List",
               "ordered": true,
-              "children": ["_line1", "_line2"]
+              "children": [
+                "_line1",
+                "_line2"
+              ]
             }
           ]
         }
@@ -4774,7 +5013,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "number", "buttons", "answer"]
+              "children": [
+                "heading",
+                "intro",
+                "number",
+                "buttons",
+                "answer"
+              ]
             },
             {
               "id": "heading",
@@ -4815,7 +5060,10 @@
             {
               "id": "buttons",
               "component": "Row",
-              "children": ["_minus", "_plus"]
+              "children": [
+                "_minus",
+                "_plus"
+              ]
             }
           ]
         }
@@ -4956,7 +5204,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "number", "buttons", "answer"]
+              "children": [
+                "heading",
+                "intro",
+                "number",
+                "buttons",
+                "answer"
+              ]
             },
             {
               "id": "heading",
@@ -4997,7 +5251,10 @@
             {
               "id": "buttons",
               "component": "Row",
-              "children": ["_minus", "_plus"]
+              "children": [
+                "_minus",
+                "_plus"
+              ]
             }
           ]
         }
@@ -5138,7 +5395,13 @@
             {
               "id": "root",
               "component": "Column",
-              "children": ["heading", "intro", "number", "buttons", "answer"]
+              "children": [
+                "heading",
+                "intro",
+                "number",
+                "buttons",
+                "answer"
+              ]
             },
             {
               "id": "heading",
@@ -5179,7 +5442,10 @@
             {
               "id": "buttons",
               "component": "Row",
-              "children": ["_minus", "_plus"]
+              "children": [
+                "_minus",
+                "_plus"
+              ]
             }
           ]
         }

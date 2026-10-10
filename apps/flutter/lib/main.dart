@@ -5,6 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:engine_flutter/engine_flutter.dart';
 import 'brand.dart';
 
+const server = String.fromEnvironment(
+  'ENGINE_SERVER_URL',
+  defaultValue: 'http://127.0.0.1:8787',
+);
+
 void main() {
   runApp(const EngineLab());
 }
@@ -18,6 +23,8 @@ class EngineLab extends StatefulWidget {
 class EngineLabState extends State<EngineLab> {
   List<dynamic> fixtures = [];
   List<dynamic> hybridFixtures = [];
+  List<dynamic> mediaFixtures = [];
+  ContentHost? content;
   AnswerSession? session;
   UIRuntime? get runtime => session?.runtime;
   bool scrollLocked = false;
@@ -45,6 +52,9 @@ class EngineLabState extends State<EngineLab> {
         jsonDecode(await rootBundle.loadString('assets/cases.json')) as List;
     hybridFixtures =
         jsonDecode(await rootBundle.loadString('assets/hybrid.json')) as List;
+    mediaFixtures =
+        jsonDecode(await rootBundle.loadString('assets/media.json')) as List;
+    fixtures = [...fixtures, ...mediaFixtures];
     kits['neutral'] = await UIKit.load('neutral');
     kits['editorial'] = await UIKit.load('editorial');
     kits['brand'] = await UIKit.load('brand');
@@ -53,9 +63,47 @@ class EngineLabState extends State<EngineLab> {
 
   void displaySession(AnswerSession next) {
     final previous = session;
-    setState(() => session = next);
+    setState(() {
+      session = next;
+      content = _content(next.runtime);
+    });
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => previous?.runtime.dispose(),
+    );
+  }
+
+  ContentHost _content(UIRuntime owner) {
+    final files = {
+      'photo-a': 'coast.png',
+      'photo-b': 'mountain.png',
+      'video-a': 'sample.mp4',
+      'audio-a': 'sample.wav',
+      'file-a': 'report.pdf',
+    };
+    for (final a in mediaFixtures.first['attachments'] as List) {
+      if (owner.attachments.get(a['id'] as String) == null) {
+        owner.attachments.attach(
+          id: a['id'] as String,
+          name: a['name'] as String,
+          mime: a['mime'] as String,
+          meta: Map<String, dynamic>.from(a as Map),
+        );
+      }
+    }
+    return ContentHost(
+      attachments: owner.attachments,
+      origins: {Uri.parse(server).origin},
+      schemes: const {'http'},
+      resolver: (id, purpose) async => ResolvedAttachment(
+        url: '$server/api/attachments/${files[id]}',
+        mime: owner.attachments.get(id)!['mime'] as String,
+      ),
+      open: (id) async {
+        if (mounted) setState(() => status = 'open:$id');
+      },
+      download: (id) async {
+        if (mounted) setState(() => status = 'download:$id');
+      },
     );
   }
 
@@ -72,6 +120,7 @@ class EngineLabState extends State<EngineLab> {
             Clipboard.setData(ClipboardData(text: displayValue(args['text']))),
       },
     );
+    _content(created);
     final next = AnswerSession(created);
     if (!mounted) {
       created.dispose();
@@ -109,7 +158,8 @@ class EngineLabState extends State<EngineLab> {
               'engine': 'v1',
               'block': 'surface',
               'surfaceId': 'main',
-              'fallbackText': '${fixture['title']}. ${fixture['prompt']}',
+              'fallbackText':
+                  '${fixture['title']}. ${fixture['prompt'] ?? fixture['fallbackText']}',
             }),
             for (final m in fixture['messages'] as List) jsonEncode(m),
           ];
@@ -363,8 +413,11 @@ class EngineLabState extends State<EngineLab> {
                               kit: kit,
                               dark: dark,
                               components: brandComponents(kit, dark),
+                              content: content,
                               onGestureLock: (locked) {
-                                if (mounted) setState(() => scrollLocked = locked);
+                                if (mounted) {
+                                  setState(() => scrollLocked = locked);
+                                }
                               },
                               child: AnswerView(
                                 session: session!,

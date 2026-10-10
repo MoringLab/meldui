@@ -7,7 +7,7 @@ import { AnswerView, createUIRuntime, UIProvider } from "@engine/renderer-react-
 import { Picker } from "@react-native-picker/picker";
 import { fetch } from "expo/fetch";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -23,6 +23,8 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import fixtures from "../../fixtures/cases.json";
 import hybridFixtures from "../../fixtures/hybrid/cases.json";
+import mediaFixtures from "../../fixtures/media/cases.json";
+import { sampleContent } from "../../fixtures/media/host";
 import { brandComponents } from "./brand";
 import { Verification } from "./Verification";
 
@@ -49,6 +51,10 @@ function Lab() {
   const [messageCount, setMessageCount] = useState(0);
   const [session, setSession] = useState<AnswerSession>(() => new AnswerSession(createUIRuntime()));
   const runtime = session.runtime;
+  const content = useMemo(
+    () => sampleContent(runtime.attachments, server, (id) => setStatus(id)),
+    [runtime],
+  );
   const sessionRef = useRef(session);
   sessionRef.current = session;
   const [scrollLocked, setScrollLocked] = useState(false);
@@ -96,8 +102,20 @@ function Lab() {
     setSelected(id);
     const next = fresh();
     const hybrid = hybridFixtures.find((f) => f.id === id);
-    const fixture = fixtures.find((f) => f.id === id) ?? fixtures[0];
-    const lines = hybrid ? hybrid.wire.split("\n") : fixture.messages.map((m) => JSON.stringify(m));
+    sampleContent(runtime.attachments, server);
+    const fixture =
+      mediaFixtures.find((f) => f.id === id) ?? fixtures.find((f) => f.id === id) ?? fixtures[0];
+    const lines = hybrid
+      ? hybrid.wire.split("\n")
+      : [
+          JSON.stringify({
+            engine: "v1",
+            block: "surface",
+            surfaceId: "main",
+            fallbackText: `${fixture.title}. ${"prompt" in fixture ? fixture.prompt : fixture.fallbackText}`,
+          }),
+          ...fixture.messages.map((m) => JSON.stringify(m)),
+        ];
     setStatus("예제를 표시하고 있습니다.");
     for (const line of lines) {
       if (run !== runId.current) return;
@@ -260,7 +278,7 @@ function Lab() {
             style={{ color: colors.foreground }}
           >
             {!selected && <Picker.Item label="생성된 인터페이스" value="" />}
-            {fixtures.map((fixture) => (
+            {[...fixtures, ...mediaFixtures].map((fixture) => (
               <Picker.Item key={fixture.id} label={fixture.title} value={fixture.id} />
             ))}
             {hybridFixtures.map((fixture) => (
@@ -283,6 +301,7 @@ function Lab() {
             kit={kit}
             mode={mode}
             components={brandComponents}
+            content={content}
             onGestureLock={setScrollLocked}
           >
             <AnswerView

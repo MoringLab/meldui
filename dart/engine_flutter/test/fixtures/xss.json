@@ -1,0 +1,177 @@
+[
+ {
+  "id": "x01",
+  "payload": "<script>alert(1)</script>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x02",
+  "payload": "<img src=x onerror=alert(1)>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x03",
+  "payload": "<svg onload=alert(1)>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x04",
+  "payload": "<iframe src=\"javascript:alert(1)\"></iframe>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x05",
+  "payload": "[click](javascript:alert(1))",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x06",
+  "payload": "[click](JaVaScRiPt:alert(1))",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x07",
+  "payload": "[click](java\tscript:alert(1))",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x08",
+  "payload": "[x](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x09",
+  "payload": "![x](javascript:alert(1))",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x10",
+  "payload": "![x](https://evil.example/pixel.png)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x11",
+  "payload": "![x](data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x12",
+  "payload": "[x](vbscript:msgbox(1))",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x13",
+  "payload": "<a href=\"javascript:alert(1)\">x</a>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x14",
+  "payload": "<a href=\"https://evil.example\" onclick=\"alert(1)\">x</a>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x15",
+  "payload": "<div style=\"background:url(javascript:alert(1))\">x</div>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x16",
+  "payload": "<style>body{display:none}</style>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x17",
+  "payload": "<form action=\"https://evil.example\"><input name=p></form>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x18",
+  "payload": "<object data=\"https://evil.example\"></object>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x19",
+  "payload": "<embed src=\"https://evil.example\">",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x20",
+  "payload": "<meta http-equiv=\"refresh\" content=\"0;url=https://evil.example\">",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x21",
+  "payload": "<base href=\"https://evil.example/\">",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x22",
+  "payload": "<math><mtext><table><mglyph><style><img src=x onerror=alert(1)>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x23",
+  "payload": "<details open ontoggle=alert(1)>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x24",
+  "payload": "<video src=x onerror=alert(1)>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x25",
+  "payload": "<input autofocus onfocus=alert(1)>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x26",
+  "payload": "<a href=\"&#106;avascript:alert(1)\">x</a>",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x27",
+  "payload": "[x](<javascript:alert(1)>)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x28",
+  "payload": "[x](  javascript:alert(1))",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x29",
+  "payload": "$$\\href{javascript:alert(1)}{x}$$",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x30",
+  "payload": "$\\includegraphics{https://evil.example/x.png}$",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x31",
+  "payload": "[x](attachment:../../etc/passwd)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x32",
+  "payload": "[x](attachment:att-nope)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x33",
+  "payload": "[x](file:///etc/passwd)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x34",
+  "payload": "[x](//evil.example)",
+  "expect": "neutralized"
+ },
+ {
+  "id": "x35",
+  "payload": "[x](mailto:a@b.c?subject=x&body=<script>)",
+  "expect": "neutralized"
+ }
+]

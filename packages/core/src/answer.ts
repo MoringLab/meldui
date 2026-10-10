@@ -9,6 +9,7 @@ import {
   defaultHostPolicy,
   type HostPolicy,
   type MediaDeclaration,
+  redactContent,
   SNAPSHOT_SCHEMA,
   type SurfaceDeclaration,
   type UIMessage,
@@ -399,7 +400,9 @@ export class AnswerSession {
         this.warnOnce("POLICY_MEDIA_DISABLED", "This host does not allow media blocks.");
         return events;
       }
-      const unknown = this.options.attachments?.unknownIds(decl.attachments) ?? [];
+      const unknown = (this.options.attachments ?? this.runtime.attachments).unknownIds(
+        decl.attachments,
+      );
       for (const id of unknown)
         this.report({
           code: "UNKNOWN_ATTACHMENT",
@@ -595,13 +598,13 @@ export class AnswerSession {
         data: structuredClone(this.runtime.read(id, "/")),
       };
     }
-    return {
+    return redactContent({
       schema: SNAPSHOT_SCHEMA,
       protocol: "v0.9",
       sdk: this.options.sdkVersion,
       blocks: this._blocks as unknown as Record<string, unknown>[],
       surfaces,
-    };
+    });
   }
   /** Rebuild an answer from a stored snapshot of any supported schema version. */
   static restore(

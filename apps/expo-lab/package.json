@@ -4,6 +4,7 @@
   "main": "index.ts",
   "dependencies": {
     "@engine/core": "workspace:*",
+    "@engine/kit-brand": "workspace:*",
     "@engine/kit-editorial": "workspace:*",
     "@engine/kit-neutral": "workspace:*",
     "@engine/protocol": "workspace:*",
@@ -12,12 +13,14 @@
     "@react-native-community/slider": "5.2.0",
     "@react-native-picker/picker": "2.11.4",
     "expo": "~57.0.27",
+    "expo-audio": "~57.0.5",
     "expo-status-bar": "~57.0.1",
+    "expo-video": "~57.0.5",
     "react": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-enriched-markdown": "^1.1.1",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-svg": "15.15.5",
-    "@engine/kit-brand": "workspace:*"
+    "react-native-svg": "15.15.5"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

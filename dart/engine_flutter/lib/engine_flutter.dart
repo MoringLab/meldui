@@ -6,3 +6,6 @@ export 'src/answer_view.dart';
 export 'src/runtime.dart';
 export 'src/renderer.dart';
 export 'src/expression.dart';
+
+export 'src/content.dart';
+export 'src/markdown.dart';

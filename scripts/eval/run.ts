@@ -4,9 +4,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import fixtures from "../../fixtures/cases.json";
 import { createUIRuntime } from "../../packages/core/src/index.js";
 import { type Row, readJson, split, summarize } from "./common.js";
+import { evaluateContent } from "./content.js";
 import { dutchShares } from "./golden.js";
 
-const rows: Row[] = [];
+const rows: Row[] = await evaluateContent();
 const node = (runtime: ReturnType<typeof createUIRuntime>, id: string) =>
   runtime.getNodeSnapshot("main", id);
 
@@ -134,41 +135,40 @@ for (const fixture of learningTargets) {
 }
 
 // ── Layers needing later milestones are registered, never silently skipped ──────────────────
-for (const id of ["markdown-xss", "attachment-injection", "media-ids", "media-layout"])
-  rows.push({
-    layer: "safety-media",
-    id,
-    status: "expected-fail",
-    unlockedBy: "M5",
-    detail: "no markdown/attachment path exists yet",
-  });
+rows.push({
+  layer: "safety-injection",
+  id: "live-model-injection",
+  status: "not-run",
+  detail:
+    "metadata/quoted prompt controls tested; no claim of an adversarial live-model success rate",
+});
 for (const set of ["routing", "multiturn"])
   for (const item of readJson<any[]>(`eval/${set}.json`))
     rows.push({
       layer: set,
       id: item.id,
       split: split(set, item.id),
-      status: set === "routing" ? "expected-fail" : "expected-fail",
-      unlockedBy: "M2",
-      detail: "needs answer envelope and host policy; baseline measured with --live",
+      status: "not-run",
+      detail: "host contract exists; this row requires a captured live/replay behavior result",
     });
 for (const item of readJson<any[]>("eval/media.json"))
   rows.push({
     layer: "media",
     id: item.id,
     split: split("media", item.id),
-    status: "expected-fail",
-    unlockedBy: "M5",
+    status: "not-run",
+    detail: "media display exists; generated answer quality requires live eval",
   });
+const partialShowcase = new Set(["h-photos", "h-pdf", "h-video", "h-calc", "h-fact", "h-code"]);
 for (const item of readJson<any[]>("eval/showcase.json")) {
   const key = `fixtures/showcase/${item.key}.json`;
   rows.push({
     layer: "showcase",
     id: item.id,
     split: split("showcase", item.id),
-    status: existsSync(key) ? "not-run" : "expected-fail",
+    status: existsSync(key) || partialShowcase.has(item.key) ? "not-run" : "expected-fail",
     unlockedBy: existsSync(key) ? undefined : item.unlockedBy,
-    detail: `${item.key} · path ${item.path} · ${item.native}`,
+    detail: `${item.key} · path ${item.path} · ${item.native}${partialShowcase.has(item.key) ? " · partial display baseline; item-specific generation/behavior/rubric acceptance not run" : ""}`,
   });
 }
 
@@ -176,6 +176,7 @@ for (const item of readJson<any[]>("eval/showcase.json")) {
 if (!process.argv.includes("--no-browser")) {
   const run = spawnSync("pnpm", ["exec", "playwright", "test", "-c", "playwright.eval.config.ts"], {
     stdio: "inherit",
+    timeout: 240_000,
   });
   if (run.status !== 0) process.exitCode = 1;
 }

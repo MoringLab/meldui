@@ -20,3 +20,4 @@ flutter:
   assets:
     - assets/cases.json
     - assets/hybrid.json
+    - assets/media.json

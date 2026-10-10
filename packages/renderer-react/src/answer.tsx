@@ -8,6 +8,8 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
+import { MediaContent } from "./content.js";
+import { SafeMarkdown } from "./markdown.js";
 import { UISurface } from "./renderer.js";
 
 export type MarkdownRendererProps = { text: string; streaming: boolean };
@@ -75,7 +77,7 @@ export type AnswerViewProps = {
 /** Ordered Markdown, surface and media blocks for one answer. */
 export function AnswerView({
   session,
-  markdown = PlainMarkdown,
+  markdown = SafeMarkdown,
   renderMedia,
   onExpand,
   maxSurfaceHeight,
@@ -111,11 +113,12 @@ export function AnswerView({
             return (
               <div className="ui-answer-media" key={block.id} data-block={block.id}>
                 {renderMedia?.(block) ?? (
-                  <ul>
-                    {block.attachmentIds.map((id) => (
-                      <li key={id}>{id}</li>
-                    ))}
-                  </ul>
+                  <MediaContent
+                    ids={block.attachmentIds}
+                    layout={block.layout}
+                    caption={block.caption}
+                    alt={block.alt}
+                  />
                 )}
               </div>
             );

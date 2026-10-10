@@ -9,7 +9,7 @@ const directories = (await readdir("packages", { withFileTypes: true }))
   .filter((entry) => entry.isDirectory())
   .map((entry) => `packages/${entry.name}`)
   .filter((entry) => entry !== "packages/kits");
-for (const kit of ["neutral", "editorial"]) directories.push(`packages/kits/${kit}`);
+for (const kit of ["neutral", "editorial", "brand"]) directories.push(`packages/kits/${kit}`);
 const files: string[] = [];
 for (const directory of directories) {
   const data = JSON.parse(await readFile(`${directory}/package.json`, "utf8"));
@@ -55,7 +55,7 @@ execFileSync(
 await writeFile(
   `${consumer}/smoke.mjs`,
   `
-import React from 'react';
+import React,{act} from 'react';
 import {renderToString} from 'react-dom/server';
 import {createUIRuntime, UIProvider, UISurface} from '@engine/renderer-react';
 import {neutral} from '@engine/kit-neutral';
@@ -70,8 +70,9 @@ runtime.accept({version:'v0.9',updateComponents:{surfaceId:'main',components:[{i
 const html=renderToString(React.createElement(UIProvider,{runtime,kit:neutral},React.createElement(UISurface,{surfaceId:'main'})));
 if(!html.includes('ui-skeleton') || runtime.diagnostics.length) throw Error('SSR placeholder failed');
 const dom=new JSDOM('<div id="root"></div>'); globalThis.window=dom.window; globalThis.document=dom.window.document;
-const root=createRoot(document.getElementById('root')); root.render(React.createElement(UIProvider,{runtime,kit:neutral},React.createElement(UISurface,{surfaceId:'main'})));
-await new Promise(resolve=>setTimeout(resolve,50));
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;
+const root=createRoot(document.getElementById('root')); await act(async()=>root.render(React.createElement(UIProvider,{runtime,kit:neutral},React.createElement(UISurface,{surfaceId:'main'}))));
+
 if(!document.body.textContent.includes('Packed consumer works')) throw Error('Packed client failed'); root.unmount();
 runtime.accept({version:'v0.9',updateComponents:{surfaceId:'main',components:[{id:'root',component:'Image',asset:'__proto__',alt:'Unregistered asset'}]}});
 const imageRoot=createRoot(document.getElementById('root'));imageRoot.render(React.createElement(UIProvider,{runtime,kit:neutral},React.createElement(UISurface)));

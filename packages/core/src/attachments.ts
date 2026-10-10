@@ -19,6 +19,8 @@ export type ResolvedAttachment = {
 /** Host-owned: turns an attachment id into something displayable. The engine holds no credentials. */
 export interface AttachmentResolver {
   resolve(id: string, purpose: AttachPurpose, signal?: AbortSignal): Promise<ResolvedAttachment>;
+  open?(id: string, signal?: AbortSignal): Promise<void>;
+  download?(id: string, signal?: AbortSignal): Promise<void>;
 }
 
 export type AttachInput = {
@@ -120,4 +122,111 @@ export class AttachmentRegistry {
   unknownIds(ids: string[]) {
     return ids.filter((id) => !this.items.has(id));
   }
+}
+
+export type ContentPolicy = {
+  /** Exact URL origins explicitly trusted by the host; empty denies all remote media. */
+  origins: string[];
+  schemes?: string[];
+  maxBytes?: number;
+  timeoutMs?: number;
+};
+export type ContentHost = {
+  attachments: AttachmentRegistry;
+  resolver: AttachmentResolver;
+  policy: ContentPolicy;
+  /** Host decides whether to open/confirm a permitted external link. No built-in navigation. */
+  openLink?: (url: string) => Promise<void> | void;
+  onDiagnostic?: (code: string, attachmentId: string) => void;
+};
+export function checkResolvedAttachment(
+  result: ResolvedAttachment,
+  manifest: AttachmentManifest,
+  policy: ContentPolicy,
+  purpose: AttachPurpose,
+): ResolvedAttachment {
+  let url: URL;
+  try {
+    url = new URL(result.url);
+  } catch {
+    throw new Error("MEDIA_URL_BLOCKED");
+  }
+  const scheme = url.protocol.slice(0, -1);
+  if (
+    !["https", ...(policy.schemes ?? [])].includes(scheme) ||
+    ["data", "javascript", "file"].includes(scheme)
+  )
+    throw new Error("MEDIA_URL_BLOCKED");
+  if (url.username || url.password || !policy.origins.includes(url.origin))
+    throw new Error("MEDIA_ORIGIN_BLOCKED");
+  if (manifest.size !== undefined && manifest.size > (policy.maxBytes ?? 50 * 1024 * 1024))
+    throw new Error("MEDIA_SIZE_LIMIT");
+  if (result.expiresAt !== undefined && result.expiresAt <= Date.now())
+    throw new Error("MEDIA_URL_EXPIRED");
+  const mime = result.mime ?? manifest.mime;
+  if (purpose === "thumbnail") {
+    if (!/^image\/(png|jpeg|webp|gif|avif)$/.test(mime)) throw new Error("MEDIA_TYPE_BLOCKED");
+  } else if (
+    mime !== manifest.mime ||
+    /^(text\/html|image\/svg\+xml|application\/javascript)$/.test(mime)
+  ) {
+    throw new Error("MEDIA_TYPE_BLOCKED");
+  }
+  return { ...result, mime };
+}
+/** Resolve at most twice (once if an expired URL is returned). Never logs URLs or auth data. */
+export async function resolveAttachment(
+  host: ContentHost,
+  id: string,
+  purpose: AttachPurpose = "display",
+  signal?: AbortSignal,
+): Promise<ResolvedAttachment> {
+  const manifest = host.attachments.get(id);
+  if (!manifest) throw new Error("UNKNOWN_ATTACHMENT");
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const timeout = setTimeout(cancel, host.policy.timeoutMs ?? 8000);
+  signal?.addEventListener("abort", cancel, { once: true });
+  if (signal?.aborted) controller.abort();
+  const combined = controller.signal;
+  try {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (combined.aborted) throw new Error("MEDIA_RESOLVE_ABORTED");
+      let abort: () => void = () => {};
+      const aborted = new Promise<never>((_, reject) => {
+        abort = () => reject(new Error("MEDIA_RESOLVE_ABORTED"));
+        combined.addEventListener("abort", abort, { once: true });
+      });
+      let response: ResolvedAttachment;
+      try {
+        response = await Promise.race([host.resolver.resolve(id, purpose, combined), aborted]);
+      } finally {
+        combined.removeEventListener("abort", abort);
+      }
+      if (combined.aborted) throw new Error("MEDIA_RESOLVE_ABORTED");
+      try {
+        return checkResolvedAttachment(response, manifest, host.policy, purpose);
+      } catch (error) {
+        if (!(error instanceof Error) || error.message !== "MEDIA_URL_EXPIRED" || attempt === 1)
+          throw error;
+      }
+    }
+    throw new Error("MEDIA_RESOLVE_FAILED");
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", cancel);
+  }
+}
+
+export function mediaLayout(items: AttachmentManifest[]) {
+  if (items.some((i) => i.kind === "file") || new Set(items.map((i) => i.kind)).size > 1)
+    return "files";
+  if (items[0]?.kind === "video" || items[0]?.kind === "audio") return "player";
+  return items.length === 1
+    ? "hero"
+    : items.length === 2
+      ? "compare"
+      : items.length <= 6
+        ? "grid"
+        : "carousel";
 }

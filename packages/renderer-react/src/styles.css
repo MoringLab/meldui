@@ -1,3 +1,4 @@
+@import "katex/dist/katex.min.css";
 .engine-ui {
   color: var(--ui-foreground);
   background: var(--ui-background);
@@ -509,4 +510,132 @@ h6.ui-heading {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+.ui-markdown {
+  max-width: 75ch;
+  overflow-wrap: anywhere;
+}
+.ui-markdown h1,
+.ui-markdown h2,
+.ui-markdown h3 {
+  line-height: 1.25;
+  margin-top: 1.8em;
+}
+.ui-markdown pre {
+  overflow-x: auto;
+  background: var(--ui-surface);
+  padding: 16px;
+  border-radius: var(--ui-radius);
+}
+.ui-markdown blockquote {
+  margin: 20px 0;
+  padding: 0 16px;
+  border-inline-start: 1px solid var(--ui-border);
+}
+.ui-markdown-link {
+  border: 0;
+  font: inherit;
+  background: none !important;
+  color: var(--ui-accent) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline;
+  padding: 4px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.ui-markdown .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 8px;
+}
+.ui-media-item {
+  margin: 0;
+  min-width: 0;
+}
+.ui-media-item img,
+.ui-media-item video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 560px;
+  object-fit: contain;
+}
+.ui-media-item audio {
+  width: 100%;
+}
+.ui-media-caption {
+  grid-column: 1 / -1;
+}
+.ui-media-items {
+  display: grid;
+  gap: 16px;
+}
+.ui-media-grid .ui-media-items,
+.ui-media-compare .ui-media-items {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+}
+.ui-media-carousel .ui-media-items {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.ui-media-carousel .ui-media-item {
+  min-width: min(280px, 85%);
+  scroll-snap-align: start;
+}
+.ui-media-item figcaption {
+  margin-top: 8px;
+  color: var(--ui-muted);
+}
+.ui-image-stage {
+  position: relative;
+}
+.ui-image-stage:has(.ui-image-region) img {
+  /* Coordinate overlays must use the image rectangle, without object-fit letterboxing. */
+  max-height: none;
+}
+.ui-image-region {
+  position: absolute;
+  border: 1px solid var(--ui-accent);
+  color: var(--ui-foreground);
+  background: color-mix(in srgb, var(--ui-surface) 20%, transparent);
+  font-size: 12px;
+  overflow: hidden;
+}
+.ui-file-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  overflow-wrap: anywhere;
+}
+.ui-file-card button {
+  min-width: 44px;
+  min-height: 44px;
+  margin-inline-end: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-surface);
+  color: var(--ui-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+.ui-media-loading {
+  padding: 24px;
+  background: var(--ui-surface);
+}
+.hljs-keyword,
+.hljs-title {
+  color: var(--ui-accent);
+}
+.hljs-string,
+.hljs-number {
+  color: var(--ui-success);
+}
+.hljs-comment {
+  color: var(--ui-muted);
 }

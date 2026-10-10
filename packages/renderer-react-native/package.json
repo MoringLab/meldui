@@ -33,6 +33,9 @@
     "react-native-svg": ">=15",
     "@react-native-community/slider": ">=5",
     "@react-native-community/datetimepicker": ">=8",
-    "@react-native-picker/picker": ">=2"
+    "@react-native-picker/picker": ">=2",
+    "react-native-enriched-markdown": "^1.1.1",
+    "expo-video": "~57.0.5",
+    "expo-audio": "~57.0.5"
   }
 }

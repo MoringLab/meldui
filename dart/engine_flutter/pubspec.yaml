@@ -10,6 +10,10 @@ dependencies:
     sdk: flutter
   a2ui_core: 0.2.2
   json_schema_builder: 0.1.7
+  flutter_markdown_plus: ^1.0.12
+  flutter_math_fork: ^0.7.4
+  markdown: ^7.3.1
+  video_player: ^2.14.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

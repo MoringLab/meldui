@@ -60,7 +60,7 @@ Adapters: OpenAI-compatible SSE through OmniRoute, replay, and the optional AG-U
 ```sh
 pnpm check
 pnpm eval
-pnpm eval:online # server + gateway credential required; makes model calls
+pnpm eval:online --live # explicit opt-in; local OmniRoute server required
 cd dart/engine_flutter && flutter test
 cd ../../apps/flutter && flutter test
 ```
@@ -74,3 +74,9 @@ See [status and actual verification](docs/STATUS.md), [architecture decisions](d
 This preview is private. Functional checks pass; native tail latency and model first-pass quality remain release gates. GPT's final neutral evaluation reached 30/30 after repair, while other routes had output or availability failures. Read the complete denominators and measured limits before selecting a deployment policy.
 
 For packaged consumers, run `pnpm exec tsx scripts/package-check.ts` after `pnpm build`. For device checks, build the two demo APKs, install Maestro, then run `python3 scripts/verify-android.py --serial DEVICE --video --live`; omit `--live` for offline flows. The Flutter profile runner is `flutter drive --profile --driver=test_driver/integration_test.dart --target=integration_test/device_test.dart` from `apps/flutter`. Temporary device-condition checks save original preferences in `artifacts/conditions/restore-pending.json`; after a disconnect, run `python3 scripts/device-conditions.py --restore` before another conditions run.
+
+## Hybrid answers and host attachments (Phase 2)
+
+`AnswerSession` composes Markdown, A2UI surfaces and media in order. `UIProvider` accepts a `ContentHost` with a metadata registry and a trusted resolver. Models reference attachment IDs; the SDK neither uploads files nor generates media bytes. Built-in GFM/math/code display and three kits are available, with host replacement APIs and platform fallbacks. See [content integration](docs/hybrid/CONTENT.md), [kit integration](docs/KITS.md) and [the current scorecard](docs/verification/phase2/content-m5.md).
+
+Select “첨부파일 예제” in the web lab or “Safe host attachments” in either Android app to replay the synthetic host media fixture. Ordinary Android verification no longer starts a benchmark. Performance runs are separate, explicitly requested, bounded jobs. Online evaluation requires `--live`; plain CI remains offline. Phase 2's remaining milestones and unverified capabilities are tracked in [STATUS](docs/STATUS.md).

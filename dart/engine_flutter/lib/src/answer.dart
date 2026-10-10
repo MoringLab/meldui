@@ -76,7 +76,11 @@ class AnswerDecoder {
       }
       if (newline == -1 && !isFinal) {
         if (utf8.encode(_buffer).length > maxLineBytes) {
-          out.add(AnswerItem.invalid(_buffer.substring(0, 80.clamp(0, _buffer.length))));
+          out.add(
+            AnswerItem.invalid(
+              _buffer.substring(0, 80.clamp(0, _buffer.length)),
+            ),
+          );
           _buffer = '';
           _mode = 'unknown';
         }
@@ -103,7 +107,9 @@ class AnswerDecoder {
       }
     } catch (_) {
       if (RegExp(r'^\s*\{\s*"(version|engine)"').hasMatch(line)) {
-        out.add(AnswerItem.invalid(line.length > 120 ? line.substring(0, 120) : line));
+        out.add(
+          AnswerItem.invalid(line.length > 120 ? line.substring(0, 120) : line),
+        );
         return;
       }
     }
@@ -150,8 +156,11 @@ class MarkdownBlock extends AnswerBlock {
   const MarkdownBlock(super.id, this.text, {this.streaming = true});
   @override
   String get kind => 'markdown';
-  MarkdownBlock copy({String? text, bool? streaming}) =>
-      MarkdownBlock(id, text ?? this.text, streaming: streaming ?? this.streaming);
+  MarkdownBlock copy({String? text, bool? streaming}) => MarkdownBlock(
+    id,
+    text ?? this.text,
+    streaming: streaming ?? this.streaming,
+  );
 }
 
 class SurfaceBlock extends AnswerBlock {
@@ -308,8 +317,12 @@ class AnswerSession extends ChangeNotifier {
       case 'surface':
         final id = decl['surfaceId'];
         final fallback = decl['fallbackText'];
-        if (id is! String || id.isEmpty || id.length > 128 ||
-            fallback is! String || fallback.isEmpty || fallback.length > 4000) {
+        if (id is! String ||
+            id.isEmpty ||
+            id.length > 128 ||
+            fallback is! String ||
+            fallback.isEmpty ||
+            fallback.length > 4000) {
           runtime.report('INVALID_ENVELOPE');
           return;
         }
@@ -335,16 +348,30 @@ class AnswerSession extends ChangeNotifier {
           return;
         }
         for (final id in ids) {
-          if (isKnownAttachment != null && !isKnownAttachment!(id)) {
+          if (!(isKnownAttachment?.call(id) ??
+              runtime.attachments.get(id) != null)) {
             runtime.report('UNKNOWN_ATTACHMENT', path: id);
           }
         }
-        _blocks.add(MediaBlock(_newId(), ids, decl['layout'] as String? ?? 'auto', decl['caption'] as String?));
+        _blocks.add(
+          MediaBlock(
+            _newId(),
+            ids,
+            decl['layout'] as String? ?? 'auto',
+            decl['caption'] as String?,
+          ),
+        );
         _touch();
       case 'sandbox':
         _warnOnce('POLICY_SANDBOX_DISABLED', error: true);
         if (!policy.allowSandbox) {
-          _blocks.add(SandboxBlock(_newId(), decl['mode'] as String? ?? 'html', decl['fallbackText'] as String? ?? ''));
+          _blocks.add(
+            SandboxBlock(
+              _newId(),
+              decl['mode'] as String? ?? 'html',
+              decl['fallbackText'] as String? ?? '',
+            ),
+          );
           _touch();
         }
       default:
@@ -353,10 +380,12 @@ class AnswerSession extends ChangeNotifier {
   }
 
   void _a2ui(JsonMap message) {
-    final body = (message['createSurface'] ??
-        message['updateComponents'] ??
-        message['updateDataModel'] ??
-        message['deleteSurface']) as Map?;
+    final body =
+        (message['createSurface'] ??
+                message['updateComponents'] ??
+                message['updateDataModel'] ??
+                message['deleteSurface'])
+            as Map?;
     final surfaceId = body?['surfaceId'] as String?;
     if (surfaceId != null && _surfaceBlock[surfaceId] == '') return;
     if (message.containsKey('createSurface') && surfaceId != null) {
@@ -395,9 +424,12 @@ class AnswerSession extends ChangeNotifier {
     final copy = jsonDecode(jsonEncode(filtered)) as JsonMap;
     final before = runtime.diagnostics.length;
     final diagnostics = runtime.accept(copy);
-    final accepted = diagnostics.isEmpty && runtime.diagnostics.length == before;
+    final accepted =
+        diagnostics.isEmpty && runtime.diagnostics.length == before;
     if (surfaceId != null && accepted) {
-      _log[surfaceId]?.messages.add(jsonDecode(jsonEncode(filtered)) as JsonMap);
+      _log[surfaceId]?.messages.add(
+        jsonDecode(jsonEncode(filtered)) as JsonMap,
+      );
     }
     if (message.containsKey('deleteSurface') && surfaceId != null) {
       final id = _surfaceBlock.remove(surfaceId);
@@ -416,8 +448,11 @@ class AnswerSession extends ChangeNotifier {
       if (allowed.contains((c as Map)['component'])) {
         kept.add(c);
       } else {
-        runtime.report('COMPONENT_NOT_ALLOWED',
-            surfaceId: update['surfaceId'] as String?, componentId: c['id'] as String?);
+        runtime.report(
+          'COMPONENT_NOT_ALLOWED',
+          surfaceId: update['surfaceId'] as String?,
+          componentId: c['id'] as String?,
+        );
       }
     }
     return {
@@ -437,7 +472,9 @@ class AnswerSession extends ChangeNotifier {
             fallbackText: block.fallbackText.isEmpty
                 ? describeSurface(runtime, block.surfaceId)
                 : block.fallbackText,
-            status: runtime.surface(block.surfaceId)?.componentsModel.get('root') == null
+            status:
+                runtime.surface(block.surfaceId)?.componentsModel.get('root') ==
+                    null
                 ? 'error'
                 : 'complete',
           )
@@ -449,14 +486,17 @@ class AnswerSession extends ChangeNotifier {
 
   /// Plain text of the whole answer; surfaces contribute their fallback text.
   String asText() => _blocks
-      .map((b) => switch (b) {
-            MarkdownBlock() => b.text,
-            SurfaceBlock() => b.fallbackText.isEmpty
+      .map(
+        (b) => switch (b) {
+          MarkdownBlock() => b.text,
+          SurfaceBlock() =>
+            b.fallbackText.isEmpty
                 ? describeSurface(runtime, b.surfaceId)
                 : b.fallbackText,
-            SandboxBlock() => b.fallbackText,
-            MediaBlock() => '[media: ${b.attachmentIds.join(', ')}]',
-          })
+          SandboxBlock() => b.fallbackText,
+          MediaBlock() => '[media: ${b.attachmentIds.join(', ')}]',
+        },
+      )
       .where((s) => s.isNotEmpty)
       .join('\n\n');
 
@@ -464,7 +504,10 @@ class AnswerSession extends ChangeNotifier {
   void reset(String surfaceId) {
     final log = _log[surfaceId];
     if (log == null) throw StateError('UNKNOWN_SURFACE');
-    runtime.accept({'version': 'v0.9', 'deleteSurface': {'surfaceId': surfaceId}});
+    runtime.accept({
+      'version': 'v0.9',
+      'deleteSurface': {'surfaceId': surfaceId},
+    });
     for (final message in log.messages) {
       runtime.accept(jsonDecode(jsonEncode(message)));
     }
@@ -472,34 +515,71 @@ class AnswerSession extends ChangeNotifier {
     _touch();
   }
 
-  JsonMap serialize() => {
-    'schema': 2,
-    'protocol': 'v0.9',
-    'blocks': [for (final b in _blocks) _blockJson(b)],
-    'surfaces': {
-      for (final entry in _log.entries)
-        entry.key: {
-          'catalogId': entry.value.catalogId,
-          'messages': entry.value.messages,
-          'data': jsonDecode(jsonEncode(runtime.read(entry.key, '/'))),
-        },
-    },
-  };
+  JsonMap serialize() =>
+      _redactHistory({
+            'schema': 2,
+            'protocol': 'v0.9',
+            'blocks': [for (final b in _blocks) _blockJson(b)],
+            'surfaces': {
+              for (final entry in _log.entries)
+                entry.key: {
+                  'catalogId': entry.value.catalogId,
+                  'messages': entry.value.messages,
+                  'data': jsonDecode(jsonEncode(runtime.read(entry.key, '/'))),
+                },
+            },
+          })
+          as JsonMap;
+
+  static dynamic _redactHistory(dynamic value) {
+    if (value is String) {
+      return value.replaceAllMapped(
+        RegExp(
+          r'''(https?://[^\s"'<>?#]+)[?#][^\s"'<>]*''',
+          caseSensitive: false,
+        ),
+        (m) => '${m[1]}?[redacted]',
+      );
+    }
+    if (value is List) return value.map(_redactHistory).toList();
+    if (value is Map) {
+      return <String, dynamic>{
+        for (final e in value.entries) e.key as String: _redactHistory(e.value),
+      };
+    }
+    return value;
+  }
 
   static JsonMap _blockJson(AnswerBlock b) => switch (b) {
-    MarkdownBlock() => {'id': b.id, 'kind': 'markdown', 'text': b.text, 'status': 'complete'},
+    MarkdownBlock() => {
+      'id': b.id,
+      'kind': 'markdown',
+      'text': b.text,
+      'status': 'complete',
+    },
     SurfaceBlock() => {
-      'id': b.id, 'kind': 'surface', 'surfaceId': b.surfaceId,
-      'fallbackText': b.fallbackText, 'fallbackSource': b.fallbackSource,
-      if (b.title != null) 'title': b.title, 'status': b.status,
+      'id': b.id,
+      'kind': 'surface',
+      'surfaceId': b.surfaceId,
+      'fallbackText': b.fallbackText,
+      'fallbackSource': b.fallbackSource,
+      if (b.title != null) 'title': b.title,
+      'status': b.status,
     },
     MediaBlock() => {
-      'id': b.id, 'kind': 'media', 'attachmentIds': b.attachmentIds,
-      'layout': b.layout, if (b.caption != null) 'caption': b.caption, 'status': 'complete',
+      'id': b.id,
+      'kind': 'media',
+      'attachmentIds': b.attachmentIds,
+      'layout': b.layout,
+      if (b.caption != null) 'caption': b.caption,
+      'status': 'complete',
     },
     SandboxBlock() => {
-      'id': b.id, 'kind': 'sandbox', 'mode': b.mode,
-      'fallbackText': b.fallbackText, 'status': 'blocked',
+      'id': b.id,
+      'kind': 'sandbox',
+      'mode': b.mode,
+      'fallbackText': b.fallbackText,
+      'status': 'blocked',
     },
   };
 
@@ -515,17 +595,44 @@ class AnswerSession extends ChangeNotifier {
     for (final raw in snapshot['blocks'] as List) {
       final b = raw as Map;
       final id = b['id'] as String;
-      session._nextBlock = [session._nextBlock, (int.tryParse(id.replaceAll(RegExp(r'\D'), '')) ?? 0) + 1].reduce((a, c) => a > c ? a : c);
+      session._nextBlock = [
+        session._nextBlock,
+        (int.tryParse(id.replaceAll(RegExp(r'\D'), '')) ?? 0) + 1,
+      ].reduce((a, c) => a > c ? a : c);
       switch (b['kind']) {
         case 'markdown':
-          session._blocks.add(MarkdownBlock(id, b['text'] as String, streaming: false));
+          session._blocks.add(
+            MarkdownBlock(id, b['text'] as String, streaming: false),
+          );
         case 'media':
-          session._blocks.add(MediaBlock(id, (b['attachmentIds'] as List).cast<String>(), b['layout'] as String? ?? 'auto', b['caption'] as String?));
+          session._blocks.add(
+            MediaBlock(
+              id,
+              (b['attachmentIds'] as List).cast<String>(),
+              b['layout'] as String? ?? 'auto',
+              b['caption'] as String?,
+            ),
+          );
         case 'sandbox':
-          session._blocks.add(SandboxBlock(id, b['mode'] as String? ?? 'html', b['fallbackText'] as String? ?? ''));
+          session._blocks.add(
+            SandboxBlock(
+              id,
+              b['mode'] as String? ?? 'html',
+              b['fallbackText'] as String? ?? '',
+            ),
+          );
         case 'surface':
           final sid = b['surfaceId'] as String;
-          session._blocks.add(SurfaceBlock(id, sid, b['fallbackText'] as String? ?? '', b['fallbackSource'] as String? ?? 'model', b['title'] as String?, 'complete'));
+          session._blocks.add(
+            SurfaceBlock(
+              id,
+              sid,
+              b['fallbackText'] as String? ?? '',
+              b['fallbackSource'] as String? ?? 'model',
+              b['title'] as String?,
+              'complete',
+            ),
+          );
           session._surfaceBlock[sid] = id;
           final stored = surfaces[sid] as Map?;
           if (stored == null) continue;
@@ -538,10 +645,17 @@ class AnswerSession extends ChangeNotifier {
           if (stored['data'] != null) {
             runtime.accept({
               'version': 'v0.9',
-              'updateDataModel': {'surfaceId': sid, 'path': '/', 'value': jsonDecode(jsonEncode(stored['data']))},
+              'updateDataModel': {
+                'surfaceId': sid,
+                'path': '/',
+                'value': jsonDecode(jsonEncode(stored['data'])),
+              },
             });
           }
-          session._log[sid] = (catalogId: stored['catalogId'] as String, messages: log);
+          session._log[sid] = (
+            catalogId: stored['catalogId'] as String,
+            messages: log,
+          );
       }
     }
     runtime.finish();
@@ -562,7 +676,11 @@ class AnswerSession extends ChangeNotifier {
 JsonMap migrateSnapshot(dynamic input) {
   dynamic value = input;
   if (value is String) {
-    value = value.split('\n').where((l) => l.trim().isNotEmpty).map(jsonDecode).toList();
+    value = value
+        .split('\n')
+        .where((l) => l.trim().isNotEmpty)
+        .map(jsonDecode)
+        .toList();
   }
   if (value is List) value = <String, dynamic>{'schema': 1, 'messages': value};
   if (value is Map && value['schema'] == 1 && value['messages'] is List) {
@@ -570,18 +688,40 @@ JsonMap migrateSnapshot(dynamic input) {
     final blocks = <JsonMap>[];
     for (final m in value['messages'] as List) {
       final message = m as Map;
-      final body = (message['createSurface'] ?? message['updateComponents'] ?? message['updateDataModel'] ?? message['deleteSurface']) as Map?;
+      final body =
+          (message['createSurface'] ??
+                  message['updateComponents'] ??
+                  message['updateDataModel'] ??
+                  message['deleteSurface'])
+              as Map?;
       final id = body?['surfaceId'] as String?;
       if (id == null) continue;
       if (message.containsKey('createSurface')) {
-        surfaces[id] = {'catalogId': (message['createSurface'] as Map)['catalogId'], 'messages': <dynamic>[]};
-        blocks.add({'id': 'b${blocks.length + 1}', 'kind': 'surface', 'surfaceId': id, 'fallbackText': '', 'fallbackSource': 'generated', 'status': 'complete'});
+        surfaces[id] = {
+          'catalogId': (message['createSurface'] as Map)['catalogId'],
+          'messages': <dynamic>[],
+        };
+        blocks.add({
+          'id': 'b${blocks.length + 1}',
+          'kind': 'surface',
+          'surfaceId': id,
+          'fallbackText': '',
+          'fallbackSource': 'generated',
+          'status': 'complete',
+        });
       }
       (surfaces[id]?['messages'] as List?)?.add(message);
     }
-    return {'schema': 2, 'protocol': 'v0.9', 'blocks': blocks, 'surfaces': surfaces};
+    return {
+      'schema': 2,
+      'protocol': 'v0.9',
+      'blocks': blocks,
+      'surfaces': surfaces,
+    };
   }
-  if (value is Map && value['schema'] == 2) return Map<String, dynamic>.from(value);
+  if (value is Map && value['schema'] == 2) {
+    return Map<String, dynamic>.from(value);
+  }
   throw StateError('UNSUPPORTED_SNAPSHOT');
 }
 

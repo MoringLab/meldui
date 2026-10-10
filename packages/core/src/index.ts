@@ -52,7 +52,10 @@ export type NodeSnapshot = {
   scope: string;
   error?: string;
 };
+
+import { type AttachInput, AttachmentRegistry } from "./attachments.js";
 export type RuntimeOptions = {
+  attachments?: AttachmentRegistry;
   catalogId?: string;
   components?: ComponentApi[];
   onAction?: (action: UserAction) => void | Promise<void>;
@@ -89,6 +92,10 @@ let defaultCatalog: Catalog<any> | undefined;
 
 /** A small policy layer around upstream A2UI state and component models. */
 export class UIRuntime {
+  readonly attachments: AttachmentRegistry;
+  attach(input: AttachInput) {
+    return this.attachments.attach(input);
+  }
   readonly processor: MessageProcessor<any>;
   readonly diagnostics: Diagnostic[] = [];
   readonly limits;
@@ -106,6 +113,7 @@ export class UIRuntime {
   private runs = new Map<string, AbortController>();
   private cleanups = new Set<() => void>();
   constructor(readonly options: RuntimeOptions = {}) {
+    this.attachments = options.attachments ?? new AttachmentRegistry();
     this.limits = { ...defaultLimits, ...options.limits };
     const components =
       options.components ??
@@ -212,9 +220,10 @@ export class UIRuntime {
         // Valid batches need one graph check; rejected batches retain isolation.
         let applied = false;
         try {
-          const components = incoming.map((raw) =>
-            parseComponent(raw, schemas as Parameters<typeof parseComponent>[1]),
-          );
+          const components = incoming.map((raw) => {
+            this.validateMediaRefs(raw);
+            return parseComponent(raw, schemas as Parameters<typeof parseComponent>[1]);
+          });
           this.processor.processMessages({
             version: PROTOCOL_VERSION,
             updateComponents: { surfaceId, components },
@@ -226,6 +235,7 @@ export class UIRuntime {
         for (const raw of incoming) {
           try {
             if (!applied) {
+              this.validateMediaRefs(raw);
               const component = parseComponent(
                 raw,
                 schemas as Parameters<typeof parseComponent>[1],
@@ -284,6 +294,26 @@ export class UIRuntime {
     return this.diagnosticEvents
       .filter((event) => event.sequence > before)
       .map((event) => event.diagnostic);
+  }
+  private validateMediaRefs(raw: Component) {
+    const ids =
+      typeof raw.attachmentId === "string"
+        ? [raw.attachmentId]
+        : Array.isArray(raw.attachmentIds)
+          ? (raw.attachmentIds as string[])
+          : [];
+    if (this.attachments.unknownIds(ids).length) throw new Error("UNKNOWN_ATTACHMENT");
+    if (raw.component === "Image" && !raw.attachmentId && !raw.asset)
+      throw new Error("IMAGE_SOURCE_REQUIRED");
+    if (raw.component === "ImageAnnotations") {
+      const manifest = this.attachments.get(ids[0]);
+      if (
+        (raw.regionIds as string[] | undefined)?.some(
+          (id) => !manifest?.regions?.some((r) => r.id === id),
+        )
+      )
+        throw new Error("UNKNOWN_ATTACHMENT_REGION");
+    }
   }
   private errorDiagnostic(error: unknown, surfaceId?: string, componentId?: string): Diagnostic {
     const zod = error as {
@@ -610,3 +640,4 @@ export class UIRuntime {
 export function createUIRuntime(options?: RuntimeOptions) {
   return new UIRuntime(options);
 }
+export * from "./markdown.js";

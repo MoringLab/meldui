@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'answer.dart';
 import 'renderer.dart';
+import 'markdown.dart';
+import 'content.dart';
 
 /// Builds Markdown for one block. Hosts replace it to reuse their own (sanitizing) pipeline.
 typedef MarkdownBuilder =
@@ -31,7 +33,9 @@ class AnswerLabels {
 /// Minimal built-in renderer: paragraphs and fenced code as plain [Text] (never markup).
 Widget plainMarkdown(BuildContext context, String text, bool streaming) {
   final parts = text.split(RegExp(r'\n```[^\n]*\n([\s\S]*?)(?:\n```|$)'));
-  final fences = RegExp(r'\n```[^\n]*\n([\s\S]*?)(?:\n```|$)').allMatches(text).toList();
+  final fences = RegExp(
+    r'\n```[^\n]*\n([\s\S]*?)(?:\n```|$)',
+  ).allMatches(text).toList();
   final children = <Widget>[];
   for (var i = 0; i < parts.length; i++) {
     for (final paragraph in parts[i].split(RegExp(r'\n{2,}'))) {
@@ -59,7 +63,8 @@ Widget plainMarkdown(BuildContext context, String text, bool streaming) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      for (final c in children) Padding(padding: const EdgeInsets.only(bottom: 10), child: c),
+      for (final c in children)
+        Padding(padding: const EdgeInsets.only(bottom: 10), child: c),
     ],
   );
 }
@@ -76,7 +81,7 @@ class AnswerView extends StatelessWidget {
   const AnswerView({
     super.key,
     required this.session,
-    this.markdown = plainMarkdown,
+    this.markdown = safeMarkdown,
     this.mediaBuilder,
     this.onExpand,
     this.maxSurfaceHeight,
@@ -105,12 +110,17 @@ class AnswerView extends StatelessWidget {
                   session: session,
                   chrome: chrome,
                   labels: labels,
-                  maxHeight: maxSurfaceHeight ?? session.policy.maxSurfaceHeight,
+                  maxHeight:
+                      maxSurfaceHeight ?? session.policy.maxSurfaceHeight,
                   onExpand: onExpand,
                 ),
                 MediaBlock() =>
                   mediaBuilder?.call(context, block) ??
-                      Text(block.attachmentIds.join(', ')),
+                      MediaContent(
+                        ids: block.attachmentIds,
+                        layout: block.layout,
+                        caption: block.caption,
+                      ),
                 SandboxBlock() => Semantics(
                   liveRegion: true,
                   child: Text('${labels.sandboxBlocked} ${block.fallbackText}'),
@@ -160,6 +170,7 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
           kit: host.kit,
           dark: host.dark,
           assets: host.assets,
+          content: host.content,
           components: host.components,
           child: Scaffold(
             appBar: AppBar(
@@ -184,8 +195,15 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
   Widget build(BuildContext context) {
     final host = UIProvider.of(context);
     final colors = host.kit.colors(host.dark);
-    final border = Color(int.parse((colors['border'] as String).replaceFirst('#', 'ff'), radix: 16));
-    final muted = Color(int.parse((colors['muted'] as String).replaceFirst('#', 'ff'), radix: 16));
+    final border = Color(
+      int.parse(
+        (colors['border'] as String).replaceFirst('#', 'ff'),
+        radix: 16,
+      ),
+    );
+    final muted = Color(
+      int.parse((colors['muted'] as String).replaceFirst('#', 'ff'), radix: 16),
+    );
     final labels = widget.labels;
     final block = widget.block;
     Widget body = asText
@@ -197,14 +215,18 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
         child: SingleChildScrollView(child: body),
       );
     }
-    Widget action(String label, IconData icon, VoidCallback onPressed, {bool selected = false}) =>
-        IconButton(
-          tooltip: label,
-          isSelected: selected,
-          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-          icon: Icon(icon, size: 20, color: muted),
-          onPressed: onPressed,
-        );
+    Widget action(
+      String label,
+      IconData icon,
+      VoidCallback onPressed, {
+      bool selected = false,
+    }) => IconButton(
+      tooltip: label,
+      isSelected: selected,
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      icon: Icon(icon, size: 20, color: muted),
+      onPressed: onPressed,
+    );
     return Semantics(
       container: true,
       label: block.title ?? labels.surface,
@@ -220,7 +242,9 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
             if (widget.chrome)
               Container(
                 padding: const EdgeInsets.only(left: 14, right: 2),
-                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: border))),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: border)),
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -231,7 +255,11 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
                         style: TextStyle(color: muted, fontSize: 13),
                       ),
                     ),
-                    action(labels.reset, Icons.restart_alt, () => widget.session.reset(block.surfaceId)),
+                    action(
+                      labels.reset,
+                      Icons.restart_alt,
+                      () => widget.session.reset(block.surfaceId),
+                    ),
                     action(labels.expand, Icons.open_in_full, _expand),
                     action(
                       asText ? labels.viewAsInterface : labels.viewAsText,
@@ -246,7 +274,10 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
             if (block.status == 'error')
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
-                child: Text(labels.incomplete, style: TextStyle(color: muted, fontSize: 13)),
+                child: Text(
+                  labels.incomplete,
+                  style: TextStyle(color: muted, fontSize: 13),
+                ),
               ),
           ],
         ),

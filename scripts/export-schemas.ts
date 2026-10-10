@@ -1,8 +1,8 @@
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { resolveTypography } from "../packages/kit-spec/src/index.js";
 import { brand } from "../packages/kits/brand/src/index.js";
 import { editorial } from "../packages/kits/editorial/src/index.js";
 import { neutral } from "../packages/kits/neutral/src/index.js";
-import { resolveTypography } from "../packages/kit-spec/src/index.js";
 import { buildCatalogSchema, COMPONENT_NAMES } from "../packages/protocol/src/index.js";
 
 await mkdir("schemas", { recursive: true });
@@ -32,4 +32,11 @@ const typography = Object.fromEntries(
   ]),
 );
 await writeFile("fixtures/kits/typography.json", `${JSON.stringify(typography, null, 1)}\n`);
-await copyFile("fixtures/kits/typography.json", "dart/engine_flutter/test/fixtures/typography.json");
+await copyFile(
+  "fixtures/kits/typography.json",
+  "dart/engine_flutter/test/fixtures/typography.json",
+);
+
+await copyFile("fixtures/media/cases.json", "dart/engine_flutter/test/fixtures/media.json");
+await copyFile("eval/safety/xss.json", "dart/engine_flutter/test/fixtures/xss.json");
+await copyFile("fixtures/media/cases.json", "apps/flutter/assets/media.json");

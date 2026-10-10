@@ -45,3 +45,9 @@ Native p95 and model first-pass quality remain open. iOS build jobs are configur
 Hybrid answers and the third brand kit extend the preview. Typography and history parity vectors are shared between TS and Dart. Device slider/scroll evidence is retained under `artifacts/device/`. These are separate from the Phase 1 results above.
 
 M4 performance investigation ended at the user's request; no further automatic benchmark runs are scheduled. The completed 120+120 sample measurements and their limitations are documented in [phase2/M4.md](phase2/M4.md). Flutter's measured cold/warm p95 is 109.97/89.68ms after prewarming. RN remains over target; missing full frame/heap traces are an open gate. The last interrupted gfxinfo run is not counted. Accessibility settings restoration was verified.
+
+## Phase 2 content continuation — 2026-10-10
+
+Safe GFM/math/code and host-resolved attachment display extend all three renderers. The original 30 fixtures are preserved; the catalog is now 35 components. [ADR 0004](../adr/0004-hybrid-content-boundary.md) records the trust boundary, libraries, replacement APIs and explicit fallbacks. [M5](phase2/M5.md) separates actual checks, device evidence and acceptance gaps. [The current scorecard](phase2/content-m5.md) and [Showcase status](phase2/showcase-status.md) preserve failures and unmeasured rows. No new performance or model/judge run was made in this continuation.
+
+Structural validity remains 30/30. Applicable behaviors expand from 27 to 62, all passing. Clean 44px target fixtures improve from 20/30 to 30/30. New host attachment metadata checks pass 20/20; Markdown safety corpus passes 35/35. Numeric advanced checks, learning quality, full live injection/routing/media/multi-turn evaluation, iOS execution and M6–M11 remain open. Model validity figures are retained historical baselines, not a claim that safe content display improved generation.

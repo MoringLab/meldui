@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "${PICKER}"
+    timeout: 30000
+- tapOn: "${PICKER}"
+- scrollUntilVisible:
+    element:
+      text: "Safe host attachments"
+    direction: DOWN
+- tapOn: "Safe host attachments"
+- extendedWaitUntil:
+    visible: "(?s).*Host attachments.*"
+    timeout: 30000
+- assertVisible: "A hybrid answer"
+- scrollUntilVisible:
+    element:
+      text: "Coast illustration|Host coast illustration"
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: media-image
+- scrollUntilVisible:
+    element:
+      text: "Open"
+    direction: DOWN
+    timeout: 40000
+- assertVisible: "Open"
+- tapOn:
+    text: "Open"
+    index: 0
+- takeScreenshot: media-file-action

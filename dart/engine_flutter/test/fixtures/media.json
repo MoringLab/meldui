@@ -1,0 +1,182 @@
+[
+  {
+    "id": "media-catalog",
+    "title": "Safe host attachments",
+    "attachments": [
+      {
+        "id": "photo-a",
+        "kind": "image",
+        "mime": "image/png",
+        "name": "Coast photo",
+        "alt": "Coast illustration",
+        "width": 640,
+        "height": 480,
+        "regions": [
+          {
+            "id": "sky",
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 0.3,
+            "label": "Sky"
+          }
+        ]
+      },
+      {
+        "id": "photo-b",
+        "kind": "image",
+        "mime": "image/png",
+        "name": "Mountain photo",
+        "alt": "Mountain illustration",
+        "width": 640,
+        "height": 480
+      },
+      {
+        "id": "video-a",
+        "kind": "video",
+        "mime": "video/mp4",
+        "name": "Host video",
+        "duration": 10,
+        "transcript": [
+          {
+            "t": 0,
+            "text": "Opening scene"
+          },
+          {
+            "t": 4,
+            "text": "Host demonstration"
+          }
+        ]
+      },
+      {
+        "id": "audio-a",
+        "kind": "audio",
+        "mime": "audio/wav",
+        "name": "Host recording"
+      },
+      {
+        "id": "file-a",
+        "kind": "file",
+        "mime": "application/pdf",
+        "name": "Host report",
+        "size": 12000
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "md",
+                "image",
+                "gallery",
+                "carousel",
+                "grid",
+                "compare",
+                "regions",
+                "video",
+                "audio",
+                "file",
+                "document"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "Host attachments",
+              "level": 2
+            },
+            {
+              "id": "md",
+              "component": "Markdown",
+              "text": "## A hybrid answer\n\n**Host-owned** images, $x^2$ and [report](attachment:file-a).\n\n| Kind | Owner |\n| --- | --- |\n| Image | Host |\n\n- [x] Local interaction\n\n```js\nconst total = 2 + 3;\n```"
+            },
+            {
+              "id": "image",
+              "component": "Image",
+              "attachmentId": "photo-a",
+              "alt": "Host coast illustration"
+            },
+            {
+              "id": "gallery",
+              "component": "Gallery",
+              "attachmentIds": [
+                "photo-a",
+                "photo-b"
+              ]
+            },
+            {
+              "id": "carousel",
+              "component": "Carousel",
+              "attachmentIds": [
+                "photo-a",
+                "photo-b"
+              ]
+            },
+            {
+              "id": "grid",
+              "component": "MediaGrid",
+              "attachmentIds": [
+                "photo-a",
+                "photo-b"
+              ]
+            },
+            {
+              "id": "compare",
+              "component": "ImageCompare",
+              "attachmentIds": [
+                "photo-a",
+                "photo-b"
+              ],
+              "caption": "Two host images side by side"
+            },
+            {
+              "id": "regions",
+              "component": "ImageAnnotations",
+              "attachmentId": "photo-a",
+              "regionIds": [
+                "sky"
+              ]
+            },
+            {
+              "id": "video",
+              "component": "Video",
+              "attachmentId": "video-a",
+              "seek": 0,
+              "muted": true
+            },
+            {
+              "id": "audio",
+              "component": "Audio",
+              "attachmentId": "audio-a"
+            },
+            {
+              "id": "file",
+              "component": "FileCard",
+              "attachmentId": "file-a"
+            },
+            {
+              "id": "document",
+              "component": "DocumentPreview",
+              "attachmentId": "file-a"
+            }
+          ]
+        }
+      }
+    ],
+    "fallbackText": "The host provides two images, a video, an audio recording and a PDF. Open and download are performed only by the host."
+  }
+]

@@ -2,6 +2,8 @@ import type { AnswerSession } from "@engine/core";
 import type { AnswerBlock } from "@engine/protocol";
 import React, { type ReactNode, useState, useSyncExternalStore } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { MediaContent } from "./content.js";
+import { SafeMarkdown } from "./markdown.js";
 import { UISurface, useUI } from "./renderer.js";
 
 export type MarkdownRenderer = (props: { text: string; streaming: boolean }) => ReactNode;
@@ -27,47 +29,7 @@ export const defaultAnswerLabels: AnswerLabels = {
   sandboxBlocked: "Interactive content is not available here.",
 };
 
-/** Minimal built-in renderer: paragraphs and fenced code as native Text (never markup). */
-export const PlainMarkdown: MarkdownRenderer = ({ text }) => {
-  const { kit, mode } = useUI();
-  const t = kit.tokens[mode];
-  const parts = text.split(/\n```[^\n]*\n([\s\S]*?)(?:\n```|$)/);
-  return (
-    <View style={{ gap: 10 }}>
-      {parts.map((part, i) =>
-        i % 2 ? (
-          // biome-ignore lint/suspicious/noArrayIndexKey: static split of one string
-          <ScrollView
-            key={i}
-            horizontal
-            style={{
-              backgroundColor: t.surface,
-              borderRadius: 6,
-              borderWidth: 1,
-              borderColor: t.border,
-            }}
-          >
-            <Text
-              style={{ fontFamily: "monospace", color: t.foreground, padding: 12, fontSize: 14 }}
-            >
-              {part}
-            </Text>
-          </ScrollView>
-        ) : (
-          part
-            .split(/\n{2,}/)
-            .filter((p) => p.trim())
-            .map((p, j) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: static split of one string
-              <Text key={`${i}-${j}`} style={{ color: t.foreground, fontSize: 16, lineHeight: 25 }}>
-                {p}
-              </Text>
-            ))
-        ),
-      )}
-    </View>
-  );
-};
+export { SafeMarkdown as PlainMarkdown } from "./markdown.js";
 
 export type AnswerViewProps = {
   session: AnswerSession;
@@ -83,7 +45,7 @@ export type AnswerViewProps = {
 /** Ordered Markdown, surface and media blocks. The host list owns scrolling. */
 export function AnswerView({
   session,
-  markdown = PlainMarkdown,
+  markdown = SafeMarkdown,
   renderMedia,
   onExpand,
   maxSurfaceHeight,
@@ -120,7 +82,12 @@ export function AnswerView({
             return (
               <View key={block.id}>
                 {renderMedia?.(block) ?? (
-                  <Text style={{ color: t.muted }}>{block.attachmentIds.join(", ")}</Text>
+                  <MediaContent
+                    ids={block.attachmentIds}
+                    layout={block.layout}
+                    caption={block.caption}
+                    alt={block.alt}
+                  />
                 )}
               </View>
             );

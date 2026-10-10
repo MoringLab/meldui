@@ -38,7 +38,8 @@ void main() {
       for (final size in [1, 3, 11, 100000]) {
         final d = AnswerDecoder();
         final items = [
-          for (final chunk in slices(v['text'] as String, size)) ...d.push(chunk),
+          for (final chunk in slices(v['text'] as String, size))
+            ...d.push(chunk),
           ...d.finish(),
         ];
         expect(jsonEncode(merge(items)), jsonEncode(v['items']));
@@ -51,7 +52,9 @@ void main() {
       final runtime = await UIRuntime.create(schema: schema);
       final session = AnswerSession(
         runtime,
-        policy: HostPolicy.fromJson(Map<String, dynamic>.from(v['policy'] as Map)),
+        policy: HostPolicy.fromJson(
+          Map<String, dynamic>.from(v['policy'] as Map),
+        ),
       );
       for (final chunk in slices(v['text'] as String, 9)) {
         session.push(chunk);
@@ -68,38 +71,58 @@ void main() {
         v['markdown'],
       );
       expect(
-        session.blocks.whereType<SurfaceBlock>().map((b) => b.fallbackSource).toList(),
+        session.blocks
+            .whereType<SurfaceBlock>()
+            .map((b) => b.fallbackSource)
+            .toList(),
         v['fallbackSources'],
       );
       runtime.dispose();
     });
   }
 
-  test('serialize, restore and migrate keep user edits and old history', () async {
-    final cases =
-        jsonDecode(File('test/fixtures/hybrid.json').readAsStringSync()) as List;
-    final calc = cases.firstWhere((c) => c['id'] == 'h-calc');
-    final runtime = await UIRuntime.create(schema: schema);
-    final session = AnswerSession(runtime)..push(calc['wire'] as String);
-    session.end();
-    runtime.setValue('main', '/b', 7);
-    final stored = jsonDecode(jsonEncode(session.serialize()));
-    final again = await UIRuntime.create(schema: schema);
-    final restored = AnswerSession.restore(stored, again);
-    expect(restored.blocks.map((b) => b.kind), ['markdown', 'surface', 'markdown']);
-    expect(again.read('main', '/b'), 7);
-    expect(restored.asText(), session.asText());
+  test(
+    'serialize, restore and migrate keep user edits and old history',
+    () async {
+      final cases =
+          jsonDecode(File('test/fixtures/hybrid.json').readAsStringSync())
+              as List;
+      final calc = cases.firstWhere((c) => c['id'] == 'h-calc');
+      final runtime = await UIRuntime.create(schema: schema);
+      final session = AnswerSession(runtime)..push(calc['wire'] as String);
+      session.end();
+      runtime.setValue('main', '/b', 7);
+      final stored = jsonDecode(jsonEncode(session.serialize()));
+      final again = await UIRuntime.create(schema: schema);
+      final restored = AnswerSession.restore(stored, again);
+      expect(restored.blocks.map((b) => b.kind), [
+        'markdown',
+        'surface',
+        'markdown',
+      ]);
+      expect(again.read('main', '/b'), 7);
+      expect(restored.asText(), session.asText());
 
-    final legacy = jsonDecode(File('test/fixtures/cases.json').readAsStringSync()) as List;
-    final messages = legacy.first['messages'] as List;
-    for (final input in [messages, {'schema': 1, 'messages': messages}, messages.map(jsonEncode).join('\n')]) {
-      final rt = await UIRuntime.create(schema: schema);
-      final s = AnswerSession.restore(input, rt);
-      expect(s.blocks.map((b) => b.kind), ['surface']);
-      expect((s.blocks.first as SurfaceBlock).fallbackText, contains('함께 나누는 저녁'));
-    }
-    expect(() => migrateSnapshot({'schema': 9}), throwsStateError);
-    session.reset('main');
-    expect(runtime.read('main', '/b'), 4);
-  });
+      final legacy =
+          jsonDecode(File('test/fixtures/cases.json').readAsStringSync())
+              as List;
+      final messages = legacy.first['messages'] as List;
+      for (final input in [
+        messages,
+        {'schema': 1, 'messages': messages},
+        messages.map(jsonEncode).join('\n'),
+      ]) {
+        final rt = await UIRuntime.create(schema: schema);
+        final s = AnswerSession.restore(input, rt);
+        expect(s.blocks.map((b) => b.kind), ['surface']);
+        expect(
+          (s.blocks.first as SurfaceBlock).fallbackText,
+          contains('함께 나누는 저녁'),
+        );
+      }
+      expect(() => migrateSnapshot({'schema': 9}), throwsStateError);
+      session.reset('main');
+      expect(runtime.read('main', '/b'), 4);
+    },
+  );
 }

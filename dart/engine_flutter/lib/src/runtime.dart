@@ -4,6 +4,7 @@ import 'package:a2ui_core/a2ui_core.dart' as a2ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'expression.dart';
+import 'content.dart';
 
 const catalogId = 'urn:engine:catalog:core:1';
 typedef JsonMap = Map<String, dynamic>;
@@ -46,13 +47,16 @@ class UIKit {
 
   /// Concrete typography; mirrors `resolveTypography` in @engine/kit-spec (shared via parity tests).
   KitTypography typography({bool ios = false}) {
-    final t = Map<String, dynamic>.from(manifest['tokens']['typography'] as Map);
+    final t = Map<String, dynamic>.from(
+      manifest['tokens']['typography'] as Map,
+    );
     final base = (t['baseSize'] as num).toDouble();
     final lineHeight = (t['lineHeight'] as num? ?? 1.55).toDouble();
     final headingLine = (t['headingLineHeight'] as num? ?? 1.2).toDouble();
-    final scale = ((t['scale'] as List?) ?? const [2.25, 1.75, 1.375, 1.125, 1, 0.875])
-        .map((e) => (e as num).toDouble())
-        .toList();
+    final scale =
+        ((t['scale'] as List?) ?? const [2.25, 1.75, 1.375, 1.125, 1, 0.875])
+            .map((e) => (e as num).toDouble())
+            .toList();
     final native = Map<String, dynamic>.from((t['native'] as Map?) ?? const {});
     String? pick(dynamic family) => family is String
         ? family
@@ -70,10 +74,13 @@ class UIKit {
       smallLineHeight: (small * lineHeight).roundToDouble(),
       headingWeight: (t['headingWeight'] as num? ?? 600).toInt(),
       headingSizes: sizes,
-      headingLineHeights: [for (final s in sizes) (s * headingLine).roundToDouble()],
+      headingLineHeights: [
+        for (final s in sizes) (s * headingLine).roundToDouble(),
+      ],
       headingFamily: pick(native['heading']),
     );
   }
+
   static Future<UIKit> load(String id) async => UIKit(
     jsonDecode(
           await rootBundle.loadString(
@@ -109,6 +116,7 @@ class _Function extends a2ui.FunctionImplementation {
 
 /// A policy boundary around upstream A2UI message processing and reactive state.
 class UIRuntime extends ChangeNotifier {
+  final AttachmentRegistry attachments = AttachmentRegistry();
   final a2ui.MessageProcessor<a2ui.ComponentApi> processor;
   final String catalogIdentifier;
   final void Function(JsonMap)? onAction;
@@ -191,7 +199,11 @@ class UIRuntime extends ChangeNotifier {
         'updateComponents': {
           'surfaceId': sid,
           'components': [
-            {'id': 'root', 'component': 'Column', 'children': ['t']},
+            {
+              'id': 'root',
+              'component': 'Column',
+              'children': ['t'],
+            },
             {'id': 't', 'component': 'Text', 'text': 'warm'},
           ],
         },
@@ -235,6 +247,23 @@ class UIRuntime extends ChangeNotifier {
       _nodeListeners['$sid\x00$id'] ?? {},
     )) {
       fn();
+    }
+  }
+
+  void _validateAttachments(JsonMap component) {
+    final ids = component['attachmentId'] is String
+        ? [component['attachmentId'] as String]
+        : List<String>.from(component['attachmentIds'] as List? ?? []);
+    if (attachments.unknownIds(ids).isNotEmpty) {
+      throw StateError('UNKNOWN_ATTACHMENT');
+    }
+    if (component['component'] == 'ImageAnnotations') {
+      final regions = attachments.get(ids.first)?['regions'] as List? ?? [];
+      if ((component['regionIds'] as List? ?? []).any(
+        (id) => !regions.any((r) => r['id'] == id),
+      )) {
+        throw StateError('UNKNOWN_ATTACHMENT_REGION');
+      }
     }
   }
 
@@ -299,6 +328,9 @@ class UIRuntime extends ChangeNotifier {
         // therefore checks its graph once; only rejected batches need isolation.
         var applied = false;
         try {
+          for (final raw in components) {
+            _validateAttachments(Map<String, dynamic>.from(raw as Map));
+          }
           _process(message);
           applied = true;
         } catch (_) {}
@@ -307,6 +339,7 @@ class UIRuntime extends ChangeNotifier {
           final id = component['id'] as String;
           try {
             if (!applied) {
+              _validateAttachments(component);
               _process({
                 'version': 'v0.9',
                 'updateComponents': {

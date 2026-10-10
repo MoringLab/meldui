@@ -164,9 +164,76 @@ export const componentSchemas = {
   }),
   Image: z.object({
     ...common,
-    asset: z.string().min(1).max(128),
+    asset: z.string().min(1).max(128).optional(),
+    attachmentId: z
+      .string()
+      .regex(/^[A-Za-z0-9._:-]{1,128}$/)
+      .optional(),
+    caption: text.optional(),
+    fit: z.enum(["contain", "cover"]).default("contain"),
+    zoom: z.boolean().default(false),
     alt: z.string().max(1024),
     aspectRatio: z.number().positive().max(10).optional(),
+  }),
+  Markdown: z.object({ ...common, text }),
+  Gallery: z.object({
+    ...common,
+    attachmentIds: z
+      .array(z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/))
+      .min(1)
+      .max(40),
+    layout: z.enum(["auto", "grid", "carousel"]).default("auto"),
+    caption: text.optional(),
+  }),
+  Carousel: z.object({
+    ...common,
+    attachmentIds: z
+      .array(z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/))
+      .min(1)
+      .max(40),
+    caption: text.optional(),
+  }),
+  MediaGrid: z.object({
+    ...common,
+    attachmentIds: z
+      .array(z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/))
+      .min(1)
+      .max(40),
+    caption: text.optional(),
+  }),
+  ImageCompare: z.object({
+    ...common,
+    attachmentIds: z.array(z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/)).length(2),
+    caption: text.optional(),
+  }),
+  ImageAnnotations: z.object({
+    ...common,
+    attachmentId: z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/),
+    regionIds: z.array(z.string().max(128)).max(50),
+    caption: text.optional(),
+  }),
+  Video: z.object({
+    ...common,
+    attachmentId: z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/),
+    caption: text.optional(),
+    seek: number.optional(),
+    muted: z.boolean().default(true),
+    autoplay: z.boolean().default(false),
+  }),
+  Audio: z.object({
+    ...common,
+    attachmentId: z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/),
+    caption: text.optional(),
+  }),
+  FileCard: z.object({
+    ...common,
+    attachmentId: z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/),
+    caption: text.optional(),
+  }),
+  DocumentPreview: z.object({
+    ...common,
+    attachmentId: z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/),
+    caption: text.optional(),
   }),
   Icon: z.object({
     ...common,

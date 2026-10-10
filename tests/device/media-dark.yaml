@@ -1,0 +1,10 @@
+appId: ${APP_ID}
+---
+- runFlow: media.yaml
+- tapOn: "다크 모드"
+- scrollUntilVisible:
+    element:
+      text: "A hybrid answer"
+    direction: UP
+    timeout: 40000
+- takeScreenshot: media-dark-markdown

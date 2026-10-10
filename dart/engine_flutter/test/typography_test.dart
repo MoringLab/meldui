@@ -30,7 +30,9 @@ void main() {
         );
         expect(
           got.headingLineHeights,
-          (heading['lineHeights'] as List).map((e) => (e as num).toDouble()).toList(),
+          (heading['lineHeights'] as List)
+              .map((e) => (e as num).toDouble())
+              .toList(),
         );
         expect(got.headingFamily, heading['nativeFamily']);
       });

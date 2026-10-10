@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'runtime.dart';
+import 'content.dart';
+import 'markdown.dart';
 import 'expression.dart';
 
 typedef EngineWidgetBuilder =
@@ -13,8 +15,10 @@ typedef EngineWidgetBuilder =
       String,
       String,
     );
+
 /// CSS-style numeric weight (100-900) to a Flutter weight.
-FontWeight fontWeightFor(int w) => FontWeight.values[((w / 100).round().clamp(1, 9)) - 1];
+FontWeight fontWeightFor(int w) =>
+    FontWeight.values[((w / 100).round().clamp(1, 9)) - 1];
 final _colorCache = <String, Color>{};
 Color _color(String value) {
   final cached = _colorCache[value];
@@ -27,6 +31,7 @@ Color _color(String value) {
 /// Inherited host configuration; switching kits does not recreate a runtime.
 class UIProvider extends InheritedWidget {
   final UIRuntime runtime;
+  final ContentHost? content;
   final UIKit kit;
   final bool dark;
   final Map<String, ImageProvider> assets;
@@ -41,6 +46,7 @@ class UIProvider extends InheritedWidget {
     required this.kit,
     this.dark = false,
     this.assets = const {},
+    this.content,
     this.components = const {},
     this.onGestureLock,
     required super.child,
@@ -49,6 +55,7 @@ class UIProvider extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<UIProvider>()!;
   @override
   bool updateShouldNotify(UIProvider oldWidget) =>
+      content != oldWidget.content ||
       runtime != oldWidget.runtime ||
       kit != oldWidget.kit ||
       dark != oldWidget.dark ||
@@ -63,7 +70,9 @@ class UISurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final host = UIProvider.of(context);
-    final ty = host.kit.typography(ios: defaultTargetPlatform == TargetPlatform.iOS);
+    final ty = host.kit.typography(
+      ios: defaultTargetPlatform == TargetPlatform.iOS,
+    );
     return DefaultTextStyle.merge(
       style: TextStyle(
         color: _color(host.kit.colors(host.dark)['foreground'] as String),
@@ -235,7 +244,9 @@ class _ComponentState extends State<_Component> {
     final node = widget.node;
     final p = Map<String, dynamic>.from(node['props'] as Map);
     final colors = host.kit.colors(host.dark);
-    final ty = host.kit.typography(ios: defaultTargetPlatform == TargetPlatform.iOS);
+    final ty = host.kit.typography(
+      ios: defaultTargetPlatform == TargetPlatform.iOS,
+    );
     final foreground = _color(colors['foreground'] as String);
     final muted = _color(colors['muted'] as String);
     final accent = _color(colors['accent'] as String);
@@ -402,7 +413,10 @@ class _ComponentState extends State<_Component> {
       case 'Divider':
         return Divider(color: border);
       case 'Heading':
-        final headingLevel = ((p['level'] as num? ?? 2).toInt() - 1).clamp(0, 5);
+        final headingLevel = ((p['level'] as num? ?? 2).toInt() - 1).clamp(
+          0,
+          5,
+        );
         return Semantics(
           header: true,
           child: Text(
@@ -410,7 +424,9 @@ class _ComponentState extends State<_Component> {
             key: ValueKey('node-${node['id']}'),
             style: TextStyle(
               fontSize: ty.headingSizes[headingLevel],
-              height: ty.headingLineHeights[headingLevel] / ty.headingSizes[headingLevel],
+              height:
+                  ty.headingLineHeights[headingLevel] /
+                  ty.headingSizes[headingLevel],
               fontWeight: fontWeightFor(ty.headingWeight),
               fontFamily: ty.headingFamily,
             ),
@@ -430,7 +446,44 @@ class _ComponentState extends State<_Component> {
                 : foreground,
           ),
         );
+      case 'Markdown':
+        return safeMarkdown(context, '${p['text'] ?? ''}', false);
+      case 'Gallery':
+      case 'Carousel':
+      case 'MediaGrid':
+      case 'ImageCompare':
+        return MediaContent(
+          ids: List<String>.from(p['attachmentIds']),
+          layout: node['component'] == 'Carousel'
+              ? 'carousel'
+              : node['component'] == 'MediaGrid'
+              ? 'grid'
+              : node['component'] == 'ImageCompare'
+              ? 'compare'
+              : p['layout'] as String? ?? 'auto',
+          caption: p['caption'] as String?,
+        );
+      case 'Video':
+      case 'Audio':
+      case 'FileCard':
+      case 'DocumentPreview':
+      case 'ImageAnnotations':
+        return AttachmentMedia(
+          id: p['attachmentId'] as String,
+          caption: p['caption'] as String?,
+          seek: (p['seek'] as num?)?.toDouble(),
+          muted: p['muted'] as bool? ?? true,
+          file: ['FileCard', 'DocumentPreview'].contains(node['component']),
+          regionIds: List<String>.from(p['regionIds'] as List? ?? []),
+        );
       case 'Image':
+        if (p['attachmentId'] != null) {
+          return AttachmentMedia(
+            id: p['attachmentId'] as String,
+            alt: p['alt'] as String?,
+            caption: p['caption'] as String?,
+          );
+        }
         final image = host.assets[p['asset']];
         return image != null
             ? Image(

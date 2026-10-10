@@ -10,10 +10,12 @@ import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { HostPolicy, UserAction } from "@engine/protocol";
 import { AnswerView, createUIRuntime, Icon, UIProvider } from "@engine/renderer-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import fixtures from "../../../fixtures/cases.json";
 import hybridFixtures from "../../../fixtures/hybrid/cases.json";
+import mediaFixtures from "../../../fixtures/media/cases.json";
+import { sampleContent } from "../../../fixtures/media/host";
 import "@engine/renderer-react/styles.css";
 import { brandComponents } from "./brand";
 import "./styles.css";
@@ -45,6 +47,10 @@ function App() {
   const [policyMode, setPolicyMode] = useState<HostPolicy["mode"]>("auto");
   const [session, setSession] = useState<AnswerSession>(() => new AnswerSession(createUIRuntime()));
   const runtime: UIRuntime = session.runtime;
+  const content = useMemo(
+    () => sampleContent(runtime.attachments, location.origin, (id) => setStatus(id)),
+    [runtime],
+  );
   const [messages, setMessages] = useState<string[]>([]);
   const [diagnostics, setDiagnostics] = useState<string[]>([]);
   const sessionId = useRef<string | undefined>(undefined);
@@ -93,7 +99,9 @@ function App() {
     setActive(id);
     const value = fresh();
     const hybridFixture = hybridFixtures.find((f) => f.id === id);
-    const fixture = fixtures.find((f) => f.id === id) ?? fixtures[0];
+    sampleContent(value.runtime.attachments, location.origin);
+    const fixture =
+      mediaFixtures.find((f) => f.id === id) ?? fixtures.find((f) => f.id === id) ?? fixtures[0];
     // Legacy fixtures replay as one JSON control line per message; hybrid ones as the mixed text.
     const lines = hybridFixture
       ? hybridFixture.wire.split("\n")
@@ -102,7 +110,7 @@ function App() {
             engine: "v1",
             block: "surface",
             surfaceId: "main",
-            fallbackText: `${fixture.title}. ${fixture.prompt}`,
+            fallbackText: `${fixture.title}. ${"prompt" in fixture ? fixture.prompt : fixture.fallbackText}`,
           }),
           ...fixture.messages.map((m) => JSON.stringify(m)),
         ];
@@ -273,6 +281,9 @@ function App() {
           </div>
           <p>작은 도구부터 시작해보세요.</p>
           <nav aria-label="예제">
+            <button type="button" onClick={() => void replay("media-catalog")}>
+              첨부파일 예제
+            </button>
             {Object.entries(groups).map(([category, label]) => (
               <section key={category}>
                 <h3>{label}</h3>
@@ -321,7 +332,13 @@ function App() {
             </span>
           </div>
           <div className="result-canvas">
-            <UIProvider runtime={runtime} kit={kit} mode={mode} components={brandComponents}>
+            <UIProvider
+              runtime={runtime}
+              kit={kit}
+              mode={mode}
+              components={brandComponents}
+              content={content}
+            >
               <AnswerView
                 session={session}
                 labels={{

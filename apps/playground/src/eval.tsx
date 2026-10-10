@@ -1,4 +1,5 @@
 import { AnswerSession } from "@engine/core";
+import { brand } from "@engine/kit-brand";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { HostPolicy, UserAction } from "@engine/protocol";
@@ -8,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import fixtures from "../../../fixtures/cases.json";
 import hybridFixtures from "../../../fixtures/hybrid/cases.json";
 import "@engine/renderer-react/styles.css";
+import { brandComponents } from "./brand";
 
 /**
  * Chrome-free harness page for the eval layers.
@@ -15,7 +17,7 @@ import "@engine/renderer-react/styles.css";
  * Window hooks: __actions (emitted UserActions), __session (AnswerSession), __ready.
  */
 const q = new URLSearchParams(location.search);
-const kits = { neutral, editorial } as const;
+const kits = { neutral, editorial, brand } as const;
 const w = window as unknown as {
   __actions: UserAction[];
   __session: AnswerSession;
@@ -44,6 +46,7 @@ createRoot(document.getElementById("root") as HTMLElement).render(
       runtime={runtime}
       kit={kits[(q.get("kit") as keyof typeof kits) ?? "neutral"] ?? neutral}
       mode={mode}
+      components={brandComponents}
     >
       <AnswerView session={session} maxSurfaceHeight={maxHeight} />
     </UIProvider>

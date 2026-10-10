@@ -1,0 +1,220 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`kit conformance > brand resolved typography is stable 1`] = `
+{
+  "android": {
+    "body": {
+      "family": "ui-rounded, system-ui, sans-serif",
+      "lineHeight": 26,
+      "nativeFamily": undefined,
+      "size": 17,
+      "weight": 400,
+    },
+    "heading": {
+      "family": "ui-rounded, system-ui, sans-serif",
+      "lineHeights": [
+        47,
+        36,
+        29,
+        23,
+        20,
+        17,
+      ],
+      "nativeFamily": "sans-serif-medium",
+      "sizes": [
+        41,
+        31,
+        25,
+        20,
+        17,
+        15,
+      ],
+      "weight": 800,
+    },
+    "small": {
+      "lineHeight": 23,
+      "size": 15,
+    },
+  },
+  "ios": {
+    "body": {
+      "family": "ui-rounded, system-ui, sans-serif",
+      "lineHeight": 26,
+      "nativeFamily": undefined,
+      "size": 17,
+      "weight": 400,
+    },
+    "heading": {
+      "family": "ui-rounded, system-ui, sans-serif",
+      "lineHeights": [
+        47,
+        36,
+        29,
+        23,
+        20,
+        17,
+      ],
+      "nativeFamily": "Avenir Next",
+      "sizes": [
+        41,
+        31,
+        25,
+        20,
+        17,
+        15,
+      ],
+      "weight": 800,
+    },
+    "small": {
+      "lineHeight": 23,
+      "size": 15,
+    },
+  },
+}
+`;
+
+exports[`kit conformance > editorial resolved typography is stable 1`] = `
+{
+  "android": {
+    "body": {
+      "family": "system-ui, sans-serif",
+      "lineHeight": 25,
+      "nativeFamily": undefined,
+      "size": 16,
+      "weight": 400,
+    },
+    "heading": {
+      "family": "Georgia, serif",
+      "lineHeights": [
+        42,
+        33,
+        26,
+        21,
+        19,
+        17,
+      ],
+      "nativeFamily": "serif",
+      "sizes": [
+        36,
+        28,
+        22,
+        18,
+        16,
+        14,
+      ],
+      "weight": 500,
+    },
+    "small": {
+      "lineHeight": 22,
+      "size": 14,
+    },
+  },
+  "ios": {
+    "body": {
+      "family": "system-ui, sans-serif",
+      "lineHeight": 25,
+      "nativeFamily": undefined,
+      "size": 16,
+      "weight": 400,
+    },
+    "heading": {
+      "family": "Georgia, serif",
+      "lineHeights": [
+        42,
+        33,
+        26,
+        21,
+        19,
+        17,
+      ],
+      "nativeFamily": "Georgia",
+      "sizes": [
+        36,
+        28,
+        22,
+        18,
+        16,
+        14,
+      ],
+      "weight": 500,
+    },
+    "small": {
+      "lineHeight": 22,
+      "size": 14,
+    },
+  },
+}
+`;
+
+exports[`kit conformance > neutral resolved typography is stable 1`] = `
+{
+  "android": {
+    "body": {
+      "family": "system-ui, sans-serif",
+      "lineHeight": 25,
+      "nativeFamily": undefined,
+      "size": 16,
+      "weight": 400,
+    },
+    "heading": {
+      "family": "system-ui, sans-serif",
+      "lineHeights": [
+        43,
+        34,
+        26,
+        22,
+        19,
+        17,
+      ],
+      "nativeFamily": undefined,
+      "sizes": [
+        36,
+        28,
+        22,
+        18,
+        16,
+        14,
+      ],
+      "weight": 600,
+    },
+    "small": {
+      "lineHeight": 22,
+      "size": 14,
+    },
+  },
+  "ios": {
+    "body": {
+      "family": "system-ui, sans-serif",
+      "lineHeight": 25,
+      "nativeFamily": undefined,
+      "size": 16,
+      "weight": 400,
+    },
+    "heading": {
+      "family": "system-ui, sans-serif",
+      "lineHeights": [
+        43,
+        34,
+        26,
+        22,
+        19,
+        17,
+      ],
+      "nativeFamily": undefined,
+      "sizes": [
+        36,
+        28,
+        22,
+        18,
+        16,
+        14,
+      ],
+      "weight": 600,
+    },
+    "small": {
+      "lineHeight": 22,
+      "size": 14,
+    },
+  },
+}
+`;

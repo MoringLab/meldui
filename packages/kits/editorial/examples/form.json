@@ -1,0 +1,198 @@
+{
+  "id": "form",
+  "title": "의견 남기기",
+  "category": "form",
+  "keywords": [
+    "신청",
+    "입력",
+    "양식",
+    "폼",
+    "예약",
+    "가입",
+    "form",
+    "sign-up",
+    "signup",
+    "register",
+    "survey",
+    "feedback"
+  ],
+  "source": "fixture:feedback",
+  "intro": "필요한 정보를 입력하고 제출하는 양식입니다.",
+  "fallbackText": "의견 남기기\n필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.\n이름:\n날짜: 2026-10-15\n주제: product\n메모:\n입력한 내용을 확인했습니다:",
+  "messages": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "urn:engine:catalog:core:1"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "value": {
+          "name": "",
+          "date": "2026-10-15",
+          "topic": "product",
+          "memo": "",
+          "consent": false
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "children": ["heading", "intro", "form"]
+          },
+          {
+            "id": "heading",
+            "component": "Heading",
+            "text": "의견 남기기",
+            "level": 1
+          },
+          {
+            "id": "intro",
+            "component": "Text",
+            "text": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+            "tone": "muted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "form",
+            "component": "Form",
+            "label": "의견 남기기",
+            "children": ["_name", "_date", "_topic", "_memo", "_consent"],
+            "onSubmit": {
+              "event": {
+                "name": "submit_form",
+                "context": {
+                  "name": {
+                    "path": "/name"
+                  },
+                  "date": {
+                    "path": "/date"
+                  },
+                  "topic": {
+                    "path": "/topic"
+                  },
+                  "memo": {
+                    "path": "/memo"
+                  },
+                  "consent": {
+                    "path": "/consent"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_name",
+            "component": "TextField",
+            "label": "이름",
+            "value": {
+              "path": "/name"
+            },
+            "placeholder": "이름을 입력하세요"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_date",
+            "component": "DatePicker",
+            "label": "날짜",
+            "value": {
+              "path": "/date"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_topic",
+            "component": "Select",
+            "label": "주제",
+            "value": {
+              "path": "/topic"
+            },
+            "options": [
+              {
+                "label": "제품",
+                "value": "product"
+              },
+              {
+                "label": "디자인",
+                "value": "design"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_memo",
+            "component": "TextField",
+            "label": "메모",
+            "value": {
+              "path": "/memo"
+            },
+            "multiline": true
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_consent",
+            "component": "Checkbox",
+            "label": "입력한 내용을 확인했습니다",
+            "value": {
+              "path": "/consent"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outro": "제출 전까지 입력은 기기에만 보관됩니다."
+}

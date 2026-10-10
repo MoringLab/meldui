@@ -19,3 +19,4 @@ flutter:
     - assets/catalog.json
     - assets/kit-neutral.json
     - assets/kit-editorial.json
+    - assets/kit-brand.json

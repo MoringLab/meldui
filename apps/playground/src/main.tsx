@@ -5,6 +5,7 @@ import {
   type UIModelEvent,
   type UIRuntime,
 } from "@engine/core";
+import { brand } from "@engine/kit-brand";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { HostPolicy, UserAction } from "@engine/protocol";
@@ -14,6 +15,7 @@ import { createRoot } from "react-dom/client";
 import fixtures from "../../../fixtures/cases.json";
 import hybridFixtures from "../../../fixtures/hybrid/cases.json";
 import "@engine/renderer-react/styles.css";
+import { brandComponents } from "./brand";
 import "./styles.css";
 
 const groups: Record<string, string> = {
@@ -215,7 +217,7 @@ function App() {
       sessionRef.current.runtime.dispose();
     };
   }, []);
-  const kit = kitId === "editorial" ? editorial : neutral;
+  const kit = kitId === "editorial" ? editorial : kitId === "brand" ? brand : neutral;
   return (
     <div className={`lab ${mode}`} style={{ colorScheme: mode }}>
       <header className="lab-header">
@@ -231,6 +233,7 @@ function App() {
             <select aria-label="디자인 킷" value={kitId} onChange={(e) => setKitId(e.target.value)}>
               <option value="neutral">Neutral</option>
               <option value="editorial">Editorial</option>
+              <option value="brand">Brand</option>
             </select>
           </label>
           <label>
@@ -310,7 +313,7 @@ function App() {
             </span>
           </div>
           <div className="result-canvas">
-            <UIProvider runtime={runtime} kit={kit} mode={mode}>
+            <UIProvider runtime={runtime} kit={kit} mode={mode} components={brandComponents}>
               <AnswerView
                 session={session}
                 labels={{

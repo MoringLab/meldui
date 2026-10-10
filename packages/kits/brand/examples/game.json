@@ -1,0 +1,177 @@
+{
+  "id": "game",
+  "title": "숫자 맞히기",
+  "category": "game",
+  "keywords": ["게임", "퀴즈", "맞히", "놀이", "game", "quiz", "guess", "puzzle", "play"],
+  "source": "fixture:counting-game",
+  "intro": "버튼으로 값을 바꾸며 정답을 맞혀 보세요.",
+  "fallbackText": "숫자 맞히기\n정답은 5입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.\n0\n[하나 빼기]\n[하나 더하기]\n조금 더 시도해보세요.",
+  "messages": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "urn:engine:catalog:core:1"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "value": {
+          "guess": 0
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "children": ["heading", "intro", "number", "buttons", "answer"]
+          },
+          {
+            "id": "heading",
+            "component": "Heading",
+            "text": "숫자 맞히기",
+            "level": 1
+          },
+          {
+            "id": "intro",
+            "component": "Text",
+            "text": "정답은 5입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+            "tone": "muted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "number",
+            "component": "Heading",
+            "text": {
+              "path": "/guess"
+            },
+            "level": 2
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "buttons",
+            "component": "Row",
+            "children": ["_minus", "_plus"]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_minus",
+            "component": "Button",
+            "label": "하나 빼기",
+            "variant": "secondary",
+            "action": {
+              "functionCall": {
+                "call": "setValue",
+                "args": {
+                  "path": "/guess",
+                  "expr": {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "ref": "/guess"
+                      },
+                      1
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_plus",
+            "component": "Button",
+            "label": "하나 더하기",
+            "action": {
+              "functionCall": {
+                "call": "setValue",
+                "args": {
+                  "path": "/guess",
+                  "expr": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "ref": "/guess"
+                      },
+                      1
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "answer",
+            "component": "Text",
+            "text": {
+              "call": "computeString",
+              "args": {
+                "expr": {
+                  "op": "if",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        5
+                      ]
+                    },
+                    "정답입니다!",
+                    "조금 더 시도해보세요."
+                  ]
+                }
+              },
+              "returnType": "string"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outro": "정답을 맞히면 바로 알려줍니다."
+}

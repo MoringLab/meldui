@@ -1,5 +1,12 @@
 import { defineKit } from "@engine/kit-spec";
 import { CATALOG_ID, COMPONENT_NAMES } from "@engine/protocol";
+import calculator from "../examples/calculator.json";
+import comparison from "../examples/comparison.json";
+import dashboard from "../examples/dashboard.json";
+import explanation from "../examples/explanation.json";
+import form from "../examples/form.json";
+import game from "../examples/game.json";
+import planner from "../examples/planner.json";
 export const neutral = defineKit({
   id: "neutral",
   name: "Neutral",
@@ -36,5 +43,16 @@ export const neutral = defineKit({
   components: Object.fromEntries(COMPONENT_NAMES.map((name) => [name, { implementation: name }])),
   guide:
     "Build clear, compact tools. Lead with one heading and a short explanation. Group related controls; give every input a label. Use bound input values and computed values for local calculations. Choose a table for exact comparisons and a chart for trends. Avoid nested cards. Fit narrow mobile screens. Show explicit units and useful empty states.",
-  examples: ["calculator", "comparison", "planner"],
+  examples: ["calculator", "comparison", "form", "planner", "dashboard", "explanation", "game"],
 });
+
+/** Validated few-shot examples this kit ships; see loadKitExamples() in @engine/adapter-gateway. */
+export const neutralExamples: unknown[] = [
+  calculator,
+  comparison,
+  form,
+  planner,
+  dashboard,
+  explanation,
+  game,
+];

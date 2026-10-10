@@ -1,0 +1,202 @@
+{
+  "id": "explanation",
+  "title": "복잡한 것을 작은 단계로",
+  "category": "explain",
+  "keywords": [
+    "설명",
+    "이해",
+    "개념",
+    "원리",
+    "알려",
+    "explain",
+    "concept",
+    "how",
+    "why",
+    "learn",
+    "walkthrough"
+  ],
+  "source": "fixture:explanation",
+  "intro": "개념을 단계별로 펼쳐 보면서 이해할 수 있습니다.",
+  "fallbackText": "복잡한 것을 작은 단계로\n설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.\n핵심 아이디어: UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.\n메시지를 검증합니다.\n등록된 컴포넌트로 표시합니다.",
+  "messages": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "urn:engine:catalog:core:1"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "value": {
+          "open": "one"
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "children": ["heading", "intro", "callout", "accordion", "divider", "icon", "image"]
+          },
+          {
+            "id": "heading",
+            "component": "Heading",
+            "text": "복잡한 것을 작은 단계로",
+            "level": 1
+          },
+          {
+            "id": "intro",
+            "component": "Text",
+            "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+            "tone": "muted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "callout",
+            "component": "Callout",
+            "title": "핵심 아이디어",
+            "text": "UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.",
+            "tone": "info"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "accordion",
+            "component": "Accordion",
+            "value": {
+              "path": "/open"
+            },
+            "items": [
+              {
+                "id": "one",
+                "label": "구조와 데이터",
+                "child": "_detail"
+              },
+              {
+                "id": "two",
+                "label": "실행 순서",
+                "child": "_list"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_detail",
+            "component": "CodeBlock",
+            "language": "json",
+            "code": "{\"value\":{\"path\":\"/name\"}}"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_list",
+            "component": "List",
+            "ordered": true,
+            "children": ["_line1", "_line2"]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_line1",
+            "component": "Text",
+            "text": "메시지를 검증합니다."
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_line2",
+            "component": "Text",
+            "text": "등록된 컴포넌트로 표시합니다."
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "divider",
+            "component": "Divider"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "icon",
+            "component": "Icon",
+            "name": "check",
+            "label": "확인됨"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "image",
+            "component": "Image",
+            "asset": "engine-pattern",
+            "alt": "세 개의 연결된 인터페이스를 나타내는 기하학 그림",
+            "aspectRatio": 3
+          }
+        ]
+      }
+    }
+  ],
+  "outro": "더 궁금한 부분은 이어서 물어보세요."
+}

@@ -22,6 +22,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(state.kitId, 'editorial');
     expect(find.text('12000'), findsOneWidget);
+    // The brand kit renders the host's Card; the edited value and result must survive the swap.
+    await tester.tap(find.text('Brand'));
+    await tester.pumpAndSettle();
+    expect(state.kitId, 'brand');
+    expect(find.byKey(const ValueKey('brand-card')), findsOneWidget);
+    expect(find.text('12000'), findsOneWidget);
+    expect(state.runtime!.read('main', '/b'), 7);
+    await tester.tap(find.text('Neutral'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Editorial'));
+    await tester.pumpAndSettle();
     expect(state.runtime!.read('main', '/b'), 7);
     expect(tester.takeException(), isNull);
     await tester.runAsync(() => state.replay('form', animate: false));
@@ -34,6 +45,11 @@ void main() {
     await tester.ensureVisible(name);
     await tester.enterText(name, '루이');
     await tester.pumpAndSettle();
+    expect(state.runtime!.read('main', '/name'), '루이');
+    // editorial → brand: the brand kit swaps in host Button/Card widgets; state must survive.
+    await tester.tap(find.text('Brand'));
+    await tester.pumpAndSettle();
+    expect(state.kitId, 'brand');
     expect(state.runtime!.read('main', '/name'), '루이');
     await tester.tap(find.text('Neutral'));
     await tester.pumpAndSettle();

@@ -5,9 +5,12 @@ import { fileURLToPath } from "node:url";
 import {
   buildSystemPrompt,
   GatewayAdapter,
-  type PromptExample,
+  type LoadedExample,
+  loadKitExamples,
   probeRoute,
   RouteHealth,
+  selectExamples,
+  toPromptExample,
 } from "@engine/adapter-gateway";
 import {
   AnswerSession,
@@ -17,8 +20,9 @@ import {
   type UIModelEvent,
   type UIRuntime,
 } from "@engine/core";
-import { editorial } from "@engine/kit-editorial";
-import { neutral } from "@engine/kit-neutral";
+import { brand, brandExamples } from "@engine/kit-brand";
+import { editorial, editorialExamples } from "@engine/kit-editorial";
+import { neutral, neutralExamples } from "@engine/kit-neutral";
 import {
   AttachmentManifestSchema,
   type Diagnostic,
@@ -53,25 +57,13 @@ type Session = {
   sink?: (diagnostic: Diagnostic) => void;
 };
 const sessions = new Map<string, Session>();
-const example = (
-  id: string,
-  intro: string,
-  outro: string,
-  fallbackText: string,
-): PromptExample => ({
-  intro,
-  outro,
-  fallbackText,
-  messages: fixtures.find((f: { id: string }) => f.id === id)?.messages ?? [],
-});
-const hybridExamples = [
-  example(
-    "calculator",
-    "1인당 금액은 총액을 인원으로 나눈 값입니다. 아래에서 직접 바꿔 보세요.",
-    "인원이 늘면 1인당 금액은 줄어들지만 총액은 그대로입니다.",
-    "총 금액과 인원을 조절하면 1인당 금액을 바로 계산해 주는 도구입니다. 기본값은 84,000원, 4명입니다.",
-  ),
-];
+const kits = {
+  neutral: { kit: neutral, examples: loadKitExamples(neutral, neutralExamples) },
+  editorial: { kit: editorial, examples: loadKitExamples(editorial, editorialExamples) },
+  brand: { kit: brand, examples: loadKitExamples(brand, brandExamples) },
+} as const;
+const pickKit = (id: unknown) =>
+  kits[(typeof id === "string" && id in kits ? id : "neutral") as keyof typeof kits];
 const adapter = new GatewayAdapter({
   baseUrl: process.env.OMNIROUTE_BASE_URL ?? "http://127.0.0.1:20128/v1",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "",
@@ -217,7 +209,8 @@ const server = createServer(async (req, res) => {
       if (!res.destroyed) res.write(`${JSON.stringify(event)}\n`);
     };
     send({ type: "session", sessionId: id });
-    const kit = input.kitId === "editorial" ? editorial : neutral;
+    const { kit, examples: library } = pickKit(input.kitId);
+    const chosen: LoadedExample[] = selectExamples(library, { prompt: String(input.prompt) });
     const platform =
       input.platform === "flutter"
         ? "flutter"
@@ -235,7 +228,7 @@ const server = createServer(async (req, res) => {
             capabilities: session.runtime.capabilities(platform),
             policy,
             attachments: session.registry.views(),
-            examples: hybridExamples,
+            examples: chosen.map(toPromptExample),
           })
         : buildSystemPrompt({
             kit,

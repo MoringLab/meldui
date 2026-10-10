@@ -36,7 +36,7 @@ test("form, tabs and chart work on a narrow viewport", async ({ page }) => {
     true,
   );
 });
-for (const kit of ["neutral", "editorial"])
+for (const kit of ["neutral", "editorial", "brand"])
   test(`all fixtures render in ${kit}`, async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -70,4 +70,27 @@ test("gateway failure retains the edited interface", async ({ page }) => {
   await expect(page.locator('[data-node="_result"]')).toHaveText("12000");
   await page.getByLabel("디자인 킷").selectOption("editorial");
   await expect(page.getByLabel("인원", { exact: true })).toHaveValue("7");
+});
+
+test("brand kit replaces Button and Card with the host's implementations and keeps state", async ({
+  page,
+}) => {
+  await page.goto("/?fixture=calculator");
+  await page.getByLabel("인원", { exact: true }).fill("7");
+  await expect(page.locator('[data-node="_result"]')).toHaveText("12000");
+  await expect(page.locator('[data-brand="card"]')).toHaveCount(0);
+  await page.getByLabel("디자인 킷").selectOption("brand");
+  await expect(page.locator('[data-brand="card"]')).toHaveCount(1);
+  await expect(page.getByLabel("인원", { exact: true })).toHaveValue("7");
+  await expect(page.locator('[data-node="_result"]')).toHaveText("12000");
+  // Reset (surface chrome) restores the model data even with host-replaced components.
+  await page.getByRole("button", { name: /^(초기화|Reset)$/ }).click();
+  await expect(page.getByLabel("인원", { exact: true })).toHaveValue("4");
+  await page.goto("/?fixture=counting-game");
+  await page.getByLabel("디자인 킷").selectOption("brand");
+  const plus = page.locator('[data-brand="button"]', { hasText: "하나 더하기" });
+  await expect(plus).toBeVisible();
+  const before = await page.locator('[data-node="number"]').innerText();
+  await plus.click();
+  await expect(page.locator('[data-node="number"]')).not.toHaveText(before);
 });

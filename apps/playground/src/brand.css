@@ -1,0 +1,68 @@
+.bds-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 2px solid var(--ui-accent);
+  border-radius: 999px;
+  background: var(--ui-accent);
+  color: var(--ui-onAccent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--ui-accent) 55%, black);
+  transition:
+    transform var(--ui-motion, 220ms) ease-out,
+    box-shadow var(--ui-motion, 220ms) ease-out;
+  align-self: flex-start;
+}
+.bds-button:hover {
+  transform: translateY(-1px);
+}
+.bds-button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ui-accent) 55%, black);
+}
+.bds-secondary {
+  background: var(--ui-surface);
+  color: var(--ui-accent);
+}
+.bds-quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ui-accent);
+  box-shadow: none;
+}
+.bds-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.bds-card {
+  position: relative;
+  padding: 24px 24px 24px 30px;
+  border-radius: var(--ui-radius);
+  background: var(--ui-surface);
+  border: 2px solid var(--ui-border);
+  box-shadow: 0 6px 0 var(--ui-border);
+  min-width: 0;
+}
+.bds-card::before {
+  content: "";
+  position: absolute;
+  inset: 16px auto 16px 10px;
+  width: 6px;
+  border-radius: 6px;
+  background: var(--ui-accent);
+}
+.bds-card-title {
+  margin: 0 0 14px;
+  font-family: var(--ui-heading);
+  font-size: var(--ui-h3);
+  font-weight: var(--ui-heading-weight);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bds-button {
+    transition: none;
+  }
+}

@@ -14,9 +14,11 @@ void main() {
     await tester.pumpAndSettle();
     final state = tester.state<EngineLabState>(find.byType(EngineLab));
     await state.ready;
-    for (final kit in ['neutral', 'editorial']) {
-      if (state.kitId != kit) {
-        await tester.tap(find.text(kit == 'neutral' ? 'Neutral' : 'Editorial'));
+    // The app bar button names the NEXT kit in the cycle neutral → editorial → brand.
+    const next = {'neutral': 'Editorial', 'editorial': 'Brand', 'brand': 'Neutral'};
+    for (final kit in ['neutral', 'editorial', 'brand']) {
+      for (var i = 0; i < 3 && state.kitId != kit; i++) {
+        await tester.tap(find.text(next[state.kitId]!));
         await tester.pumpAndSettle();
       }
       for (final fixture in state.fixtures) {

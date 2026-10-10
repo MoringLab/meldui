@@ -1,0 +1,169 @@
+{
+  "id": "comparison",
+  "title": "요금제 비교",
+  "category": "compare",
+  "keywords": [
+    "비교",
+    "차이",
+    "요금제",
+    "표",
+    "선택",
+    "compare",
+    "comparison",
+    "versus",
+    "plans",
+    "table",
+    "pros"
+  ],
+  "source": "fixture:plan-compare",
+  "intro": "항목별 차이를 표로 먼저 보여드립니다.",
+  "fallbackText": "요금제 비교\n예시 요금제의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\nTable: 예시 요금제 비교\n관심 있는 선택지: A\n현재 선택: A",
+  "messages": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "urn:engine:catalog:core:1"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "value": {
+          "choice": "A",
+          "rows": [
+            {
+              "name": "A",
+              "cost": "무료",
+              "strength": "간단하게 시작"
+            },
+            {
+              "name": "B",
+              "cost": "월 10,000원",
+              "strength": "함께 작업"
+            },
+            {
+              "name": "C",
+              "cost": "월 20,000원",
+              "strength": "세밀한 설정"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "children": ["heading", "intro", "table", "choice", "selection"]
+          },
+          {
+            "id": "heading",
+            "component": "Heading",
+            "text": "요금제 비교",
+            "level": 1
+          },
+          {
+            "id": "intro",
+            "component": "Text",
+            "text": "예시 요금제의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+            "tone": "muted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "table",
+            "component": "Table",
+            "caption": "예시 요금제 비교",
+            "columns": [
+              {
+                "key": "name",
+                "label": "선택지"
+              },
+              {
+                "key": "cost",
+                "label": "비용"
+              },
+              {
+                "key": "strength",
+                "label": "특징"
+              }
+            ],
+            "rows": {
+              "path": "/rows"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "choice",
+            "component": "Select",
+            "label": "관심 있는 선택지",
+            "value": {
+              "path": "/choice"
+            },
+            "options": [
+              {
+                "value": "A",
+                "label": "선택 A"
+              },
+              {
+                "value": "B",
+                "label": "선택 B"
+              },
+              {
+                "value": "C",
+                "label": "선택 C"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "selection",
+            "component": "Text",
+            "text": {
+              "call": "computeString",
+              "args": {
+                "expr": {
+                  "op": "format",
+                  "args": [
+                    "현재 선택: {0}",
+                    {
+                      "ref": "/choice"
+                    }
+                  ]
+                }
+              },
+              "returnType": "string"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outro": "표의 수치는 비교를 위한 예시입니다."
+}

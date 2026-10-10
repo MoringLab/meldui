@@ -29,7 +29,20 @@
     "typography": {
       "body": "system-ui, sans-serif",
       "heading": "system-ui, sans-serif",
-      "baseSize": 16
+      "baseSize": 16,
+      "bodyWeight": 400,
+      "headingWeight": 600,
+      "lineHeight": 1.55,
+      "headingLineHeight": 1.2,
+      "scale": [
+        2.25,
+        1.75,
+        1.375,
+        1.125,
+        1,
+        0.875
+      ],
+      "native": {}
     },
     "spacing": {
       "xs": 4,
@@ -118,10 +131,15 @@
       "implementation": "Chart"
     }
   },
+  "hostImplementations": [],
   "guide": "Build clear, compact tools. Lead with one heading and a short explanation. Group related controls; give every input a label. Use bound input values and computed values for local calculations. Choose a table for exact comparisons and a chart for trends. Avoid nested cards. Fit narrow mobile screens. Show explicit units and useful empty states.",
   "examples": [
     "calculator",
     "comparison",
-    "planner"
+    "form",
+    "planner",
+    "dashboard",
+    "explanation",
+    "game"
   ]
 }

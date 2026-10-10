@@ -58,6 +58,8 @@ export const KitSchema = z.object({
     motionMs: z.number().min(0).max(300),
   }),
   components: z.record(z.object({ implementation: z.string(), fallback: z.string().optional() })),
+  /** Implementation names the host must register itself; each needs a fallback so an unregistered host still renders. */
+  hostImplementations: z.array(z.string()).default([]),
   guide: z.string().min(20),
   examples: z.array(z.string()),
 });
@@ -134,3 +136,30 @@ export function resolveTypography(
     },
   };
 }
+
+export const EXAMPLE_CATEGORIES = [
+  "calculator",
+  "compare",
+  "form",
+  "planner",
+  "dashboard",
+  "explain",
+  "game",
+  "media",
+  "simulation",
+] as const;
+/** A validated few-shot example a kit ships in its `examples/` folder. */
+export const KitExampleSchema = z.object({
+  id: z.string().min(1).max(64),
+  title: z.string().max(200),
+  category: z.enum(EXAMPLE_CATEGORIES),
+  keywords: z.array(z.string().min(1).max(40)).min(1).max(40),
+  source: z.string().max(200).optional(),
+  intro: z.string().max(600).optional(),
+  fallbackText: z.string().min(10).max(4000),
+  messages: z.array(z.unknown()).min(2).max(200),
+  outro: z.string().max(600).optional(),
+});
+export type KitExample = z.infer<typeof KitExampleSchema>;
+
+export * from "./conformance.js";

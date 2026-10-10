@@ -1,0 +1,139 @@
+{
+  "id": "dashboard",
+  "title": "에너지 사용량",
+  "category": "dashboard",
+  "keywords": [
+    "차트",
+    "그래프",
+    "대시보드",
+    "추이",
+    "변화",
+    "데이터",
+    "chart",
+    "graph",
+    "dashboard",
+    "trend",
+    "metrics",
+    "sales"
+  ],
+  "source": "fixture:energy",
+  "intro": "값을 바꾸면 차트가 즉시 다시 그려집니다.",
+  "fallbackText": "에너지 사용량\n예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\nChart: 일별 변화 · 예시 데이터\n수요일 값: 46\n기기에서 즉시 업데이트",
+  "messages": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "urn:engine:catalog:core:1"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "value": {
+          "points": [
+            {
+              "x": "월",
+              "y": 32
+            },
+            {
+              "x": "화",
+              "y": 58
+            },
+            {
+              "x": "수",
+              "y": 46
+            },
+            {
+              "x": "목",
+              "y": 72
+            },
+            {
+              "x": "금",
+              "y": 65
+            }
+          ]
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "children": ["heading", "intro", "chart", "slider", "badge"]
+          },
+          {
+            "id": "heading",
+            "component": "Heading",
+            "text": "에너지 사용량",
+            "level": 1
+          },
+          {
+            "id": "intro",
+            "component": "Text",
+            "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+            "tone": "muted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "chart",
+            "component": "Chart",
+            "title": "일별 변화 · 예시 데이터",
+            "kind": "bar",
+            "values": {
+              "path": "/points"
+            },
+            "xKey": "x",
+            "yKey": "y"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "slider",
+            "component": "Slider",
+            "label": "수요일 값",
+            "value": {
+              "path": "/points/2/y"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "badge",
+            "component": "Badge",
+            "text": "기기에서 즉시 업데이트",
+            "tone": "success"
+          }
+        ]
+      }
+    }
+  ],
+  "outro": "예시 데이터이므로 실제 수치가 아닙니다."
+}

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:engine_flutter/engine_flutter.dart';
+import 'brand.dart';
 
 void main() {
   runApp(const EngineLab());
@@ -46,6 +47,7 @@ class EngineLabState extends State<EngineLab> {
         jsonDecode(await rootBundle.loadString('assets/hybrid.json')) as List;
     kits['neutral'] = await UIKit.load('neutral');
     kits['editorial'] = await UIKit.load('editorial');
+    kits['brand'] = await UIKit.load('brand');
     await replay('calculator', animate: false);
   }
 
@@ -276,9 +278,19 @@ class EngineLabState extends State<EngineLab> {
           actions: [
             TextButton(
               onPressed: () => setState(
-                () => kitId = kitId == 'neutral' ? 'editorial' : 'neutral',
+                () => kitId = kitId == 'neutral'
+                    ? 'editorial'
+                    : kitId == 'editorial'
+                    ? 'brand'
+                    : 'neutral',
               ),
-              child: Text(kitId == 'neutral' ? 'Editorial' : 'Neutral'),
+              child: Text(
+                kitId == 'neutral'
+                    ? 'Editorial'
+                    : kitId == 'editorial'
+                    ? 'Brand'
+                    : 'Neutral',
+              ),
             ),
             IconButton(
               tooltip: dark ? '라이트 모드' : '다크 모드',
@@ -342,6 +354,7 @@ class EngineLabState extends State<EngineLab> {
                               runtime: runtime!,
                               kit: kit,
                               dark: dark,
+                              components: brandComponents(kit, dark),
                               onGestureLock: (locked) {
                                 if (mounted) setState(() => scrollLocked = locked);
                               },

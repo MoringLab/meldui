@@ -1,4 +1,5 @@
 import { AnswerSession, NDJSONDecoder, readBytes, type UIModelEvent } from "@engine/core";
+import { brand } from "@engine/kit-brand";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { UserAction } from "@engine/protocol";
@@ -22,6 +23,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import fixtures from "../../fixtures/cases.json";
 import hybridFixtures from "../../fixtures/hybrid/cases.json";
+import { brandComponents } from "./brand";
 import { Verification } from "./Verification";
 
 const server = process.env.EXPO_PUBLIC_ENGINE_URL ?? "http://127.0.0.1:8787";
@@ -55,7 +57,7 @@ function Lab() {
   const sessionId = useRef<string | undefined>(undefined);
   const runId = useRef(0);
   const surfaceScroll = useRef<ScrollView>(null);
-  const kit = kitId === "editorial" ? editorial : neutral;
+  const kit = kitId === "editorial" ? editorial : kitId === "brand" ? brand : neutral;
   const colors = kit.tokens[mode];
   const activate = (next: AnswerSession) => {
     sessionRef.current.runtime.dispose();
@@ -231,8 +233,16 @@ function Lab() {
           <View
             style={{ flex: 1, flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end" }}
           >
-            {smallButton(kitId === "neutral" ? "Editorial로 전환" : "Neutral로 전환", () =>
-              setKitId(kitId === "neutral" ? "editorial" : "neutral"),
+            {smallButton(
+              kitId === "neutral"
+                ? "Editorial로 전환"
+                : kitId === "editorial"
+                  ? "Brand로 전환"
+                  : "Neutral로 전환",
+              () =>
+                setKitId(
+                  kitId === "neutral" ? "editorial" : kitId === "editorial" ? "brand" : "neutral",
+                ),
             )}
             {smallButton(mode === "light" ? "다크 모드" : "라이트 모드", () =>
               setMode(mode === "light" ? "dark" : "light"),
@@ -268,7 +278,13 @@ function Lab() {
           scrollEnabled={!scrollLocked}
           contentContainerStyle={{ padding: 18, gap: 24 }}
         >
-          <UIProvider runtime={runtime} kit={kit} mode={mode} onGestureLock={setScrollLocked}>
+          <UIProvider
+            runtime={runtime}
+            kit={kit}
+            mode={mode}
+            components={brandComponents}
+            onGestureLock={setScrollLocked}
+          >
             <AnswerView
               session={session}
               labels={{

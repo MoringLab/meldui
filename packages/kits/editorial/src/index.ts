@@ -1,5 +1,9 @@
 import { defineKit } from "@engine/kit-spec";
 import { CATALOG_ID, COMPONENT_NAMES } from "@engine/protocol";
+import calculator from "../examples/calculator.json";
+import comparison from "../examples/comparison.json";
+import explanation from "../examples/explanation.json";
+import planner from "../examples/planner.json";
 export const editorial = defineKit({
   id: "editorial",
   name: "Editorial",
@@ -48,5 +52,8 @@ export const editorial = defineKit({
   ),
   guide:
     "Build readable, thoughtful interfaces. Use a strong heading, short explanatory paragraphs, and generous group spacing. Favor lists and tables for detailed information. Use cards only for independent tools. Keep native controls recognizable. All state, props and actions follow the core catalog exactly; never use kit-specific component names in model output.",
-  examples: ["explanation", "comparison", "calculator"],
+  examples: ["explanation", "comparison", "calculator", "planner"],
 });
+
+/** Validated few-shot examples this kit ships; see loadKitExamples() in @engine/adapter-gateway. */
+export const editorialExamples: unknown[] = [explanation, comparison, calculator, planner];

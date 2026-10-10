@@ -12,6 +12,7 @@
     "@engine/protocol": "workspace:*",
     "@engine/kit-neutral": "workspace:*",
     "@engine/kit-editorial": "workspace:*",
-    "@engine/adapter-gateway": "workspace:*"
+    "@engine/adapter-gateway": "workspace:*",
+    "@engine/kit-brand": "workspace:*"
   }
 }

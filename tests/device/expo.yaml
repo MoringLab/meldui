@@ -7,6 +7,9 @@ appId: dev.engine.lab.expo
     timeout: 30000
 - assertVisible: "21000"
 - tapOn: "Editorial로 전환"
+- assertVisible: "Brand로 전환"
+- assertVisible: "21000"
+- tapOn: "Brand로 전환"
 - assertVisible: "Neutral로 전환"
 - assertVisible: "21000"
 - tapOn: "다크 모드"

@@ -7,6 +7,9 @@ appId: dev.engine.engine_lab
     timeout: 30000
 - assertVisible: "21000"
 - tapOn: "Editorial"
+- assertVisible: "Brand"
+- assertVisible: "21000"
+- tapOn: "Brand"
 - assertVisible: "Neutral"
 - assertVisible: "21000"
 - tapOn: "다크 모드"

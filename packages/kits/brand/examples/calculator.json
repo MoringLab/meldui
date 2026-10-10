@@ -1,0 +1,184 @@
+{
+  "id": "calculator",
+  "title": "함께 나누는 저녁",
+  "category": "calculator",
+  "keywords": [
+    "계산",
+    "계산기",
+    "합계",
+    "총액",
+    "나누",
+    "더치페이",
+    "1인당",
+    "calculator",
+    "calculate",
+    "split",
+    "total",
+    "tip",
+    "converter"
+  ],
+  "source": "fixture:calculator",
+  "intro": "값을 바꾸면 결과가 바로 달라지는 계산기입니다.",
+  "fallbackText": "함께 나누는 저녁\n총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\n총 금액 (원): 84000\n인원: 4\n계산 결과\n21000\n입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+  "messages": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "urn:engine:catalog:core:1"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "value": {
+          "a": 84000,
+          "b": 4
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "children": ["heading", "intro", "controls", "result", "note"]
+          },
+          {
+            "id": "heading",
+            "component": "Heading",
+            "text": "함께 나누는 저녁",
+            "level": 1
+          },
+          {
+            "id": "intro",
+            "component": "Text",
+            "text": "총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.",
+            "tone": "muted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "controls",
+            "component": "Grid",
+            "columns": 2,
+            "children": ["_a", "_b"]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_a",
+            "component": "Slider",
+            "label": "총 금액 (원)",
+            "value": {
+              "path": "/a"
+            },
+            "min": 0,
+            "max": 168000,
+            "step": 1000
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_b",
+            "component": "Slider",
+            "label": "인원",
+            "value": {
+              "path": "/b"
+            },
+            "min": 1,
+            "max": 10,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "result",
+            "component": "Card",
+            "title": "계산 결과",
+            "children": ["_result"]
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "_result",
+            "component": "Heading",
+            "level": 2,
+            "text": {
+              "call": "computeNumber",
+              "args": {
+                "expr": {
+                  "op": "round",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "ref": "/a"
+                        },
+                        {
+                          "ref": "/b"
+                        }
+                      ]
+                    },
+                    2
+                  ]
+                }
+              },
+              "returnType": "number"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "note",
+            "component": "Text",
+            "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+            "tone": "muted"
+          }
+        ]
+      }
+    }
+  ],
+  "outro": "계산은 이 기기에서 즉시 이루어지며 입력값은 저장되지 않습니다."
+}

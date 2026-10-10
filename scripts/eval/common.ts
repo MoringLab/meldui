@@ -38,7 +38,7 @@ export function parseCsvLine(line: string) {
       else if (ch === '"') quoted = false;
       else cell += ch;
     } else if (ch === '"') quoted = true;
-    else if (ch === ",") (out.push(cell), (cell = ""));
+    else if (ch === ",") out.push(cell), (cell = "");
     else cell += ch;
   }
   out.push(cell);

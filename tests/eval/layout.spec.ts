@@ -2,13 +2,17 @@ import { mkdir, writeFile } from "node:fs/promises";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import fixtures from "../../fixtures/cases.json" with { type: "json" };
+import hybrid from "../../fixtures/hybrid/cases.json" with { type: "json" };
 
 const WIDTHS = [320, 480, 720, 960];
 const KITS = ["neutral", "editorial"];
 const MODES = ["light", "dark"];
-const FIXTURES = (process.env.EVAL_FIXTURES?.split(",") ?? fixtures.map((f) => f.id)).filter(
-  Boolean,
-);
+const FIXTURES = (
+  process.env.EVAL_FIXTURES?.split(",") ?? [
+    ...fixtures.map((f) => f.id),
+    ...hybrid.map((f) => f.id),
+  ]
+).filter(Boolean);
 
 type Row = {
   fixture: string;

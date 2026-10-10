@@ -1,0 +1,78 @@
+[
+ {
+  "id": "h-calc",
+  "title": "계산기 + 가정 설명",
+  "prompt": "더치페이를 계산해주고 가정을 설명해줘.",
+  "showcase": "H-05",
+  "expect": {
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ]
+  },
+  "wire": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.\",\"title\":\"더치페이 계산기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}\n\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다."
+ },
+ {
+  "id": "h-fact",
+  "title": "사실 질문 (마크다운만)",
+  "prompt": "프랑스의 수도는 어디야?",
+  "showcase": "H-06",
+  "expect": {
+   "blocks": [
+    "markdown"
+   ]
+  },
+  "wire": "프랑스의 수도는 **파리**입니다."
+ },
+ {
+  "id": "h-code",
+  "title": "코드 질문 (마크다운 + 코드)",
+  "prompt": "JavaScript에서 배열 중복을 제거하는 방법은?",
+  "showcase": "H-07",
+  "expect": {
+   "blocks": [
+    "markdown"
+   ]
+  },
+  "wire": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다."
+ },
+ {
+  "id": "h-explore",
+  "title": "차트 탐색 + 설명",
+  "prompt": "한 주의 흐름을 슬라이더로 바꿔보며 보고 싶어.",
+  "expect": {
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ]
+  },
+  "wire": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.\",\"title\":\"한 주의 흐름\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"points\":[{\"x\":\"월\",\"y\":32},{\"x\":\"화\",\"y\":58},{\"x\":\"수\",\"y\":46},{\"x\":\"목\",\"y\":72},{\"x\":\"금\",\"y\":65}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"chart\",\"slider\",\"badge\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"한 주의 흐름\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"chart\",\"component\":\"Chart\",\"title\":\"일별 변화 · 예시 데이터\",\"kind\":\"line\",\"values\":{\"path\":\"/points\"},\"xKey\":\"x\",\"yKey\":\"y\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"slider\",\"component\":\"Slider\",\"label\":\"수요일 값\",\"value\":{\"path\":\"/points/2/y\"},\"min\":0,\"max\":100,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"badge\",\"component\":\"Badge\",\"text\":\"기기에서 즉시 업데이트\",\"tone\":\"success\"}]}}\n예시 데이터이므로 실제 수치가 아닙니다."
+ },
+ {
+  "id": "h-two",
+  "title": "표 비교 + 계산기 (두 surface)",
+  "prompt": "노트 앱을 비교하고 비용도 계산해줘.",
+  "expect": {
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown",
+    "surface"
+   ]
+  },
+  "wire": "먼저 앱의 차이를 표로 볼까요?\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"compare\",\"fallbackText\":\"노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.\",\"title\":\"앱 비교\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"compare\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"compare\",\"value\":{\"choice\":\"A\",\"rows\":[{\"name\":\"A\",\"cost\":\"무료\",\"strength\":\"간단하게 시작\"},{\"name\":\"B\",\"cost\":\"월 10,000원\",\"strength\":\"함께 작업\"},{\"name\":\"C\",\"cost\":\"월 20,000원\",\"strength\":\"세밀한 설정\"}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"table\",\"choice\",\"selection\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"도구를 고르는 기준\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"table\",\"component\":\"Table\",\"caption\":\"노트 앱 비교\",\"columns\":[{\"key\":\"name\",\"label\":\"선택지\"},{\"key\":\"cost\",\"label\":\"비용\"},{\"key\":\"strength\",\"label\":\"특징\"}],\"rows\":{\"path\":\"/rows\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"choice\",\"component\":\"Select\",\"label\":\"관심 있는 선택지\",\"value\":{\"path\":\"/choice\"},\"options\":[{\"value\":\"A\",\"label\":\"선택 A\"},{\"value\":\"B\",\"label\":\"선택 B\"},{\"value\":\"C\",\"label\":\"선택 C\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"selection\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"expr\":{\"op\":\"format\",\"args\":[\"현재 선택: {0}\",{\"ref\":\"/choice\"}]}},\"returnType\":\"string\"}}]}}\n마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"cost\",\"fallbackText\":\"총 금액과 인원을 조절해 1인당 금액을 계산합니다.\",\"title\":\"비용 나누기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"cost\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"cost\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}"
+ },
+ {
+  "id": "h-legacy",
+  "title": "선언 없는 기존 스트림",
+  "prompt": "(이전 버전 출력)",
+  "expect": {
+   "blocks": [
+    "surface"
+   ]
+  },
+  "wire": "{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"tab\":\"today\",\"done1\":false,\"done2\":false,\"memo\":\"\"}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"tabs\",\"add\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"하루를 가볍게 계획하기\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"할 일을 정리하고 완료한 항목을 체크하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"tabs\",\"component\":\"Tabs\",\"value\":{\"path\":\"/tab\"},\"tabs\":[{\"id\":\"today\",\"label\":\"오늘\",\"child\":\"_today\"},{\"id\":\"next\",\"label\":\"다음\",\"child\":\"_next\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_today\",\"component\":\"Column\",\"children\":[\"_task1\",\"_task2\",\"_progress\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_next\",\"component\":\"Text\",\"text\":\"다음 단계를 위한 여유를 남겨두세요.\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task1\",\"component\":\"Checkbox\",\"label\":\"중요한 일 한 가지 정하기\",\"value\":{\"path\":\"/done1\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task2\",\"component\":\"Checkbox\",\"label\":\"필요한 자료 준비하기\",\"value\":{\"path\":\"/done2\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_progress\",\"component\":\"Progress\",\"label\":\"진행 상황\",\"value\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"add\",\"args\":[{\"op\":\"if\",\"args\":[{\"ref\":\"/done1\"},50,0]},{\"op\":\"if\",\"args\":[{\"ref\":\"/done2\"},50,0]}]}},\"returnType\":\"number\"},\"max\":100}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"add\",\"component\":\"TextField\",\"label\":\"나의 메모\",\"value\":{\"path\":\"/memo\"}}]}}"
+ }
+]

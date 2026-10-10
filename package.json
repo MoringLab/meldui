@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "schemas": "tsx scripts/export-schemas.ts",
-    "fixtures": "tsx scripts/create-fixtures.ts",
+    "fixtures": "tsx scripts/create-fixtures.ts && tsx scripts/create-hybrid-fixtures.ts",
     "dev": "pnpm --parallel --filter @engine/server --filter @engine/playground dev",
     "eval": "tsx scripts/eval/run.ts",
     "eval:online": "tsx scripts/eval/live.ts",

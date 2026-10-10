@@ -36,7 +36,7 @@ type ContextValue = {
   views: ComponentViews;
 };
 const Context = createContext<ContextValue | null>(null);
-function useUI() {
+export function useUI() {
   const value = useContext(Context);
   if (!value) throw new Error("UIProvider is required");
   return value;

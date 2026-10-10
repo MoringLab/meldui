@@ -8,6 +8,7 @@ import {
   CATALOG_ID,
   type Capabilities,
   type Component,
+  capabilitiesFor,
   componentSchemas,
   type Diagnostic,
   type Expr,
@@ -21,11 +22,15 @@ import {
 import { assertSafeJson, evaluateExpression, resolvePath } from "./expression.js";
 import { NDJSONDecoder } from "./stream.js";
 
+export * from "./answer.js";
+export * from "./attachments.js";
 export * from "./expression.js";
 export * from "./stream.js";
 
 export type UIModelEvent =
   | { type: "message"; message: UIMessage }
+  /** Raw model text in hybrid format; feed an AnswerSession. */
+  | { type: "text"; text: string }
   | { type: "diagnostic"; diagnostic: Diagnostic }
   | { type: "usage"; inputTokens?: number; outputTokens?: number; model?: string }
   | { type: "complete"; status: "completed" | "cancelled" | "failed" };
@@ -33,6 +38,8 @@ export type ModelRequest = {
   messages: { role: "system" | "user" | "assistant"; content: string }[];
   model: string;
   maxTokens?: number;
+  /** "a2ui" (default): adapter decodes NDJSON envelopes. "hybrid": adapter forwards raw text. */
+  format?: "a2ui" | "hybrid";
 };
 export interface UIModelAdapter {
   stream(request: ModelRequest, options?: { signal?: AbortSignal }): AsyncIterable<UIModelEvent>;
@@ -141,11 +148,10 @@ export class UIRuntime {
     return this.processor.getSurface(id);
   }
   capabilities(platform: Capabilities["platform"]): Capabilities {
-    return {
+    return capabilitiesFor(platform, {
       catalogIds: [this.options.catalogId ?? CATALOG_ID],
-      platform,
       clientActions: Object.keys(this.options.clientActions ?? {}),
-    };
+    });
   }
   private changed() {
     this.revision++;

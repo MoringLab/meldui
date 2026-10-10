@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import fixtures from "../../fixtures/cases.json" with { type: "json" };
+import hybrid from "../../fixtures/hybrid/cases.json" with { type: "json" };
 
 type Row = {
   fixture: string;
@@ -15,10 +16,28 @@ test("behavioral scripts per fixture", async ({ page }) => {
   const rows: Row[] = [];
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  for (const f of fixtures) {
+  for (const f of [...fixtures, ...hybrid.map((h) => ({ id: h.id, category: "hybrid" }))]) {
     await page.setViewportSize({ width: 900, height: 900 });
     await page.goto(`/eval.html?fixture=${f.id}&width=720`);
     await page.waitForFunction(() => (window as any).__ready === true);
+    // Signature of what the person sees and edits (ids from useId change on remount, so no raw HTML).
+    const body = async () =>
+      (await page.locator(".ui-frame-body").count())
+        ? page
+            .locator(".ui-frame-body")
+            .first()
+            .evaluate((el) =>
+              JSON.stringify({
+                text: (el as HTMLElement).innerText,
+                values: [...el.querySelectorAll("input, select, textarea")].map((i) =>
+                  i instanceof HTMLInputElement && i.type === "checkbox"
+                    ? i.checked
+                    : (i as HTMLInputElement).value,
+                ),
+              }),
+            )
+        : "";
+    const initialBody = await body();
     const text = () => page.locator("#chat-column").innerText();
     const html = () => page.locator("#chat-column").innerHTML();
     const add = (
@@ -97,12 +116,23 @@ test("behavioral scripts per fixture", async ({ page }) => {
       add("form", "na");
     }
 
-    const reset = page.getByRole("button", { name: /reset|초기화/i });
+    const reset = page.getByRole("button", { name: /^(reset|초기화)$/i });
     const interactive = (await sliders.count()) + (await boxes.count()) + (await form.count()) > 0;
     if (!interactive) add("reset", "na");
     else if (await reset.count()) {
-      const initial = await html();
-      add("reset", "pass", String(initial.length));
+      const changed = (await body()) !== initialBody;
+      await reset.first().click();
+      // Reset must bring the surface back to the model's own initial state.
+      await expect
+        .poll(body, { timeout: 3000 })
+        .toBe(initialBody)
+        .catch(() => {});
+      const restored = (await body()) === initialBody;
+      add(
+        "reset",
+        restored ? "pass" : "fail",
+        changed ? "state changed, then restored" : "no state change to undo",
+      );
     } else add("reset", "expected-fail", "no reset control", "M2");
   }
   await mkdir("artifacts/eval", { recursive: true });

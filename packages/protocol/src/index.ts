@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
+export * from "./answer.js";
+export * from "./attachments.js";
+export * from "./support.js";
+
 /** Stable wire profile shared by every Engine renderer. */
 export const PROTOCOL_VERSION = "v0.9" as const;
 export const CATALOG_ID = "urn:engine:catalog:core:1";
@@ -12,7 +16,7 @@ export type Expr =
   | string
   | { ref: string }
   | { op: string; args: Expr[] };
-const ops = [
+export const EXPRESSION_OPS = [
   "add",
   "sub",
   "mul",
@@ -36,6 +40,7 @@ const ops = [
   "array",
   "round",
 ] as const;
+const ops = EXPRESSION_OPS;
 export const ExprSchema: z.ZodType<Expr> = z.lazy(() =>
   z.union([
     z.string(),
@@ -304,6 +309,14 @@ export type Capabilities = {
   catalogIds: string[];
   platform: "web" | "react-native" | "flutter";
   clientActions: string[];
+  /** Components this renderer implements natively; others must use a declared fallback. */
+  components?: string[];
+  /** Declared substitutions for components the renderer lacks, e.g. {Video: "FileCard"}. */
+  fallbacks?: Record<string, string>;
+  /** Expression operators the runtime evaluates. */
+  expressionOps?: string[];
+  /** Hybrid answer wire versions the host understands. */
+  answerWire?: string[];
 };
 
 /** Validate a component independently so malformed siblings can be quarantined. */

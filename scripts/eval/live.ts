@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import fixtures from "../../fixtures/cases.json";
-import { createUIRuntime } from "../../packages/core/src/index.js";
+import { AnswerSession, createUIRuntime } from "../../packages/core/src/index.js";
 import { classifyRow } from "../lib/taxonomy.js";
 import { readJson, split } from "./common.js";
 
@@ -25,6 +25,10 @@ const setName = opt("set", "original")!;
 const which = opt("split", "all")!;
 const kits = opt("kits", "neutral")!.split(",");
 const out = opt("out", "artifacts/eval/online-latest.json")!;
+const format = opt("format", "a2ui") as "a2ui" | "hybrid";
+const policy = JSON.parse(opt("policy", "{}")!);
+const attachmentSets = readJson<Record<string, unknown[]>>("eval/attachments.json");
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type Job = {
   id: string;
@@ -70,6 +74,7 @@ const jobsFor = (): Job[] => {
 };
 const wanted = jobsFor()
   .filter((j) => which === "all" || j.split === which)
+  .filter((j) => !opt("ids") || opt("ids")!.split(",").includes(j.id))
   .slice(0, Number(opt("limit", "1000")));
 
 const health = (await fetch(`${base}/api/routes/health?probe=1`).then((r) => r.json())) as {
@@ -129,7 +134,9 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
     return;
   }
   const runtime = createUIRuntime();
+  const answer = format === "hybrid" ? new AnswerSession(runtime, { policy }) : undefined;
   const start = performance.now();
+  let waitedMs = 0;
   let sessionId = "";
   let firstMessageMs: number | undefined;
   let repairs = 0;
@@ -143,25 +150,47 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
   let initialValid = true;
   const errors: string[] = [];
   try {
-    const response = await fetch(`${base}/api/ui`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model,
-        kitId,
-        prompt: job.prompt,
-        platform: "web",
-        ...(job.extra?.attachments ? { attachmentSet: job.extra.attachments } : {}),
-      }),
-      signal: AbortSignal.timeout(360_000),
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
+    const attachments = job.extra?.attachments
+      ? attachmentSets[String(job.extra.attachments)]
+      : undefined;
+    let response: Response | undefined;
+    // Availability backoff only (never schema repair): wait out a short route cooldown, then record infra.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      response = await fetch(`${base}/api/ui`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          kitId,
+          prompt: job.prompt,
+          platform: "web",
+          format,
+          policy,
+          ...(attachments ? { attachments, visibility: { text: true } } : {}),
+        }),
+        signal: AbortSignal.timeout(360_000),
+      });
+      if (response.status !== 503) break;
+      const body = await response
+        .clone()
+        .json()
+        .catch(() => ({}));
+      if (body.error !== "ROUTE_UNAVAILABLE" || attempt === 3) break;
+      const wait = Math.min(
+        Math.max((body.route?.retryAt ?? Date.now() + 5000) - Date.now(), 1000),
+        60_000,
+      );
+      waitedMs += wait;
+      await sleep(wait);
+    }
+    if (!response?.ok) {
+      const body = await response?.json().catch(() => ({}));
       throw Error(
-        body.error === "ROUTE_UNAVAILABLE" ? "ROUTE_UNAVAILABLE" : `HTTP_${response.status}`,
+        body?.error === "ROUTE_UNAVAILABLE" ? "ROUTE_UNAVAILABLE" : `HTTP_${response?.status}`,
       );
     }
-    const reader = response.body!.getReader();
+    const reader = response.body?.getReader();
+    if (!reader) throw Error("NO_BODY");
     const decoder = new TextDecoder();
     let buffer = "";
     for (;;) {
@@ -181,19 +210,24 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
           firstMessageMs ??= performance.now() - start;
           messageCount++;
           runtime.accept(event.message);
-        } else if (event.type === "markdown") markdownChars += String(event.text ?? "").length;
-        else if (event.type === "diagnostic") {
+        } else if (event.type === "text") {
+          firstMessageMs ??= performance.now() - start;
+          answer?.push(event.text);
+        } else if (event.type === "diagnostic") {
           errors.push(event.diagnostic.code);
           if (!repairs && event.diagnostic.severity === "error") initialValid = false;
-        } else if (event.type === "repair") repairs = event.attempt;
-        else if (event.type === "usage") {
+        } else if (event.type === "repair") {
+          repairs = event.attempt;
+          answer?.beginTurn();
+        } else if (event.type === "usage") {
           actualModel = event.model ?? actualModel;
           inputTokens = event.inputTokens ?? inputTokens;
           outputTokens = event.outputTokens ?? outputTokens;
         } else if (event.type === "complete") status = event.status;
       }
     }
-    runtime.finish();
+    if (answer) answer.end();
+    else runtime.finish();
   } catch (error) {
     errors.push(error instanceof Error ? error.message : "ERROR");
     initialValid = false;
@@ -204,12 +238,21 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
       .filter(Boolean),
   );
   const surfaces = runtime.surfaceIds.length;
+  const blocks = answer?.blocks.map((b) => b.kind) ?? [];
+  markdownChars =
+    answer?.blocks.reduce((n, b) => n + (b.kind === "markdown" ? b.text.length : 0), 0) ?? 0;
+  const surfacesOk = runtime.surfaceIds.every((sid) =>
+    runtime.getSurface(sid)?.componentsModel.has("root"),
+  );
+  // Hybrid answers may legitimately contain no surface; they still need some block.
   const valid =
-    status === "completed" &&
-    messageCount > 0 &&
-    surfaces > 0 &&
-    runtime.surfaceIds.every((sid) => runtime.getSurface(sid)!.componentsModel.has("root")) &&
-    !finalErrors.length;
+    format === "hybrid"
+      ? status === "completed" && blocks.length > 0 && surfacesOk && !finalErrors.length
+      : status === "completed" &&
+        messageCount > 0 &&
+        surfaces > 0 &&
+        surfacesOk &&
+        !finalErrors.length;
   const row: any = {
     ...base_,
     actualModel: actualModel ?? null,
@@ -224,7 +267,14 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
     outputTokens,
     messageCount,
     surfaces,
+    blocks,
     markdownChars,
+    waitedMs,
+    format,
+    fallbackText: answer?.blocks
+      .filter((b) => b.kind === "surface")
+      .map((b: any) => ({ source: b.fallbackSource, text: b.fallbackText })),
+    media: answer?.blocks.filter((b) => b.kind === "media").map((b: any) => b.attachmentIds),
     errors,
     finalErrors,
   };

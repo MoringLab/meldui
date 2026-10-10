@@ -17,7 +17,8 @@ const samples: Sample[] = process.argv[2]
       for (const f of fixtures) byCat.set(f.category, [...(byCat.get(f.category) ?? []), f]);
       const picked: typeof fixtures = [];
       for (let round = 0; picked.length < 20; round++)
-        for (const list of byCat.values()) if (list[round] && picked.length < 20) picked.push(list[round]);
+        for (const list of byCat.values())
+          if (list[round] && picked.length < 20) picked.push(list[round]);
       return picked.map((f) => ({ id: f.id, summary: `${f.title} — ${f.prompt}` }));
     })();
 const items = rubric.items.map((i: { id: string }) => i.id);

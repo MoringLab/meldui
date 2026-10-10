@@ -8,7 +8,9 @@ import { parseCsvLine, readJson } from "./common.js";
  */
 const items = readJson("eval/rubric/learning.json").items.map((i: { id: string }) => i.id);
 if (!existsSync("eval/human/ratings.csv")) {
-  console.log("UNCALIBRATED: eval/human/ratings.csv not found. Rate eval/human/rating-sheet.csv first.");
+  console.log(
+    "UNCALIBRATED: eval/human/ratings.csv not found. Rate eval/human/rating-sheet.csv first.",
+  );
   process.exit(0);
 }
 const [head, ...lines] = readFileSync("eval/human/ratings.csv", "utf8").trim().split("\n");
@@ -23,7 +25,10 @@ if (human.size < 20) {
   console.log(`UNCALIBRATED: ${human.size}/20 complete human rows.`);
   process.exit(0);
 }
-const judge = readJson("artifacts/eval/judge.json").results as { id: string; scores?: Record<string, number> }[];
+const judge = readJson("artifacts/eval/judge.json").results as {
+  id: string;
+  scores?: Record<string, number>;
+}[];
 let n = 0;
 let abs = 0;
 let near = 0;
@@ -41,6 +46,14 @@ for (const j of judge) {
 }
 const mae = abs / n;
 const calibrated = mae <= 0.5 && near / n >= 0.85;
-const report = { compared: n, meanAbsError: mae, withinOne: near / n, perItemMae: Object.fromEntries(items.map((i: string, k: number) => [i, perItem[k] / (n / items.length)])), calibrated };
+const report = {
+  compared: n,
+  meanAbsError: mae,
+  withinOne: near / n,
+  perItemMae: Object.fromEntries(
+    items.map((i: string, k: number) => [i, perItem[k] / (n / items.length)]),
+  ),
+  calibrated,
+};
 writeFileSync("artifacts/eval/judge-calibration.json", JSON.stringify(report, null, 1));
 console.log(report);

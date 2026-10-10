@@ -18,3 +18,6 @@ await mkdir("apps/flutter/assets", { recursive: true });
 await copyFile("fixtures/cases.json", "apps/flutter/assets/cases.json");
 await mkdir("dart/engine_flutter/test/fixtures", { recursive: true });
 await copyFile("fixtures/cases.json", "dart/engine_flutter/test/fixtures/cases.json");
+await copyFile("fixtures/hybrid/cases.json", "apps/flutter/assets/hybrid.json");
+await copyFile("fixtures/hybrid/cases.json", "dart/engine_flutter/test/fixtures/hybrid.json");
+await copyFile("fixtures/hybrid/vectors.json", "dart/engine_flutter/test/fixtures/vectors.json");

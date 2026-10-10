@@ -1,11 +1,18 @@
-import { NDJSONDecoder, readBytes, type UIModelEvent, type UIRuntime } from "@engine/core";
+import {
+  AnswerSession,
+  NDJSONDecoder,
+  readBytes,
+  type UIModelEvent,
+  type UIRuntime,
+} from "@engine/core";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
-import type { UIMessage, UserAction } from "@engine/protocol";
-import { createUIRuntime, Icon, UIProvider, UISurface } from "@engine/renderer-react";
+import type { HostPolicy, UserAction } from "@engine/protocol";
+import { AnswerView, createUIRuntime, Icon, UIProvider } from "@engine/renderer-react";
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import fixtures from "../../../fixtures/cases.json";
+import hybridFixtures from "../../../fixtures/hybrid/cases.json";
 import "@engine/renderer-react/styles.css";
 import "./styles.css";
 
@@ -33,22 +40,26 @@ function App() {
     "agy/gemini-3.7-flash-medium",
   ]);
   const [model, setModel] = useState(models[0]);
-  const [runtime, setRuntime] = useState<UIRuntime>(() => createUIRuntime());
-  const [messages, setMessages] = useState<UIMessage[]>([]);
+  const [policyMode, setPolicyMode] = useState<HostPolicy["mode"]>("auto");
+  const [session, setSession] = useState<AnswerSession>(() => new AnswerSession(createUIRuntime()));
+  const runtime: UIRuntime = session.runtime;
+  const [messages, setMessages] = useState<string[]>([]);
   const [diagnostics, setDiagnostics] = useState<string[]>([]);
   const sessionId = useRef<string | undefined>(undefined);
   const abortRef = useRef<AbortController | undefined>(undefined);
   const run = useRef(0);
-  const runtimeRef = useRef(runtime);
-  runtimeRef.current = runtime;
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const policyRef = useRef<Partial<HostPolicy>>({});
+  policyRef.current = { mode: policyMode };
   const onAction = useRef<(action: UserAction) => void>(() => {});
-  const activate = (value: UIRuntime) => {
-    runtimeRef.current.dispose();
-    runtimeRef.current = value;
-    setRuntime(value);
+  const activate = (value: AnswerSession) => {
+    sessionRef.current.runtime.dispose();
+    sessionRef.current = value;
+    setSession(value);
   };
   const fresh = (display = true) => {
-    const value = createUIRuntime({
+    const runtime = createUIRuntime({
       onDiagnostic: (d) =>
         setDiagnostics((items) => [
           ...items.slice(-49),
@@ -66,6 +77,7 @@ function App() {
         },
       },
     });
+    const value = new AnswerSession(runtime, { policy: policyRef.current });
     if (display) activate(value);
     setMessages([]);
     setDiagnostics([]);
@@ -78,16 +90,21 @@ function App() {
     setBusy(false);
     setActive(id);
     const value = fresh();
+    const hybridFixture = hybridFixtures.find((f) => f.id === id);
     const fixture = fixtures.find((f) => f.id === id) ?? fixtures[0];
+    // Legacy fixtures replay as one JSON control line per message; hybrid ones as the mixed text.
+    const lines = hybridFixture
+      ? hybridFixture.wire.split("\n")
+      : fixture.messages.map((m) => JSON.stringify(m));
     setStatus("예제를 차례로 표시하고 있습니다.");
-    for (const message of fixture.messages) {
+    for (const line of lines) {
       if (generation !== run.current) return;
-      value.accept(message);
-      setMessages((items) => [...items, message as UIMessage]);
+      value.push(`${line}\n`);
+      setMessages((items) => [...items, `${line}\n`]);
       await new Promise((resolve) => setTimeout(resolve, 28));
     }
     if (generation !== run.current) return;
-    value.finish();
+    value.end();
     setStatus("준비되었습니다. 입력값을 바꿔보세요.");
   }
   async function generate(text: string, action?: UserAction) {
@@ -96,9 +113,10 @@ function App() {
     const controller = new AbortController();
     abortRef.current = controller;
     ++run.current;
-    const value = action ? runtimeRef.current : fresh(false);
+    const value = action ? sessionRef.current : fresh(false);
+    if (action) value.beginTurn();
     let displayed = !!action;
-    value.beginRun("main");
+    value.runtime.beginRun("main");
     setBusy(true);
     setActive("");
     setStatus("모델이 인터페이스를 만들고 있습니다.");
@@ -114,6 +132,8 @@ function App() {
           kitId,
           platform: "web",
           sessionId: sessionId.current,
+          format: "hybrid",
+          policy: policyRef.current,
         }),
         signal: controller.signal,
       });
@@ -132,26 +152,26 @@ function App() {
           | { type: "session"; sessionId: string }
           | { type: "repair"; attempt: number };
         if (event.type === "session") sessionId.current = event.sessionId;
-        else if (event.type === "message") {
-          value.accept(event.message);
-          if (
-            !displayed &&
-            value.surfaceIds.some((sid) => value.getNodeSnapshot(sid, "root").component)
-          ) {
+        else if (event.type === "text") {
+          value.push(event.text);
+          setMessages((items) => [...items.slice(-399), event.text]);
+          if (!displayed && value.blocks.length) {
             activate(value);
             displayed = true;
           }
-          setMessages((items) => [...items, event.message]);
         } else if (event.type === "diagnostic")
           setDiagnostics((items) => [...items.slice(-49), event.diagnostic.code]);
-        else if (event.type === "repair")
+        else if (event.type === "repair") {
+          value.beginTurn();
           setStatus(`일부 항목을 수정하고 있습니다 (${event.attempt}/2).`);
-        else if (event.type === "complete")
+        } else if (event.type === "complete") {
+          value.end();
           setStatus(
             event.status === "completed"
               ? "완료되었습니다. 화면에서 바로 사용해보세요."
               : "일부 항목을 완료하지 못했습니다. 다시 요청할 수 있습니다.",
           );
+        }
       };
       if (!response.body) throw new Error("스트림을 사용할 수 없습니다.");
       for await (const bytes of readBytes(response.body, controller.signal)) {
@@ -169,7 +189,7 @@ function App() {
             : "연결을 확인하고 다시 시도하세요.",
       );
     } finally {
-      if (!displayed) value.dispose();
+      if (!displayed) value.runtime.dispose();
       if (abortRef.current === controller) setBusy(false);
     }
   }
@@ -192,7 +212,7 @@ function App() {
     return () => {
       run.current++;
       abortRef.current?.abort();
-      runtimeRef.current.dispose();
+      sessionRef.current.runtime.dispose();
     };
   }, []);
   const kit = kitId === "editorial" ? editorial : neutral;
@@ -213,6 +233,18 @@ function App() {
               <option value="editorial">Editorial</option>
             </select>
           </label>
+          <label>
+            답변 방식
+            <select
+              aria-label="답변 방식"
+              value={policyMode}
+              onChange={(e) => setPolicyMode(e.target.value as HostPolicy["mode"])}
+            >
+              <option value="auto">자동</option>
+              <option value="markdown-only">글만</option>
+              <option value="engine-only">화면만</option>
+            </select>
+          </label>
           <button
             type="button"
             className="plain-button"
@@ -226,7 +258,7 @@ function App() {
         <aside className="example-rail">
           <div className="rail-heading">
             <h2>만들어볼 것들</h2>
-            <span>{fixtures.length}개 예제</span>
+            <span>{fixtures.length + hybridFixtures.length}개 예제</span>
           </div>
           <p>작은 도구부터 시작해보세요.</p>
           <nav aria-label="예제">
@@ -249,6 +281,20 @@ function App() {
               </section>
             ))}
           </nav>
+          <section>
+            <h3>섞어 보기</h3>
+            {hybridFixtures.map((f) => (
+              <button
+                type="button"
+                key={f.id}
+                className={active === f.id ? "active" : ""}
+                onClick={() => void replay(f.id)}
+              >
+                {f.title}
+                <Icon name="arrow" />
+              </button>
+            ))}
+          </section>
           <footer>
             하나의 구조, 여러 가지 표현.
             <br />
@@ -260,14 +306,25 @@ function App() {
             <span className="status-dot" />
             {active ? "리플레이 예제" : "생성된 인터페이스"}
             <span className="canvas-meta">
-              {kit.name} · {messages.length} messages
+              {kit.name} · {messages.length} lines
             </span>
           </div>
           <div className="result-canvas">
             <UIProvider runtime={runtime} kit={kit} mode={mode}>
-              <UISurface />
+              <AnswerView
+                session={session}
+                labels={{
+                  surface: "인터랙티브 콘텐츠",
+                  reset: "초기화",
+                  expand: "크게 보기",
+                  close: "닫기",
+                  viewAsText: "텍스트로 보기",
+                  viewAsInterface: "화면으로 보기",
+                  incomplete: "일부 내용을 표시하지 못했습니다.",
+                }}
+              />
             </UIProvider>
-            {!runtime.surfaceIds.length && (
+            {!session.blocks.length && (
               <div className="empty">
                 <h1>어떤 도구가 필요한가요?</h1>
                 <p>설명하고, 비교하고, 직접 조절할 수 있는 화면을 만들어보세요.</p>
@@ -340,12 +397,12 @@ function App() {
                   ))}
                 </ul>
               )}
-              <pre>{messages.map((m) => JSON.stringify(m)).join("\n")}</pre>
+              <pre>{messages.join("")}</pre>
               <button
                 type="button"
                 className="plain-button"
                 onClick={() => {
-                  const blob = new Blob([messages.map((m) => JSON.stringify(m)).join("\n")], {
+                  const blob = new Blob([messages.join("")], {
                     type: "application/x-ndjson",
                   });
                   const url = URL.createObjectURL(blob);

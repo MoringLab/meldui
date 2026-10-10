@@ -1,0 +1,1901 @@
+{
+ "decoder": [
+  {
+   "name": "korean-emoji",
+   "text": "안녕하세요 😀 **굵게**\n둘째 줄\n",
+   "items": [
+    {
+     "kind": "text",
+     "text": "안녕하세요 😀 **굵게**\n둘째 줄\n"
+    }
+   ]
+  },
+  {
+   "name": "fenced-json-is-text",
+   "text": "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}\n",
+   "items": [
+    {
+     "kind": "text",
+     "text": "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}\n"
+    }
+   ]
+  },
+  {
+   "name": "broken-control-line",
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\n",
+   "items": [
+    {
+     "kind": "invalid",
+     "line": "{\"version\":\"v0.9\",\"createSurface\":{"
+    }
+   ]
+  },
+  {
+   "name": "blank-lines",
+   "text": "\n\n첫 문단\n\n\n둘째 문단\n",
+   "items": [
+    {
+     "kind": "text",
+     "text": "\n\n첫 문단\n\n\n둘째 문단\n"
+    }
+   ]
+  },
+  {
+   "name": "no-trailing-newline",
+   "text": "문장 끝{\"engine\":\"v1\"}",
+   "items": [
+    {
+     "kind": "text",
+     "text": "문장 끝{\"engine\":\"v1\"}"
+    }
+   ]
+  },
+  {
+   "name": "indented-control",
+   "text": "  {\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"들여쓴 선언\"}\n",
+   "items": [
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "main",
+      "fallbackText": "들여쓴 선언"
+     }
+    }
+   ]
+  },
+  {
+   "name": "h-calc",
+   "text": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.\",\"title\":\"더치페이 계산기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}\n\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다.",
+   "items": [
+    {
+     "kind": "text",
+     "text": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n"
+    },
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "main",
+      "fallbackText": "총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.",
+      "title": "더치페이 계산기"
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "createSurface": {
+       "surfaceId": "main",
+       "catalogId": "urn:engine:catalog:core:1"
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateDataModel": {
+       "surfaceId": "main",
+       "value": {
+        "a": 84000,
+        "b": 4
+       }
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "root",
+         "component": "Column",
+         "children": [
+          "heading",
+          "intro",
+          "controls",
+          "result",
+          "note"
+         ]
+        },
+        {
+         "id": "heading",
+         "component": "Heading",
+         "text": "함께 나누는 저녁",
+         "level": 1
+        },
+        {
+         "id": "intro",
+         "component": "Text",
+         "text": "총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "controls",
+         "component": "Grid",
+         "columns": 2,
+         "children": [
+          "_a",
+          "_b"
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_a",
+         "component": "Slider",
+         "label": "총 금액 (원)",
+         "value": {
+          "path": "/a"
+         },
+         "min": 0,
+         "max": 168000,
+         "step": 1000
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_b",
+         "component": "Slider",
+         "label": "인원",
+         "value": {
+          "path": "/b"
+         },
+         "min": 1,
+         "max": 10,
+         "step": 1
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "result",
+         "component": "Card",
+         "title": "계산 결과",
+         "children": [
+          "_result"
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_result",
+         "component": "Heading",
+         "level": 2,
+         "text": {
+          "call": "computeNumber",
+          "args": {
+           "expr": {
+            "op": "round",
+            "args": [
+             {
+              "op": "div",
+              "args": [
+               {
+                "ref": "/a"
+               },
+               {
+                "ref": "/b"
+               }
+              ]
+             },
+             2
+            ]
+           }
+          },
+          "returnType": "number"
+         }
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "note",
+         "component": "Text",
+         "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "text",
+     "text": "\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다."
+    }
+   ]
+  },
+  {
+   "name": "h-fact",
+   "text": "프랑스의 수도는 **파리**입니다.",
+   "items": [
+    {
+     "kind": "text",
+     "text": "프랑스의 수도는 **파리**입니다."
+    }
+   ]
+  },
+  {
+   "name": "h-code",
+   "text": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다.",
+   "items": [
+    {
+     "kind": "text",
+     "text": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다."
+    }
+   ]
+  },
+  {
+   "name": "h-explore",
+   "text": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.\",\"title\":\"한 주의 흐름\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"points\":[{\"x\":\"월\",\"y\":32},{\"x\":\"화\",\"y\":58},{\"x\":\"수\",\"y\":46},{\"x\":\"목\",\"y\":72},{\"x\":\"금\",\"y\":65}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"chart\",\"slider\",\"badge\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"한 주의 흐름\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"chart\",\"component\":\"Chart\",\"title\":\"일별 변화 · 예시 데이터\",\"kind\":\"line\",\"values\":{\"path\":\"/points\"},\"xKey\":\"x\",\"yKey\":\"y\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"slider\",\"component\":\"Slider\",\"label\":\"수요일 값\",\"value\":{\"path\":\"/points/2/y\"},\"min\":0,\"max\":100,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"badge\",\"component\":\"Badge\",\"text\":\"기기에서 즉시 업데이트\",\"tone\":\"success\"}]}}\n예시 데이터이므로 실제 수치가 아닙니다.",
+   "items": [
+    {
+     "kind": "text",
+     "text": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n"
+    },
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "main",
+      "fallbackText": "한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.",
+      "title": "한 주의 흐름"
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "createSurface": {
+       "surfaceId": "main",
+       "catalogId": "urn:engine:catalog:core:1"
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateDataModel": {
+       "surfaceId": "main",
+       "value": {
+        "points": [
+         {
+          "x": "월",
+          "y": 32
+         },
+         {
+          "x": "화",
+          "y": 58
+         },
+         {
+          "x": "수",
+          "y": 46
+         },
+         {
+          "x": "목",
+          "y": 72
+         },
+         {
+          "x": "금",
+          "y": 65
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "root",
+         "component": "Column",
+         "children": [
+          "heading",
+          "intro",
+          "chart",
+          "slider",
+          "badge"
+         ]
+        },
+        {
+         "id": "heading",
+         "component": "Heading",
+         "text": "한 주의 흐름",
+         "level": 1
+        },
+        {
+         "id": "intro",
+         "component": "Text",
+         "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "chart",
+         "component": "Chart",
+         "title": "일별 변화 · 예시 데이터",
+         "kind": "line",
+         "values": {
+          "path": "/points"
+         },
+         "xKey": "x",
+         "yKey": "y"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "slider",
+         "component": "Slider",
+         "label": "수요일 값",
+         "value": {
+          "path": "/points/2/y"
+         },
+         "min": 0,
+         "max": 100,
+         "step": 1
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "badge",
+         "component": "Badge",
+         "text": "기기에서 즉시 업데이트",
+         "tone": "success"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "text",
+     "text": "예시 데이터이므로 실제 수치가 아닙니다."
+    }
+   ]
+  },
+  {
+   "name": "h-two",
+   "text": "먼저 앱의 차이를 표로 볼까요?\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"compare\",\"fallbackText\":\"노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.\",\"title\":\"앱 비교\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"compare\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"compare\",\"value\":{\"choice\":\"A\",\"rows\":[{\"name\":\"A\",\"cost\":\"무료\",\"strength\":\"간단하게 시작\"},{\"name\":\"B\",\"cost\":\"월 10,000원\",\"strength\":\"함께 작업\"},{\"name\":\"C\",\"cost\":\"월 20,000원\",\"strength\":\"세밀한 설정\"}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"table\",\"choice\",\"selection\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"도구를 고르는 기준\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"table\",\"component\":\"Table\",\"caption\":\"노트 앱 비교\",\"columns\":[{\"key\":\"name\",\"label\":\"선택지\"},{\"key\":\"cost\",\"label\":\"비용\"},{\"key\":\"strength\",\"label\":\"특징\"}],\"rows\":{\"path\":\"/rows\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"choice\",\"component\":\"Select\",\"label\":\"관심 있는 선택지\",\"value\":{\"path\":\"/choice\"},\"options\":[{\"value\":\"A\",\"label\":\"선택 A\"},{\"value\":\"B\",\"label\":\"선택 B\"},{\"value\":\"C\",\"label\":\"선택 C\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"selection\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"expr\":{\"op\":\"format\",\"args\":[\"현재 선택: {0}\",{\"ref\":\"/choice\"}]}},\"returnType\":\"string\"}}]}}\n마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"cost\",\"fallbackText\":\"총 금액과 인원을 조절해 1인당 금액을 계산합니다.\",\"title\":\"비용 나누기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"cost\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"cost\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}",
+   "items": [
+    {
+     "kind": "text",
+     "text": "먼저 앱의 차이를 표로 볼까요?\n"
+    },
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "compare",
+      "fallbackText": "노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.",
+      "title": "앱 비교"
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "createSurface": {
+       "surfaceId": "compare",
+       "catalogId": "urn:engine:catalog:core:1"
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateDataModel": {
+       "surfaceId": "compare",
+       "value": {
+        "choice": "A",
+        "rows": [
+         {
+          "name": "A",
+          "cost": "무료",
+          "strength": "간단하게 시작"
+         },
+         {
+          "name": "B",
+          "cost": "월 10,000원",
+          "strength": "함께 작업"
+         },
+         {
+          "name": "C",
+          "cost": "월 20,000원",
+          "strength": "세밀한 설정"
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "compare",
+       "components": [
+        {
+         "id": "root",
+         "component": "Column",
+         "children": [
+          "heading",
+          "intro",
+          "table",
+          "choice",
+          "selection"
+         ]
+        },
+        {
+         "id": "heading",
+         "component": "Heading",
+         "text": "도구를 고르는 기준",
+         "level": 1
+        },
+        {
+         "id": "intro",
+         "component": "Text",
+         "text": "노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "compare",
+       "components": [
+        {
+         "id": "table",
+         "component": "Table",
+         "caption": "노트 앱 비교",
+         "columns": [
+          {
+           "key": "name",
+           "label": "선택지"
+          },
+          {
+           "key": "cost",
+           "label": "비용"
+          },
+          {
+           "key": "strength",
+           "label": "특징"
+          }
+         ],
+         "rows": {
+          "path": "/rows"
+         }
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "compare",
+       "components": [
+        {
+         "id": "choice",
+         "component": "Select",
+         "label": "관심 있는 선택지",
+         "value": {
+          "path": "/choice"
+         },
+         "options": [
+          {
+           "value": "A",
+           "label": "선택 A"
+          },
+          {
+           "value": "B",
+           "label": "선택 B"
+          },
+          {
+           "value": "C",
+           "label": "선택 C"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "compare",
+       "components": [
+        {
+         "id": "selection",
+         "component": "Text",
+         "text": {
+          "call": "computeString",
+          "args": {
+           "expr": {
+            "op": "format",
+            "args": [
+             "현재 선택: {0}",
+             {
+              "ref": "/choice"
+             }
+            ]
+           }
+          },
+          "returnType": "string"
+         }
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "text",
+     "text": "마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n"
+    },
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "cost",
+      "fallbackText": "총 금액과 인원을 조절해 1인당 금액을 계산합니다.",
+      "title": "비용 나누기"
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "createSurface": {
+       "surfaceId": "cost",
+       "catalogId": "urn:engine:catalog:core:1"
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateDataModel": {
+       "surfaceId": "cost",
+       "value": {
+        "a": 84000,
+        "b": 4
+       }
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "root",
+         "component": "Column",
+         "children": [
+          "heading",
+          "intro",
+          "controls",
+          "result",
+          "note"
+         ]
+        },
+        {
+         "id": "heading",
+         "component": "Heading",
+         "text": "함께 나누는 저녁",
+         "level": 1
+        },
+        {
+         "id": "intro",
+         "component": "Text",
+         "text": "총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "controls",
+         "component": "Grid",
+         "columns": 2,
+         "children": [
+          "_a",
+          "_b"
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "_a",
+         "component": "Slider",
+         "label": "총 금액 (원)",
+         "value": {
+          "path": "/a"
+         },
+         "min": 0,
+         "max": 168000,
+         "step": 1000
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "_b",
+         "component": "Slider",
+         "label": "인원",
+         "value": {
+          "path": "/b"
+         },
+         "min": 1,
+         "max": 10,
+         "step": 1
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "result",
+         "component": "Card",
+         "title": "계산 결과",
+         "children": [
+          "_result"
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "_result",
+         "component": "Heading",
+         "level": 2,
+         "text": {
+          "call": "computeNumber",
+          "args": {
+           "expr": {
+            "op": "round",
+            "args": [
+             {
+              "op": "div",
+              "args": [
+               {
+                "ref": "/a"
+               },
+               {
+                "ref": "/b"
+               }
+              ]
+             },
+             2
+            ]
+           }
+          },
+          "returnType": "number"
+         }
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "cost",
+       "components": [
+        {
+         "id": "note",
+         "component": "Text",
+         "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "h-legacy",
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"tab\":\"today\",\"done1\":false,\"done2\":false,\"memo\":\"\"}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"tabs\",\"add\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"하루를 가볍게 계획하기\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"할 일을 정리하고 완료한 항목을 체크하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"tabs\",\"component\":\"Tabs\",\"value\":{\"path\":\"/tab\"},\"tabs\":[{\"id\":\"today\",\"label\":\"오늘\",\"child\":\"_today\"},{\"id\":\"next\",\"label\":\"다음\",\"child\":\"_next\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_today\",\"component\":\"Column\",\"children\":[\"_task1\",\"_task2\",\"_progress\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_next\",\"component\":\"Text\",\"text\":\"다음 단계를 위한 여유를 남겨두세요.\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task1\",\"component\":\"Checkbox\",\"label\":\"중요한 일 한 가지 정하기\",\"value\":{\"path\":\"/done1\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task2\",\"component\":\"Checkbox\",\"label\":\"필요한 자료 준비하기\",\"value\":{\"path\":\"/done2\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_progress\",\"component\":\"Progress\",\"label\":\"진행 상황\",\"value\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"add\",\"args\":[{\"op\":\"if\",\"args\":[{\"ref\":\"/done1\"},50,0]},{\"op\":\"if\",\"args\":[{\"ref\":\"/done2\"},50,0]}]}},\"returnType\":\"number\"},\"max\":100}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"add\",\"component\":\"TextField\",\"label\":\"나의 메모\",\"value\":{\"path\":\"/memo\"}}]}}",
+   "items": [
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "createSurface": {
+       "surfaceId": "main",
+       "catalogId": "urn:engine:catalog:core:1"
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateDataModel": {
+       "surfaceId": "main",
+       "value": {
+        "tab": "today",
+        "done1": false,
+        "done2": false,
+        "memo": ""
+       }
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "root",
+         "component": "Column",
+         "children": [
+          "heading",
+          "intro",
+          "tabs",
+          "add"
+         ]
+        },
+        {
+         "id": "heading",
+         "component": "Heading",
+         "text": "하루를 가볍게 계획하기",
+         "level": 1
+        },
+        {
+         "id": "intro",
+         "component": "Text",
+         "text": "할 일을 정리하고 완료한 항목을 체크하세요.",
+         "tone": "muted"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "tabs",
+         "component": "Tabs",
+         "value": {
+          "path": "/tab"
+         },
+         "tabs": [
+          {
+           "id": "today",
+           "label": "오늘",
+           "child": "_today"
+          },
+          {
+           "id": "next",
+           "label": "다음",
+           "child": "_next"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_today",
+         "component": "Column",
+         "children": [
+          "_task1",
+          "_task2",
+          "_progress"
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_next",
+         "component": "Text",
+         "text": "다음 단계를 위한 여유를 남겨두세요."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_task1",
+         "component": "Checkbox",
+         "label": "중요한 일 한 가지 정하기",
+         "value": {
+          "path": "/done1"
+         }
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_task2",
+         "component": "Checkbox",
+         "label": "필요한 자료 준비하기",
+         "value": {
+          "path": "/done2"
+         }
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "_progress",
+         "component": "Progress",
+         "label": "진행 상황",
+         "value": {
+          "call": "computeNumber",
+          "args": {
+           "expr": {
+            "op": "add",
+            "args": [
+             {
+              "op": "if",
+              "args": [
+               {
+                "ref": "/done1"
+               },
+               50,
+               0
+              ]
+             },
+             {
+              "op": "if",
+              "args": [
+               {
+                "ref": "/done2"
+               },
+               50,
+               0
+              ]
+             }
+            ]
+           }
+          },
+          "returnType": "number"
+         },
+         "max": 100
+        }
+       ]
+      }
+     }
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "add",
+         "component": "TextField",
+         "label": "나의 메모",
+         "value": {
+          "path": "/memo"
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "session": [
+  {
+   "name": "korean-emoji/auto",
+   "policy": {},
+   "text": "안녕하세요 😀 **굵게**\n둘째 줄\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "안녕하세요 😀 **굵게**\n둘째 줄"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "korean-emoji/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "안녕하세요 😀 **굵게**\n둘째 줄\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "안녕하세요 😀 **굵게**\n둘째 줄"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "korean-emoji/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "안녕하세요 😀 **굵게**\n둘째 줄\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "korean-emoji/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "안녕하세요 😀 **굵게**\n둘째 줄\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "안녕하세요 😀 **굵게**\n둘째 줄"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "fenced-json-is-text/auto",
+   "policy": {},
+   "text": "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "fenced-json-is-text/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "fenced-json-is-text/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "fenced-json-is-text/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "```json\n{\"version\":\"v0.9\",\"createSurface\":{}}\n```\n{x}\n{\"a\":1}"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "broken-control-line/auto",
+   "policy": {},
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON"
+   ]
+  },
+  {
+   "name": "broken-control-line/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON"
+   ]
+  },
+  {
+   "name": "broken-control-line/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON"
+   ]
+  },
+  {
+   "name": "broken-control-line/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON"
+   ]
+  },
+  {
+   "name": "blank-lines/auto",
+   "policy": {},
+   "text": "\n\n첫 문단\n\n\n둘째 문단\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "첫 문단\n\n\n둘째 문단"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "blank-lines/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "\n\n첫 문단\n\n\n둘째 문단\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "첫 문단\n\n\n둘째 문단"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "blank-lines/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "\n\n첫 문단\n\n\n둘째 문단\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "blank-lines/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "\n\n첫 문단\n\n\n둘째 문단\n",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "첫 문단\n\n\n둘째 문단"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "no-trailing-newline/auto",
+   "policy": {},
+   "text": "문장 끝{\"engine\":\"v1\"}",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "문장 끝{\"engine\":\"v1\"}"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "no-trailing-newline/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "문장 끝{\"engine\":\"v1\"}",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "문장 끝{\"engine\":\"v1\"}"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "no-trailing-newline/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "문장 끝{\"engine\":\"v1\"}",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "no-trailing-newline/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "문장 끝{\"engine\":\"v1\"}",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "문장 끝{\"engine\":\"v1\"}"
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "indented-control/auto",
+   "policy": {},
+   "text": "  {\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"들여쓴 선언\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "indented-control/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "  {\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"들여쓴 선언\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "indented-control/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "  {\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"들여쓴 선언\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "indented-control/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "  {\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"들여쓴 선언\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-calc/auto",
+   "policy": {},
+   "text": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.\",\"title\":\"더치페이 계산기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}\n\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다.",
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [
+    "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.",
+    "인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다."
+   ],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-calc/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.\",\"title\":\"더치페이 계산기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}\n\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다.",
+   "blocks": [
+    "markdown",
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.",
+    "인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "h-calc/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.\",\"title\":\"더치페이 계산기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}\n\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다.",
+   "blocks": [
+    "surface"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "h-calc/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.\n\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"총 금액과 인원을 조절하면 1인당 금액을 계산합니다. 기본값은 84,000원, 4명으로 1인당 21,000원입니다.\",\"title\":\"더치페이 계산기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}\n\n인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다.",
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [
+    "1인당 금액은 **총 금액 ÷ 인원**으로 계산합니다. 팁과 세금은 포함하지 않은 단순한 가정입니다.",
+    "인원이 늘면 1인당 금액은 줄어들지만 전체 금액은 그대로입니다."
+   ],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-fact/auto",
+   "policy": {},
+   "text": "프랑스의 수도는 **파리**입니다.",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "프랑스의 수도는 **파리**입니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-fact/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "프랑스의 수도는 **파리**입니다.",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "프랑스의 수도는 **파리**입니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-fact/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "프랑스의 수도는 **파리**입니다.",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "h-fact/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "프랑스의 수도는 **파리**입니다.",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "프랑스의 수도는 **파리**입니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-code/auto",
+   "policy": {},
+   "text": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다.",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-code/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다.",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-code/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다.",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "h-code/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다.",
+   "blocks": [
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "`Set`을 사용하면 가장 간단합니다.\n\n```js\nconst unique = [...new Set(items)];\n```\n\n객체 배열이라면 키를 정해 `Map`으로 걸러야 합니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-explore/auto",
+   "policy": {},
+   "text": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.\",\"title\":\"한 주의 흐름\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"points\":[{\"x\":\"월\",\"y\":32},{\"x\":\"화\",\"y\":58},{\"x\":\"수\",\"y\":46},{\"x\":\"목\",\"y\":72},{\"x\":\"금\",\"y\":65}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"chart\",\"slider\",\"badge\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"한 주의 흐름\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"chart\",\"component\":\"Chart\",\"title\":\"일별 변화 · 예시 데이터\",\"kind\":\"line\",\"values\":{\"path\":\"/points\"},\"xKey\":\"x\",\"yKey\":\"y\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"slider\",\"component\":\"Slider\",\"label\":\"수요일 값\",\"value\":{\"path\":\"/points/2/y\"},\"min\":0,\"max\":100,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"badge\",\"component\":\"Badge\",\"text\":\"기기에서 즉시 업데이트\",\"tone\":\"success\"}]}}\n예시 데이터이므로 실제 수치가 아닙니다.",
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [
+    "수요일 값을 바꾸면 차트가 바로 달라집니다.",
+    "예시 데이터이므로 실제 수치가 아닙니다."
+   ],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-explore/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.\",\"title\":\"한 주의 흐름\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"points\":[{\"x\":\"월\",\"y\":32},{\"x\":\"화\",\"y\":58},{\"x\":\"수\",\"y\":46},{\"x\":\"목\",\"y\":72},{\"x\":\"금\",\"y\":65}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"chart\",\"slider\",\"badge\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"한 주의 흐름\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"chart\",\"component\":\"Chart\",\"title\":\"일별 변화 · 예시 데이터\",\"kind\":\"line\",\"values\":{\"path\":\"/points\"},\"xKey\":\"x\",\"yKey\":\"y\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"slider\",\"component\":\"Slider\",\"label\":\"수요일 값\",\"value\":{\"path\":\"/points/2/y\"},\"min\":0,\"max\":100,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"badge\",\"component\":\"Badge\",\"text\":\"기기에서 즉시 업데이트\",\"tone\":\"success\"}]}}\n예시 데이터이므로 실제 수치가 아닙니다.",
+   "blocks": [
+    "markdown",
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "수요일 값을 바꾸면 차트가 바로 달라집니다.",
+    "예시 데이터이므로 실제 수치가 아닙니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "h-explore/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.\",\"title\":\"한 주의 흐름\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"points\":[{\"x\":\"월\",\"y\":32},{\"x\":\"화\",\"y\":58},{\"x\":\"수\",\"y\":46},{\"x\":\"목\",\"y\":72},{\"x\":\"금\",\"y\":65}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"chart\",\"slider\",\"badge\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"한 주의 흐름\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"chart\",\"component\":\"Chart\",\"title\":\"일별 변화 · 예시 데이터\",\"kind\":\"line\",\"values\":{\"path\":\"/points\"},\"xKey\":\"x\",\"yKey\":\"y\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"slider\",\"component\":\"Slider\",\"label\":\"수요일 값\",\"value\":{\"path\":\"/points/2/y\"},\"min\":0,\"max\":100,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"badge\",\"component\":\"Badge\",\"text\":\"기기에서 즉시 업데이트\",\"tone\":\"success\"}]}}\n예시 데이터이므로 실제 수치가 아닙니다.",
+   "blocks": [
+    "surface"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "h-explore/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "수요일 값을 바꾸면 차트가 바로 달라집니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"한 주의 값을 보여주는 선 차트와 수요일 값을 바꾸는 조절 막대가 있습니다. 수요일 기본값은 42입니다.\",\"title\":\"한 주의 흐름\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"points\":[{\"x\":\"월\",\"y\":32},{\"x\":\"화\",\"y\":58},{\"x\":\"수\",\"y\":46},{\"x\":\"목\",\"y\":72},{\"x\":\"금\",\"y\":65}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"chart\",\"slider\",\"badge\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"한 주의 흐름\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"chart\",\"component\":\"Chart\",\"title\":\"일별 변화 · 예시 데이터\",\"kind\":\"line\",\"values\":{\"path\":\"/points\"},\"xKey\":\"x\",\"yKey\":\"y\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"slider\",\"component\":\"Slider\",\"label\":\"수요일 값\",\"value\":{\"path\":\"/points/2/y\"},\"min\":0,\"max\":100,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"badge\",\"component\":\"Badge\",\"text\":\"기기에서 즉시 업데이트\",\"tone\":\"success\"}]}}\n예시 데이터이므로 실제 수치가 아닙니다.",
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [
+    "수요일 값을 바꾸면 차트가 바로 달라집니다.",
+    "예시 데이터이므로 실제 수치가 아닙니다."
+   ],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-two/auto",
+   "policy": {},
+   "text": "먼저 앱의 차이를 표로 볼까요?\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"compare\",\"fallbackText\":\"노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.\",\"title\":\"앱 비교\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"compare\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"compare\",\"value\":{\"choice\":\"A\",\"rows\":[{\"name\":\"A\",\"cost\":\"무료\",\"strength\":\"간단하게 시작\"},{\"name\":\"B\",\"cost\":\"월 10,000원\",\"strength\":\"함께 작업\"},{\"name\":\"C\",\"cost\":\"월 20,000원\",\"strength\":\"세밀한 설정\"}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"table\",\"choice\",\"selection\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"도구를 고르는 기준\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"table\",\"component\":\"Table\",\"caption\":\"노트 앱 비교\",\"columns\":[{\"key\":\"name\",\"label\":\"선택지\"},{\"key\":\"cost\",\"label\":\"비용\"},{\"key\":\"strength\",\"label\":\"특징\"}],\"rows\":{\"path\":\"/rows\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"choice\",\"component\":\"Select\",\"label\":\"관심 있는 선택지\",\"value\":{\"path\":\"/choice\"},\"options\":[{\"value\":\"A\",\"label\":\"선택 A\"},{\"value\":\"B\",\"label\":\"선택 B\"},{\"value\":\"C\",\"label\":\"선택 C\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"selection\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"expr\":{\"op\":\"format\",\"args\":[\"현재 선택: {0}\",{\"ref\":\"/choice\"}]}},\"returnType\":\"string\"}}]}}\n마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"cost\",\"fallbackText\":\"총 금액과 인원을 조절해 1인당 금액을 계산합니다.\",\"title\":\"비용 나누기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"cost\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"cost\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}",
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown",
+    "surface"
+   ],
+   "surfaces": [
+    "compare",
+    "cost"
+   ],
+   "markdown": [
+    "먼저 앱의 차이를 표로 볼까요?",
+    "마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다."
+   ],
+   "fallbackSources": [
+    "model",
+    "model"
+   ],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "h-two/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "먼저 앱의 차이를 표로 볼까요?\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"compare\",\"fallbackText\":\"노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.\",\"title\":\"앱 비교\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"compare\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"compare\",\"value\":{\"choice\":\"A\",\"rows\":[{\"name\":\"A\",\"cost\":\"무료\",\"strength\":\"간단하게 시작\"},{\"name\":\"B\",\"cost\":\"월 10,000원\",\"strength\":\"함께 작업\"},{\"name\":\"C\",\"cost\":\"월 20,000원\",\"strength\":\"세밀한 설정\"}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"table\",\"choice\",\"selection\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"도구를 고르는 기준\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"table\",\"component\":\"Table\",\"caption\":\"노트 앱 비교\",\"columns\":[{\"key\":\"name\",\"label\":\"선택지\"},{\"key\":\"cost\",\"label\":\"비용\"},{\"key\":\"strength\",\"label\":\"특징\"}],\"rows\":{\"path\":\"/rows\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"choice\",\"component\":\"Select\",\"label\":\"관심 있는 선택지\",\"value\":{\"path\":\"/choice\"},\"options\":[{\"value\":\"A\",\"label\":\"선택 A\"},{\"value\":\"B\",\"label\":\"선택 B\"},{\"value\":\"C\",\"label\":\"선택 C\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"selection\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"expr\":{\"op\":\"format\",\"args\":[\"현재 선택: {0}\",{\"ref\":\"/choice\"}]}},\"returnType\":\"string\"}}]}}\n마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"cost\",\"fallbackText\":\"총 금액과 인원을 조절해 1인당 금액을 계산합니다.\",\"title\":\"비용 나누기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"cost\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"cost\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}",
+   "blocks": [
+    "markdown",
+    "markdown"
+   ],
+   "surfaces": [],
+   "markdown": [
+    "먼저 앱의 차이를 표로 볼까요?",
+    "마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다."
+   ],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "h-two/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "먼저 앱의 차이를 표로 볼까요?\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"compare\",\"fallbackText\":\"노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.\",\"title\":\"앱 비교\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"compare\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"compare\",\"value\":{\"choice\":\"A\",\"rows\":[{\"name\":\"A\",\"cost\":\"무료\",\"strength\":\"간단하게 시작\"},{\"name\":\"B\",\"cost\":\"월 10,000원\",\"strength\":\"함께 작업\"},{\"name\":\"C\",\"cost\":\"월 20,000원\",\"strength\":\"세밀한 설정\"}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"table\",\"choice\",\"selection\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"도구를 고르는 기준\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"table\",\"component\":\"Table\",\"caption\":\"노트 앱 비교\",\"columns\":[{\"key\":\"name\",\"label\":\"선택지\"},{\"key\":\"cost\",\"label\":\"비용\"},{\"key\":\"strength\",\"label\":\"특징\"}],\"rows\":{\"path\":\"/rows\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"choice\",\"component\":\"Select\",\"label\":\"관심 있는 선택지\",\"value\":{\"path\":\"/choice\"},\"options\":[{\"value\":\"A\",\"label\":\"선택 A\"},{\"value\":\"B\",\"label\":\"선택 B\"},{\"value\":\"C\",\"label\":\"선택 C\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"selection\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"expr\":{\"op\":\"format\",\"args\":[\"현재 선택: {0}\",{\"ref\":\"/choice\"}]}},\"returnType\":\"string\"}}]}}\n마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"cost\",\"fallbackText\":\"총 금액과 인원을 조절해 1인당 금액을 계산합니다.\",\"title\":\"비용 나누기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"cost\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"cost\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}",
+   "blocks": [
+    "surface",
+    "surface"
+   ],
+   "surfaces": [
+    "compare",
+    "cost"
+   ],
+   "markdown": [],
+   "fallbackSources": [
+    "model",
+    "model"
+   ],
+   "diagnosticCodes": [
+    "POLICY_MARKDOWN_DISABLED"
+   ]
+  },
+  {
+   "name": "h-two/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "먼저 앱의 차이를 표로 볼까요?\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"compare\",\"fallbackText\":\"노트 앱 세 가지를 비교한 표와 선택 목록입니다. 수치는 예시입니다.\",\"title\":\"앱 비교\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"compare\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"compare\",\"value\":{\"choice\":\"A\",\"rows\":[{\"name\":\"A\",\"cost\":\"무료\",\"strength\":\"간단하게 시작\"},{\"name\":\"B\",\"cost\":\"월 10,000원\",\"strength\":\"함께 작업\"},{\"name\":\"C\",\"cost\":\"월 20,000원\",\"strength\":\"세밀한 설정\"}]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"table\",\"choice\",\"selection\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"도구를 고르는 기준\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"table\",\"component\":\"Table\",\"caption\":\"노트 앱 비교\",\"columns\":[{\"key\":\"name\",\"label\":\"선택지\"},{\"key\":\"cost\",\"label\":\"비용\"},{\"key\":\"strength\",\"label\":\"특징\"}],\"rows\":{\"path\":\"/rows\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"choice\",\"component\":\"Select\",\"label\":\"관심 있는 선택지\",\"value\":{\"path\":\"/choice\"},\"options\":[{\"value\":\"A\",\"label\":\"선택 A\"},{\"value\":\"B\",\"label\":\"선택 B\"},{\"value\":\"C\",\"label\":\"선택 C\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"compare\",\"components\":[{\"id\":\"selection\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"expr\":{\"op\":\"format\",\"args\":[\"현재 선택: {0}\",{\"ref\":\"/choice\"}]}},\"returnType\":\"string\"}}]}}\n마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"cost\",\"fallbackText\":\"총 금액과 인원을 조절해 1인당 금액을 계산합니다.\",\"title\":\"비용 나누기\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"cost\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"cost\",\"value\":{\"a\":84000,\"b\":4}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"controls\",\"result\",\"note\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"함께 나누는 저녁\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"controls\",\"component\":\"Grid\",\"columns\":2,\"children\":[\"_a\",\"_b\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_a\",\"component\":\"Slider\",\"label\":\"총 금액 (원)\",\"value\":{\"path\":\"/a\"},\"min\":0,\"max\":168000,\"step\":1000}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_b\",\"component\":\"Slider\",\"label\":\"인원\",\"value\":{\"path\":\"/b\"},\"min\":1,\"max\":10,\"step\":1}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"result\",\"component\":\"Card\",\"title\":\"계산 결과\",\"children\":[\"_result\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"_result\",\"component\":\"Heading\",\"level\":2,\"text\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"round\",\"args\":[{\"op\":\"div\",\"args\":[{\"ref\":\"/a\"},{\"ref\":\"/b\"}]},2]}},\"returnType\":\"number\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"cost\",\"components\":[{\"id\":\"note\",\"component\":\"Text\",\"text\":\"입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.\",\"tone\":\"muted\"}]}}",
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ],
+   "surfaces": [
+    "compare"
+   ],
+   "markdown": [
+    "먼저 앱의 차이를 표로 볼까요?",
+    "마음에 드는 앱이 있다면 구독 비용을 나눠 볼 수 있습니다."
+   ],
+   "fallbackSources": [
+    "model"
+   ],
+   "diagnosticCodes": [
+    "POLICY_MAX_SURFACES"
+   ]
+  },
+  {
+   "name": "h-legacy/auto",
+   "policy": {},
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"tab\":\"today\",\"done1\":false,\"done2\":false,\"memo\":\"\"}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"tabs\",\"add\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"하루를 가볍게 계획하기\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"할 일을 정리하고 완료한 항목을 체크하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"tabs\",\"component\":\"Tabs\",\"value\":{\"path\":\"/tab\"},\"tabs\":[{\"id\":\"today\",\"label\":\"오늘\",\"child\":\"_today\"},{\"id\":\"next\",\"label\":\"다음\",\"child\":\"_next\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_today\",\"component\":\"Column\",\"children\":[\"_task1\",\"_task2\",\"_progress\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_next\",\"component\":\"Text\",\"text\":\"다음 단계를 위한 여유를 남겨두세요.\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task1\",\"component\":\"Checkbox\",\"label\":\"중요한 일 한 가지 정하기\",\"value\":{\"path\":\"/done1\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task2\",\"component\":\"Checkbox\",\"label\":\"필요한 자료 준비하기\",\"value\":{\"path\":\"/done2\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_progress\",\"component\":\"Progress\",\"label\":\"진행 상황\",\"value\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"add\",\"args\":[{\"op\":\"if\",\"args\":[{\"ref\":\"/done1\"},50,0]},{\"op\":\"if\",\"args\":[{\"ref\":\"/done2\"},50,0]}]}},\"returnType\":\"number\"},\"max\":100}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"add\",\"component\":\"TextField\",\"label\":\"나의 메모\",\"value\":{\"path\":\"/memo\"}}]}}",
+   "blocks": [
+    "surface"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [],
+   "fallbackSources": [
+    "generated"
+   ],
+   "diagnosticCodes": [
+    "FALLBACK_TEXT_MISSING"
+   ]
+  },
+  {
+   "name": "h-legacy/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"tab\":\"today\",\"done1\":false,\"done2\":false,\"memo\":\"\"}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"tabs\",\"add\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"하루를 가볍게 계획하기\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"할 일을 정리하고 완료한 항목을 체크하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"tabs\",\"component\":\"Tabs\",\"value\":{\"path\":\"/tab\"},\"tabs\":[{\"id\":\"today\",\"label\":\"오늘\",\"child\":\"_today\"},{\"id\":\"next\",\"label\":\"다음\",\"child\":\"_next\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_today\",\"component\":\"Column\",\"children\":[\"_task1\",\"_task2\",\"_progress\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_next\",\"component\":\"Text\",\"text\":\"다음 단계를 위한 여유를 남겨두세요.\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task1\",\"component\":\"Checkbox\",\"label\":\"중요한 일 한 가지 정하기\",\"value\":{\"path\":\"/done1\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task2\",\"component\":\"Checkbox\",\"label\":\"필요한 자료 준비하기\",\"value\":{\"path\":\"/done2\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_progress\",\"component\":\"Progress\",\"label\":\"진행 상황\",\"value\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"add\",\"args\":[{\"op\":\"if\",\"args\":[{\"ref\":\"/done1\"},50,0]},{\"op\":\"if\",\"args\":[{\"ref\":\"/done2\"},50,0]}]}},\"returnType\":\"number\"},\"max\":100}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"add\",\"component\":\"TextField\",\"label\":\"나의 메모\",\"value\":{\"path\":\"/memo\"}}]}}",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "h-legacy/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"tab\":\"today\",\"done1\":false,\"done2\":false,\"memo\":\"\"}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"tabs\",\"add\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"하루를 가볍게 계획하기\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"할 일을 정리하고 완료한 항목을 체크하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"tabs\",\"component\":\"Tabs\",\"value\":{\"path\":\"/tab\"},\"tabs\":[{\"id\":\"today\",\"label\":\"오늘\",\"child\":\"_today\"},{\"id\":\"next\",\"label\":\"다음\",\"child\":\"_next\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_today\",\"component\":\"Column\",\"children\":[\"_task1\",\"_task2\",\"_progress\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_next\",\"component\":\"Text\",\"text\":\"다음 단계를 위한 여유를 남겨두세요.\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task1\",\"component\":\"Checkbox\",\"label\":\"중요한 일 한 가지 정하기\",\"value\":{\"path\":\"/done1\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task2\",\"component\":\"Checkbox\",\"label\":\"필요한 자료 준비하기\",\"value\":{\"path\":\"/done2\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_progress\",\"component\":\"Progress\",\"label\":\"진행 상황\",\"value\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"add\",\"args\":[{\"op\":\"if\",\"args\":[{\"ref\":\"/done1\"},50,0]},{\"op\":\"if\",\"args\":[{\"ref\":\"/done2\"},50,0]}]}},\"returnType\":\"number\"},\"max\":100}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"add\",\"component\":\"TextField\",\"label\":\"나의 메모\",\"value\":{\"path\":\"/memo\"}}]}}",
+   "blocks": [
+    "surface"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [],
+   "fallbackSources": [
+    "generated"
+   ],
+   "diagnosticCodes": [
+    "FALLBACK_TEXT_MISSING"
+   ]
+  },
+  {
+   "name": "h-legacy/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"value\":{\"tab\":\"today\",\"done1\":false,\"done2\":false,\"memo\":\"\"}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"tabs\",\"add\"]},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"하루를 가볍게 계획하기\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"할 일을 정리하고 완료한 항목을 체크하세요.\",\"tone\":\"muted\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"tabs\",\"component\":\"Tabs\",\"value\":{\"path\":\"/tab\"},\"tabs\":[{\"id\":\"today\",\"label\":\"오늘\",\"child\":\"_today\"},{\"id\":\"next\",\"label\":\"다음\",\"child\":\"_next\"}]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_today\",\"component\":\"Column\",\"children\":[\"_task1\",\"_task2\",\"_progress\"]}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_next\",\"component\":\"Text\",\"text\":\"다음 단계를 위한 여유를 남겨두세요.\"}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task1\",\"component\":\"Checkbox\",\"label\":\"중요한 일 한 가지 정하기\",\"value\":{\"path\":\"/done1\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_task2\",\"component\":\"Checkbox\",\"label\":\"필요한 자료 준비하기\",\"value\":{\"path\":\"/done2\"}}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"_progress\",\"component\":\"Progress\",\"label\":\"진행 상황\",\"value\":{\"call\":\"computeNumber\",\"args\":{\"expr\":{\"op\":\"add\",\"args\":[{\"op\":\"if\",\"args\":[{\"ref\":\"/done1\"},50,0]},{\"op\":\"if\",\"args\":[{\"ref\":\"/done2\"},50,0]}]}},\"returnType\":\"number\"},\"max\":100}]}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"add\",\"component\":\"TextField\",\"label\":\"나의 메모\",\"value\":{\"path\":\"/memo\"}}]}}",
+   "blocks": [
+    "surface"
+   ],
+   "surfaces": [
+    "main"
+   ],
+   "markdown": [],
+   "fallbackSources": [
+    "generated"
+   ],
+   "diagnosticCodes": [
+    "FALLBACK_TEXT_MISSING"
+   ]
+  }
+ ]
+}

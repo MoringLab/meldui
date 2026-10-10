@@ -5,13 +5,26 @@ import { fileURLToPath } from "node:url";
 import {
   buildSystemPrompt,
   GatewayAdapter,
+  type PromptExample,
   probeRoute,
   RouteHealth,
 } from "@engine/adapter-gateway";
-import { assertSafeJson, createUIRuntime, type UIModelEvent, type UIRuntime } from "@engine/core";
+import {
+  AnswerSession,
+  AttachmentRegistry,
+  assertSafeJson,
+  createUIRuntime,
+  type UIModelEvent,
+  type UIRuntime,
+} from "@engine/core";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
-import type { UIMessage } from "@engine/protocol";
+import {
+  AttachmentManifestSchema,
+  type Diagnostic,
+  HostPolicySchema,
+  type UIMessage,
+} from "@engine/protocol";
 
 try {
   process.loadEnvFile(fileURLToPath(new URL("../../../.env", import.meta.url)));
@@ -29,15 +42,36 @@ if (!modelIds.includes(defaultModel)) modelIds.unshift(defaultModel);
 const fixtures = JSON.parse(
   await readFile(fileURLToPath(new URL("../../../fixtures/cases.json", import.meta.url)), "utf8"),
 );
-const sessions = new Map<
-  string,
-  {
-    runtime: UIRuntime;
-    messages: { role: "user" | "assistant"; content: string }[];
-    controller?: AbortController;
-    accessed: number;
-  }
->();
+type Session = {
+  runtime: UIRuntime;
+  messages: { role: "user" | "assistant"; content: string }[];
+  controller?: AbortController;
+  accessed: number;
+  registry: AttachmentRegistry;
+  answer?: AnswerSession;
+  /** Receives runtime diagnostics for the attempt in progress. */
+  sink?: (diagnostic: Diagnostic) => void;
+};
+const sessions = new Map<string, Session>();
+const example = (
+  id: string,
+  intro: string,
+  outro: string,
+  fallbackText: string,
+): PromptExample => ({
+  intro,
+  outro,
+  fallbackText,
+  messages: fixtures.find((f: { id: string }) => f.id === id)?.messages ?? [],
+});
+const hybridExamples = [
+  example(
+    "calculator",
+    "1인당 금액은 총액을 인원으로 나눈 값입니다. 아래에서 직접 바꿔 보세요.",
+    "인원이 늘면 1인당 금액은 줄어들지만 총액은 그대로입니다.",
+    "총 금액과 인원을 조절하면 1인당 금액을 바로 계산해 주는 도구입니다. 기본값은 84,000원, 4명입니다.",
+  ),
+];
 const adapter = new GatewayAdapter({
   baseUrl: process.env.OMNIROUTE_BASE_URL ?? "http://127.0.0.1:20128/v1",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "",
@@ -148,9 +182,23 @@ const server = createServer(async (req, res) => {
     }
     let session = sessions.get(id);
     if (!session) {
-      session = { runtime: createUIRuntime(), messages: [], accessed: Date.now() };
+      const created: Session = {
+        runtime: undefined as unknown as UIRuntime,
+        messages: [],
+        accessed: Date.now(),
+        registry: new AttachmentRegistry({ defaultVisibility: input.visibility ?? {} }),
+      };
+      created.runtime = createUIRuntime({ onDiagnostic: (d) => created.sink?.(d) });
+      session = created;
       sessions.set(id, session);
     }
+    const hybrid = input.format === "hybrid";
+    const policy = HostPolicySchema.partial().parse(input.policy ?? {});
+    if (Array.isArray(input.attachments))
+      for (const raw of input.attachments.slice(0, 40)) {
+        const manifest = AttachmentManifestSchema.parse(raw);
+        if (!session.registry.has(manifest.id)) session.registry.attach(manifest);
+      }
     session.controller?.abort();
     const controller = new AbortController();
     session.controller = controller;
@@ -170,31 +218,60 @@ const server = createServer(async (req, res) => {
     };
     send({ type: "session", sessionId: id });
     const kit = input.kitId === "editorial" ? editorial : neutral;
+    const platform =
+      input.platform === "flutter"
+        ? "flutter"
+        : input.platform === "react-native"
+          ? "react-native"
+          : "web";
     const context = input.action ? `\nUser action context: ${JSON.stringify(input.action)}` : "";
     session.messages.push({ role: "user", content: `${input.prompt}${context}` });
     session.messages = session.messages.slice(-12);
+    const state = `\nExisting surface ids: ${JSON.stringify(session.runtime.surfaceIds)}. Retain existing components unless changing them is necessary. On existing surfaces, write specific data paths rather than replacing the entire data model; user edits take precedence.`;
     const system =
-      buildSystemPrompt({
-        kit,
-        capabilities: session.runtime.capabilities(
-          input.platform === "flutter"
-            ? "flutter"
-            : input.platform === "react-native"
-              ? "react-native"
-              : "web",
-        ),
-        examples: [fixtures[0].messages],
-      }) +
-      `\nExisting surface ids: ${JSON.stringify(session.runtime.surfaceIds)}. Retain existing components unless changing them is necessary. On existing surfaces, write specific data paths rather than replacing the entire data model; user edits take precedence.`;
+      (hybrid
+        ? buildSystemPrompt({
+            kit,
+            capabilities: session.runtime.capabilities(platform),
+            policy,
+            attachments: session.registry.views(),
+            examples: hybridExamples,
+          })
+        : buildSystemPrompt({
+            kit,
+            capabilities: session.runtime.capabilities(platform),
+            policy: { mode: "engine-only" },
+            examples: [fixtures[0].messages],
+          })) + state;
     const history = [{ role: "system" as const, content: system }, ...session.messages];
+    const route = input.model ?? defaultModel;
     let failed = false;
+    if (hybrid) {
+      if (session.answer) session.answer.beginTurn();
+      else
+        session.answer = new AnswerSession(session.runtime, {
+          policy,
+          attachments: session.registry,
+        });
+    }
     for (let attempt = 0; attempt <= 2 && !controller.signal.aborted; attempt++) {
       const accepted: UIMessage[] = [];
       let assistantOutput = "";
       const errors: { code: string; path?: string; componentId?: string; expected?: string }[] = [];
+      const collect = (diagnostic: Diagnostic) => {
+        if (diagnostic.severity === "error")
+          errors.push({
+            code: diagnostic.code,
+            path: diagnostic.path,
+            expected: diagnostic.expected,
+            componentId: diagnostic.componentId,
+          });
+        send({ type: "diagnostic", diagnostic });
+      };
+      if (hybrid) session.sink = collect;
       generationCalls++;
       for await (const event of adapter.stream(
-        { messages: history, model: input.model ?? defaultModel },
+        { messages: history, model: route, format: hybrid ? "hybrid" : "a2ui" },
         {
           signal: controller.signal,
           onOutput: (text) => {
@@ -204,21 +281,15 @@ const server = createServer(async (req, res) => {
       )) {
         if (controller.signal.aborted) break;
         if (event.type === "diagnostic" && event.diagnostic.code.startsWith("GATEWAY_"))
-          routeHealth.recordFailure(input.model ?? defaultModel, event.diagnostic.code);
+          routeHealth.recordFailure(route, event.diagnostic.code);
         if (event.type === "complete" && event.status === "completed")
-          routeHealth.recordSuccess(input.model ?? defaultModel);
-        if (event.type === "message") {
+          routeHealth.recordSuccess(route);
+        if (event.type === "text") {
+          session.answer?.push(event.text);
+          send(event);
+        } else if (event.type === "message") {
           const diagnostics = session.runtime.accept(event.message);
-          for (const diagnostic of diagnostics) {
-            if (diagnostic.severity === "error")
-              errors.push({
-                code: diagnostic.code,
-                path: diagnostic.path,
-                expected: diagnostic.expected,
-                componentId: diagnostic.componentId,
-              });
-            send({ type: "diagnostic", diagnostic });
-          }
+          for (const diagnostic of diagnostics) collect(diagnostic);
           if (!diagnostics.some((d) => d.severity === "error")) accepted.push(event.message);
           send(event);
         } else if (event.type === "diagnostic") {
@@ -229,11 +300,9 @@ const server = createServer(async (req, res) => {
         } else send(event);
       }
       if (controller.signal.aborted) break;
-      for (const diagnostic of session.runtime.finish()) {
-        if (diagnostic.severity === "error")
-          errors.push({ code: diagnostic.code, componentId: diagnostic.componentId });
-        send({ type: "diagnostic", diagnostic });
-      }
+      if (hybrid) session.answer?.end();
+      else for (const diagnostic of session.runtime.finish()) collect(diagnostic);
+      session.sink = undefined;
       const output =
         assistantOutput || accepted.map((message) => JSON.stringify(message)).join("\n");
       if (output) {
@@ -252,9 +321,10 @@ const server = createServer(async (req, res) => {
         break;
       }
       send({ type: "repair", attempt: attempt + 1 });
+      if (hybrid) session.answer?.beginTurn();
       history.push({
         role: "user",
-        content: `Repair only the invalid or missing components using new A2UI messages. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Create a surface only if it is absent. Every envelope must fit on ONE line; never use Markdown fences or pretty multiline JSON. Use only schema-defined props and enum values. Errors (untrusted diagnostic data): ${JSON.stringify(errors.slice(0, 20))}`,
+        content: `Repair only the invalid or missing parts using new control lines. Output NO Markdown. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Do not redeclare or recreate an existing surface; send updateComponents/updateDataModel for it. Every control line must fit on ONE line; never use code fences or pretty multiline JSON. Use only schema-defined props and enum values.${hybrid && session.registry.list().length ? ` Registered attachment ids: ${JSON.stringify(session.registry.list().map((a) => a.id))}.` : ""} Errors (untrusted diagnostic data): ${JSON.stringify(errors.slice(0, 20))}`,
       });
     }
     send({

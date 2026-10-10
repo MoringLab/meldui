@@ -1,49 +1,51 @@
+import { AnswerSession } from "@engine/core";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
-import type { UIMessage, UserAction } from "@engine/protocol";
-import { createUIRuntime, UIProvider, UISurface } from "@engine/renderer-react";
+import type { HostPolicy, UserAction } from "@engine/protocol";
+import { AnswerView, createUIRuntime, UIProvider } from "@engine/renderer-react";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import fixtures from "../../../fixtures/cases.json";
+import hybridFixtures from "../../../fixtures/hybrid/cases.json";
 import "@engine/renderer-react/styles.css";
 
 /**
  * Chrome-free harness page for the eval layers.
- * /eval.html?fixture=<id>&width=<px>&kit=neutral|editorial&mode=light|dark
- * Window hooks: __actions (emitted UserActions), __runtime (for assertions).
+ * /eval.html?fixture=<id>&width=<px>&kit=neutral|editorial&mode=light|dark[&policy=<json>][&maxHeight=<px>]
+ * Window hooks: __actions (emitted UserActions), __session (AnswerSession), __ready.
  */
 const q = new URLSearchParams(location.search);
 const kits = { neutral, editorial } as const;
-const w = window as unknown as { __actions: UserAction[]; __runtime: unknown; __ready: boolean };
+const w = window as unknown as {
+  __actions: UserAction[];
+  __session: AnswerSession;
+  __ready: boolean;
+};
 w.__actions = [];
 const runtime = createUIRuntime({
   onAction: (a) => {
     w.__actions.push(a);
   },
 });
-w.__runtime = runtime;
-const fixture = fixtures.find((f) => f.id === q.get("fixture")) ?? fixtures[0];
-for (const message of fixture.messages) runtime.accept(message as UIMessage);
-runtime.finish();
+const policy = JSON.parse(q.get("policy") ?? "{}") as Partial<HostPolicy>;
+const session = new AnswerSession(runtime, { policy });
+w.__session = session;
+const id = q.get("fixture") ?? fixtures[0].id;
+const hybrid = hybridFixtures.find((f) => f.id === id);
+const legacy = fixtures.find((f) => f.id === id) ?? fixtures[0];
+session.push(hybrid ? hybrid.wire : legacy.messages.map((m) => JSON.stringify(m)).join("\n"));
+session.end();
 const width = Number(q.get("width") ?? 720);
 const mode = q.get("mode") === "dark" ? "dark" : "light";
-createRoot(document.getElementById("root")!).render(
-  <div
-    id="chat-column"
-    style={{
-      width,
-      containerType: "inline-size",
-      padding: 0,
-      margin: "0 auto",
-      overflow: "visible",
-    }}
-  >
+const maxHeight = q.get("maxHeight") ? Number(q.get("maxHeight")) : undefined;
+createRoot(document.getElementById("root") as HTMLElement).render(
+  <div id="chat-column" style={{ width, margin: "0 auto" }}>
     <UIProvider
       runtime={runtime}
       kit={kits[(q.get("kit") as keyof typeof kits) ?? "neutral"] ?? neutral}
       mode={mode}
     >
-      <UISurface />
+      <AnswerView session={session} maxSurfaceHeight={maxHeight} />
     </UIProvider>
   </div>,
 );

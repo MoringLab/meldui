@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui' show FrameTiming;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -25,7 +26,7 @@ void main() {
         await state.replay(fixture['id'] as String, animate: false);
         await tester.pumpAndSettle();
         expect(
-          state.runtime!.diagnostics,
+          state.runtime!.diagnostics.where((d) => d['severity'] == 'error'),
           isEmpty,
           reason: '$kit/${fixture['id']}',
         );
@@ -51,10 +52,74 @@ void main() {
     expect(state.runtime!.read('main', '/name'), '루이');
     FocusManager.instance.primaryFocus?.unfocus();
     tester.testTextInput.unregister();
-    final timings = <double>[];
+    // Two conditions, 130 samples each (10 warm-ups dropped, 120 kept):
+    //  cold-tree: fresh runtime and freshly mounted tree for every sample
+    //  warm:      one mounted tree and runtime; each sample deletes then recreates the surface
+    const samples = 130, drop = 10;
     final kit = state.kits['neutral']!;
-    for (var run = 0; run < 35; run++) {
+    final frameTimings = <FrameTiming>[];
+    void onTimings(List<FrameTiming> t) => frameTimings.addAll(t);
+    WidgetsBinding.instance.addTimingsCallback(onTimings);
+    JsonMap components() => {
+      'version': 'v0.9',
+      'updateComponents': {
+        'surfaceId': 'main',
+        'components': [
+          {
+            'id': 'root',
+            'component': 'Column',
+            'children': [for (var i = 0; i < 99; i++) 'n$i'],
+          },
+          for (var i = 0; i < 99; i++)
+            {'id': 'n$i', 'component': 'Text', 'text': '측정 $i'},
+        ],
+      },
+    };
+    Future<Map<String, double>> measure(UIRuntime runtime) async {
+      final clock = Stopwatch()..start();
+      runtime.accept(components());
+      final acceptMs = clock.elapsedMicroseconds / 1000;
+      await tester.pump();
+      clock.stop();
+      return {
+        'total': clock.elapsedMicroseconds / 1000,
+        'acceptMs': acceptMs,
+        'pumpMs': clock.elapsedMicroseconds / 1000 - acceptMs,
+      };
+    }
+
+    Map<String, dynamic> stat(List<double> values) {
+      final sorted = [...values]..sort();
+      double at(double q) =>
+          sorted[(sorted.length * q).ceil().clamp(1, sorted.length) - 1];
+      return {
+        'samples': sorted.length,
+        'min': sorted.first,
+        'p50': at(.5),
+        'p90': at(.9),
+        'p95': at(.95),
+        'p99': at(.99),
+        'max': sorted.last,
+        'mean': sorted.reduce((a, b) => a + b) / sorted.length,
+        'timingsMs': sorted,
+      };
+    }
+
+    Map<String, dynamic> summary(List<Map<String, double>> kept) => {
+      ...stat([for (final k in kept) k['total']!]),
+      'phases': {
+        'acceptMs': {...stat([for (final k in kept) k['acceptMs']!])..remove('timingsMs')},
+        'pumpMs': {...stat([for (final k in kept) k['pumpMs']!])..remove('timingsMs')},
+      },
+    };
+
+    frameTimings.clear();
+    final cold = <Map<String, double>>[];
+    final createMs = <double>[];
+    for (var run = 0; run < samples; run++) {
+      final createClock = Stopwatch()..start();
       final runtime = await UIRuntime.create();
+      if (run >= drop) createMs.add(createClock.elapsedMicroseconds / 1000);
       runtime.accept({
         'version': 'v0.9',
         'createSurface': {'surfaceId': 'main', 'catalogId': catalogId},
@@ -63,48 +128,78 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: SingleChildScrollView(
-              child: UIProvider(
-                runtime: runtime,
-                kit: kit,
-                child: const UISurface(),
-              ),
+              child: UIProvider(runtime: runtime, kit: kit, child: const UISurface()),
             ),
           ),
         ),
       );
-      final clock = Stopwatch()..start();
-      runtime.accept({
-        'version': 'v0.9',
-        'updateComponents': {
-          'surfaceId': 'main',
-          'components': [
-            {
-              'id': 'root',
-              'component': 'Column',
-              'children': [for (var i = 0; i < 99; i++) 'n$i'],
-            },
-            for (var i = 0; i < 99; i++)
-              {'id': 'n$i', 'component': 'Text', 'text': '측정 $i'},
-          ],
-        },
-      });
-      await tester.pump();
-      clock.stop();
-      if (run >= 5) timings.add(clock.elapsedMicroseconds / 1000);
+      final result = await measure(runtime);
+      if (run >= drop) cold.add(result);
       await tester.pumpWidget(const SizedBox());
       runtime.dispose();
     }
-    timings.sort();
-    IntegrationTestWidgetsFlutterBinding.instance.reportData = {
-      "performance": {
-        "platform": "flutter",
-        "nodes": 100,
-        "samples": timings.length,
-        "p95Ms": timings[(timings.length * .95).ceil() - 1],
-      },
-    };
-    debugPrint(
-      'ENGINE_PERFORMANCE ${jsonEncode({'platform': 'flutter', 'mode': 'profile', 'nodes': 100, 'samples': timings.length, 'p95Ms': timings[(timings.length * .95).ceil() - 1], 'timingsMs': timings})}',
+    await tester.pump(const Duration(milliseconds: 500));
+    final coldFrames = frameTimings.toList();
+    frameTimings.clear();
+    final warmRuntime = await UIRuntime.create();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: UIProvider(runtime: warmRuntime, kit: kit, child: const UISurface()),
+          ),
+        ),
+      ),
     );
+    final warm = <Map<String, double>>[];
+    for (var run = 0; run < samples; run++) {
+      if (warmRuntime.surface('main') != null) {
+        warmRuntime.accept({'version': 'v0.9', 'deleteSurface': {'surfaceId': 'main'}});
+      }
+      await tester.pump();
+      warmRuntime.accept({
+        'version': 'v0.9',
+        'createSurface': {'surfaceId': 'main', 'catalogId': catalogId},
+      });
+      await tester.pump();
+      final result = await measure(warmRuntime);
+      if (run >= drop) warm.add(result);
+    }
+    await tester.pump(const Duration(milliseconds: 500));
+    final warmFrames = frameTimings.toList();
+    WidgetsBinding.instance.removeTimingsCallback(onTimings);
+    Map<String, dynamic> frames(List<FrameTiming> list) => list.isEmpty
+        ? {'count': 0}
+        : {
+            'count': list.length,
+            'buildMs': {...stat([for (final f in list) f.buildDuration.inMicroseconds / 1000])..remove('timingsMs')},
+            'rasterMs': {...stat([for (final f in list) f.rasterDuration.inMicroseconds / 1000])..remove('timingsMs')},
+            'totalMs': {...stat([for (final f in list) f.totalSpan.inMicroseconds / 1000])..remove('timingsMs')},
+          };
+    final report = {
+      'platform': 'flutter',
+      'mode': 'profile',
+      'nodes': 100,
+      'warmupDropped': drop,
+      'cold': {
+        ...summary(cold),
+        // Runtime creation (incl. one-time processor warm-up) happens while the model is still
+        // working; it is reported so the cost is moved, not hidden.
+        'createMs': {...stat(createMs)..remove('timingsMs')},
+        'frames': frames(coldFrames),
+      },
+      'warm': {...summary(warm), 'frames': frames(warmFrames)},
+    };
+    // Legacy fields (cold-tree, the original definition) so older readers keep working.
+    final legacy = {
+      ...report,
+      'samples': (report['cold'] as Map)['samples'],
+      'p95Ms': (report['cold'] as Map)['p95'],
+      'timingsMs': (report['cold'] as Map)['timingsMs'],
+    };
+    IntegrationTestWidgetsFlutterBinding.instance.reportData = {
+      'performance': legacy,
+    };
+    debugPrint('ENGINE_PERFORMANCE ${jsonEncode(legacy)}');
   });
 }

@@ -39,3 +39,9 @@ Normal batches now validate one candidate graph before mutation; rejected batche
 ## Remaining release gates
 
 Native p95 and model first-pass quality remain open. iOS build jobs are configured on macOS CI but were not executed on this Linux computer. Full screen-reader coverage and semantic review of all generated tasks require additional review beyond the measured checks. Desktop and the arbitrary-code sandbox are intentionally deferred. Finalize package/repository ownership and private reporting contacts before public publication.
+
+## Phase 2 batch 1 continuation — 2026-10-10
+
+Hybrid answers and the third brand kit extend the preview. Typography and history parity vectors are shared between TS and Dart. Device slider/scroll evidence is retained under `artifacts/device/`. These are separate from the Phase 1 results above.
+
+M4 performance investigation ended at the user's request; no further automatic benchmark runs are scheduled. The completed 120+120 sample measurements and their limitations are documented in [phase2/M4.md](phase2/M4.md). Flutter's measured cold/warm p95 is 109.97/89.68ms after prewarming. RN remains over target; missing full frame/heap traces are an open gate. The last interrupted gfxinfo run is not counted. Accessibility settings restoration was verified.

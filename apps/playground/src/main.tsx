@@ -97,7 +97,15 @@ function App() {
     // Legacy fixtures replay as one JSON control line per message; hybrid ones as the mixed text.
     const lines = hybridFixture
       ? hybridFixture.wire.split("\n")
-      : fixture.messages.map((m) => JSON.stringify(m));
+      : [
+          JSON.stringify({
+            engine: "v1",
+            block: "surface",
+            surfaceId: "main",
+            fallbackText: `${fixture.title}. ${fixture.prompt}`,
+          }),
+          ...fixture.messages.map((m) => JSON.stringify(m)),
+        ];
     setStatus("예제를 차례로 표시하고 있습니다.");
     for (const line of lines) {
       if (generation !== run.current) return;

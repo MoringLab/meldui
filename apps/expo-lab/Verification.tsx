@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import fixtures from "../../fixtures/cases.json";
+import { gcCounters, summarize } from "./stats";
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 const settle = async () => {
@@ -71,14 +72,32 @@ export function Verification({ close }: { close: () => void }) {
           if (runtime.diagnostics.length || invalid.length || renderError.current)
             throw Error(`${kit.id}/${fixture.id}: INVALID_FIXTURE`);
         }
-      const times: number[] = [];
-      for (let sample = 0; sample < 35; sample++) {
-        const runtime = createUIRuntime();
-        runtime.accept({
-          version: "v0.9",
-          createSurface: { surfaceId: "main", catalogId: CATALOG_ID },
-        });
-        await show(runtime, neutral);
+      // Two conditions, 130 samples each (10 warm-ups dropped, 120 kept):
+      //  cold-tree: a fresh runtime and a freshly mounted tree for every sample
+      //  warm:      one mounted tree and runtime; each sample deletes then recreates the surface
+      const SAMPLES = 130;
+      const DROP = 10;
+      const content = () => [
+        {
+          id: "root",
+          component: "Column",
+          children: Array.from({ length: 99 }, (_, i) => `n${i}`),
+        },
+        ...Array.from({ length: 99 }, (_, i) => ({
+          id: `n${i}`,
+          component: "Text",
+          text: `측정 ${i}`,
+        })),
+      ];
+      const measure = async (runtime: UIRuntime) => {
+        // JS-thread liveness: a 4 ms timer whose worst lateness tells JS stalls from native delays.
+        let last = performance.now();
+        let worstLag = 0;
+        const lagTimer = setInterval(() => {
+          const now = performance.now();
+          worstLag = Math.max(worstLag, now - last - 4);
+          last = now;
+        }, 4);
         const elapsed = new Promise<number>((resolve, reject) => {
           const timeout = setTimeout(() => {
             pending.current = null;
@@ -93,42 +112,102 @@ export function Verification({ close }: { close: () => void }) {
             reject,
           };
         });
+        const gcBefore = gcCounters();
+        const t0 = performance.now();
         runtime.accept({
           version: "v0.9",
-          updateComponents: {
-            surfaceId: "main",
-            components: [
-              {
-                id: "root",
-                component: "Column",
-                children: Array.from({ length: 99 }, (_, i) => `n${i}`),
-              },
-              ...Array.from({ length: 99 }, (_, i) => ({
-                id: `n${i}`,
-                component: "Text",
-                text: `측정 ${i}`,
-              })),
-            ],
-          },
+          updateComponents: { surfaceId: "main", components: content() },
         });
-        const ms = await elapsed;
-        if (sample >= 5) times.push(ms);
+        const acceptMs = performance.now() - t0;
+        const total = await elapsed;
+        clearInterval(lagTimer);
+        const gcAfter = gcCounters();
+        return {
+          worstJsLagMs: worstLag,
+          total,
+          acceptMs,
+          layoutMs: total - acceptMs,
+          gcCount: gcBefore && gcAfter ? gcAfter.collections - gcBefore.collections : null,
+          gcMs: gcBefore && gcAfter ? gcAfter.wallMs - gcBefore.wallMs : null,
+          heapBytes: gcAfter?.heapBytes ?? null,
+          statKeys: gcAfter ? Object.keys(gcAfter.raw) : null,
+        };
+      };
+      type Sample = Awaited<ReturnType<typeof measure>>;
+      const condition = (kept: Sample[]) => ({
+        ...summarize(kept.map((k) => k.total)),
+        // Arrival order (the sorted list loses it): lets periodic stalls show up.
+        sequenceMs: kept.map((k) => Math.round(k.total)),
+        jsLagSequenceMs: kept.map((k) => Math.round(k.worstJsLagMs)),
+        gcMsSequence: kept.map((k) => (k.gcMs == null ? null : Math.round(k.gcMs))),
+        gcCountSequence: kept.map((k) => k.gcCount),
+        heapBytesSequence: kept.map((k) => k.heapBytes),
+        hermesStatKeys: kept[0]?.statKeys ?? null,
+        phases: {
+          acceptMs: { ...summarize(kept.map((k) => k.acceptMs)), timingsMs: undefined },
+          layoutMs: { ...summarize(kept.map((k) => k.layoutMs)), timingsMs: undefined },
+        },
+        gc:
+          kept[0]?.gcCount == null
+            ? "unavailable"
+            : {
+                collectionsTotal: kept.reduce((n, k) => n + (k.gcCount ?? 0), 0),
+                samplesWithGc: kept.filter((k) => (k.gcCount ?? 0) > 0).length,
+                gcMsTotal: kept.reduce((n, k) => n + (k.gcMs ?? 0), 0),
+                // Slow samples (> p95) and whether a collection ran inside them.
+                slowWithGc: kept
+                  .filter((k) => k.total > summarize(kept.map((x) => x.total)).p95)
+                  .map((k) => (k.gcCount ?? 0) > 0),
+              },
+      });
+      const coldSamples: Sample[] = [];
+      for (let sample = 0; sample < SAMPLES; sample++) {
+        const runtime = createUIRuntime();
+        runtime.accept({
+          version: "v0.9",
+          createSurface: { surfaceId: "main", catalogId: CATALOG_ID },
+        });
+        await show(runtime, neutral);
+        const result = await measure(runtime);
+        if (sample >= DROP) coldSamples.push(result);
         await settle();
       }
-      times.sort((a, b) => a - b);
+      const warmRuntime = createUIRuntime();
+      await show(warmRuntime, neutral);
+      const warmSamples: Sample[] = [];
+      for (let sample = 0; sample < SAMPLES; sample++) {
+        if (warmRuntime.getSurface("main"))
+          warmRuntime.accept({ version: "v0.9", deleteSurface: { surfaceId: "main" } });
+        await settle();
+        warmRuntime.accept({
+          version: "v0.9",
+          createSurface: { surfaceId: "main", catalogId: CATALOG_ID },
+        });
+        await settle();
+        const result = await measure(warmRuntime);
+        if (sample >= DROP) warmSamples.push(result);
+      }
+      const warm = condition(warmSamples);
+      const cold = condition(coldSamples);
       const result = {
         platform: "react-native",
         mode: "release",
         fixtures: 60,
         nodes: 100,
-        samples: times.length,
-        p95Ms: times[Math.ceil(times.length * 0.95) - 1],
-        timingsMs: times,
+        warmupDropped: DROP,
+        cold,
+        warm,
+        // Legacy fields (cold-tree, the original definition) so older readers keep working.
+        samples: cold.samples,
+        p95Ms: cold.p95,
+        timingsMs: cold.timingsMs,
       };
       console.log(`ENGINE_PERFORMANCE ${JSON.stringify(result)}`);
       if (alive) {
         setReport(JSON.stringify(result));
-        setStatus(`SDK 검증 통과 · 60/60 · p95 ${result.p95Ms.toFixed(1)}ms`);
+        setStatus(
+          `SDK 검증 통과 · 60/60 · cold p95 ${cold.p95.toFixed(1)}ms · warm p95 ${warm.p95.toFixed(1)}ms`,
+        );
         setFinished(true);
       }
     };
@@ -156,7 +235,7 @@ export function Verification({ close }: { close: () => void }) {
           accessibilityLabel={report}
           style={{ color: "#172a40", fontSize: 12 }}
         >
-          100 nodes · 30 samples · native layout event
+          100 nodes · 120 cold + 120 warm samples · native layout event
         </Text>
       )}
       <Pressable

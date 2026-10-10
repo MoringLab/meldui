@@ -155,6 +155,7 @@ class UIRuntime extends ChangeNotifier {
     void Function(JsonMap)? onAction,
     Map<String, FutureOr<void> Function(JsonMap)> clientActions = const {},
     JsonMap? schema,
+    bool prewarm = true,
   }) async {
     // Cache immutable catalog descriptors, never surfaces or conversation data.
     final catalog = await (schema == null
@@ -165,12 +166,43 @@ class UIRuntime extends ChangeNotifier {
       protocolVersion: a2ui.A2uiProtocolVersion.v0_9,
       validationConfig: a2ui.ValidationConfig.relaxed,
     );
-    return UIRuntime._(
+    final runtime = UIRuntime._(
       processor,
       catalog.id,
       onAction: onAction,
       clientActions: clientActions,
     );
+    if (prewarm) runtime._prewarm();
+    return runtime;
+  }
+
+  /// The first batch on a new processor pays one-time costs (validator and component-model setup).
+  /// Paying them here, while the model is still working, keeps them off the content-to-first-frame
+  /// path. A throwaway surface is processed and removed; nothing is observable afterwards.
+  void _prewarm() {
+    const sid = '\u0000prewarm';
+    try {
+      _process({
+        'version': 'v0.9',
+        'createSurface': {'surfaceId': sid, 'catalogId': catalogIdentifier},
+      });
+      _process({
+        'version': 'v0.9',
+        'updateComponents': {
+          'surfaceId': sid,
+          'components': [
+            {'id': 'root', 'component': 'Column', 'children': ['t']},
+            {'id': 't', 'component': 'Text', 'text': 'warm'},
+          ],
+        },
+      });
+      _process({
+        'version': 'v0.9',
+        'deleteSurface': {'surfaceId': sid},
+      });
+    } catch (_) {
+      // Prewarm is an optimization only.
+    }
   }
 
   List<String> get surfaceIds =>
@@ -179,6 +211,7 @@ class UIRuntime extends ChangeNotifier {
       processor.groupModel.getSurface(id);
   void report(
     String code, {
+    String severity = 'error',
     String? surfaceId,
     String? componentId,
     String? path,
@@ -186,6 +219,7 @@ class UIRuntime extends ChangeNotifier {
     if (diagnostics.length >= 200) diagnostics.removeAt(0);
     final diagnostic = <String, dynamic>{
       'code': code,
+      'severity': severity,
       'surfaceId': surfaceId,
       'componentId': componentId,
       'path': path,

@@ -104,7 +104,15 @@ class EngineLabState extends State<EngineLab> {
     // Legacy fixtures replay as one JSON control line per message; hybrid ones as mixed text.
     final lines = hybrid != null
         ? (hybrid['wire'] as String).split('\n')
-        : [for (final m in fixture['messages'] as List) jsonEncode(m)];
+        : [
+            jsonEncode({
+              'engine': 'v1',
+              'block': 'surface',
+              'surfaceId': 'main',
+              'fallbackText': '${fixture['title']}. ${fixture['prompt']}',
+            }),
+            for (final m in fixture['messages'] as List) jsonEncode(m),
+          ];
     for (final line in lines) {
       if (!mounted || run != generation) return;
       next.push('$line\n');

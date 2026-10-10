@@ -2,6 +2,7 @@ import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { brand } from "../packages/kits/brand/src/index.js";
 import { editorial } from "../packages/kits/editorial/src/index.js";
 import { neutral } from "../packages/kits/neutral/src/index.js";
+import { resolveTypography } from "../packages/kit-spec/src/index.js";
 import { buildCatalogSchema, COMPONENT_NAMES } from "../packages/protocol/src/index.js";
 
 await mkdir("schemas", { recursive: true });
@@ -22,3 +23,13 @@ await copyFile("fixtures/cases.json", "dart/engine_flutter/test/fixtures/cases.j
 await copyFile("fixtures/hybrid/cases.json", "apps/flutter/assets/hybrid.json");
 await copyFile("fixtures/hybrid/cases.json", "dart/engine_flutter/test/fixtures/hybrid.json");
 await copyFile("fixtures/hybrid/vectors.json", "dart/engine_flutter/test/fixtures/vectors.json");
+// Typography parity vectors: the Dart UIKit.typography() must match resolveTypography() exactly.
+await mkdir("fixtures/kits", { recursive: true });
+const typography = Object.fromEntries(
+  [neutral, editorial, brand].map((kit) => [
+    kit.id,
+    { ios: resolveTypography(kit, "ios"), android: resolveTypography(kit, "android") },
+  ]),
+);
+await writeFile("fixtures/kits/typography.json", `${JSON.stringify(typography, null, 1)}\n`);
+await copyFile("fixtures/kits/typography.json", "dart/engine_flutter/test/fixtures/typography.json");

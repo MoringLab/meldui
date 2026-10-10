@@ -226,8 +226,10 @@ class AnswerSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _warnOnce(String code) {
-    if (_warned.add(code)) runtime.report(code);
+  void _warnOnce(String code, {bool error = false}) {
+    if (_warned.add(code)) {
+      runtime.report(code, severity: error ? 'error' : 'warning');
+    }
   }
 
   String _newId() => 'b${_nextBlock++}';
@@ -317,7 +319,7 @@ class AnswerSession extends ChangeNotifier {
           return;
         }
         if (_surfaceBlock.length >= policy.maxSurfaces) {
-          _warnOnce('POLICY_MAX_SURFACES');
+          _warnOnce('POLICY_MAX_SURFACES', error: true);
           _surfaceBlock[id] = '';
           return;
         }
@@ -340,7 +342,7 @@ class AnswerSession extends ChangeNotifier {
         _blocks.add(MediaBlock(_newId(), ids, decl['layout'] as String? ?? 'auto', decl['caption'] as String?));
         _touch();
       case 'sandbox':
-        _warnOnce('POLICY_SANDBOX_DISABLED');
+        _warnOnce('POLICY_SANDBOX_DISABLED', error: true);
         if (!policy.allowSandbox) {
           _blocks.add(SandboxBlock(_newId(), decl['mode'] as String? ?? 'html', decl['fallbackText'] as String? ?? ''));
           _touch();
@@ -365,7 +367,7 @@ class AnswerSession extends ChangeNotifier {
       }
       if (!_surfaceBlock.containsKey(surfaceId)) {
         if (_surfaceBlock.length >= policy.maxSurfaces) {
-          _warnOnce('POLICY_MAX_SURFACES');
+          _warnOnce('POLICY_MAX_SURFACES', error: true);
           _surfaceBlock[surfaceId] = '';
           return;
         }

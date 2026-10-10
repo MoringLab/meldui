@@ -35,7 +35,15 @@ w.__session = session;
 const id = q.get("fixture") ?? fixtures[0].id;
 const hybrid = hybridFixtures.find((f) => f.id === id);
 const legacy = fixtures.find((f) => f.id === id) ?? fixtures[0];
-session.push(hybrid ? hybrid.wire : legacy.messages.map((m) => JSON.stringify(m)).join("\n"));
+const declaration = JSON.stringify({
+  engine: "v1",
+  block: "surface",
+  surfaceId: "main",
+  fallbackText: `${legacy.title}. ${legacy.prompt}`,
+});
+session.push(
+  hybrid ? hybrid.wire : [declaration, ...legacy.messages.map((m) => JSON.stringify(m))].join("\n"),
+);
 session.end();
 const width = Number(q.get("width") ?? 720);
 const mode = q.get("mode") === "dark" ? "dark" : "light";

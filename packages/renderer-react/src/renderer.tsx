@@ -44,8 +44,11 @@ function useUI() {
 
 /** Create a core runtime with the upstream React implementations attached. */
 export function createUIRuntime(options: RuntimeOptions = {}) {
-  const components = Object.entries(componentSchemas).map(([name, schema]) =>
-    createBinderlessComponentImplementation({ name, schema }, ({ context }) => (
+  const apis =
+    options.components ??
+    Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema }));
+  const components = apis.map((api) =>
+    createBinderlessComponentImplementation(api, ({ context }) => (
       <EngineNode
         surfaceId={context.dataContext.surface.id}
         id={context.componentModel.id}
@@ -53,7 +56,7 @@ export function createUIRuntime(options: RuntimeOptions = {}) {
       />
     )),
   );
-  return createCoreRuntime({ ...options, components: options.components ?? components });
+  return createCoreRuntime({ ...options, components });
 }
 
 /** Apply a trusted kit without recreating the state model. */
@@ -92,7 +95,13 @@ export function UIProvider({
 }
 
 /** Render one surface, or all active surfaces if no id is supplied. */
+const clientSubscribe = () => () => {};
 export function UISurface({ surfaceId }: { surfaceId?: string }) {
+  const clientReady = useSyncExternalStore(
+    clientSubscribe,
+    () => true,
+    () => false,
+  );
   const { runtime } = useUI();
   useSyncExternalStore(runtime.subscribe, runtime.getRevision, runtime.getRevision);
   const ids = surfaceId ? [surfaceId] : runtime.surfaceIds;
@@ -103,7 +112,7 @@ export function UISurface({ surfaceId }: { surfaceId?: string }) {
         return surface ? (
           <SurfaceBoundary key={id}>
             <section className="ui-surface" aria-label="생성된 인터페이스" data-surface={id}>
-              <A2uiSurface surface={surface} />
+              {clientReady ? <A2uiSurface surface={surface} /> : <Loading />}
             </section>
           </SurfaceBoundary>
         ) : (
@@ -113,10 +122,30 @@ export function UISurface({ surfaceId }: { surfaceId?: string }) {
     </>
   );
 }
-class SurfaceBoundary extends ReactComponent<{ children: ReactNode }, { failed: boolean }> {
+class SurfaceBoundary extends ReactComponent<
+  { children: ReactNode; resetKey?: unknown; kitKey?: unknown; onError?: () => void },
+  { failed: boolean }
+> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onError?.();
+  }
+  componentDidUpdate(
+    previous: Readonly<{
+      children: ReactNode;
+      resetKey?: unknown;
+      kitKey?: unknown;
+      onError?: () => void;
+    }>,
+  ) {
+    if (
+      this.state.failed &&
+      (previous.resetKey !== this.props.resetKey || previous.kitKey !== this.props.kitKey)
+    )
+      this.setState({ failed: false });
   }
   render() {
     return this.state.failed ? (
@@ -141,7 +170,7 @@ const EngineNode = memo(function EngineNode({
   id: string;
   scope?: string;
 }) {
-  const { runtime, views } = useUI();
+  const { runtime, views, kit } = useUI();
   const subscribe = useCallback(
     (listener: () => void) => runtime.subscribeNode(surfaceId, id, scope, listener),
     [runtime, surfaceId, id, scope],
@@ -168,9 +197,27 @@ const EngineNode = memo(function EngineNode({
     />
   );
   const children = renderChildren(node.props.children, runtime, surfaceId, scope, renderChild);
-  const View = views[node.component] ?? DefaultView;
+  const definition = kit.components[node.component];
+  const View =
+    views[definition?.implementation ?? ""] ??
+    views[node.component] ??
+    views[definition?.fallback ?? ""] ??
+    DefaultView;
   return (
-    <SurfaceBoundary key={`${id}:${node.component}`}>
+    <SurfaceBoundary
+      key={`${id}:${node.component}`}
+      resetKey={node}
+      kitKey={kit}
+      onError={() =>
+        runtime.report({
+          code: "RENDER_ERROR",
+          message: "The registered component failed to render.",
+          severity: "error",
+          surfaceId,
+          componentId: id,
+        })
+      }
+    >
       <View node={node} runtime={runtime} surfaceId={surfaceId} renderChild={renderChild}>
         {children}
       </View>
@@ -273,7 +320,8 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
         </div>
       );
     case "Card":
-      return kit.id === "editorial" ? (
+      return kit.components[node.component ?? ""]?.implementation ===
+        `Editorial${node.component}` ? (
         <article className="ui-card editorial-card">
           {p.title && (
             <header>
@@ -294,7 +342,7 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
       return React.createElement(
         `h${p.level ?? 2}`,
         {
-          className: `ui-heading${kit.id === "editorial" ? " editorial-heading" : ""}`,
+          className: `ui-heading${kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}` ? " editorial-heading" : ""}`,
           "data-node": node.id,
         },
         text(p.text),
@@ -306,7 +354,7 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
         </p>
       );
     case "Image":
-      return assets[p.asset] ? (
+      return Object.hasOwn(assets, p.asset) && assets[p.asset] ? (
         <img
           className="ui-image"
           src={assets[p.asset]}
@@ -363,13 +411,14 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
       return (
         <button
           type="button"
-          className={`ui-button ${p.variant} ${kit.id === "editorial" ? "editorial-button" : ""}`}
+          className={`ui-button ${p.variant} ${kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}` ? "editorial-button" : ""}`}
           disabled={Boolean(p.disabled)}
           onClick={fire}
           data-node={node.id}
         >
           {label}
-          {kit.id === "editorial" && <Icon name="arrow" />}
+          {kit.components[node.component ?? ""]?.implementation ===
+            `Editorial${node.component}` && <Icon name="arrow" />}
         </button>
       );
     case "TextField":
@@ -595,7 +644,17 @@ function Chart({ node }: { node: NodeSnapshot }) {
   );
   const min = Math.min(0, ...points.map((v: any) => v[p.yKey]));
   const max = Math.max(1, ...points.map((v: any) => v[p.yKey]));
-  const x = (i: number) => 42 + (i * 476) / Math.max(points.length - 1, 1);
+  const numericX =
+    p.kind === "scatter" &&
+    points.every((v: any) => typeof v[p.xKey] === "number" && Number.isFinite(v[p.xKey]));
+  const minX = Math.min(...points.map((v: any) => v[p.xKey]));
+  const maxX = Math.max(...points.map((v: any) => v[p.xKey]));
+  const x = (i: number) =>
+    42 +
+    (numericX
+      ? (points[i][p.xKey] - minX) / (maxX - minX || 1)
+      : i / Math.max(points.length - 1, 1)) *
+      476;
   const y = (v: number) => 174 - ((v - min) / (max - min)) * 142;
   return (
     <figure className="ui-chart">

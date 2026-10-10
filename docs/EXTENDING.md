@@ -8,4 +8,8 @@ Use `defineKit()` and `validateKit()` from kit-spec. Supply all tokens for light
 
 Model adapters implement `stream(request,{signal})` yielding message, diagnostic, usage and completion events. The gateway adapter belongs on a trusted server. Ordinary CI and replay use no model calls. AG-UI transport maps CUSTOM events with name `engine.a2ui` to A2UI messages; reject other names and validate their values.
 
+`buildSystemPrompt({ catalog, kit, capabilities })` accepts a JSON Schema catalog with a `catalogId`. Its ID must match the kit and one of `capabilities.catalogIds`. The standard catalog is the default; pass the host's schema explicitly for custom components. Templates in a kit guide cannot authorize components or client actions absent from the active catalog and capabilities.
+
 The included server is a local verification service, not a public authenticated multitenant backend. Replace its host/session policy when embedding into an existing service. Full data-model transmission is disabled. Pass only the context fields the agent needs.
+
+Conflicting model writes are retained in `getPendingWrites(surfaceId)`. After a host UI obtains the user’s decision, call `resolveConflict(surfaceId,path,"keep-local"|"accept-model")`. A generation change does not discard previous edits. React surfaces render a loading placeholder on the server and attach upstream rendering during hydration.

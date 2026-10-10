@@ -116,10 +116,40 @@ describe("runtime", () => {
   });
 });
 describe("runtime regression boundaries", () => {
+  it("shares catalog caches while isolating conversation data and disposal", () => {
+    const first = createUIRuntime();
+    const second = createUIRuntime();
+    for (const runtime of [first, second]) {
+      runtime.accept(create);
+      runtime.accept(
+        update([
+          {
+            id: "root",
+            component: "Text",
+            text: {
+              call: "computeString",
+              args: { expr: { op: "format", args: ["{0}", { ref: "/value" }] } },
+              returnType: "string",
+            },
+          },
+        ]),
+      );
+    }
+    first.accept(data({ value: 11 }));
+    second.accept(data({ value: 22 }));
+    expect(first.getNodeSnapshot("s", "root").props.text).toBe("11");
+    expect(second.getNodeSnapshot("s", "root").props.text).toBe("22");
+    first.dispose();
+    second.setValue("s", "/value", 33);
+    expect(second.getNodeSnapshot("s", "root").props.text).toBe("33");
+    second.dispose();
+  });
   it("reports fresh errors after the diagnostic ring fills", () => {
     const r = createUIRuntime();
     for (let i = 0; i < 205; i++) expect(r.accept({ bad: i })).toHaveLength(1);
     expect(r.diagnostics).toHaveLength(200);
+    r.accept(create);
+    expect(r.finish()).toHaveLength(1);
     r.dispose();
   });
   it("includes resolvable expression errors in completion diagnostics", () => {
@@ -166,6 +196,21 @@ describe("runtime regression boundaries", () => {
     r.setValue("s", "/x0", 999);
     expect(counters[0]).toBeGreaterThan(baseline[0]);
     expect(counters.slice(1)).toEqual(baseline.slice(1));
+    r.dispose();
+  });
+});
+describe("conflict decisions", () => {
+  it("holds a model write across generation changes until the host chooses", () => {
+    const r = createUIRuntime();
+    r.accept(create);
+    r.accept(data(1, "/x"));
+    r.setValue("s", "/x", 7);
+    r.beginRun("s");
+    r.accept(data(99, "/x"));
+    expect(r.read("s", "/x")).toBe(7);
+    expect(r.getPendingWrites("s")).toHaveLength(1);
+    r.resolveConflict("s", "/x", "accept-model");
+    expect(r.read("s", "/x")).toBe(99);
     r.dispose();
   });
 });

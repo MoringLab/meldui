@@ -10,7 +10,7 @@ jobs:
         with: {node-version: 22, cache: pnpm}
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
-      - run: pnpm check && pnpm eval
+      - run: pnpm check && pnpm eval && pnpm --filter @engine/expo-lab typecheck
   flutter:
     runs-on: ubuntu-latest
     steps:
@@ -19,6 +19,8 @@ jobs:
         with: {channel: stable}
       - run: flutter pub get && flutter analyze && flutter test
         working-directory: dart/engine_flutter
+      - run: flutter pub get && flutter analyze && flutter test
+        working-directory: apps/flutter
   ios:
     runs-on: macos-latest
     steps:
@@ -27,3 +29,26 @@ jobs:
         with: {channel: stable}
       - run: flutter pub get && flutter build ios --simulator
         working-directory: apps/flutter
+  expo-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: pnpm}
+      - run: pnpm install --frozen-lockfile && pnpm build
+      - run: pnpm exec expo prebuild --platform ios --no-install
+        working-directory: apps/expo-lab
+      - run: pod install
+        working-directory: apps/expo-lab/ios
+      - name: Build Expo for the iOS simulator
+        working-directory: apps/expo-lab/ios
+        run: |
+          python3 - <<'PYBUILD'
+          from pathlib import Path
+          import subprocess
+          workspace = next(Path('.').glob('*.xcworkspace'))
+          subprocess.run(['xcodebuild', '-workspace', str(workspace), '-scheme', workspace.stem,
+            '-configuration', 'Release', '-sdk', 'iphonesimulator',
+            '-destination', 'generic/platform=iOS Simulator', 'CODE_SIGNING_ALLOWED=NO', 'build'], check=True)
+          PYBUILD

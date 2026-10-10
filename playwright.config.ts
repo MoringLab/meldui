@@ -9,7 +9,10 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: ["chromium", "firefox", "webkit"].map((browserName) => ({ name: browserName, use: { browserName: browserName as "chromium" | "firefox" | "webkit" } })),
+  projects: ["chromium", "firefox", "webkit"].map((browserName) => ({
+    name: browserName,
+    use: { browserName: browserName as "chromium" | "firefox" | "webkit" },
+  })),
   webServer: {
     command: "pnpm --filter @engine/playground dev",
     url: "http://127.0.0.1:5173",

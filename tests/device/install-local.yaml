@@ -1,0 +1,8 @@
+appId: dev.engine.lab.expo
+---
+- assertVisible: "(?is).*engine.*"
+- scrollUntilVisible:
+    element:
+      text: "전송하지 않음|Don't send"
+    direction: DOWN
+- tapOn: "전송하지 않음|Don't send"

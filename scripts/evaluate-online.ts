@@ -6,9 +6,18 @@ const base = process.env.ENGINE_SERVER_URL ?? "http://127.0.0.1:8787";
 const { models } = (await fetch(`${base}/api/models`).then((r) => r.json())) as {
   models: string[];
 };
-const jobs = models.flatMap((model) => [
-  ...fixtures.map((fixture) => ({ model, fixture, kitId: "neutral" })),
-  ...fixtures.slice(0, 6).map((fixture) => ({ model, fixture, kitId: "editorial" })),
+const selectedModels = process.env.EVAL_MODELS?.split(",") ?? models;
+const selectedCases = process.env.EVAL_CASES?.split(",");
+const evaluatedFixtures = selectedCases
+  ? fixtures.filter((fixture) => selectedCases.includes(fixture.id))
+  : fixtures;
+const jobs = selectedModels.flatMap((model) => [
+  ...evaluatedFixtures.map((fixture) => ({ model, fixture, kitId: "neutral" })),
+  ...(process.env.EVAL_EDITORIAL === "0" ? [] : evaluatedFixtures.slice(0, 6)).map((fixture) => ({
+    model,
+    fixture,
+    kitId: "editorial",
+  })),
 ]);
 const results: any[] = [];
 await mkdir("artifacts", { recursive: true });
@@ -102,9 +111,10 @@ async function worker() {
       `${results.length}/${jobs.length} ${model} ${kitId} ${fixture.id}: ${valid ? "PASS" : "FAIL"} (${repairs} repairs)`,
     );
     runtime.dispose();
-    if (sessionId) await fetch(`${base}/api/sessions/${sessionId}`, { method: "DELETE" });
+    if (sessionId)
+      await fetch(`${base}/api/sessions/${sessionId}`, { method: "DELETE" }).catch(() => {});
     await writeFile(
-      "artifacts/online-eval.json",
+      process.env.EVAL_OUTPUT ?? "artifacts/online-eval.json",
       JSON.stringify(
         {
           timestamp: new Date().toISOString(),

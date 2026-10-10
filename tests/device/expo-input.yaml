@@ -1,0 +1,28 @@
+appId: dev.engine.lab.expo
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "함께 나누는 저녁"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+- tapOn: "예제 선택"
+- scrollUntilVisible:
+    element:
+      text: "참가 신청"
+    direction: DOWN
+- tapOn: "참가 신청"
+- extendedWaitUntil:
+    visible: "이름"
+    timeout: 30000
+- tapOn:
+    text: "이름"
+    index: 1
+- inputText: "Louis"
+- hideKeyboard
+- tapOn: "Editorial로 전환"
+- assertVisible: "Louis"
+- takeScreenshot: artifacts/expo-form

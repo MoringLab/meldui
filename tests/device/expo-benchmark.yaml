@@ -1,0 +1,21 @@
+appId: dev.engine.lab.expo
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "함께 나누는 저녁"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: "메시지와 진단 보기"
+    direction: DOWN
+- tapOn: "메시지와 진단 보기"
+- scrollUntilVisible:
+    element:
+      text: "SDK 검증"
+    direction: DOWN
+- tapOn: "SDK 검증"

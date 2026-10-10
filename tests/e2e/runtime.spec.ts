@@ -50,3 +50,24 @@ for (const kit of ["neutral", "editorial"])
     }
     expect(errors).toEqual([]);
   });
+
+test("gateway failure retains the edited interface", async ({ page }) => {
+  await page.goto("/?fixture=calculator");
+  await page.getByLabel("인원", { exact: true }).fill("7");
+  await expect(page.locator('[data-node="_result"]')).toHaveText("12000");
+  await page.route("**/api/ui", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "GATEWAY_NOT_CONFIGURED" }),
+    }),
+  );
+  await page.getByRole("textbox", { name: "만들고 싶은 인터페이스" }).fill("실패 검증");
+  await page.getByRole("button", { name: "만들기", exact: true }).click();
+  await expect(
+    page.getByText("서버에 OmniRoute 키를 설정한 뒤 다시 시도하세요.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('[data-node="_result"]')).toHaveText("12000");
+  await page.getByLabel("디자인 킷").selectOption("editorial");
+  await expect(page.getByLabel("인원", { exact: true })).toHaveValue("7");
+});

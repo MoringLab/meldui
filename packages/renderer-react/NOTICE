@@ -1,0 +1,6 @@
+Engine
+Copyright 2026 Engine contributors
+
+Engine uses A2UI TypeScript/React and Dart cores under Apache-2.0.
+A2UI copyright holders retain rights to their upstream work.
+React, React Native, Expo, Zod and Flutter and other dependencies retain their original licenses. No upstream code is vendored into Engine source. Package dependency metadata identifies the pinned versions; generated native scaffolds retain their platform notices.

@@ -52,7 +52,7 @@ export class NDJSONDecoder {
 export async function* readBytes(stream: ReadableStream<Uint8Array>, signal?: AbortSignal) {
   const reader = stream.getReader();
   const abort = () => {
-    void reader.cancel(signal?.reason);
+    void reader.cancel(signal?.reason).catch(() => {});
   };
   signal?.addEventListener("abort", abort, { once: true });
   try {

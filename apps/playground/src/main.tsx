@@ -42,7 +42,12 @@ function App() {
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
   const onAction = useRef<(action: UserAction) => void>(() => {});
-  const fresh = () => {
+  const activate = (value: UIRuntime) => {
+    runtimeRef.current.dispose();
+    runtimeRef.current = value;
+    setRuntime(value);
+  };
+  const fresh = (display = true) => {
     const value = createUIRuntime({
       onDiagnostic: (d) =>
         setDiagnostics((items) => [
@@ -61,9 +66,7 @@ function App() {
         },
       },
     });
-    runtimeRef.current.dispose();
-    runtimeRef.current = value;
-    setRuntime(value);
+    if (display) activate(value);
     setMessages([]);
     setDiagnostics([]);
     sessionId.current = undefined;
@@ -83,6 +86,7 @@ function App() {
       setMessages((items) => [...items, message as UIMessage]);
       await new Promise((resolve) => setTimeout(resolve, 28));
     }
+    if (generation !== run.current) return;
     value.finish();
     setStatus("준비되었습니다. 입력값을 바꿔보세요.");
   }
@@ -92,7 +96,8 @@ function App() {
     const controller = new AbortController();
     abortRef.current = controller;
     ++run.current;
-    const value = action ? runtimeRef.current : fresh();
+    const value = action ? runtimeRef.current : fresh(false);
+    let displayed = !!action;
     value.beginRun("main");
     setBusy(true);
     setActive("");
@@ -129,6 +134,13 @@ function App() {
         if (event.type === "session") sessionId.current = event.sessionId;
         else if (event.type === "message") {
           value.accept(event.message);
+          if (
+            !displayed &&
+            value.surfaceIds.some((sid) => value.getNodeSnapshot(sid, "root").component)
+          ) {
+            activate(value);
+            displayed = true;
+          }
           setMessages((items) => [...items, event.message]);
         } else if (event.type === "diagnostic")
           setDiagnostics((items) => [...items.slice(-49), event.diagnostic.code]);
@@ -148,6 +160,7 @@ function App() {
       }
       if (!controller.signal.aborted) for (const event of decoder.finish()) accept(event);
     } catch (error) {
+      if (abortRef.current !== controller) return;
       setStatus(
         controller.signal.aborted
           ? "생성을 중단했습니다."
@@ -156,6 +169,7 @@ function App() {
             : "연결을 확인하고 다시 시도하세요.",
       );
     } finally {
+      if (!displayed) value.dispose();
       if (abortRef.current === controller) setBusy(false);
     }
   }

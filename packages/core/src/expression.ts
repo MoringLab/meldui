@@ -95,7 +95,7 @@ export function evaluateExpression(expression: Expr, read: (path: string) => unk
         const template = at(0);
         if (typeof template !== "string") throw new Error("EXPECTED_STRING");
         return template.replace(/\{(\d+)\}/g, (_, index: string) =>
-          String(at(Number(index) + 1) ?? ""),
+          formatValue(at(Number(index) + 1)),
         );
       }
       case "sum":
@@ -115,4 +115,12 @@ export function evaluateExpression(expression: Expr, read: (path: string) => unk
     }
   };
   return evaluate(expr);
+}
+
+function formatValue(value: unknown): string {
+  return value === null || value === undefined
+    ? ""
+    : typeof value === "object"
+      ? JSON.stringify(value)
+      : String(value);
 }

@@ -24,6 +24,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle, Line, Path, Polyline, Rect, Text as SvgText } from "react-native-svg";
+import { localCalendarDate } from "./date.js";
 
 export { createUIRuntime } from "@engine/core";
 
@@ -151,7 +152,20 @@ const NativeNode = memo(function NativeNode({
     components[fallback ?? ""] ??
     NativeView;
   return (
-    <NativeBoundary key={`${id}:${node.component}`}>
+    <NativeBoundary
+      key={`${id}:${node.component}`}
+      resetKey={node}
+      kitKey={kit}
+      onError={() =>
+        runtime.report({
+          code: "RENDER_ERROR",
+          message: "The registered component failed to render.",
+          severity: "error",
+          surfaceId,
+          componentId: id,
+        })
+      }
+    >
       <Widget node={node} runtime={runtime} surfaceId={surfaceId} renderChild={renderChild}>
         {children}
       </Widget>
@@ -159,10 +173,30 @@ const NativeNode = memo(function NativeNode({
   );
 });
 
-class NativeBoundary extends React.Component<{ children: ReactNode }, { failed: boolean }> {
+class NativeBoundary extends React.Component<
+  { children: ReactNode; resetKey?: unknown; kitKey?: unknown; onError?: () => void },
+  { failed: boolean }
+> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onError?.();
+  }
+  componentDidUpdate(
+    previous: Readonly<{
+      children: ReactNode;
+      resetKey?: unknown;
+      kitKey?: unknown;
+      onError?: () => void;
+    }>,
+  ) {
+    if (
+      this.state.failed &&
+      (previous.resetKey !== this.props.resetKey || previous.kitKey !== this.props.kitKey)
+    )
+      this.setState({ failed: false });
   }
   render() {
     return this.state.failed ? (
@@ -217,7 +251,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         minHeight: 48,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        borderRadius: kit.id === "editorial" ? 4 : 8,
+        borderRadius:
+          kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`
+            ? 4
+            : 8,
         backgroundColor: secondary ? t.surface : t.accent,
         borderWidth: secondary ? 1 : 0,
         borderColor: t.border,
@@ -285,13 +322,22 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
                 fontWeight: "600",
                 fontSize: 20,
                 fontFamily:
-                  kit.id === "editorial"
+                  kit.components[node.component ?? ""]?.implementation ===
+                  `Editorial${node.component}`
                     ? Platform.OS === "ios"
                       ? "Georgia"
                       : "serif"
                     : undefined,
-                paddingBottom: kit.id === "editorial" ? 12 : 0,
-                borderBottomWidth: kit.id === "editorial" ? 1 : 0,
+                paddingBottom:
+                  kit.components[node.component ?? ""]?.implementation ===
+                  `Editorial${node.component}`
+                    ? 12
+                    : 0,
+                borderBottomWidth:
+                  kit.components[node.component ?? ""]?.implementation ===
+                  `Editorial${node.component}`
+                    ? 1
+                    : 0,
                 borderColor: t.border,
               }}
             >
@@ -312,9 +358,16 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             color: t.foreground,
             fontSize: p.level === 1 ? 30 : p.level === 2 ? 26 : 21,
             lineHeight: p.level === 1 ? 38 : 32,
-            fontWeight: kit.id === "editorial" ? "500" : "600",
+            fontWeight:
+              kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`
+                ? "500"
+                : "600",
             fontFamily:
-              kit.id === "editorial" ? (Platform.OS === "ios" ? "Georgia" : "serif") : undefined,
+              kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`
+                ? Platform.OS === "ios"
+                  ? "Georgia"
+                  : "serif"
+                : undefined,
           }}
         >
           {String(p.text ?? "")}
@@ -340,7 +393,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </Text>
       );
     case "Image":
-      return assets[p.asset] ? (
+      return Object.hasOwn(assets, p.asset) && assets[p.asset] ? (
         <Image
           source={assets[p.asset]}
           accessibilityLabel={p.alt}
@@ -557,7 +610,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           {button(String(value || "날짜 선택"), () => setDateOpen(true), true, disabled)}
           {dateOpen && (
             <DateTimePicker
-              value={new Date(`${value || "2026-01-01"}T12:00:00`)}
+              value={localCalendarDate(value)}
               mode="date"
               onChange={(_, date) => {
                 setDateOpen(false);
@@ -566,8 +619,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
                     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
                   );
               }}
-              minimumDate={p.min ? new Date(p.min) : undefined}
-              maximumDate={p.max ? new Date(p.max) : undefined}
+              minimumDate={p.min ? localCalendarDate(p.min, "00:00:00") : undefined}
+              maximumDate={p.max ? localCalendarDate(p.max, "23:59:59") : undefined}
             />
           )}
         </View>,
@@ -735,7 +788,17 @@ function NativeChart({ node }: { node: NodeSnapshot }) {
   );
   const min = Math.min(0, ...points.map((v: any) => v[p.yKey]));
   const max = Math.max(1, ...points.map((v: any) => v[p.yKey]));
-  const x = (i: number) => 38 + (i * 276) / Math.max(points.length - 1, 1);
+  const numericX =
+    p.kind === "scatter" &&
+    points.every((v: any) => typeof v[p.xKey] === "number" && Number.isFinite(v[p.xKey]));
+  const minX = Math.min(...points.map((v: any) => v[p.xKey]));
+  const maxX = Math.max(...points.map((v: any) => v[p.xKey]));
+  const x = (i: number) =>
+    38 +
+    (numericX
+      ? (points[i][p.xKey] - minX) / (maxX - minX || 1)
+      : i / Math.max(points.length - 1, 1)) *
+      276;
   const y = (v: number) => 174 - ((v - min) / (max - min)) * 142;
   return (
     <View style={{ gap: 8 }}>

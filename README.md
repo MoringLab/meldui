@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm build
 pnpm schemas
 cp .env.example .env
-# Set OMNIROUTE_API_KEY in your shell, or load .env using your environment manager.
+# Set OMNIROUTE_API_KEY in .env; the server loads it, never the clients.
 pnpm dev
 ```
 
@@ -66,3 +66,11 @@ cd ../../apps/flutter && flutter test
 ```
 
 See [status and actual verification](docs/STATUS.md), [architecture decisions](docs/adr/0001-wire-format.md) and [research](docs/research/2026-10-09.md). Packages remain private until ownership and registry names are finalized. iOS builds require macOS; sandbox and desktop are deferred. Apache-2.0.
+
+## Preview evidence
+
+[Android form and kit demonstration](docs/media/android-demo.mp4) · [verification report](docs/verification/REPORT.md) · [roadmap and contribution opportunities](docs/ROADMAP.md).
+
+This preview is private. Functional checks pass; native tail latency and model first-pass quality remain release gates. GPT's final neutral evaluation reached 30/30 after repair, while other routes had output or availability failures. Read the complete denominators and measured limits before selecting a deployment policy.
+
+For packaged consumers, run `pnpm exec tsx scripts/package-check.ts` after `pnpm build`. For device checks, build the two demo APKs, install Maestro, then run `python3 scripts/verify-android.py --serial DEVICE --video --live`; omit `--live` for offline flows. The Flutter profile runner is `flutter drive --profile --driver=test_driver/integration_test.dart --target=integration_test/device_test.dart` from `apps/flutter`. Temporary device-condition checks save original preferences in `artifacts/conditions/restore-pending.json`; after a disconnect, run `python3 scripts/device-conditions.py --restore` before another conditions run.

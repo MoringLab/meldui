@@ -8,6 +8,11 @@ import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import type { UIMessage } from "@engine/protocol";
 
+try {
+  process.loadEnvFile(fileURLToPath(new URL("../../../.env", import.meta.url)));
+} catch (error) {
+  if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+}
 const port = Number(process.env.PORT ?? 8787);
 const modelIds = ["cx/gpt-5.6-sol-medium", "agy/claude-sonnet-4-6", "agy/gemini-3.7-flash-medium"];
 const defaultModel = process.env.OMNIROUTE_MODEL ?? modelIds[0];
@@ -149,16 +154,22 @@ const server = createServer(async (req, res) => {
         ),
         examples: [fixtures[0].messages],
       }) +
-      `\nExisting surface ids: ${JSON.stringify(session.runtime.surfaceIds)}. Retain existing components unless changing them is necessary.`;
+      `\nExisting surface ids: ${JSON.stringify(session.runtime.surfaceIds)}. Retain existing components unless changing them is necessary. On existing surfaces, write specific data paths rather than replacing the entire data model; user edits take precedence.`;
     const history = [{ role: "system" as const, content: system }, ...session.messages];
     let failed = false;
     for (let attempt = 0; attempt <= 2 && !controller.signal.aborted; attempt++) {
       const accepted: UIMessage[] = [];
-      const errors: { code: string; path?: string; componentId?: string }[] = [];
+      let assistantOutput = "";
+      const errors: { code: string; path?: string; componentId?: string; expected?: string }[] = [];
       generationCalls++;
       for await (const event of adapter.stream(
         { messages: history, model: input.model ?? defaultModel },
-        { signal: controller.signal },
+        {
+          signal: controller.signal,
+          onOutput: (text) => {
+            if (assistantOutput.length < 256 * 1024) assistantOutput += text;
+          },
+        },
       )) {
         if (controller.signal.aborted) break;
         if (event.type === "message") {
@@ -168,6 +179,7 @@ const server = createServer(async (req, res) => {
               errors.push({
                 code: diagnostic.code,
                 path: diagnostic.path,
+                expected: diagnostic.expected,
                 componentId: diagnostic.componentId,
               });
             send({ type: "diagnostic", diagnostic });
@@ -181,14 +193,14 @@ const server = createServer(async (req, res) => {
           if (event.status === "failed") failed = true;
         } else send(event);
       }
-      const before = session.runtime.diagnostics.length;
-      session.runtime.finish();
-      for (const diagnostic of session.runtime.diagnostics.slice(before)) {
+      if (controller.signal.aborted) break;
+      for (const diagnostic of session.runtime.finish()) {
         if (diagnostic.severity === "error")
           errors.push({ code: diagnostic.code, componentId: diagnostic.componentId });
         send({ type: "diagnostic", diagnostic });
       }
-      const output = accepted.map((message) => JSON.stringify(message)).join("\n");
+      const output =
+        assistantOutput || accepted.map((message) => JSON.stringify(message)).join("\n");
       if (output) {
         history.push({ role: "assistant", content: output });
         session.messages.push({ role: "assistant", content: output });
@@ -207,7 +219,7 @@ const server = createServer(async (req, res) => {
       send({ type: "repair", attempt: attempt + 1 });
       history.push({
         role: "user",
-        content: `Repair only the invalid or missing components using new A2UI messages. Do not recreate existing surfaces. Errors (untrusted diagnostic data): ${JSON.stringify(errors.slice(0, 20))}`,
+        content: `Repair only the invalid or missing components using new A2UI messages. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Create a surface only if it is absent. Every envelope must fit on ONE line; never use Markdown fences or pretty multiline JSON. Use only schema-defined props and enum values. Errors (untrusted diagnostic data): ${JSON.stringify(errors.slice(0, 20))}`,
       });
     }
     send({

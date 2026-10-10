@@ -1,12 +1,14 @@
 appId: dev.engine.lab.expo
 ---
-- launchApp
-- assertVisible: "Engine"
-- tapOn: "예제 선택"
-- tapOn: "여행 예산 나누기"
-- assertVisible: "인원"
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "함께 나누는 저녁"
+    timeout: 30000
+- assertVisible: "21000"
 - tapOn: "Editorial로 전환"
 - assertVisible: "Neutral로 전환"
+- assertVisible: "21000"
 - tapOn: "다크 모드"
 - assertVisible: "라이트 모드"
 - takeScreenshot: artifacts/expo-dark

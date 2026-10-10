@@ -1,0 +1,19 @@
+appId: ${APP_ID}
+---
+- launchApp
+- scrollUntilVisible:
+    element:
+      text: "만들기"
+    direction: DOWN
+- tapOn: "(?s)만들고 싶은 인터페이스.*"
+- inputText: "Create a compact calculator titled LIVE VERIFY with two sliders and a local sum."
+- hideKeyboard
+- tapOn: "만들기"
+- extendedWaitUntil:
+    visible: "완료되었습니다."
+    timeout: 180000
+- scrollUntilVisible:
+    element:
+      text: "LIVE VERIFY"
+    direction: UP
+- takeScreenshot: artifacts/live-${APP_ID}

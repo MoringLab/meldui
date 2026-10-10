@@ -17,7 +17,7 @@
     "dev": "pnpm --parallel --filter @engine/server --filter @engine/playground dev",
     "eval": "tsx scripts/evaluate.ts",
     "eval:online": "tsx scripts/evaluate-online.ts",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e"
+    "check": "pnpm lint && pnpm build && pnpm typecheck && pnpm test && pnpm test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.8",

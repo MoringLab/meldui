@@ -290,9 +290,11 @@ export type Diagnostic = {
   surfaceId?: string;
   componentId?: string;
   path?: string;
+  expected?: string;
   severity: "error" | "warning";
 };
 export type UserAction = {
+  timestamp: string;
   name: string;
   surfaceId: string;
   sourceComponentId: string;
@@ -310,7 +312,7 @@ export function parseComponent(
   schemas: Record<string, z.AnyZodObject> = componentSchemas,
 ): Component {
   const base = envelopeComponent.parse(value);
-  const schema = schemas[base.component];
+  const schema = Object.hasOwn(schemas, base.component) ? schemas[base.component] : undefined;
   if (!schema) throw new Error(`Unknown component: ${base.component}`);
   const { id, component, ...props } = base;
   return { id, component: component as ComponentName, ...schema.strict().parse(props) };

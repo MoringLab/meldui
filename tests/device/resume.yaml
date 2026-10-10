@@ -1,0 +1,19 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "함께 나누는 저녁"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+- pressKey: Home
+- launchApp
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+- assertVisible: "21000"
+- takeScreenshot: artifacts/background-resume

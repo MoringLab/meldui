@@ -1,0 +1,5550 @@
+[
+  {
+    "id": "calculator",
+    "title": "함께 나누는 저녁",
+    "category": "calculator",
+    "prompt": "총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.",
+    "interactions": [
+      {
+        "path": "/a",
+        "value": 168000,
+        "node": "_result",
+        "prop": "text",
+        "expected": 42000
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "a": 84000,
+            "b": 4
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "함께 나누는 저녁",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "총 금액과 인원을 바꾸며 1인당 금액을 계산하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "controls",
+              "component": "Grid",
+              "columns": 2,
+              "children": [
+                "_a",
+                "_b"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_a",
+              "component": "Slider",
+              "label": "총 금액 (원)",
+              "value": {
+                "path": "/a"
+              },
+              "min": 0,
+              "max": 168000,
+              "step": 1000
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_b",
+              "component": "Slider",
+              "label": "인원",
+              "value": {
+                "path": "/b"
+              },
+              "min": 1,
+              "max": 10,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "result",
+              "component": "Card",
+              "title": "계산 결과",
+              "children": [
+                "_result"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_result",
+              "component": "Heading",
+              "level": 2,
+              "text": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "round",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "ref": "/a"
+                          },
+                          {
+                            "ref": "/b"
+                          }
+                        ]
+                      },
+                      2
+                    ]
+                  }
+                },
+                "returnType": "number"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "note",
+              "component": "Text",
+              "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "trip-budget",
+    "title": "여행 예산",
+    "category": "calculator",
+    "prompt": "하루 예산과 여행 일수로 총 예산을 계산하세요.",
+    "interactions": [
+      {
+        "path": "/a",
+        "value": 130000,
+        "node": "_result",
+        "prop": "text",
+        "expected": 650000
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "a": 65000,
+            "b": 5
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "여행 예산",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "하루 예산과 여행 일수로 총 예산을 계산하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "controls",
+              "component": "Grid",
+              "columns": 2,
+              "children": [
+                "_a",
+                "_b"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_a",
+              "component": "Slider",
+              "label": "하루 예산 (원)",
+              "value": {
+                "path": "/a"
+              },
+              "min": 0,
+              "max": 130000,
+              "step": 1000
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_b",
+              "component": "Slider",
+              "label": "여행 일수",
+              "value": {
+                "path": "/b"
+              },
+              "min": 1,
+              "max": 10,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "result",
+              "component": "Card",
+              "title": "계산 결과",
+              "children": [
+                "_result"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_result",
+              "component": "Heading",
+              "level": 2,
+              "text": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "round",
+                    "args": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "ref": "/a"
+                          },
+                          {
+                            "ref": "/b"
+                          }
+                        ]
+                      },
+                      2
+                    ]
+                  }
+                },
+                "returnType": "number"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "note",
+              "component": "Text",
+              "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "study-time",
+    "title": "이번 주 공부 시간",
+    "category": "calculator",
+    "prompt": "매일 공부할 시간과 일수로 계획을 세우세요.",
+    "interactions": [
+      {
+        "path": "/a",
+        "value": 4,
+        "node": "_result",
+        "prop": "text",
+        "expected": 20
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "a": 2,
+            "b": 5
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "이번 주 공부 시간",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "매일 공부할 시간과 일수로 계획을 세우세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "controls",
+              "component": "Grid",
+              "columns": 2,
+              "children": [
+                "_a",
+                "_b"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_a",
+              "component": "Slider",
+              "label": "하루 시간",
+              "value": {
+                "path": "/a"
+              },
+              "min": 0,
+              "max": 10,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_b",
+              "component": "Slider",
+              "label": "일수",
+              "value": {
+                "path": "/b"
+              },
+              "min": 1,
+              "max": 10,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "result",
+              "component": "Card",
+              "title": "계산 결과",
+              "children": [
+                "_result"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_result",
+              "component": "Heading",
+              "level": 2,
+              "text": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "round",
+                    "args": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "ref": "/a"
+                          },
+                          {
+                            "ref": "/b"
+                          }
+                        ]
+                      },
+                      2
+                    ]
+                  }
+                },
+                "returnType": "number"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "note",
+              "component": "Text",
+              "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "unit-price",
+    "title": "단위 가격 비교",
+    "category": "calculator",
+    "prompt": "묶음 가격과 수량으로 개당 가격을 확인하세요.",
+    "interactions": [
+      {
+        "path": "/a",
+        "value": 36000,
+        "node": "_result",
+        "prop": "text",
+        "expected": 6000
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "a": 18000,
+            "b": 6
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "단위 가격 비교",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "묶음 가격과 수량으로 개당 가격을 확인하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "controls",
+              "component": "Grid",
+              "columns": 2,
+              "children": [
+                "_a",
+                "_b"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_a",
+              "component": "Slider",
+              "label": "묶음 가격 (원)",
+              "value": {
+                "path": "/a"
+              },
+              "min": 0,
+              "max": 36000,
+              "step": 1000
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_b",
+              "component": "Slider",
+              "label": "수량",
+              "value": {
+                "path": "/b"
+              },
+              "min": 1,
+              "max": 12,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "result",
+              "component": "Card",
+              "title": "계산 결과",
+              "children": [
+                "_result"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_result",
+              "component": "Heading",
+              "level": 2,
+              "text": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "round",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "ref": "/a"
+                          },
+                          {
+                            "ref": "/b"
+                          }
+                        ]
+                      },
+                      2
+                    ]
+                  }
+                },
+                "returnType": "number"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "note",
+              "component": "Text",
+              "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "remaining-budget",
+    "title": "남은 예산",
+    "category": "calculator",
+    "prompt": "예산에서 사용한 금액을 빼고 남은 금액을 확인하세요.",
+    "interactions": [
+      {
+        "path": "/a",
+        "value": 200000,
+        "node": "_result",
+        "prop": "text",
+        "expected": 175000
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "a": 100000,
+            "b": 25000
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "controls",
+                "result",
+                "note"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "남은 예산",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예산에서 사용한 금액을 빼고 남은 금액을 확인하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "controls",
+              "component": "Grid",
+              "columns": 2,
+              "children": [
+                "_a",
+                "_b"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_a",
+              "component": "Slider",
+              "label": "예산 (원)",
+              "value": {
+                "path": "/a"
+              },
+              "min": 0,
+              "max": 200000,
+              "step": 1000
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_b",
+              "component": "Slider",
+              "label": "사용한 금액 (원)",
+              "value": {
+                "path": "/b"
+              },
+              "min": 1,
+              "max": 50000,
+              "step": 1000
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "result",
+              "component": "Card",
+              "title": "계산 결과",
+              "children": [
+                "_result"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_result",
+              "component": "Heading",
+              "level": 2,
+              "text": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "round",
+                    "args": [
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "ref": "/a"
+                          },
+                          {
+                            "ref": "/b"
+                          }
+                        ]
+                      },
+                      2
+                    ]
+                  }
+                },
+                "returnType": "number"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "note",
+              "component": "Text",
+              "text": "입력값을 바꾸면 기기에서 바로 계산됩니다. 예시 금액입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "comparison",
+    "title": "도구를 고르는 기준",
+    "category": "comparison",
+    "prompt": "노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+    "interactions": [
+      {
+        "path": "/choice",
+        "value": "B",
+        "node": "selection",
+        "prop": "text",
+        "expected": "현재 선택: B"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "choice": "A",
+            "rows": [
+              {
+                "name": "A",
+                "cost": "무료",
+                "strength": "간단하게 시작"
+              },
+              {
+                "name": "B",
+                "cost": "월 10,000원",
+                "strength": "함께 작업"
+              },
+              {
+                "name": "C",
+                "cost": "월 20,000원",
+                "strength": "세밀한 설정"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "도구를 고르는 기준",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "노트 앱의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "table",
+              "component": "Table",
+              "caption": "노트 앱 비교",
+              "columns": [
+                {
+                  "key": "name",
+                  "label": "선택지"
+                },
+                {
+                  "key": "cost",
+                  "label": "비용"
+                },
+                {
+                  "key": "strength",
+                  "label": "특징"
+                }
+              ],
+              "rows": {
+                "path": "/rows"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "choice",
+              "component": "Select",
+              "label": "관심 있는 선택지",
+              "value": {
+                "path": "/choice"
+              },
+              "options": [
+                {
+                  "value": "A",
+                  "label": "선택 A"
+                },
+                {
+                  "value": "B",
+                  "label": "선택 B"
+                },
+                {
+                  "value": "C",
+                  "label": "선택 C"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "selection",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "format",
+                    "args": [
+                      "현재 선택: {0}",
+                      {
+                        "ref": "/choice"
+                      }
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "travel-compare",
+    "title": "이동 수단 비교",
+    "category": "comparison",
+    "prompt": "교통수단의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+    "interactions": [
+      {
+        "path": "/choice",
+        "value": "B",
+        "node": "selection",
+        "prop": "text",
+        "expected": "현재 선택: B"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "choice": "A",
+            "rows": [
+              {
+                "name": "A",
+                "cost": "무료",
+                "strength": "간단하게 시작"
+              },
+              {
+                "name": "B",
+                "cost": "월 10,000원",
+                "strength": "함께 작업"
+              },
+              {
+                "name": "C",
+                "cost": "월 20,000원",
+                "strength": "세밀한 설정"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "이동 수단 비교",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "교통수단의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "table",
+              "component": "Table",
+              "caption": "교통수단 비교",
+              "columns": [
+                {
+                  "key": "name",
+                  "label": "선택지"
+                },
+                {
+                  "key": "cost",
+                  "label": "비용"
+                },
+                {
+                  "key": "strength",
+                  "label": "특징"
+                }
+              ],
+              "rows": {
+                "path": "/rows"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "choice",
+              "component": "Select",
+              "label": "관심 있는 선택지",
+              "value": {
+                "path": "/choice"
+              },
+              "options": [
+                {
+                  "value": "A",
+                  "label": "선택 A"
+                },
+                {
+                  "value": "B",
+                  "label": "선택 B"
+                },
+                {
+                  "value": "C",
+                  "label": "선택 C"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "selection",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "format",
+                    "args": [
+                      "현재 선택: {0}",
+                      {
+                        "ref": "/choice"
+                      }
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "plan-compare",
+    "title": "요금제 비교",
+    "category": "comparison",
+    "prompt": "예시 요금제의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+    "interactions": [
+      {
+        "path": "/choice",
+        "value": "B",
+        "node": "selection",
+        "prop": "text",
+        "expected": "현재 선택: B"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "choice": "A",
+            "rows": [
+              {
+                "name": "A",
+                "cost": "무료",
+                "strength": "간단하게 시작"
+              },
+              {
+                "name": "B",
+                "cost": "월 10,000원",
+                "strength": "함께 작업"
+              },
+              {
+                "name": "C",
+                "cost": "월 20,000원",
+                "strength": "세밀한 설정"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "요금제 비교",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예시 요금제의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "table",
+              "component": "Table",
+              "caption": "예시 요금제 비교",
+              "columns": [
+                {
+                  "key": "name",
+                  "label": "선택지"
+                },
+                {
+                  "key": "cost",
+                  "label": "비용"
+                },
+                {
+                  "key": "strength",
+                  "label": "특징"
+                }
+              ],
+              "rows": {
+                "path": "/rows"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "choice",
+              "component": "Select",
+              "label": "관심 있는 선택지",
+              "value": {
+                "path": "/choice"
+              },
+              "options": [
+                {
+                  "value": "A",
+                  "label": "선택 A"
+                },
+                {
+                  "value": "B",
+                  "label": "선택 B"
+                },
+                {
+                  "value": "C",
+                  "label": "선택 C"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "selection",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "format",
+                    "args": [
+                      "현재 선택: {0}",
+                      {
+                        "ref": "/choice"
+                      }
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "course-compare",
+    "title": "학습 과정 비교",
+    "category": "comparison",
+    "prompt": "학습 과정의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+    "interactions": [
+      {
+        "path": "/choice",
+        "value": "B",
+        "node": "selection",
+        "prop": "text",
+        "expected": "현재 선택: B"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "choice": "A",
+            "rows": [
+              {
+                "name": "A",
+                "cost": "무료",
+                "strength": "간단하게 시작"
+              },
+              {
+                "name": "B",
+                "cost": "월 10,000원",
+                "strength": "함께 작업"
+              },
+              {
+                "name": "C",
+                "cost": "월 20,000원",
+                "strength": "세밀한 설정"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "table",
+                "choice",
+                "selection"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "학습 과정 비교",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "학습 과정의 차이를 표로 살펴보세요. 수치는 비교를 위한 예시입니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "table",
+              "component": "Table",
+              "caption": "학습 과정 비교",
+              "columns": [
+                {
+                  "key": "name",
+                  "label": "선택지"
+                },
+                {
+                  "key": "cost",
+                  "label": "비용"
+                },
+                {
+                  "key": "strength",
+                  "label": "특징"
+                }
+              ],
+              "rows": {
+                "path": "/rows"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "choice",
+              "component": "Select",
+              "label": "관심 있는 선택지",
+              "value": {
+                "path": "/choice"
+              },
+              "options": [
+                {
+                  "value": "A",
+                  "label": "선택 A"
+                },
+                {
+                  "value": "B",
+                  "label": "선택 B"
+                },
+                {
+                  "value": "C",
+                  "label": "선택 C"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "selection",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "format",
+                    "args": [
+                      "현재 선택: {0}",
+                      {
+                        "ref": "/choice"
+                      }
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "form",
+    "title": "참가 신청",
+    "category": "form",
+    "prompt": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+    "interactions": [
+      {
+        "path": "/name",
+        "value": "루이",
+        "node": "_name",
+        "prop": "value",
+        "expected": "루이"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "name": "",
+            "date": "2026-10-15",
+            "topic": "product",
+            "memo": "",
+            "consent": false
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "참가 신청",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "form",
+              "component": "Form",
+              "label": "참가 신청",
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
+              "onSubmit": {
+                "event": {
+                  "name": "submit_form",
+                  "context": {
+                    "name": {
+                      "path": "/name"
+                    },
+                    "date": {
+                      "path": "/date"
+                    },
+                    "topic": {
+                      "path": "/topic"
+                    },
+                    "memo": {
+                      "path": "/memo"
+                    },
+                    "consent": {
+                      "path": "/consent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_name",
+              "component": "TextField",
+              "label": "이름",
+              "value": {
+                "path": "/name"
+              },
+              "placeholder": "이름을 입력하세요"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_date",
+              "component": "DatePicker",
+              "label": "날짜",
+              "value": {
+                "path": "/date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_topic",
+              "component": "Select",
+              "label": "주제",
+              "value": {
+                "path": "/topic"
+              },
+              "options": [
+                {
+                  "label": "제품",
+                  "value": "product"
+                },
+                {
+                  "label": "디자인",
+                  "value": "design"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_memo",
+              "component": "TextField",
+              "label": "메모",
+              "value": {
+                "path": "/memo"
+              },
+              "multiline": true
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_consent",
+              "component": "Checkbox",
+              "label": "입력한 내용을 확인했습니다",
+              "value": {
+                "path": "/consent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "reservation",
+    "title": "방문 예약",
+    "category": "form",
+    "prompt": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+    "interactions": [
+      {
+        "path": "/name",
+        "value": "루이",
+        "node": "_name",
+        "prop": "value",
+        "expected": "루이"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "name": "",
+            "date": "2026-10-15",
+            "topic": "product",
+            "memo": "",
+            "consent": false
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "방문 예약",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "form",
+              "component": "Form",
+              "label": "방문 예약",
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
+              "onSubmit": {
+                "event": {
+                  "name": "submit_form",
+                  "context": {
+                    "name": {
+                      "path": "/name"
+                    },
+                    "date": {
+                      "path": "/date"
+                    },
+                    "topic": {
+                      "path": "/topic"
+                    },
+                    "memo": {
+                      "path": "/memo"
+                    },
+                    "consent": {
+                      "path": "/consent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_name",
+              "component": "TextField",
+              "label": "이름",
+              "value": {
+                "path": "/name"
+              },
+              "placeholder": "이름을 입력하세요"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_date",
+              "component": "DatePicker",
+              "label": "날짜",
+              "value": {
+                "path": "/date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_topic",
+              "component": "Select",
+              "label": "주제",
+              "value": {
+                "path": "/topic"
+              },
+              "options": [
+                {
+                  "label": "제품",
+                  "value": "product"
+                },
+                {
+                  "label": "디자인",
+                  "value": "design"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_memo",
+              "component": "TextField",
+              "label": "메모",
+              "value": {
+                "path": "/memo"
+              },
+              "multiline": true
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_consent",
+              "component": "Checkbox",
+              "label": "입력한 내용을 확인했습니다",
+              "value": {
+                "path": "/consent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "feedback",
+    "title": "의견 남기기",
+    "category": "form",
+    "prompt": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+    "interactions": [
+      {
+        "path": "/name",
+        "value": "루이",
+        "node": "_name",
+        "prop": "value",
+        "expected": "루이"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "name": "",
+            "date": "2026-10-15",
+            "topic": "product",
+            "memo": "",
+            "consent": false
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "의견 남기기",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "form",
+              "component": "Form",
+              "label": "의견 남기기",
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
+              "onSubmit": {
+                "event": {
+                  "name": "submit_form",
+                  "context": {
+                    "name": {
+                      "path": "/name"
+                    },
+                    "date": {
+                      "path": "/date"
+                    },
+                    "topic": {
+                      "path": "/topic"
+                    },
+                    "memo": {
+                      "path": "/memo"
+                    },
+                    "consent": {
+                      "path": "/consent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_name",
+              "component": "TextField",
+              "label": "이름",
+              "value": {
+                "path": "/name"
+              },
+              "placeholder": "이름을 입력하세요"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_date",
+              "component": "DatePicker",
+              "label": "날짜",
+              "value": {
+                "path": "/date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_topic",
+              "component": "Select",
+              "label": "주제",
+              "value": {
+                "path": "/topic"
+              },
+              "options": [
+                {
+                  "label": "제품",
+                  "value": "product"
+                },
+                {
+                  "label": "디자인",
+                  "value": "design"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_memo",
+              "component": "TextField",
+              "label": "메모",
+              "value": {
+                "path": "/memo"
+              },
+              "multiline": true
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_consent",
+              "component": "Checkbox",
+              "label": "입력한 내용을 확인했습니다",
+              "value": {
+                "path": "/consent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "contact",
+    "title": "연락 요청",
+    "category": "form",
+    "prompt": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+    "interactions": [
+      {
+        "path": "/name",
+        "value": "루이",
+        "node": "_name",
+        "prop": "value",
+        "expected": "루이"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "name": "",
+            "date": "2026-10-15",
+            "topic": "product",
+            "memo": "",
+            "consent": false
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "연락 요청",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "form",
+              "component": "Form",
+              "label": "연락 요청",
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
+              "onSubmit": {
+                "event": {
+                  "name": "submit_form",
+                  "context": {
+                    "name": {
+                      "path": "/name"
+                    },
+                    "date": {
+                      "path": "/date"
+                    },
+                    "topic": {
+                      "path": "/topic"
+                    },
+                    "memo": {
+                      "path": "/memo"
+                    },
+                    "consent": {
+                      "path": "/consent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_name",
+              "component": "TextField",
+              "label": "이름",
+              "value": {
+                "path": "/name"
+              },
+              "placeholder": "이름을 입력하세요"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_date",
+              "component": "DatePicker",
+              "label": "날짜",
+              "value": {
+                "path": "/date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_topic",
+              "component": "Select",
+              "label": "주제",
+              "value": {
+                "path": "/topic"
+              },
+              "options": [
+                {
+                  "label": "제품",
+                  "value": "product"
+                },
+                {
+                  "label": "디자인",
+                  "value": "design"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_memo",
+              "component": "TextField",
+              "label": "메모",
+              "value": {
+                "path": "/memo"
+              },
+              "multiline": true
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_consent",
+              "component": "Checkbox",
+              "label": "입력한 내용을 확인했습니다",
+              "value": {
+                "path": "/consent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "onboarding",
+    "title": "시작 설정",
+    "category": "form",
+    "prompt": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+    "interactions": [
+      {
+        "path": "/name",
+        "value": "루이",
+        "node": "_name",
+        "prop": "value",
+        "expected": "루이"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "name": "",
+            "date": "2026-10-15",
+            "topic": "product",
+            "memo": "",
+            "consent": false
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "form"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "시작 설정",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "필요한 정보를 입력하고 제출하세요. 제출 전까지 입력은 기기에만 보관됩니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "form",
+              "component": "Form",
+              "label": "시작 설정",
+              "children": [
+                "_name",
+                "_date",
+                "_topic",
+                "_memo",
+                "_consent"
+              ],
+              "onSubmit": {
+                "event": {
+                  "name": "submit_form",
+                  "context": {
+                    "name": {
+                      "path": "/name"
+                    },
+                    "date": {
+                      "path": "/date"
+                    },
+                    "topic": {
+                      "path": "/topic"
+                    },
+                    "memo": {
+                      "path": "/memo"
+                    },
+                    "consent": {
+                      "path": "/consent"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_name",
+              "component": "TextField",
+              "label": "이름",
+              "value": {
+                "path": "/name"
+              },
+              "placeholder": "이름을 입력하세요"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_date",
+              "component": "DatePicker",
+              "label": "날짜",
+              "value": {
+                "path": "/date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_topic",
+              "component": "Select",
+              "label": "주제",
+              "value": {
+                "path": "/topic"
+              },
+              "options": [
+                {
+                  "label": "제품",
+                  "value": "product"
+                },
+                {
+                  "label": "디자인",
+                  "value": "design"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_memo",
+              "component": "TextField",
+              "label": "메모",
+              "value": {
+                "path": "/memo"
+              },
+              "multiline": true
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_consent",
+              "component": "Checkbox",
+              "label": "입력한 내용을 확인했습니다",
+              "value": {
+                "path": "/consent"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "planner",
+    "title": "하루를 가볍게 계획하기",
+    "category": "planner",
+    "prompt": "할 일을 정리하고 완료한 항목을 체크하세요.",
+    "interactions": [
+      {
+        "path": "/done1",
+        "value": true,
+        "node": "_progress",
+        "prop": "value",
+        "expected": 50
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "tab": "today",
+            "done1": false,
+            "done2": false,
+            "memo": ""
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "하루를 가볍게 계획하기",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "할 일을 정리하고 완료한 항목을 체크하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "tabs",
+              "component": "Tabs",
+              "value": {
+                "path": "/tab"
+              },
+              "tabs": [
+                {
+                  "id": "today",
+                  "label": "오늘",
+                  "child": "_today"
+                },
+                {
+                  "id": "next",
+                  "label": "다음",
+                  "child": "_next"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_today",
+              "component": "Column",
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_next",
+              "component": "Text",
+              "text": "다음 단계를 위한 여유를 남겨두세요."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task1",
+              "component": "Checkbox",
+              "label": "중요한 일 한 가지 정하기",
+              "value": {
+                "path": "/done1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task2",
+              "component": "Checkbox",
+              "label": "필요한 자료 준비하기",
+              "value": {
+                "path": "/done2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_progress",
+              "component": "Progress",
+              "label": "진행 상황",
+              "value": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done1"
+                          },
+                          50,
+                          0
+                        ]
+                      },
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done2"
+                          },
+                          50,
+                          0
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "returnType": "number"
+              },
+              "max": 100
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "add",
+              "component": "TextField",
+              "label": "나의 메모",
+              "value": {
+                "path": "/memo"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "packing",
+    "title": "여행 준비",
+    "category": "planner",
+    "prompt": "할 일을 정리하고 완료한 항목을 체크하세요.",
+    "interactions": [
+      {
+        "path": "/done1",
+        "value": true,
+        "node": "_progress",
+        "prop": "value",
+        "expected": 50
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "tab": "today",
+            "done1": false,
+            "done2": false,
+            "memo": ""
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "여행 준비",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "할 일을 정리하고 완료한 항목을 체크하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "tabs",
+              "component": "Tabs",
+              "value": {
+                "path": "/tab"
+              },
+              "tabs": [
+                {
+                  "id": "today",
+                  "label": "오늘",
+                  "child": "_today"
+                },
+                {
+                  "id": "next",
+                  "label": "다음",
+                  "child": "_next"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_today",
+              "component": "Column",
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_next",
+              "component": "Text",
+              "text": "다음 단계를 위한 여유를 남겨두세요."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task1",
+              "component": "Checkbox",
+              "label": "중요한 일 한 가지 정하기",
+              "value": {
+                "path": "/done1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task2",
+              "component": "Checkbox",
+              "label": "필요한 자료 준비하기",
+              "value": {
+                "path": "/done2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_progress",
+              "component": "Progress",
+              "label": "진행 상황",
+              "value": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done1"
+                          },
+                          50,
+                          0
+                        ]
+                      },
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done2"
+                          },
+                          50,
+                          0
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "returnType": "number"
+              },
+              "max": 100
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "add",
+              "component": "TextField",
+              "label": "나의 메모",
+              "value": {
+                "path": "/memo"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "meeting",
+    "title": "회의 준비",
+    "category": "planner",
+    "prompt": "할 일을 정리하고 완료한 항목을 체크하세요.",
+    "interactions": [
+      {
+        "path": "/done1",
+        "value": true,
+        "node": "_progress",
+        "prop": "value",
+        "expected": 50
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "tab": "today",
+            "done1": false,
+            "done2": false,
+            "memo": ""
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "회의 준비",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "할 일을 정리하고 완료한 항목을 체크하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "tabs",
+              "component": "Tabs",
+              "value": {
+                "path": "/tab"
+              },
+              "tabs": [
+                {
+                  "id": "today",
+                  "label": "오늘",
+                  "child": "_today"
+                },
+                {
+                  "id": "next",
+                  "label": "다음",
+                  "child": "_next"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_today",
+              "component": "Column",
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_next",
+              "component": "Text",
+              "text": "다음 단계를 위한 여유를 남겨두세요."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task1",
+              "component": "Checkbox",
+              "label": "중요한 일 한 가지 정하기",
+              "value": {
+                "path": "/done1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task2",
+              "component": "Checkbox",
+              "label": "필요한 자료 준비하기",
+              "value": {
+                "path": "/done2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_progress",
+              "component": "Progress",
+              "label": "진행 상황",
+              "value": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done1"
+                          },
+                          50,
+                          0
+                        ]
+                      },
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done2"
+                          },
+                          50,
+                          0
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "returnType": "number"
+              },
+              "max": 100
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "add",
+              "component": "TextField",
+              "label": "나의 메모",
+              "value": {
+                "path": "/memo"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "habit",
+    "title": "작은 습관 만들기",
+    "category": "planner",
+    "prompt": "할 일을 정리하고 완료한 항목을 체크하세요.",
+    "interactions": [
+      {
+        "path": "/done1",
+        "value": true,
+        "node": "_progress",
+        "prop": "value",
+        "expected": 50
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "tab": "today",
+            "done1": false,
+            "done2": false,
+            "memo": ""
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "tabs",
+                "add"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "작은 습관 만들기",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "할 일을 정리하고 완료한 항목을 체크하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "tabs",
+              "component": "Tabs",
+              "value": {
+                "path": "/tab"
+              },
+              "tabs": [
+                {
+                  "id": "today",
+                  "label": "오늘",
+                  "child": "_today"
+                },
+                {
+                  "id": "next",
+                  "label": "다음",
+                  "child": "_next"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_today",
+              "component": "Column",
+              "children": [
+                "_task1",
+                "_task2",
+                "_progress"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_next",
+              "component": "Text",
+              "text": "다음 단계를 위한 여유를 남겨두세요."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task1",
+              "component": "Checkbox",
+              "label": "중요한 일 한 가지 정하기",
+              "value": {
+                "path": "/done1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_task2",
+              "component": "Checkbox",
+              "label": "필요한 자료 준비하기",
+              "value": {
+                "path": "/done2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_progress",
+              "component": "Progress",
+              "label": "진행 상황",
+              "value": {
+                "call": "computeNumber",
+                "args": {
+                  "expr": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done1"
+                          },
+                          50,
+                          0
+                        ]
+                      },
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "ref": "/done2"
+                          },
+                          50,
+                          0
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "returnType": "number"
+              },
+              "max": 100
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "add",
+              "component": "TextField",
+              "label": "나의 메모",
+              "value": {
+                "path": "/memo"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "dashboard",
+    "title": "한 주의 흐름",
+    "category": "dashboard",
+    "prompt": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+    "interactions": [
+      {
+        "path": "/points/2/y",
+        "value": 80,
+        "node": "slider",
+        "prop": "value",
+        "expected": 80
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "points": [
+              {
+                "x": "월",
+                "y": 32
+              },
+              {
+                "x": "화",
+                "y": 58
+              },
+              {
+                "x": "수",
+                "y": 46
+              },
+              {
+                "x": "목",
+                "y": 72
+              },
+              {
+                "x": "금",
+                "y": 65
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "한 주의 흐름",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "chart",
+              "component": "Chart",
+              "title": "일별 변화 · 예시 데이터",
+              "kind": "line",
+              "values": {
+                "path": "/points"
+              },
+              "xKey": "x",
+              "yKey": "y"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "slider",
+              "component": "Slider",
+              "label": "수요일 값",
+              "value": {
+                "path": "/points/2/y"
+              },
+              "min": 0,
+              "max": 100,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "badge",
+              "component": "Badge",
+              "text": "기기에서 즉시 업데이트",
+              "tone": "success"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "energy",
+    "title": "에너지 사용량",
+    "category": "dashboard",
+    "prompt": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+    "interactions": [
+      {
+        "path": "/points/2/y",
+        "value": 80,
+        "node": "slider",
+        "prop": "value",
+        "expected": 80
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "points": [
+              {
+                "x": "월",
+                "y": 32
+              },
+              {
+                "x": "화",
+                "y": 58
+              },
+              {
+                "x": "수",
+                "y": 46
+              },
+              {
+                "x": "목",
+                "y": 72
+              },
+              {
+                "x": "금",
+                "y": 65
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "에너지 사용량",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "chart",
+              "component": "Chart",
+              "title": "일별 변화 · 예시 데이터",
+              "kind": "bar",
+              "values": {
+                "path": "/points"
+              },
+              "xKey": "x",
+              "yKey": "y"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "slider",
+              "component": "Slider",
+              "label": "수요일 값",
+              "value": {
+                "path": "/points/2/y"
+              },
+              "min": 0,
+              "max": 100,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "badge",
+              "component": "Badge",
+              "text": "기기에서 즉시 업데이트",
+              "tone": "success"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "activity",
+    "title": "활동 기록",
+    "category": "dashboard",
+    "prompt": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+    "interactions": [
+      {
+        "path": "/points/2/y",
+        "value": 80,
+        "node": "slider",
+        "prop": "value",
+        "expected": 80
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "points": [
+              {
+                "x": "월",
+                "y": 32
+              },
+              {
+                "x": "화",
+                "y": 58
+              },
+              {
+                "x": "수",
+                "y": 46
+              },
+              {
+                "x": "목",
+                "y": 72
+              },
+              {
+                "x": "금",
+                "y": 65
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "활동 기록",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "chart",
+              "component": "Chart",
+              "title": "일별 변화 · 예시 데이터",
+              "kind": "scatter",
+              "values": {
+                "path": "/points"
+              },
+              "xKey": "x",
+              "yKey": "y"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "slider",
+              "component": "Slider",
+              "label": "수요일 값",
+              "value": {
+                "path": "/points/2/y"
+              },
+              "min": 0,
+              "max": 100,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "badge",
+              "component": "Badge",
+              "text": "기기에서 즉시 업데이트",
+              "tone": "success"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "experiment",
+    "title": "실험 데이터",
+    "category": "dashboard",
+    "prompt": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+    "interactions": [
+      {
+        "path": "/points/2/y",
+        "value": 80,
+        "node": "slider",
+        "prop": "value",
+        "expected": 80
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "points": [
+              {
+                "x": "월",
+                "y": 32
+              },
+              {
+                "x": "화",
+                "y": 58
+              },
+              {
+                "x": "수",
+                "y": 46
+              },
+              {
+                "x": "목",
+                "y": 72
+              },
+              {
+                "x": "금",
+                "y": 65
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "실험 데이터",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "chart",
+              "component": "Chart",
+              "title": "일별 변화 · 예시 데이터",
+              "kind": "line",
+              "values": {
+                "path": "/points"
+              },
+              "xKey": "x",
+              "yKey": "y"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "slider",
+              "component": "Slider",
+              "label": "수요일 값",
+              "value": {
+                "path": "/points/2/y"
+              },
+              "min": 0,
+              "max": 100,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "badge",
+              "component": "Badge",
+              "text": "기기에서 즉시 업데이트",
+              "tone": "success"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "sales",
+    "title": "매출 추이",
+    "category": "dashboard",
+    "prompt": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+    "interactions": [
+      {
+        "path": "/points/2/y",
+        "value": 80,
+        "node": "slider",
+        "prop": "value",
+        "expected": 80
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "points": [
+              {
+                "x": "월",
+                "y": 32
+              },
+              {
+                "x": "화",
+                "y": 58
+              },
+              {
+                "x": "수",
+                "y": 46
+              },
+              {
+                "x": "목",
+                "y": 72
+              },
+              {
+                "x": "금",
+                "y": 65
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "chart",
+                "slider",
+                "badge"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "매출 추이",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "예시 데이터의 변화를 살펴보세요. 조절 막대로 가운데 값을 바꿀 수 있습니다.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "chart",
+              "component": "Chart",
+              "title": "일별 변화 · 예시 데이터",
+              "kind": "bar",
+              "values": {
+                "path": "/points"
+              },
+              "xKey": "x",
+              "yKey": "y"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "slider",
+              "component": "Slider",
+              "label": "수요일 값",
+              "value": {
+                "path": "/points/2/y"
+              },
+              "min": 0,
+              "max": 100,
+              "step": 1
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "badge",
+              "component": "Badge",
+              "text": "기기에서 즉시 업데이트",
+              "tone": "success"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "explanation",
+    "title": "복잡한 것을 작은 단계로",
+    "category": "explanation",
+    "prompt": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+    "interactions": [
+      {
+        "path": "/open",
+        "value": "two",
+        "node": "accordion",
+        "prop": "value",
+        "expected": "two"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "open": "one"
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "복잡한 것을 작은 단계로",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "callout",
+              "component": "Callout",
+              "title": "핵심 아이디어",
+              "text": "UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.",
+              "tone": "info"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "accordion",
+              "component": "Accordion",
+              "value": {
+                "path": "/open"
+              },
+              "items": [
+                {
+                  "id": "one",
+                  "label": "구조와 데이터",
+                  "child": "_detail"
+                },
+                {
+                  "id": "two",
+                  "label": "실행 순서",
+                  "child": "_list"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_detail",
+              "component": "CodeBlock",
+              "language": "json",
+              "code": "{\"value\":{\"path\":\"/name\"}}"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_list",
+              "component": "List",
+              "ordered": true,
+              "children": [
+                "_line1",
+                "_line2"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line1",
+              "component": "Text",
+              "text": "메시지를 검증합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line2",
+              "component": "Text",
+              "text": "등록된 컴포넌트로 표시합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "divider",
+              "component": "Divider"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "icon",
+              "component": "Icon",
+              "name": "check",
+              "label": "확인됨"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "image",
+              "component": "Image",
+              "asset": "engine-pattern",
+              "alt": "세 개의 연결된 인터페이스를 나타내는 기하학 그림",
+              "aspectRatio": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "streaming",
+    "title": "스트리밍 이해하기",
+    "category": "explanation",
+    "prompt": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+    "interactions": [
+      {
+        "path": "/open",
+        "value": "two",
+        "node": "accordion",
+        "prop": "value",
+        "expected": "two"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "open": "one"
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "스트리밍 이해하기",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "callout",
+              "component": "Callout",
+              "title": "핵심 아이디어",
+              "text": "UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.",
+              "tone": "info"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "accordion",
+              "component": "Accordion",
+              "value": {
+                "path": "/open"
+              },
+              "items": [
+                {
+                  "id": "one",
+                  "label": "구조와 데이터",
+                  "child": "_detail"
+                },
+                {
+                  "id": "two",
+                  "label": "실행 순서",
+                  "child": "_list"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_detail",
+              "component": "CodeBlock",
+              "language": "json",
+              "code": "{\"value\":{\"path\":\"/name\"}}"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_list",
+              "component": "List",
+              "ordered": true,
+              "children": [
+                "_line1",
+                "_line2"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line1",
+              "component": "Text",
+              "text": "메시지를 검증합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line2",
+              "component": "Text",
+              "text": "등록된 컴포넌트로 표시합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "divider",
+              "component": "Divider"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "icon",
+              "component": "Icon",
+              "name": "check",
+              "label": "확인됨"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "image",
+              "component": "Image",
+              "asset": "engine-pattern",
+              "alt": "세 개의 연결된 인터페이스를 나타내는 기하학 그림",
+              "aspectRatio": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "accessibility",
+    "title": "접근성 체크리스트",
+    "category": "explanation",
+    "prompt": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+    "interactions": [
+      {
+        "path": "/open",
+        "value": "two",
+        "node": "accordion",
+        "prop": "value",
+        "expected": "two"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "open": "one"
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "접근성 체크리스트",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "callout",
+              "component": "Callout",
+              "title": "핵심 아이디어",
+              "text": "UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.",
+              "tone": "info"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "accordion",
+              "component": "Accordion",
+              "value": {
+                "path": "/open"
+              },
+              "items": [
+                {
+                  "id": "one",
+                  "label": "구조와 데이터",
+                  "child": "_detail"
+                },
+                {
+                  "id": "two",
+                  "label": "실행 순서",
+                  "child": "_list"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_detail",
+              "component": "CodeBlock",
+              "language": "json",
+              "code": "{\"value\":{\"path\":\"/name\"}}"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_list",
+              "component": "List",
+              "ordered": true,
+              "children": [
+                "_line1",
+                "_line2"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line1",
+              "component": "Text",
+              "text": "메시지를 검증합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line2",
+              "component": "Text",
+              "text": "등록된 컴포넌트로 표시합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "divider",
+              "component": "Divider"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "icon",
+              "component": "Icon",
+              "name": "check",
+              "label": "확인됨"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "image",
+              "component": "Image",
+              "asset": "engine-pattern",
+              "alt": "세 개의 연결된 인터페이스를 나타내는 기하학 그림",
+              "aspectRatio": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "components",
+    "title": "인터페이스의 구성 요소",
+    "category": "explanation",
+    "prompt": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+    "interactions": [
+      {
+        "path": "/open",
+        "value": "two",
+        "node": "accordion",
+        "prop": "value",
+        "expected": "two"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "open": "one"
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "callout",
+                "accordion",
+                "divider",
+                "icon",
+                "image"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "인터페이스의 구성 요소",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "callout",
+              "component": "Callout",
+              "title": "핵심 아이디어",
+              "text": "UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.",
+              "tone": "info"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "accordion",
+              "component": "Accordion",
+              "value": {
+                "path": "/open"
+              },
+              "items": [
+                {
+                  "id": "one",
+                  "label": "구조와 데이터",
+                  "child": "_detail"
+                },
+                {
+                  "id": "two",
+                  "label": "실행 순서",
+                  "child": "_list"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_detail",
+              "component": "CodeBlock",
+              "language": "json",
+              "code": "{\"value\":{\"path\":\"/name\"}}"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_list",
+              "component": "List",
+              "ordered": true,
+              "children": [
+                "_line1",
+                "_line2"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line1",
+              "component": "Text",
+              "text": "메시지를 검증합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_line2",
+              "component": "Text",
+              "text": "등록된 컴포넌트로 표시합니다."
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "divider",
+              "component": "Divider"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "icon",
+              "component": "Icon",
+              "name": "check",
+              "label": "확인됨"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "image",
+              "component": "Image",
+              "asset": "engine-pattern",
+              "alt": "세 개의 연결된 인터페이스를 나타내는 기하학 그림",
+              "aspectRatio": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "quiz",
+    "title": "작은 수학 퀴즈",
+    "category": "game",
+    "prompt": "정답은 8입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+    "interactions": [
+      {
+        "path": "/guess",
+        "value": 8,
+        "node": "answer",
+        "prop": "text",
+        "expected": "정답입니다!"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "guess": 0
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "number",
+                "buttons",
+                "answer"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "작은 수학 퀴즈",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "정답은 8입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "number",
+              "component": "Heading",
+              "text": {
+                "path": "/guess"
+              },
+              "level": 2
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "buttons",
+              "component": "Row",
+              "children": [
+                "_minus",
+                "_plus"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_minus",
+              "component": "Button",
+              "label": "하나 빼기",
+              "variant": "secondary",
+              "action": {
+                "functionCall": {
+                  "call": "setValue",
+                  "args": {
+                    "path": "/guess",
+                    "expr": {
+                      "op": "sub",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_plus",
+              "component": "Button",
+              "label": "하나 더하기",
+              "action": {
+                "functionCall": {
+                  "call": "setValue",
+                  "args": {
+                    "path": "/guess",
+                    "expr": {
+                      "op": "add",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "answer",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "ref": "/guess"
+                          },
+                          8
+                        ]
+                      },
+                      "정답입니다!",
+                      "조금 더 시도해보세요."
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "counting-game",
+    "title": "숫자 맞히기",
+    "category": "game",
+    "prompt": "정답은 5입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+    "interactions": [
+      {
+        "path": "/guess",
+        "value": 5,
+        "node": "answer",
+        "prop": "text",
+        "expected": "정답입니다!"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "guess": 0
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "number",
+                "buttons",
+                "answer"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "숫자 맞히기",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "정답은 5입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "number",
+              "component": "Heading",
+              "text": {
+                "path": "/guess"
+              },
+              "level": 2
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "buttons",
+              "component": "Row",
+              "children": [
+                "_minus",
+                "_plus"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_minus",
+              "component": "Button",
+              "label": "하나 빼기",
+              "variant": "secondary",
+              "action": {
+                "functionCall": {
+                  "call": "setValue",
+                  "args": {
+                    "path": "/guess",
+                    "expr": {
+                      "op": "sub",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_plus",
+              "component": "Button",
+              "label": "하나 더하기",
+              "action": {
+                "functionCall": {
+                  "call": "setValue",
+                  "args": {
+                    "path": "/guess",
+                    "expr": {
+                      "op": "add",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "answer",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "ref": "/guess"
+                          },
+                          5
+                        ]
+                      },
+                      "정답입니다!",
+                      "조금 더 시도해보세요."
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "logic-game",
+    "title": "규칙 찾기",
+    "category": "game",
+    "prompt": "정답은 3입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+    "interactions": [
+      {
+        "path": "/guess",
+        "value": 3,
+        "node": "answer",
+        "prop": "text",
+        "expected": "정답입니다!"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "urn:engine:catalog:core:1"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "value": {
+            "guess": 0
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "intro",
+                "number",
+                "buttons",
+                "answer"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Heading",
+              "text": "규칙 찾기",
+              "level": 1
+            },
+            {
+              "id": "intro",
+              "component": "Text",
+              "text": "정답은 3입니다. 버튼으로 값을 바꾸며 정답을 맞혀보세요.",
+              "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "number",
+              "component": "Heading",
+              "text": {
+                "path": "/guess"
+              },
+              "level": 2
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "buttons",
+              "component": "Row",
+              "children": [
+                "_minus",
+                "_plus"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_minus",
+              "component": "Button",
+              "label": "하나 빼기",
+              "variant": "secondary",
+              "action": {
+                "functionCall": {
+                  "call": "setValue",
+                  "args": {
+                    "path": "/guess",
+                    "expr": {
+                      "op": "sub",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "_plus",
+              "component": "Button",
+              "label": "하나 더하기",
+              "action": {
+                "functionCall": {
+                  "call": "setValue",
+                  "args": {
+                    "path": "/guess",
+                    "expr": {
+                      "op": "add",
+                      "args": [
+                        {
+                          "ref": "/guess"
+                        },
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "answer",
+              "component": "Text",
+              "text": {
+                "call": "computeString",
+                "args": {
+                  "expr": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "ref": "/guess"
+                          },
+                          3
+                        ]
+                      },
+                      "정답입니다!",
+                      "조금 더 시도해보세요."
+                    ]
+                  }
+                },
+                "returnType": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -17,3 +17,5 @@ Android 앱은 `adb reverse tcp:8787 tcp:8787` 후 실행하세요. Flutter 앱�
 A2UI v0.9.1의 제한된 호환 프로파일과 자체 카탈로그를 사용합니다. 표준 A2UI 기본 카탈로그 전체를 지원한다고 주장하지 않습니다. 사용자 입력과 충돌하는 모델 업데이트는 적용하지 않고 진단을 남깁니다.
 
 구체적인 API와 확장법은 [영문 README](README.md), 진행 상태와 검증 범위는 [STATUS](docs/STATUS.md)를 확인하세요. 공개 패키지명은 아직 확정되지 않았으며, 샌드박스와 데스크톱은 후속 범위입니다.
+
+[Android 실제 입력·킷 전환 영상](docs/media/android-demo.mp4)과 [검증 보고서](docs/verification/REPORT.md)를 확인하세요. 현재는 private 프리뷰입니다. 네이티브 p95와 모델 첫 생성 성공률은 출시 목표에 아직 미달하며, iOS 검증과 공개 소유권 확정도 남아 있습니다.

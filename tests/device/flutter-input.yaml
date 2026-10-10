@@ -1,0 +1,26 @@
+appId: dev.engine.engine_lab
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "함께 나누는 저녁"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+- tapOn: "함께 나누는 저녁"
+- scrollUntilVisible:
+    element:
+      text: "참가 신청"
+    direction: DOWN
+- tapOn: "참가 신청"
+- extendedWaitUntil:
+    visible: "(?s)이름.*"
+    timeout: 30000
+- tapOn: "(?s)이름.*"
+- inputText: "Louis"
+- hideKeyboard
+- tapOn: "Editorial"
+- assertVisible: "Louis"
+- takeScreenshot: artifacts/flutter-form

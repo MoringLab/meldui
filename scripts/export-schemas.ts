@@ -16,3 +16,5 @@ for (const file of ["catalog.json", "kit-neutral.json", "kit-editorial.json"])
   await copyFile(`schemas/${file}`, `dart/engine_flutter/assets/${file}`);
 await mkdir("apps/flutter/assets", { recursive: true });
 await copyFile("fixtures/cases.json", "apps/flutter/assets/cases.json");
+await mkdir("dart/engine_flutter/test/fixtures", { recursive: true });
+await copyFile("fixtures/cases.json", "dart/engine_flutter/test/fixtures/cases.json");

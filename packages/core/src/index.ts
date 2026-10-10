@@ -67,6 +67,19 @@ const defaultLimits = {
 const overlapping = (a: string, b: string) =>
   a === "/" || b === "/" || a === b || a.startsWith(`${b}/`) || b.startsWith(`${a}/`);
 
+const functions = functionDefinitions.map((definition) => ({
+  ...definition,
+  execute: (args: Record<string, unknown>, context: any) => {
+    if (!definition.pure) throw new Error("ACTION_DISPATCH_REQUIRED");
+    return evaluateExpression(args.expr as Expr, (path) =>
+      getValue(context.dataModel.getSignal(resolvePath(path, context.path))),
+    );
+  },
+}));
+// Catalog descriptors and reference maps are immutable registration metadata.
+// Reuse their caches; conversation data always belongs to a new processor.
+let defaultCatalog: Catalog<any> | undefined;
+
 /** A small policy layer around upstream A2UI state and component models. */
 export class UIRuntime {
   readonly processor: MessageProcessor<any>;
@@ -76,6 +89,7 @@ export class UIRuntime {
   private nodeListeners = new Map<string, Set<() => void>>();
   private snapshots = new Map<string, { signature: string; snapshot: NodeSnapshot }>();
   private dirty = new Map<string, Set<string>>();
+  private pending = new Map<string, Map<string, UIMessage>>();
   private errors = new Map<string, string>();
   private seenEvents = new Set<string>();
   private revision = 0;
@@ -89,30 +103,28 @@ export class UIRuntime {
     const components =
       options.components ??
       Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema }));
-    const functions = functionDefinitions.map((definition) => ({
-      ...definition,
-      execute: (args: Record<string, unknown>, context: any) => {
-        if (!definition.pure) throw new Error("ACTION_DISPATCH_REQUIRED");
-        return evaluateExpression(args.expr as Expr, (path) =>
-          getValue(context.dataModel.getSignal(resolvePath(path, context.path))),
-        );
+    let catalog: Catalog<any>;
+    if (!options.components && !options.catalogId) {
+      defaultCatalog ??= new Catalog(CATALOG_ID, PROTOCOL_VERSION, components, functions);
+      catalog = defaultCatalog;
+    } else
+      catalog = new Catalog(
+        options.catalogId ?? CATALOG_ID,
+        PROTOCOL_VERSION,
+        components,
+        functions,
+      );
+    this.processor = new MessageProcessor([catalog], undefined, {
+      version: PROTOCOL_VERSION,
+      validationConfig: {
+        targetVersion: PROTOCOL_VERSION,
+        allowMissingRoot: true,
+        allowDanglingReferences: true,
+        allowOrphanComponents: true,
+        allowUnknownElements: false,
+        maxDepth: 50,
       },
-    }));
-    this.processor = new MessageProcessor(
-      [new Catalog(options.catalogId ?? CATALOG_ID, PROTOCOL_VERSION, components, functions)],
-      undefined,
-      {
-        version: PROTOCOL_VERSION,
-        validationConfig: {
-          targetVersion: PROTOCOL_VERSION,
-          allowMissingRoot: true,
-          allowDanglingReferences: true,
-          allowOrphanComponents: true,
-          allowUnknownElements: false,
-          maxDepth: 50,
-        },
-      },
-    );
+    });
   }
   /** Runtime-level subscription: surface lifecycle and diagnostics only. */
   subscribe = (fn: () => void) => {
@@ -182,22 +194,42 @@ export class UIRuntime {
         const incoming = message.updateComponents.components;
         const ids = new Set(incoming.map((c) => c.id));
         if (ids.size !== incoming.length) throw new Error("DUPLICATE_COMPONENT_ID");
-        const added = [...ids].filter((id) => !surface.componentsModel.has(id)).length;
-        if (surface.componentsModel.size + added > this.limits.components)
-          throw new Error("COMPONENT_LIMIT");
+        const tracked = new Set([...surface.componentsModel.values].map((node) => node.id));
+        for (const key of this.errors.keys())
+          if (key.startsWith(`${surfaceId}\0`)) tracked.add(key.slice(surfaceId.length + 1));
+        const added = [...ids].filter((id) => !tracked.has(id)).length;
+        if (tracked.size + added > this.limits.components) throw new Error("COMPONENT_LIMIT");
+        const schemas = this.options.components
+          ? Object.fromEntries(this.options.components.map((entry) => [entry.name, entry.schema]))
+          : componentSchemas;
+        // The pinned upstream validates a candidate graph before any mutation.
+        // Valid batches need one graph check; rejected batches retain isolation.
+        let applied = false;
+        try {
+          const components = incoming.map((raw) =>
+            parseComponent(raw, schemas as Parameters<typeof parseComponent>[1]),
+          );
+          this.processor.processMessages({
+            version: PROTOCOL_VERSION,
+            updateComponents: { surfaceId, components },
+          });
+          applied = true;
+        } catch {
+          /* The per-node path below reports and isolates the failures. */
+        }
         for (const raw of incoming) {
           try {
-            const schemas = this.options.components
-              ? Object.fromEntries(
-                  this.options.components.map((entry) => [entry.name, entry.schema]),
-                )
-              : componentSchemas;
-            const component = parseComponent(raw, schemas as Parameters<typeof parseComponent>[1]);
-            this.processor.processMessages({
-              version: PROTOCOL_VERSION,
-              updateComponents: { surfaceId, components: [component] },
-            });
-            this.errors.delete(`${surfaceId}\0${component.id}`);
+            if (!applied) {
+              const component = parseComponent(
+                raw,
+                schemas as Parameters<typeof parseComponent>[1],
+              );
+              this.processor.processMessages({
+                version: PROTOCOL_VERSION,
+                updateComponents: { surfaceId, components: [component] },
+              });
+            }
+            this.errors.delete(`${surfaceId}\0${raw.id}`);
           } catch (error) {
             const diagnostic = this.errorDiagnostic(error, surfaceId, raw.id);
             this.errors.set(`${surfaceId}\0${raw.id}`, diagnostic.message);
@@ -208,6 +240,10 @@ export class UIRuntime {
       } else if ("updateDataModel" in message) {
         const path = resolvePath(message.updateDataModel.path ?? "/");
         if ([...(this.dirty.get(surfaceId) ?? [])].some((edited) => overlapping(edited, path))) {
+          const writes = this.pending.get(surfaceId) ?? new Map<string, UIMessage>();
+          if (writes.size >= 200 && !writes.has(path)) writes.delete(writes.keys().next().value!);
+          writes.set(path, message);
+          this.pending.set(surfaceId, writes);
           this.report({
             code: "LOCAL_EDIT_CONFLICT",
             message: "A model update overlaps a local edit; the local value was preserved.",
@@ -221,6 +257,9 @@ export class UIRuntime {
         this.runs.delete(surfaceId);
         this.processor.processMessages(message);
         this.dirty.delete(surfaceId);
+        this.pending.delete(surfaceId);
+        for (const key of this.errors.keys())
+          if (key.startsWith(`${surfaceId}\0`)) this.errors.delete(key);
         for (const key of this.snapshots.keys())
           if (key.startsWith(`${surfaceId}\0`)) this.snapshots.delete(key);
         for (const key of this.nodeListeners.keys())
@@ -242,13 +281,27 @@ export class UIRuntime {
   }
   private errorDiagnostic(error: unknown, surfaceId?: string, componentId?: string): Diagnostic {
     const zod = error as {
-      issues?: { path: (string | number)[]; code: string; message: string }[];
+      issues?: {
+        path: (string | number)[];
+        code: string;
+        message: string;
+        expected?: string;
+        options?: unknown[];
+        keys?: string[];
+      }[];
     };
     if (zod.issues?.length) {
       const issue = zod.issues[0];
       return {
         code: "INVALID_SCHEMA",
         message: `Invalid ${issue.code} at ${issue.path.join(".") || "message"}.`,
+        expected:
+          issue.expected ??
+          (issue.options
+            ? `one of ${JSON.stringify(issue.options)}`
+            : issue.keys
+              ? "Only properties defined by the component schema"
+              : "A valid catalog property; inspect the schema at this path"),
         path: issue.path.join("/"),
         surfaceId,
         componentId,
@@ -277,7 +330,7 @@ export class UIRuntime {
     this.runs.get(surfaceId)?.abort();
   }
   async consume(stream: AsyncIterable<unknown>, options: { signal?: AbortSignal } = {}) {
-    let objectBytes = 0;
+    let receivedBytes = 0;
     const decoder = new NDJSONDecoder(
       (d) => this.report(d),
       this.limits.messageBytes,
@@ -286,11 +339,15 @@ export class UIRuntime {
     try {
       for await (const chunk of stream) {
         if (options.signal?.aborted || this.disposed) break;
+        receivedBytes +=
+          chunk instanceof Uint8Array
+            ? chunk.byteLength
+            : new TextEncoder().encode(typeof chunk === "string" ? chunk : JSON.stringify(chunk))
+                .length;
+        if (receivedBytes > this.limits.streamBytes) throw new Error("STREAM_LIMIT");
         if (typeof chunk === "string" || chunk instanceof Uint8Array)
           for (const message of decoder.push(chunk)) this.accept(message);
         else {
-          objectBytes += new TextEncoder().encode(JSON.stringify(chunk)).length;
-          if (objectBytes > this.limits.streamBytes) throw new Error("STREAM_LIMIT");
           this.accept(chunk);
         }
       }
@@ -304,6 +361,7 @@ export class UIRuntime {
   }
   /** At stream completion, unresolved references become reportable errors. */
   finish() {
+    const before = this.diagnosticSequence;
     for (const surfaceId of this.surfaceIds) {
       for (const node of this.getSurface(surfaceId)!.componentsModel.values) {
         const snapshot = this.getNodeSnapshot(surfaceId, node.id);
@@ -318,6 +376,16 @@ export class UIRuntime {
       }
     }
     for (const surfaceId of this.surfaceIds) {
+      if (!this.getSurface(surfaceId)!.componentsModel.has("root")) {
+        this.report({
+          code: "MISSING_ROOT",
+          message: "The surface requires a root component at completion.",
+          surfaceId,
+          componentId: "root",
+          severity: "error",
+        });
+        continue;
+      }
       try {
         this.getSurface(surfaceId)!.componentsModel.validateTopology({
           allowMissingRoot: false,
@@ -328,9 +396,28 @@ export class UIRuntime {
         this.report(this.errorDiagnostic(error, surfaceId));
       }
     }
+    return this.diagnosticEvents
+      .filter((event) => event.sequence > before)
+      .map((event) => event.diagnostic);
   }
   read(surfaceId: string, path: string, scope = "/"): any {
     return this.getSurface(surfaceId)?.dataModel.get(resolvePath(path, scope));
+  }
+  getPendingWrites(surfaceId: string) {
+    return [...(this.pending.get(surfaceId) ?? [])].map(([path, message]) => ({ path, message }));
+  }
+  /** Call accept-model only after the host obtains the user's decision. */
+  resolveConflict(surfaceId: string, path: string, decision: "keep-local" | "accept-model") {
+    const resolved = resolvePath(path);
+    const message = this.pending.get(surfaceId)?.get(resolved);
+    if (!message) throw new Error("UNKNOWN_CONFLICT");
+    this.pending.get(surfaceId)!.delete(resolved);
+    if (decision === "accept-model") {
+      const edits = this.dirty.get(surfaceId);
+      for (const edit of edits ?? []) if (overlapping(edit, resolved)) edits!.delete(edit);
+      return this.accept(message);
+    }
+    return [];
   }
   /** Resolve values without exposing host objects or invoking side effects. */
   resolve(surfaceId: string, value: any, scope = "/"): any {
@@ -451,6 +538,7 @@ export class UIRuntime {
         const context = this.resolve(surfaceId, action.event.context ?? {}, scope);
         await this.options.onAction?.({
           name: action.event.name,
+          timestamp: new Date().toISOString(),
           surfaceId,
           sourceComponentId: componentId,
           context,
@@ -507,6 +595,7 @@ export class UIRuntime {
     this.nodeListeners.clear();
     this.snapshots.clear();
     this.dirty.clear();
+    this.pending.clear();
     this.errors.clear();
   }
 }

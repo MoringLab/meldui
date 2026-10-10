@@ -77,7 +77,7 @@ describe("parity vectors (reference for the Dart port)", () => {
   for (const v of vectors.session)
     it(`session ${v.name}`, () => {
       const runtime = createUIRuntime();
-      const session = new AnswerSession(runtime, { policy: v.policy as HostPolicy });
+      const session = new AnswerSession(runtime, { policy: v.policy as Partial<HostPolicy> });
       for (const chunk of slices(v.text, 9)) session.push(chunk);
       session.end();
       expect(session.blocks.map((b) => b.kind)).toEqual(v.blocks);

@@ -2,7 +2,12 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
-import { buildSystemPrompt, GatewayAdapter } from "@engine/adapter-gateway";
+import {
+  buildSystemPrompt,
+  GatewayAdapter,
+  probeRoute,
+  RouteHealth,
+} from "@engine/adapter-gateway";
 import { assertSafeJson, createUIRuntime, type UIModelEvent, type UIRuntime } from "@engine/core";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
@@ -33,6 +38,11 @@ const adapter = new GatewayAdapter({
   baseUrl: process.env.OMNIROUTE_BASE_URL ?? "http://127.0.0.1:20128/v1",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "",
 });
+const gatewayOptions = {
+  baseUrl: process.env.OMNIROUTE_BASE_URL ?? "http://127.0.0.1:20128/v1",
+  apiKey: process.env.OMNIROUTE_API_KEY ?? "",
+};
+const routeHealth = new RouteHealth();
 let generationCalls = 0;
 
 const server = createServer(async (req, res) => {
@@ -55,6 +65,15 @@ const server = createServer(async (req, res) => {
       gatewayConfigured: Boolean(process.env.OMNIROUTE_API_KEY),
       generationCalls,
     });
+    return;
+  }
+  if (req.url === "/api/routes/health" || req.url === "/api/routes/health?probe=1") {
+    if (req.url.endsWith("probe=1") && gatewayOptions.apiKey)
+      for (const result of await Promise.all(modelIds.map((m) => probeRoute(gatewayOptions, m)))) {
+        if (result.ok) routeHealth.recordSuccess(result.model);
+        else routeHealth.recordFailure(result.model, result.code ?? "GATEWAY_ERROR");
+      }
+    json({ routes: modelIds.map((m) => routeHealth.state(m)) });
     return;
   }
   if (req.url === "/api/models") {
@@ -99,6 +118,14 @@ const server = createServer(async (req, res) => {
     }
     if (!process.env.OMNIROUTE_API_KEY) {
       json({ error: "GATEWAY_NOT_CONFIGURED" }, 503);
+      return;
+    }
+    const requestedModel = input.model ?? defaultModel;
+    if (!routeHealth.canAttempt(requestedModel)) {
+      const state = routeHealth.state(requestedModel);
+      res
+        .writeHead(503, { "Content-Type": "application/json", "Retry-After": "5" })
+        .end(JSON.stringify({ error: "ROUTE_UNAVAILABLE", route: state }));
       return;
     }
     const id =
@@ -172,6 +199,10 @@ const server = createServer(async (req, res) => {
         },
       )) {
         if (controller.signal.aborted) break;
+        if (event.type === "diagnostic" && event.diagnostic.code.startsWith("GATEWAY_"))
+          routeHealth.recordFailure(input.model ?? defaultModel, event.diagnostic.code);
+        if (event.type === "complete" && event.status === "completed")
+          routeHealth.recordSuccess(input.model ?? defaultModel);
         if (event.type === "message") {
           const diagnostics = session.runtime.accept(event.message);
           for (const diagnostic of diagnostics) {

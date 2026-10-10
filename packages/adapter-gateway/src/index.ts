@@ -188,3 +188,5 @@ export class GatewayAdapter implements UIModelAdapter {
     }
   }
 }
+
+export * from "./health.js";

@@ -1,13 +1,11 @@
 import { expect, test } from "@playwright/test";
 import cases from "../../fixtures/showcase/cases.json" with { type: "json" };
 
-test("all Showcase replays render within a narrow container and keep sandbox policy explicit", async ({
-  page,
-}) => {
-  const errors: string[] = [];
-  await page.setViewportSize({ width: 320, height: 900 });
-  page.on("pageerror", (e) => errors.push(e.message));
-  for (const fixture of cases) {
+for (const fixture of cases) {
+  test(`Showcase ${fixture.id} renders in a narrow container`, async ({ page }) => {
+    const errors: string[] = [];
+    await page.setViewportSize({ width: 320, height: 900 });
+    page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(`/showcase.html?id=${fixture.id}`);
     await expect(page.getByRole("heading", { name: "Engine Showcase" })).toBeVisible();
     await expect(page.locator(".ui-answer")).toBeVisible();
@@ -21,8 +19,8 @@ test("all Showcase replays render within a narrow container and keep sandbox pol
       await page.locator("body").evaluate((el) => el.scrollWidth <= window.innerWidth),
       fixture.id,
     ).toBe(true);
-  }
-});
+  });
+}
 test("simulation steps, reset and population chart stay local", async ({ page }) => {
   await page.goto("/showcase.html?id=04");
   await page.getByRole("button", { name: "Step simulation", exact: true }).click();

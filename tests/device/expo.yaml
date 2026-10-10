@@ -5,13 +5,41 @@ appId: dev.engine.lab.expo
 - extendedWaitUntil:
     visible: "함께 나누는 저녁"
     timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+    timeout: 20000
 - assertVisible: "21000"
+- scrollUntilVisible:
+    element:
+      text: "Editorial로 전환"
+    direction: UP
+    timeout: 20000
 - tapOn: "Editorial로 전환"
 - assertVisible: "Brand로 전환"
-- assertVisible: "21000"
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "Brand로 전환"
+    direction: UP
+    timeout: 20000
 - tapOn: "Brand로 전환"
 - assertVisible: "Neutral로 전환"
-- assertVisible: "21000"
+- scrollUntilVisible:
+    element:
+      text: "21000"
+    direction: DOWN
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "다크 모드"
+    direction: UP
+    timeout: 20000
 - tapOn: "다크 모드"
 - assertVisible: "라이트 모드"
 - takeScreenshot: artifacts/expo-dark

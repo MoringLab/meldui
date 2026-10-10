@@ -63,15 +63,41 @@ String displayValue(dynamic value) {
 /// Evaluate the portable bounded expression AST, with lazy conditional branches.
 dynamic evaluateExpression(dynamic expression, dynamic Function(String) read) {
   assertSafeJson(expression, 34);
+  var astNodes = 0;
+  void boundAst(dynamic item) {
+    if (++astNodes > 256) throw StateError("EXPRESSION_LIMIT");
+    if (item is Map && item["args"] is List) {
+      for (final x in item["args"]) {
+        boundAst(x);
+      }
+    }
+  }
+
+  boundAst(expression);
   var nodes = 0;
+  var iterations = 0;
+  var locals = <String, dynamic>{};
+  int loop(dynamic n) {
+    final length = _number(n);
+    if (length != length.round() ||
+        length < 0 ||
+        length > 1000 ||
+        (iterations += length.toInt()) > 1000) {
+      throw StateError("ITERATION_LIMIT");
+    }
+    return length.toInt();
+  }
+
   dynamic evaluate(dynamic value, int depth) {
-    if (++nodes > 256 || depth > 16) throw StateError('EXPRESSION_LIMIT');
+    if (++nodes > 10000 || depth > 16) throw StateError('EXPRESSION_LIMIT');
     if (value == null || value is String || value is bool || value is num) {
       return value;
     }
     if (value is! Map) throw StateError('INVALID_EXPRESSION');
     if (value['ref'] is String && value.length == 1) {
-      return read(value['ref'] as String);
+      return locals.containsKey(value['ref'])
+          ? locals[value['ref']]
+          : read(value['ref'] as String);
     }
     if (value.keys.any((key) => key != 'op' && key != 'args') ||
         value['op'] is! String ||
@@ -87,6 +113,87 @@ dynamic evaluateExpression(dynamic expression, dynamic Function(String) read) {
 
     final op = value['op'];
     switch (op) {
+      case 'sin':
+        return _number(math.sin(_number(at(0))));
+      case 'cos':
+        return _number(math.cos(_number(at(0))));
+      case 'exp':
+        return _number(math.exp(_number(at(0))));
+      case 'log':
+        return _number(math.log(_number(at(0))));
+      case 'sqrt':
+        return _number(math.sqrt(_number(at(0))));
+      case 'floor':
+        return _number(at(0)).floor();
+      case 'pow':
+        return _number(math.pow(_number(at(0)), _number(at(1))));
+      case 'clamp':
+        return math.min(
+          _number(at(2)),
+          math.max(_number(at(1)), _number(at(0))),
+        );
+      case 'lerp':
+        return _number(
+          _number(at(0)) + (_number(at(1)) - _number(at(0))) * _number(at(2)),
+        );
+      case 'rng':
+        return seededRandom(_number(at(0)), _number(at(1)));
+      case 'get':
+        final target = at(0);
+        final key = at(1);
+        if (target is! List || key is! num || key != key.round()) {
+          throw StateError('EXPECTED_ARRAY_INDEX');
+        }
+        return key < 0 || key >= target.length ? null : target[key.toInt()];
+      case 'numberFormat':
+        final digits = args.length > 1 ? _number(at(1)) : 2;
+        if (digits != digits.round() || digits < 0 || digits > 8) {
+          throw StateError('ROUND_LIMIT');
+        }
+        return _number(at(0)).toStringAsFixed(digits.toInt());
+      case 'range':
+        return List.generate(loop(at(0)), (i) => i);
+      case 'map':
+      case 'filter':
+      case 'reduce':
+      case 'scan':
+      case 'series':
+        final recurrence = op == 'scan';
+        final series = op == 'series';
+        final source = recurrence ? at(2) : at(0);
+        final length = loop(
+          recurrence || series ? source : (source is List ? source.length : -1),
+        );
+        final values = source is List
+            ? source
+            : List.generate(length, (i) => i);
+        var acc = op == 'reduce'
+            ? at(2)
+            : recurrence
+            ? at(0)
+            : null;
+        final output = <dynamic>[if (recurrence) acc];
+        final previous = locals;
+        try {
+          for (var i = 0; i < length; i++) {
+            locals = {
+              ...previous,
+              r'$item': values[i],
+              r'$index': i,
+              r'$acc': acc,
+            };
+            final result = evaluate(args[1], depth + 1);
+            if (op == 'reduce' || recurrence) acc = result;
+            if (op == 'filter') {
+              if (_truth(result)) output.add(values[i]);
+            } else if (op != 'reduce') {
+              output.add(result);
+            }
+          }
+        } finally {
+          locals = previous;
+        }
+        return op == 'reduce' ? acc : output;
       case 'if':
         return _truth(at(0)) ? at(1) : at(2);
       case 'and':
@@ -96,11 +203,19 @@ dynamic evaluateExpression(dynamic expression, dynamic Function(String) read) {
       case 'not':
         return !_truth(at(0));
       case 'add':
-        return _number(_number(at(0)) + _number(at(1)));
+        var result = 0.0;
+        for (var i = 0; i < args.length; i++) {
+          result += _number(at(i));
+        }
+        return _number(result);
       case 'sub':
         return _number(_number(at(0)) - _number(at(1)));
       case 'mul':
-        return _number(_number(at(0)) * _number(at(1)));
+        var result = 1.0;
+        for (var i = 0; i < args.length; i++) {
+          result *= _number(at(i));
+        }
+        return _number(result);
       case 'div':
       case 'mod':
         final a = _number(at(0));
@@ -155,4 +270,17 @@ dynamic evaluateExpression(dynamic expression, dynamic Function(String) read) {
   }
 
   return evaluate(expression, 0);
+}
+
+double seededRandom(num seed, num draw) {
+  if (seed != seed.round() ||
+      draw != draw.round() ||
+      draw < 0 ||
+      draw > 1000000) {
+    throw StateError('RNG_INDEX_LIMIT');
+  }
+  var x = (seed.toInt() ^ ((draw.toInt() + 1) * 0x9e3779b9)) & 0xffffffff;
+  x = ((x ^ (x >>> 16)) * 0x21f0aaad) & 0xffffffff;
+  x = ((x ^ (x >>> 15)) * 0x735a2d97) & 0xffffffff;
+  return ((x ^ (x >>> 15)) & 0xffffffff) / 4294967296;
 }

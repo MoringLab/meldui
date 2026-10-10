@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { parseCsvLine, readJson } from "./common.js";
+import { parseCsvLine, ratingScores, readJson } from "./common.js";
 
 /**
  * Compares judge scores with the user's hand ratings. Never generates or estimates human ratings.
@@ -18,8 +18,11 @@ const cols = parseCsvLine(head);
 const human = new Map<string, number[]>();
 for (const line of lines) {
   const cells = parseCsvLine(line);
-  const scores = items.map((i: string) => Number(cells[cols.indexOf(i)]));
-  if (scores.every((n: number) => [0, 1, 2].includes(n))) human.set(cells[0], scores);
+  const scores = ratingScores(
+    cells,
+    items.map((i: string) => cols.indexOf(i)),
+  );
+  if (scores) human.set(cells[0], scores);
 }
 if (human.size < 20) {
   console.log(`UNCALIBRATED: ${human.size}/20 complete human rows.`);
@@ -29,13 +32,18 @@ const judge = readJson("artifacts/eval/judge.json").results as {
   id: string;
   scores?: Record<string, number>;
 }[];
+let matchedSamples = 0;
 let n = 0;
 let abs = 0;
 let near = 0;
 const perItem = items.map(() => 0);
+const matched = new Set<string>();
 for (const j of judge) {
+  if (matched.has(j.id)) continue;
   const h = human.get(j.id);
-  if (!h || !j.scores) continue;
+  if (!h || !j.scores || !items.every((i: string) => [0, 1, 2].includes(j.scores![i]))) continue;
+  matchedSamples++;
+  matched.add(j.id);
   items.forEach((item: string, k: number) => {
     const d = Math.abs(h[k] - j.scores![item]);
     abs += d;
@@ -45,9 +53,10 @@ for (const j of judge) {
   });
 }
 const mae = abs / n;
-const calibrated = mae <= 0.5 && near / n >= 0.85;
+const calibrated = matchedSamples >= 20 && mae <= 0.5 && near / n >= 0.85;
 const report = {
   compared: n,
+  matchedSamples,
   meanAbsError: mae,
   withinOne: near / n,
   perItemMae: Object.fromEntries(

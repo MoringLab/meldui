@@ -21,8 +21,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import advancedFixtures from "../../fixtures/advanced/cases.json";
 import fixtures from "../../fixtures/cases.json";
-import hybridFixtures from "../../fixtures/hybrid/cases.json";
+import baseHybridFixtures from "../../fixtures/hybrid/cases.json";
+import showcaseFixtures from "../../fixtures/showcase/cases.json";
+
+const hybridFixtures = [...baseHybridFixtures, ...showcaseFixtures];
+
 import mediaFixtures from "../../fixtures/media/cases.json";
 import { sampleContent } from "../../fixtures/media/host";
 import { brandComponents } from "./brand";
@@ -104,7 +109,9 @@ function Lab() {
     const hybrid = hybridFixtures.find((f) => f.id === id);
     sampleContent(runtime.attachments, server);
     const fixture =
-      mediaFixtures.find((f) => f.id === id) ?? fixtures.find((f) => f.id === id) ?? fixtures[0];
+      [...mediaFixtures, ...advancedFixtures].find((f) => f.id === id) ??
+      fixtures.find((f) => f.id === id) ??
+      fixtures[0];
     const lines = hybrid
       ? hybrid.wire.split("\n")
       : [
@@ -278,7 +285,7 @@ function Lab() {
             style={{ color: colors.foreground }}
           >
             {!selected && <Picker.Item label="생성된 인터페이스" value="" />}
-            {[...fixtures, ...mediaFixtures].map((fixture) => (
+            {[...fixtures, ...mediaFixtures, ...advancedFixtures].map((fixture) => (
               <Picker.Item key={fixture.id} label={fixture.title} value={fixture.id} />
             ))}
             {hybridFixtures.map((fixture) => (

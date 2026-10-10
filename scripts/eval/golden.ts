@@ -50,7 +50,7 @@ const erf = (x: number) => {
 export const normalCdf = (x: number, mean = 0, sd = 1) =>
   0.5 * (1 + erf((x - mean) / (sd * Math.SQRT2)));
 
-/** 32-bit deterministic generator. Same algorithm the engine's seeded RNG must use (ADR in M8). */
+/** 32-bit deterministic generator. Independent sequential PRNG used to check distributions, not the Engine random-access wire RNG. */
 export function mulberry32(seed: number) {
   let a = seed >>> 0;
   return () => {

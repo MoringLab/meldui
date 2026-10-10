@@ -612,7 +612,9 @@ h6.ui-heading {
   border-radius: var(--ui-radius);
   overflow-wrap: anywhere;
 }
-.ui-file-card button {
+.ui-file-card button,
+.ui-media-item button,
+.ui-image-zoom button {
   min-width: 44px;
   min-height: 44px;
   margin-inline-end: 8px;
@@ -637,5 +639,135 @@ h6.ui-heading {
   color: var(--ui-success);
 }
 .hljs-comment {
+  color: var(--ui-muted);
+}
+.ui-composition {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.ui-composition-text,
+.ui-composition-media {
+  min-width: 0;
+}
+.ui-composition-above,
+.ui-composition-left {
+  flex-direction: column-reverse;
+}
+@container (min-width: 600px) {
+  .ui-answer-media.ui-composition-left {
+    flex-direction: row-reverse;
+  }
+  .ui-answer-media.ui-composition-right {
+    flex-direction: row;
+  }
+  .ui-composition-left > .ui-composition-text,
+  .ui-composition-right > .ui-composition-text {
+    flex: 1;
+  }
+  .ui-composition-left > .ui-composition-media,
+  .ui-composition-right > .ui-composition-media {
+    flex: 0 0 var(--media-fraction, 40%);
+  }
+}
+.ui-gallery-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.ui-gallery-controls button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.ui-gallery-pages {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+}
+.ui-gallery-page {
+  min-width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.ui-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ui-stat-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+.ui-stat {
+  display: flex;
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+}
+.ui-stat strong {
+  font-size: 1.5em;
+}
+.ui-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+}
+.ui-legend span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+}
+.ui-timeline {
+  padding-inline-start: 24px;
+}
+.ui-control-panel h3 {
+  margin: 0;
+}
+.ui-chart details pre {
+  overflow: auto;
+  max-height: 240px;
+}
+
+.ui-answer {
+  container-type: inline-size;
+}
+
+.ui-image-zoom {
+  position: fixed;
+  inset: 5%;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  z-index: 30;
+  background: var(--ui-background);
+  border: 1px solid var(--ui-border);
+}
+.ui-image-zoom img {
+  max-width: none;
+  width: auto;
+  max-height: 75vh;
+}
+
+.ui-image-zoom::backdrop {
+  background: rgb(10 20 30 / 60%);
+}
+.ui-markdown .hljs-keyword,
+.ui-markdown .hljs-number,
+.ui-markdown .hljs-title {
+  color: var(--ui-accent);
+}
+.ui-markdown .hljs-string {
+  color: var(--ui-success);
+}
+.ui-markdown .hljs-comment {
   color: var(--ui-muted);
 }

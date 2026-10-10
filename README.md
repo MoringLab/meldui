@@ -1,82 +1,69 @@
 # Engine
 
-A catalog-driven A2UI runtime with interchangeable design kits for React, React Native/Expo and Flutter. Model output is JSON data; interactions run locally. The demos use your local OmniRoute gateway through a server that keeps credentials off clients.
-
-## Run
-
-Requirements: Node 22+, pnpm 10; Flutter for the Dart SDK; Android SDK/JDK 17 for native builds.
+A private A2UI SDK for React web, React Native/Expo and Flutter. It composes Markdown, interactive surfaces and host media, with three replaceable design kits and local state that survives kit changes. [한국어](README.ko.md).
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm build
 pnpm schemas
-cp .env.example .env
-# Set OMNIROUTE_API_KEY in .env; the server loads it, never the clients.
+# Set server-only OMNIROUTE_API_KEY; see .env.example
 pnpm dev
+# Separate business consumer, in another terminal:
+pnpm --filter @engine/reservations start
 ```
 
-Open http://127.0.0.1:5173. Thirty replay examples work without a model connection. The server binds to loopback on port 8787. It uses OmniRoute at http://127.0.0.1:20128/v1.
+Open the [lab](http://127.0.0.1:5173), [30-item Showcase](http://127.0.0.1:5173/showcase.html), or [reservation consumer](http://127.0.0.1:5173/reservation.html). Replay works without a model. Live generation uses local OmniRoute through the loopback server on 8787; credentials stay out of browser/native bundles. The reservation service separately persists to SQLite on 8788.
 
-```sh
-adb reverse tcp:8787 tcp:8787
-cd apps/flutter
-flutter pub get
-flutter run
-# Expo: from apps/expo-lab, pnpm android
-```
-
-## Embed in React
+## Host integration
 
 ```tsx
-import { createUIRuntime, UIProvider, UISurface } from '@engine/renderer-react';
+import { AnswerComposer } from '@engine/core';
+import { createUIRuntime, UIProvider, AnswerView } from '@engine/renderer-react';
 import { neutral } from '@engine/kit-neutral';
-import '@engine/renderer-react/styles.css';
 
-const runtime = createUIRuntime({ onAction: action => agent.handle(action) });
-runtime.accept({ version: 'v0.9', createSurface: {
-  surfaceId: 'main', catalogId: 'urn:engine:catalog:core:1'
-}});
-runtime.accept({ version: 'v0.9', updateComponents: {
-  surfaceId: 'main', components: [{ id: 'root', component: 'Text', text: 'Hello' }]
-}});
-// Keep runtime stable when changing kit or theme; dispose when the host unmounts.
-<UIProvider runtime={runtime} kit={neutral}><UISurface surfaceId="main" /></UIProvider>;
+const runtime = createUIRuntime({ onAction: action => yourAgent(action) });
+const answer = new AnswerComposer(runtime, {
+  policy: { mode: 'auto', maxSurfaces: 3, allowMedia: true, allowSandbox: false },
+});
+// Existing agent/transport, or a model adapter:
+await answer.consume(yourAsyncStream, { signal });
+<UIProvider runtime={runtime} kit={neutral} content={yourContentHost}>
+  <AnswerView session={answer} />
+</UIProvider>;
 ```
 
-The React Native package exports the same provider and surface contract with native controls. Flutter exports `UIRuntime.create()`, `UIProvider`, `UISurface` and `UIKit.load()`. See the independent apps for full host lifecycle examples.
+`accept`/`consume`/`dispatch`/`dispose`, node/path subscriptions, bounded NDJSON/UTF-8 parsing, pure expressions, action permissions and input-write conflict resolution are independent of model transport. `AnswerSession` and `AnswerComposer` are the same composer API. AG-UI text/CUSTOM adapters are optional. Render errors retain prior valid content. Model-write conflicts require host resolution rather than silently discarding user input.
 
-## Contracts
+The catalog contains 50 validated layout, content, form, learning, media and visual components. Core expressions support bounded math, arrays, seeded randomness and recurrence; local calculations, sliders, tabs, quizzes, games and media paging do not call a model. Trusted web modules implement nBody/cellular/agents simulations. Declarative SvgScene, Plot and approximate RouteMap render on native too. Native continuous animation, direct scene dragging, advanced Chart features and simulations have explicit feature/fallback declarations. [Visual contracts](docs/VISUALS.md).
 
-Engine implements a restricted A2UI v0.9.1 profile (`version: "v0.9"`) with its own catalog ID, not the standard/basic catalog. The 25 components include layout, text, forms, tabs, tables and accessible charts. Generated JSON schemas in `schemas/` come from Zod; Flutter consumes those same assets.
+## Model-authored Markdown and media
 
-Input bindings write locally. Pure expression ASTs provide bounded arithmetic, comparison, conditional formatting and aggregation. Agent actions send only their explicitly declared context. Hosts must register client capabilities and assets. Neither arbitrary code, remote modules, HTML, styles nor model-supplied image URLs are accepted.
+Hosts register metadata and own URL resolution/storage. Models choose IDs and semantic layout:
 
-Kits include light/dark tokens, implementation mappings, fallback rules, examples and a model-facing guide. Both `neutral` and `editorial` use the same component semantics. Host components are registered statically. See [extending the SDK](docs/EXTENDING.md).
+```json
+{"engine":"v1","block":"media","attachments":["photo-a","photo-b"],"layout":"carousel","markdown":"## Compare the photos\nSwipe or use the navigation buttons.","placement":"left","mediaFraction":0.4}
+```
 
-Adapters: OpenAI-compatible SSE through OmniRoute, replay, and the optional AG-UI CUSTOM `engine.a2ui` binding. Existing agents can supply an `AsyncIterable` directly without a model adapter.
+Media can be left/right/above/below Markdown. Side-by-side compositions stack in narrow containers. Carousels have swipe/paging, accessible buttons, a counter and image enlargement; video chapters/captions are host supplied. `allowMedia:false` blocks embedded media too. GFM, code and math have safe defaults and replaceable renderers. Raw HTML is stripped; an optional host flag allows only attribute-free basic formatting. [Content integration](docs/hybrid/CONTENT.md) · [composition contract](docs/hybrid/MEDIA-LAYOUT.md).
 
-## Verify
+The `neutral`, `editorial` and `brand` kits share semantics. Brand replaces host Button/Card/Heading implementations on all three targets. Tokens cover light/dark, platform fonts, sizes/weights/line heights and reduced motion. Kit guides and validated examples inform generation; category/keyword retrieval respects a host token budget. [Wrap your design system](docs/KITS.md) · [custom catalog/components](docs/EXTENDING.md).
+
+## Apps and verification
+
+Android demos have separate IDs. Build Expo from `apps/expo-lab/android` and Flutter from `apps/flutter`; use `adb reverse tcp:8787 tcp:8787`. Native work uses `scripts/native-job.sh`. Both apps expose the media, advanced and Showcase fixtures. They preserve edited content during failed generations.
 
 ```sh
 pnpm check
 pnpm eval
-pnpm eval:online --live # explicit opt-in; local OmniRoute server required
-cd dart/engine_flutter && flutter test
-cd ../../apps/flutter && flutter test
+pnpm --filter @engine/expo-lab typecheck
+# SDK and app, in their respective directories:
+flutter analyze && flutter test
+pnpm exec tsx scripts/package-check.ts
+scripts/native-job.sh python3 scripts/verify-android.py --platform all
 ```
 
-See [status and actual verification](docs/STATUS.md), [architecture decisions](docs/adr/0001-wire-format.md) and [research](docs/research/2026-10-09.md). Packages remain private until ownership and registry names are finalized. iOS builds require macOS; sandbox and desktop are deferred. Apache-2.0.
+Ordinary CI/device checks are replay/functional checks and **do not start performance benchmarks**. Online tools `eval:online`, `eval:experiments`, `eval:multiturn` require `--live`; every call uses OmniRoute. Dated reports keep complete denominators, infrastructure failures, dev/held-out splits and unmeasured semantic layers. Human ratings are blank until supplied; judge calibration is not fabricated.
 
-## Preview evidence
+Sandbox is a separate experimental web provider, off by default. It requires a fingerprint-matched attack-test attestation and runs generated code in networkless resource-limited Docker/Chromium, with a screenshot/input replay bridge. Mobile uses fallback text. [Provider limits](packages/sandbox/README.md).
 
-[Android form and kit demonstration](docs/media/android-demo.mp4) · [verification report](docs/verification/REPORT.md) · [roadmap and contribution opportunities](docs/ROADMAP.md).
-
-This preview is private. Functional checks pass; native tail latency and model first-pass quality remain release gates. GPT's final neutral evaluation reached 30/30 after repair, while other routes had output or availability failures. Read the complete denominators and measured limits before selecting a deployment policy.
-
-For packaged consumers, run `pnpm exec tsx scripts/package-check.ts` after `pnpm build`. For device checks, build the two demo APKs, install Maestro, then run `python3 scripts/verify-android.py --serial DEVICE --video --live`; omit `--live` for offline flows. The Flutter profile runner is `flutter drive --profile --driver=test_driver/integration_test.dart --target=integration_test/device_test.dart` from `apps/flutter`. Temporary device-condition checks save original preferences in `artifacts/conditions/restore-pending.json`; after a disconnect, run `python3 scripts/device-conditions.py --restore` before another conditions run.
-
-## Hybrid answers and host attachments (Phase 2)
-
-`AnswerSession` composes Markdown, A2UI surfaces and media in order. `UIProvider` accepts a `ContentHost` with a metadata registry and a trusted resolver. Models reference attachment IDs; the SDK neither uploads files nor generates media bytes. Built-in GFM/math/code display and three kits are available, with host replacement APIs and platform fallbacks. See [content integration](docs/hybrid/CONTENT.md), [kit integration](docs/KITS.md) and [the current scorecard](docs/verification/phase2/content-m5.md).
-
-Select “첨부파일 예제” in the web lab or “Safe host attachments” in either Android app to replay the synthetic host media fixture. Ordinary Android verification no longer starts a benchmark. Performance runs are separate, explicitly requested, bounded jobs. Online evaluation requires `--live`; plain CI remains offline. Phase 2's remaining milestones and unverified capabilities are tracked in [STATUS](docs/STATUS.md).
+See [current status/report](docs/STATUS.md), [generation experiments](docs/quality/experiments.md), [release preparation](docs/RELEASING.md) and [security](SECURITY.md). Feature implementation is distinct from model task success: routing/semantic quality, RN tail latency, human calibration, iOS and unresolved transitive advisories remain gates. Packages stay private; no public deployment or registry publication occurred. Apache-2.0.

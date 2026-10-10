@@ -8,3 +8,5 @@ onlyBuiltDependencies:
 overrides:
   react: 19.2.3
   react-dom: 19.2.3
+  katex: 0.18.2
+  dompurify: 3.4.16

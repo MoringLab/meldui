@@ -3,16 +3,16 @@ import { attachmentIdFrom, markdownDestination, prepareMarkdown } from "@engine/
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
-import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
+import { safeMath } from "./math.js";
 /** No rehype-raw. All HTML is discarded; URLs have no network/navigation side effect by default. */
 export function SafeMarkdown({ text, streaming = false }: { text: string; streaming?: boolean }) {
   const host = useContentHost();
   let parts: ReturnType<typeof prepareMarkdown>;
   try {
-    parts = prepareMarkdown(text);
+    parts = prepareMarkdown(text, 65536, host?.policy.formattingHtml);
   } catch {
     return <p role="status">Markdown is too large to display.</p>;
   }
@@ -26,10 +26,7 @@ export function SafeMarkdown({ text, streaming = false }: { text: string; stream
             key={`text-${i}`}
             skipHtml
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[
-              [rehypeKatex, { trust: false, throwOnError: false, maxExpand: 100, maxSize: 10 }],
-              rehypeHighlight,
-            ]}
+            rehypePlugins={[safeMath, rehypeHighlight]}
             urlTransform={(value) => markdownDestination(value) ?? ""}
             components={{
               li: ({ children, className }) => (

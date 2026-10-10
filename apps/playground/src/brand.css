@@ -66,3 +66,9 @@
     transition: none;
   }
 }
+.bds-heading {
+  background: var(--ui-accent);
+  color: var(--ui-onAccent);
+  padding: 12px 16px;
+  border-radius: 4px;
+}

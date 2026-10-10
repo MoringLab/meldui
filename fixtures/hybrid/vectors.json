@@ -1144,6 +1144,7 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
+    "MISSING_ANSWER",
     "POLICY_MARKDOWN_DISABLED"
    ]
   },
@@ -1204,6 +1205,7 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
+    "MISSING_ANSWER",
     "POLICY_MARKDOWN_DISABLED"
    ]
   },
@@ -1260,7 +1262,8 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
-    "INVALID_JSON"
+    "INVALID_JSON",
+    "MISSING_ANSWER"
    ]
   },
   {
@@ -1318,6 +1321,7 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
+    "MISSING_ANSWER",
     "POLICY_MARKDOWN_DISABLED"
    ]
   },
@@ -1378,6 +1382,7 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
+    "MISSING_ANSWER",
     "POLICY_MARKDOWN_DISABLED"
    ]
   },
@@ -1431,7 +1436,9 @@
    "surfaces": [],
    "markdown": [],
    "fallbackSources": [],
-   "diagnosticCodes": []
+   "diagnosticCodes": [
+    "MISSING_ANSWER"
+   ]
   },
   {
    "name": "indented-control/max-1",
@@ -1570,6 +1577,7 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
+    "MISSING_ANSWER",
     "POLICY_MARKDOWN_DISABLED"
    ]
   },
@@ -1630,6 +1638,7 @@
    "markdown": [],
    "fallbackSources": [],
    "diagnosticCodes": [
+    "MISSING_ANSWER",
     "POLICY_MARKDOWN_DISABLED"
    ]
   },

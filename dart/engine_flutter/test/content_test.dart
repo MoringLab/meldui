@@ -5,6 +5,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:engine_flutter/engine_flutter.dart';
 
 void main() {
+  test(
+    'formatting allowlist rejects attributes and preserves literal code',
+    () {
+      expect(sanitizeMarkdownHtml('<b>x</b>'), 'x');
+      expect(
+        sanitizeMarkdownHtml('<b>x</b>', formattingHtml: true),
+        '<b>x</b>',
+      );
+      expect(
+        sanitizeMarkdownHtml(
+          '<b onclick="attack()">x</b>',
+          formattingHtml: true,
+        ),
+        'x</b>',
+      );
+      const literal = '~~~html\n<b>example</b>\n~~~\n`<img src=x>`';
+      expect(sanitizeMarkdownHtml(literal, formattingHtml: true), literal);
+    },
+  );
+
   final schema =
       jsonDecode(File('assets/catalog.json').readAsStringSync()) as JsonMap;
   final media =

@@ -44,3 +44,8 @@ export function parseCsvLine(line: string) {
   out.push(cell);
   return out;
 }
+export function ratingScores(cells: string[], indices: number[]): number[] | undefined {
+  const raw = indices.map((i) => cells[i]?.trim());
+  if (raw.some((v) => !v || !/^[012]$/.test(v))) return;
+  return raw.map(Number);
+}

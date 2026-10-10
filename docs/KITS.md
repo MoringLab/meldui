@@ -83,3 +83,5 @@ UIProvider(runtime: runtime, kit: kit, components: {'BrandButton': (context, nod
 4. Switching kits must not recreate the runtime. Input values and selected tabs survive a swap, and the eval layers check it.
 5. If the host has not registered a name, the renderer falls back to the built-in component of the same name, so a partial rollout still renders.
 6. Never import code named by a model. Kits and their implementations come from the host's static registration.
+
+The reference Brand kit additionally registers `BrandHeading` on web, RN and Flutter. It uses the same level/text contract, typography tokens and a branded accent band. Keep the host registration list in sync with `hostImplementations`; missing host mappings still fall through to the semantic built-in component. The dated visual matrix preserves the original 3% comparison threshold.

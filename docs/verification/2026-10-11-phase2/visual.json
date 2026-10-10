@@ -1,0 +1,69 @@
+{
+ "timestamp": "2026-10-10T22:59:35.309Z",
+ "rows": [
+  {
+   "fixture": "calculator",
+   "width": 480,
+   "mode": "light",
+   "neutralVsEditorial": 0.052748790078644886,
+   "neutralVsBrand": 0.22804748941318814,
+   "editorialVsBrand": 0.23613810365135454
+  },
+  {
+   "fixture": "counting-game",
+   "width": 480,
+   "mode": "light",
+   "neutralVsEditorial": 0.054470064724919096,
+   "neutralVsBrand": 0.33917572463768114,
+   "editorialVsBrand": 0.3456007281553398
+  },
+  {
+   "fixture": "dashboard",
+   "width": 960,
+   "mode": "light",
+   "neutralVsEditorial": 0.015274207369323051,
+   "neutralVsBrand": 0.10578867137355584,
+   "editorialVsBrand": 0.10536096829477293
+  },
+  {
+   "fixture": "h-calc",
+   "width": 720,
+   "mode": "light",
+   "neutralVsEditorial": 0.044015239197530864,
+   "neutralVsBrand": 0.2574049961419753,
+   "editorialVsBrand": 0.2590360030080842
+  },
+  {
+   "fixture": "calculator",
+   "width": 480,
+   "mode": "dark",
+   "neutralVsEditorial": 0.053482304900181486,
+   "neutralVsBrand": 0.2538150332728373,
+   "editorialVsBrand": 0.31989472909305067
+  },
+  {
+   "fixture": "counting-game",
+   "width": 480,
+   "mode": "dark",
+   "neutralVsEditorial": 0.05507686084142395,
+   "neutralVsBrand": 0.3486513687600644,
+   "editorialVsBrand": 0.35869741100323627
+  },
+  {
+   "fixture": "dashboard",
+   "width": 960,
+   "mode": "dark",
+   "neutralVsEditorial": 0.01551654884318766,
+   "neutralVsBrand": 0.11844111039794608,
+   "editorialVsBrand": 0.11784891816623821
+  },
+  {
+   "fixture": "h-calc",
+   "width": 720,
+   "mode": "dark",
+   "neutralVsEditorial": 0.04506172839506173,
+   "neutralVsBrand": 0.27025462962962965,
+   "editorialVsBrand": 0.32805273547659336
+  }
+ ]
+}

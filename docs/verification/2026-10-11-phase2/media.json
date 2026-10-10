@@ -1,0 +1,386 @@
+{
+ "timestamp": "2026-10-10T21:18:14.058Z",
+ "set": "media",
+ "split": "all",
+ "scope": "Structural validity and resolvable expressions; semantic quality is scored by the separate layers.",
+ "routes": [
+  {
+   "model": "auto/claude-sonnet",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791667094044
+  },
+  {
+   "model": "cx/gpt-5.6-sol-medium",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791667094044
+  },
+  {
+   "model": "agy/claude-sonnet-4-6",
+   "status": "unavailable",
+   "consecutiveFailures": 2,
+   "retryAt": 1791667104044,
+   "lastCode": "GATEWAY_HTTP_429",
+   "checkedAt": 1791667094044
+  },
+  {
+   "model": "agy/gemini-3.7-flash-medium",
+   "status": "unavailable",
+   "consecutiveFailures": 2,
+   "retryAt": 1791667104044,
+   "lastCode": "GATEWAY_HTTP_429",
+   "checkedAt": 1791667094044
+  },
+  {
+   "model": "cfp/zai-org/glm-5.2",
+   "status": "unavailable",
+   "consecutiveFailures": 1,
+   "retryAt": 1791667099044,
+   "lastCode": "GATEWAY_ERROR",
+   "checkedAt": 1791667094044
+  }
+ ],
+ "results": [
+  {
+   "id": "m01",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m02",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m03",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m04",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m05",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m06",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m07",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m08",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m09",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m10",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m11",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m12",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m13",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m14",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m15",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m16",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m17",
+   "set": "media",
+   "split": "heldout",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m18",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m19",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "m20",
+   "set": "media",
+   "split": "dev",
+   "model": "cfp/zai-org/glm-5.2",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "GATEWAY_ERROR"
+   ],
+   "finalErrors": [],
+   "infra": true
+  }
+ ]
+}

@@ -40,3 +40,11 @@ await copyFile(
 await copyFile("fixtures/media/cases.json", "dart/engine_flutter/test/fixtures/media.json");
 await copyFile("eval/safety/xss.json", "dart/engine_flutter/test/fixtures/xss.json");
 await copyFile("fixtures/media/cases.json", "apps/flutter/assets/media.json");
+await copyFile("fixtures/advanced/cases.json", "apps/flutter/assets/advanced.json");
+await copyFile("fixtures/showcase/cases.json", "apps/flutter/assets/showcase.json");
+await copyFile("fixtures/advanced/cases.json", "dart/engine_flutter/test/fixtures/advanced.json");
+await copyFile("fixtures/showcase/cases.json", "dart/engine_flutter/test/fixtures/showcase.json");
+// The gallery build can display synthetic host fixtures on a static origin without an asset server.
+await mkdir("apps/playground/public/api/attachments", { recursive: true });
+for (const file of ["coast.png", "mountain.png", "sample.mp4", "sample.wav", "report.pdf"])
+  await copyFile(`fixtures/media/assets/${file}`, `apps/playground/public/api/attachments/${file}`);

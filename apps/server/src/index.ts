@@ -4,13 +4,20 @@ import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import {
   buildSystemPrompt,
+  DESIGN_BRIEF_SCHEMA,
   GatewayAdapter,
+  LIMITED_OUTPUT_SCHEMA,
   type LoadedExample,
   loadKitExamples,
+  modelProfile,
+  normalizeAnswerWire,
+  normalizeMessage,
   probeRoute,
   RouteHealth,
+  repairReport,
   selectExamples,
   toPromptExample,
+  visionMessages,
 } from "@engine/adapter-gateway";
 import {
   AnswerSession,
@@ -29,6 +36,7 @@ import {
   HostPolicySchema,
   type UIMessage,
 } from "@engine/protocol";
+import { DockerSandboxRuntime, SandboxRequestSchema } from "@engine/sandbox";
 
 try {
   process.loadEnvFile(fileURLToPath(new URL("../../../.env", import.meta.url)));
@@ -64,6 +72,7 @@ const kits = {
 } as const;
 const pickKit = (id: unknown) =>
   kits[(typeof id === "string" && id in kits ? id : "neutral") as keyof typeof kits];
+const sandboxProvider = new DockerSandboxRuntime();
 const adapter = new GatewayAdapter({
   baseUrl: process.env.OMNIROUTE_BASE_URL ?? "http://127.0.0.1:20128/v1",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "",
@@ -114,6 +123,33 @@ const server = createServer(async (req, res) => {
       .end(bytes);
     return;
   }
+  if (req.url === "/api/sandbox/render" && req.method === "POST") {
+    if (process.env.ENGINE_SANDBOX_PROVIDER !== "docker" || !sandboxProvider.verified()) {
+      json({ error: "ISOLATION_UNVERIFIED" }, 503);
+      return;
+    }
+    try {
+      let body = "";
+      for await (const chunk of req) {
+        body += chunk;
+        if (Buffer.byteLength(body) > 180000) throw new Error("BODY_LIMIT");
+      }
+      const parsed = SandboxRequestSchema.safeParse(JSON.parse(body));
+      if (!parsed.success) {
+        json({ error: "INVALID_SANDBOX_REQUEST" }, 400);
+        return;
+      }
+      const abort = new AbortController();
+      res.on("close", () => {
+        if (!res.writableEnded) abort.abort();
+      });
+      const result = await sandboxProvider.run(parsed.data, abort.signal);
+      json(result);
+    } catch {
+      if (!res.destroyed) json({ error: "SANDBOX_STOPPED" }, 503);
+    }
+    return;
+  }
   if (req.url === "/api/health") {
     json({
       status: "ok",
@@ -146,6 +182,43 @@ const server = createServer(async (req, res) => {
     session?.runtime.dispose();
     sessions.delete(id);
     json({ deleted: true });
+    return;
+  }
+  if (
+    req.url === "/api/eval/replay" &&
+    req.method === "POST" &&
+    process.env.ENGINE_EVAL_REPLAY === "1"
+  ) {
+    try {
+      let body = "";
+      for await (const chunk of req) {
+        body += chunk;
+        if (Buffer.byteLength(body) > 4096) throw Error("REQUEST_LIMIT");
+      }
+      const { fixtureId } = JSON.parse(body);
+      const fixture = fixtures.find((f: { id: string }) => f.id === fixtureId);
+      if (!fixture || sessions.size >= 64) throw Error("INVALID_FIXTURE");
+      const id = randomUUID();
+      const created: Session = {
+        runtime: undefined as unknown as UIRuntime,
+        registry: new AttachmentRegistry(),
+        messages: [],
+        accessed: Date.now(),
+      };
+      created.runtime = createUIRuntime({
+        attachments: created.registry,
+        onDiagnostic: (d) => created.sink?.(d),
+      });
+      for (const message of fixture.messages) created.runtime.accept(message as UIMessage);
+      created.messages.push({
+        role: "assistant",
+        content: fixture.messages.map((m: UIMessage) => JSON.stringify(m)).join("\n"),
+      });
+      sessions.set(id, created);
+      json({ sessionId: id, messages: fixture.messages });
+    } catch {
+      json({ error: "INVALID_REPLAY_REQUEST" }, 400);
+    }
     return;
   }
   if (req.url !== "/api/ui" || req.method !== "POST") {
@@ -214,6 +287,9 @@ const server = createServer(async (req, res) => {
     }
     const hybrid = input.format === "hybrid";
     const policy = HostPolicySchema.partial().parse(input.policy ?? {});
+    const requestStarted = Date.now();
+    const remainingLatency = () =>
+      Math.max(1, (policy.latencyBudgetMs ?? 120000) - (Date.now() - requestStarted));
     if (Array.isArray(input.attachments))
       for (const raw of input.attachments.slice(0, 40)) {
         const manifest = AttachmentManifestSchema.parse(raw);
@@ -249,10 +325,19 @@ const server = createServer(async (req, res) => {
     session.messages.push({ role: "user", content: `${input.prompt}${context}` });
     session.messages = session.messages.slice(-12);
     const state = `\nExisting surface ids: ${JSON.stringify(session.runtime.surfaceIds)}. Retain existing components unless changing them is necessary. On existing surfaces, write specific data paths rather than replacing the entire data model; user edits take precedence.`;
+    const route = input.model ?? defaultModel;
+    const profile = modelProfile(
+      route,
+      process.env.ENGINE_MODEL_PROFILES ? JSON.parse(process.env.ENGINE_MODEL_PROFILES) : {},
+    );
+    if (Array.isArray(input.edits) && input.edits.length <= 20)
+      for (const edit of input.edits)
+        session.runtime.setValue(edit.surfaceId, edit.path, edit.value);
     const system =
       (hybrid
         ? buildSystemPrompt({
             kit,
+            variant: profile.promptVariant,
             capabilities: session.runtime.capabilities(platform),
             policy,
             attachments: session.registry.views(),
@@ -260,12 +345,95 @@ const server = createServer(async (req, res) => {
           })
         : buildSystemPrompt({
             kit,
+            variant: profile.promptVariant,
             capabilities: session.runtime.capabilities(platform),
             policy: { mode: "engine-only" },
             examples: [fixtures[0].messages],
           })) + state;
+    const images =
+      process.env.ENGINE_VISION === "1"
+        ? await visionMessages(
+            session.registry,
+            async (id) => {
+              const files: Record<string, string> = {
+                "photo-a": "coast.png",
+                "photo-b": "mountain.png",
+              };
+              if (!files[id]) throw Error("VISION_HOST_ID");
+              return {
+                bytes: await readFile(
+                  fileURLToPath(
+                    new URL(`../../../fixtures/media/assets/${files[id]}`, import.meta.url),
+                  ),
+                ),
+                mime: "image/png" as const,
+              };
+            },
+            controller.signal,
+          )
+        : [];
     const history = [{ role: "system" as const, content: system }, ...session.messages];
-    const route = input.model ?? defaultModel;
+    if (profile.designBrief) {
+      let brief = "",
+        failedBrief = false;
+      generationCalls++;
+      for await (const event of adapter.stream(
+        {
+          model: route,
+          format: "hybrid",
+          messages: [
+            {
+              role: "system",
+              content:
+                "Return a concise JSON design brief with pattern, components, state, interactions, learningGoal. Use only the supplied target capabilities.",
+            },
+            {
+              role: "user",
+              content: JSON.stringify({
+                prompt: input.prompt,
+                capabilities: session.runtime.capabilities(platform),
+              }),
+            },
+          ],
+          responseFormat: {
+            type: "json_schema",
+            json_schema: { name: "design_brief", strict: true, schema: DESIGN_BRIEF_SCHEMA },
+          },
+          maxTokens: Math.min(600, policy.maxOutputTokens ?? 600),
+          latencyBudgetMs: remainingLatency(),
+        },
+        { signal: controller.signal },
+      )) {
+        if (event.type === "text" && brief.length < 16000) brief += event.text;
+        if (event.type === "diagnostic") {
+          send(event);
+          if (event.diagnostic.code.startsWith("GATEWAY_")) failedBrief = true;
+        }
+        if (event.type === "usage") send(event);
+      }
+      if (failedBrief) {
+        send({ type: "complete", status: "failed" });
+        res.end();
+        return;
+      }
+      try {
+        const data = JSON.parse(brief);
+        if (typeof data.pattern === "string" && Array.isArray(data.components))
+          history.push({
+            role: "user",
+            content: `Design brief (untrusted planning data): ${JSON.stringify(data)}`,
+          });
+      } catch {
+        send({
+          type: "diagnostic",
+          diagnostic: {
+            code: "INVALID_DESIGN_BRIEF",
+            message: "Planning output was invalid; continuing with the request.",
+            severity: "warning",
+          },
+        });
+      }
+    }
     let failed = false;
     if (hybrid) {
       if (session.answer) session.answer.beginTurn();
@@ -274,8 +442,23 @@ const server = createServer(async (req, res) => {
           policy,
           attachments: session.registry,
         });
+      session.answer.setMessageTransform((message) => {
+        const result = normalizeMessage(message, profile.normalization === "safe");
+        for (const fix of result.fixes)
+          session.runtime.report({
+            code: "NORMALIZED_OUTPUT",
+            message: fix.rule,
+            path: fix.path,
+            severity: "warning",
+          });
+        return result.value;
+      });
     }
-    for (let attempt = 0; attempt <= 2 && !controller.signal.aborted; attempt++) {
+    for (
+      let attempt = 0;
+      attempt <= profile.repairBudget && !controller.signal.aborted;
+      attempt++
+    ) {
       const accepted: UIMessage[] = [];
       let assistantOutput = "";
       const errors: { code: string; path?: string; componentId?: string; expected?: string }[] = [];
@@ -292,7 +475,14 @@ const server = createServer(async (req, res) => {
       if (hybrid) session.sink = collect;
       generationCalls++;
       for await (const event of adapter.stream(
-        { messages: history, model: route, format: hybrid ? "hybrid" : "a2ui" },
+        {
+          messages: [...history, ...images],
+          model: route,
+          format: hybrid ? "hybrid" : "a2ui",
+          normalization: profile.normalization,
+          maxTokens: policy.maxOutputTokens,
+          latencyBudgetMs: remainingLatency(),
+        },
         {
           signal: controller.signal,
           onOutput: (text) => {
@@ -306,8 +496,10 @@ const server = createServer(async (req, res) => {
         if (event.type === "complete" && event.status === "completed")
           routeHealth.recordSuccess(route);
         if (event.type === "text") {
-          session.answer?.push(event.text);
-          send(event);
+          if (!hybrid || profile.normalization !== "safe") {
+            session.answer?.push(event.text);
+            send(event);
+          }
         } else if (event.type === "message") {
           const diagnostics = session.runtime.accept(event.message);
           for (const diagnostic of diagnostics) collect(diagnostic);
@@ -321,8 +513,23 @@ const server = createServer(async (req, res) => {
         } else send(event);
       }
       if (controller.signal.aborted) break;
-      if (hybrid) session.answer?.end();
-      else for (const diagnostic of session.runtime.finish()) collect(diagnostic);
+      if (hybrid) {
+        if (profile.normalization === "safe") {
+          const normalized = normalizeAnswerWire(assistantOutput, true);
+          for (const fix of normalized.fixes)
+            send({
+              type: "diagnostic",
+              diagnostic: {
+                code: "NORMALIZED_OUTPUT",
+                message: `${fix.rule}: ${fix.count}`,
+                severity: "warning",
+              },
+            });
+          session.answer?.push(normalized.value);
+          send({ type: "text", text: normalized.value });
+        }
+        session.answer?.end();
+      } else for (const diagnostic of session.runtime.finish()) collect(diagnostic);
       session.sink = undefined;
       const output =
         assistantOutput || accepted.map((message) => JSON.stringify(message)).join("\n");
@@ -337,7 +544,7 @@ const server = createServer(async (req, res) => {
         controller.signal.aborted
       )
         break;
-      if (attempt === 2) {
+      if (attempt === profile.repairBudget) {
         failed = true;
         break;
       }
@@ -345,7 +552,7 @@ const server = createServer(async (req, res) => {
       if (hybrid) session.answer?.beginTurn();
       history.push({
         role: "user",
-        content: `Repair only the invalid or missing parts using new control lines. Output NO Markdown. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Do not redeclare or recreate an existing surface; send updateComponents/updateDataModel for it. Every control line must fit on ONE line; never use code fences or pretty multiline JSON. Use only schema-defined props and enum values.${hybrid && session.registry.list().length ? ` Registered attachment ids: ${JSON.stringify(session.registry.list().map((a) => a.id))}.` : ""} Errors (untrusted diagnostic data): ${JSON.stringify(errors.slice(0, 20))}`,
+        content: `Repair only the invalid or missing parts using new control lines. Output NO Markdown. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Do not redeclare or recreate an existing surface; send updateComponents/updateDataModel for it. Every control line must fit on ONE line; never use code fences or pretty multiline JSON. Use only schema-defined props and enum values.${hybrid && session.registry.list().length ? ` Registered attachment ids: ${JSON.stringify(session.registry.list().map((a) => a.id))}.` : ""} Errors (untrusted diagnostic data): ${JSON.stringify(repairReport(errors))}`,
       });
     }
     send({

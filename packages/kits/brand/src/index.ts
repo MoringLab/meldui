@@ -56,10 +56,10 @@ export const brand = defineKit({
     COMPONENT_NAMES.map((name) => [
       name,
       // Unregistered host implementations fall through to the built-in view of the same component.
-      { implementation: ["Button", "Card"].includes(name) ? `Brand${name}` : name },
+      { implementation: ["Button", "Card", "Heading"].includes(name) ? `Brand${name}` : name },
     ]),
   ),
-  hostImplementations: ["BrandButton", "BrandCard"],
+  hostImplementations: ["BrandButton", "BrandCard", "BrandHeading"],
   guide:
     "Speak in a warm, direct brand voice. Lead with a bold heading and one sentence of context. Prefer a single primary action per screen; secondary actions are quiet buttons. Group related fields in a card and keep everything else flat. Use friendly, concrete labels with units. All state, props and actions follow the core catalog exactly; never use kit-specific component names in model output.",
   examples: ["calculator", "form", "planner", "dashboard"],

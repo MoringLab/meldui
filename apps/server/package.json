@@ -13,6 +13,7 @@
     "@engine/kit-neutral": "workspace:*",
     "@engine/kit-editorial": "workspace:*",
     "@engine/adapter-gateway": "workspace:*",
-    "@engine/kit-brand": "workspace:*"
+    "@engine/kit-brand": "workspace:*",
+    "@engine/sandbox": "workspace:*"
   }
 }

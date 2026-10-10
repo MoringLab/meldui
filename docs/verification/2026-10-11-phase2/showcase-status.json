@@ -1,0 +1,308 @@
+{
+  "at": "2026-10-11",
+  "implemented": 30,
+  "referenceReplaysPassed": 30,
+  "fullySemanticallyAccepted": 0,
+  "rows": [
+    {
+      "id": "01",
+      "title": "bicycle",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "02",
+      "title": "black-hole",
+      "path": "C",
+      "referenceReplay": "pass",
+      "scope": "Attested experimental web provider; native fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "03",
+      "title": "dna",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "04",
+      "title": "predator-prey",
+      "path": "B",
+      "referenceReplay": "pass",
+      "scope": "Trusted web module; native text fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "05",
+      "title": "civilization",
+      "path": "C",
+      "referenceReplay": "pass",
+      "scope": "Attested experimental web provider; native fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "06",
+      "title": "solar-system",
+      "path": "B",
+      "referenceReplay": "pass",
+      "scope": "Trusted web module; native text fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "07",
+      "title": "fluid",
+      "path": "B",
+      "referenceReplay": "pass",
+      "scope": "Trusted web module; native text fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "08",
+      "title": "circuit",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "09",
+      "title": "engine",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "10",
+      "title": "climate",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "11",
+      "title": "ants",
+      "path": "C",
+      "referenceReplay": "pass",
+      "scope": "Attested experimental web provider; native fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "12",
+      "title": "ai-city",
+      "path": "C",
+      "referenceReplay": "pass",
+      "scope": "Attested experimental web provider; native fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "13",
+      "title": "stock",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "14",
+      "title": "virus",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "15",
+      "title": "evolution",
+      "path": "B",
+      "referenceReplay": "pass",
+      "scope": "Trusted web module; native text fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "16",
+      "title": "compound-interest",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "17",
+      "title": "monty-hall",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "18",
+      "title": "normal",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "19",
+      "title": "interactive-math",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "20",
+      "title": "dutch-pay",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "21",
+      "title": "retro-game",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "22",
+      "title": "itinerary-map",
+      "path": "A",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-01",
+      "title": "h-photos",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-02",
+      "title": "h-pdf",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-03",
+      "title": "h-video",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-04",
+      "title": "h-trip",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-05",
+      "title": "h-calc",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-06",
+      "title": "h-fact",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-07",
+      "title": "h-code",
+      "path": "H",
+      "referenceReplay": "pass",
+      "scope": "Web and native declarative/manual rendering",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    },
+    {
+      "id": "H-08",
+      "title": "h-sandbox",
+      "path": "C",
+      "referenceReplay": "pass",
+      "scope": "Attested experimental web provider; native fallback",
+      "generationQuality": "not-run",
+      "humanSemanticAcceptance": "not-run",
+      "fullAcceptance": "open"
+    }
+  ]
+}

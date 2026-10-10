@@ -91,43 +91,52 @@ class AnswerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: session,
-      builder: (context, _) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final block in session.blocks)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: switch (block) {
-                MarkdownBlock() => KeyedSubtree(
-                  key: ValueKey('md-${block.id}'),
-                  child: markdown(context, block.text, block.streaming),
-                ),
-                SurfaceBlock() => _SurfaceFrame(
-                  key: ValueKey('surface-${block.id}'),
-                  block: block,
-                  session: session,
-                  chrome: chrome,
-                  labels: labels,
-                  maxHeight:
-                      maxSurfaceHeight ?? session.policy.maxSurfaceHeight,
-                  onExpand: onExpand,
-                ),
-                MediaBlock() =>
-                  mediaBuilder?.call(context, block) ??
-                      MediaContent(
-                        ids: block.attachmentIds,
-                        layout: block.layout,
-                        caption: block.caption,
-                      ),
-                SandboxBlock() => Semantics(
-                  liveRegion: true,
-                  child: Text('${labels.sandboxBlocked} ${block.fallbackText}'),
-                ),
-              },
-            ),
-        ],
+    final host = UIProvider.of(context);
+    return UIProvider(
+      runtime: host.runtime,
+      kit: host.kit,
+      dark: host.dark,
+      assets: host.assets,
+      components: host.components,
+      content: session.policy.allowMedia ? host.content : null,
+      child: ListenableBuilder(
+        listenable: session,
+        builder: (context, _) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final block in session.blocks)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: switch (block) {
+                  MarkdownBlock() => KeyedSubtree(
+                    key: ValueKey('md-${block.id}'),
+                    child: markdown(context, block.text, block.streaming),
+                  ),
+                  SurfaceBlock() => _SurfaceFrame(
+                    key: ValueKey('surface-${block.id}'),
+                    block: block,
+                    session: session,
+                    chrome: chrome,
+                    labels: labels,
+                    maxHeight:
+                        maxSurfaceHeight ?? session.policy.maxSurfaceHeight,
+                    onExpand: onExpand,
+                  ),
+                  MediaBlock() => _MediaComposition(
+                    block: block,
+                    markdown: markdown,
+                    mediaBuilder: mediaBuilder,
+                  ),
+                  SandboxBlock() => Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      '${labels.sandboxBlocked} ${block.fallbackText}',
+                    ),
+                  ),
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -284,4 +293,49 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
       ),
     );
   }
+}
+
+class _MediaComposition extends StatelessWidget {
+  final MediaBlock block;
+  final MarkdownBuilder markdown;
+  final MediaBuilder? mediaBuilder;
+  const _MediaComposition({
+    required this.block,
+    required this.markdown,
+    this.mediaBuilder,
+  });
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, size) {
+      final media =
+          mediaBuilder?.call(context, block) ??
+          MediaContent(
+            ids: block.attachmentIds,
+            layout: block.layout,
+            caption: block.caption,
+          );
+      if (block.markdown == null) return media;
+      final text = markdown(context, block.markdown!, false);
+      final before = ['left', 'above'].contains(block.placement);
+      if (size.maxWidth >= 600 && ['left', 'right'].contains(block.placement)) {
+        final m = SizedBox(
+          width: (size.maxWidth - 24) * block.mediaFraction,
+          child: media,
+        );
+        final t = Expanded(child: text);
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: before
+              ? [m, const SizedBox(width: 24), t]
+              : [t, const SizedBox(width: 24), m],
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: before
+            ? [media, const SizedBox(height: 16), text]
+            : [text, const SizedBox(height: 16), media],
+      );
+    },
+  );
 }

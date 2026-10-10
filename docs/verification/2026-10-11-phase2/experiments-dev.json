@@ -1,0 +1,94 @@
+{
+  "at": "2026-10-10T13:08:40.598Z",
+  "rows": [
+    {
+      "id": "calculator",
+      "split": "dev",
+      "variant": "baseline",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 62827,
+        "outputTokens": 73
+      },
+      "firstTokenMs": 8331.017316,
+      "elapsedMs": 9017.771622,
+      "output": "현재 총 금액과 인원에 대한 정보가 없습니다. 계산을 위해 총 금액과 인원을 입력해주세요.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "calculator",
+      "split": "dev",
+      "variant": "compact",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 62754,
+        "outputTokens": 299
+      },
+      "firstTokenMs": 10176.295906999998,
+      "elapsedMs": 12272.887727999998,
+      "output": "총 금액과 인원을 알려주세요. 멀티플레이어가 몇 명인지, 그리고 총 금액이 얼마인지 말씀해 주시면 계산해 드리겠습니다.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "calculator",
+      "split": "dev",
+      "variant": "design-brief",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 62931,
+        "outputTokens": 1024
+      },
+      "firstTokenMs": 18795.605103,
+      "elapsedMs": 29163.314771,
+      "briefUsage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 409,
+        "outputTokens": 64
+      },
+      "output": "총 금액과 인원 수를 알려주시면 바로 1인당 금액을 계산해 드리겠습니다. 예를 들어, 총 금액이 100,000원이고 인원이 4명이라면 어떻게 해드릴까요?",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "calculator",
+      "split": "dev",
+      "variant": "structured",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "fail",
+      "errors": [
+        "SyntaxError: Unexpected token '총', \"총 금액과 인원 수\"... is not valid JSON"
+      ],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 63004,
+        "outputTokens": 59
+      },
+      "firstTokenMs": 5441.374797999997,
+      "elapsedMs": 6214.582926000003,
+      "output": "총 금액과 인원 수를 알려주시면 1인당 금액을 계산해 드리겠습니다.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    }
+  ],
+  "adoption": "No defaults changed from this small uncalibrated experiment."
+}

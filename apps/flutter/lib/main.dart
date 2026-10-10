@@ -54,7 +54,12 @@ class EngineLabState extends State<EngineLab> {
         jsonDecode(await rootBundle.loadString('assets/hybrid.json')) as List;
     mediaFixtures =
         jsonDecode(await rootBundle.loadString('assets/media.json')) as List;
-    fixtures = [...fixtures, ...mediaFixtures];
+    final advanced =
+        jsonDecode(await rootBundle.loadString('assets/advanced.json')) as List;
+    final showcase =
+        jsonDecode(await rootBundle.loadString('assets/showcase.json')) as List;
+    fixtures = [...fixtures, ...mediaFixtures, ...advanced];
+    hybridFixtures = [...hybridFixtures, ...showcase];
     kits['neutral'] = await UIKit.load('neutral');
     kits['editorial'] = await UIKit.load('editorial');
     kits['brand'] = await UIKit.load('brand');

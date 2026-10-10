@@ -1,0 +1,25 @@
+{
+  "device": "MTK0000903071707360",
+  "results": [
+    {
+      "platform": "expo",
+      "flow": "expo-input",
+      "passed": true
+    },
+    {
+      "platform": "expo",
+      "flow": "expo",
+      "passed": true
+    },
+    {
+      "platform": "flutter",
+      "flow": "flutter-input",
+      "passed": true
+    },
+    {
+      "platform": "flutter",
+      "flow": "flutter",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "at": "2026-10-11",
+  "typeScriptTests": 315,
+  "e2eTests": 66,
+  "ordinaryE2eSkipped": 3,
+  "flutterSdkTests": 325,
+  "flutterAppTests": 1,
+  "sandboxAttackChecks": 11,
+  "sandboxReferenceApps": 5,
+  "npmPackages": 12,
+  "pubWarnings": 4,
+  "performanceRunsInThisContinuation": 0,
+  "devicePreferencesChanged": false,
+  "rawArtifacts": [
+    "artifacts/continuation-final-check.log",
+    "artifacts/continuation-final-units.log",
+    "artifacts/continuation-final-native.log",
+    "artifacts/continuation-frozen-apks.log",
+    "artifacts/continuation-final-pub.log",
+    "artifacts/continuation-final-pub-dry.log",
+    "artifacts/continuation-final-device.log",
+    "artifacts/continuation-final-install.log",
+    "artifacts/continuation-final-eval.log",
+    "artifacts/continuation-final-packages.log",
+    "artifacts/continuation-sandbox-viewer.log",
+    "artifacts/continuation-sandbox-showcase.log",
+    "artifacts/continuation-dependency-audit-after.json",
+    "artifacts/continuation-dependency-licenses.json",
+    "artifacts/continuation-final-composition.log",
+    "artifacts/continuation-final-expo-types.log",
+    "artifacts/continuation-final-expo.log",
+    "artifacts/continuation-final-web-build.log"
+  ],
+  "apkSha256": {
+    "apps/flutter/build/app/outputs/flutter-apk/app-release.apk": "1a620fca820818d140f64a6c68870b75b217afe806fbf154c40a20f68ca11b91",
+    "apps/expo-lab/android/app/build/outputs/apk/release/app-release.apk": "d0bd29ff70c308e9fba796169a80531244d8aed502484cb9bde94ab931800bac"
+  },
+  "beforeAfter": {
+    "catalogComponents": [
+      35,
+      50
+    ],
+    "tsTests": [
+      248,
+      315
+    ],
+    "e2eTests": [
+      42,
+      66
+    ],
+    "flutterSdkTests": [
+      257,
+      325
+    ],
+    "numericPass": [
+      6,
+      11
+    ],
+    "numericExpectedFail": [
+      5,
+      0
+    ],
+    "learningProxyPass": [
+      0,
+      0
+    ],
+    "learningProxyTotal": [
+      12,
+      12
+    ],
+    "fullyHumanAcceptedShowcases": [
+      0,
+      0
+    ]
+  },
+  "commands": {
+    "pnpm check": "passed (315 unit, 66 E2E, 3 opt-in skips)",
+    "pnpm eval": "passed, semantic failures/unmeasured rows retained",
+    "Expo typecheck/lint": "passed",
+    "Flutter SDK/app analyze/test": "passed",
+    "release APKs/build/install": "passed",
+    "image swipe": "passed on both apps",
+    "composition/zoom regression": "9 passed on 3 browsers",
+    "isolated reference apps": "5 passed",
+    "npm pack/consumer/dry-run": "12 passed",
+    "pub publish --dry-run": "passed with 4 warnings"
+  }
+}

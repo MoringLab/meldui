@@ -1,0 +1,4123 @@
+{
+ "timestamp": "2026-10-10T22:59:35.431Z",
+ "browserRun": "completed",
+ "summary": {
+  "safety-markdown": {
+   "total": 35,
+   "pass": 35,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "media:registration": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "media:catalog": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "media:resolver": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "media:layout-choice": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "routing:host-policy": {
+   "total": 1,
+   "pass": 1,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "showcase:replay": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "learning:showcase-proxy": {
+   "total": 14,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 14,
+   "na": 0
+  },
+  "numeric": {
+   "total": 11,
+   "pass": 11,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "structural": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "learning-proxy": {
+   "total": 12,
+   "pass": 0,
+   "fail": 12,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "safety-injection": {
+   "total": 1,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 1,
+   "na": 0
+  },
+  "routing": {
+   "total": 40,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 40,
+   "na": 0
+  },
+  "multiturn": {
+   "total": 20,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 20,
+   "na": 0
+  },
+  "media": {
+   "total": 20,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 20,
+   "na": 0
+  },
+  "showcase": {
+   "total": 30,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 30,
+   "na": 0
+  },
+  "layout:overflow": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:touch-44": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:contrast": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:first-paint": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "behavior:slider": {
+   "total": 36,
+   "pass": 13,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 23
+  },
+  "behavior:tabs": {
+   "total": 36,
+   "pass": 5,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 31
+  },
+  "behavior:checkbox": {
+   "total": 36,
+   "pass": 5,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 31
+  },
+  "behavior:button": {
+   "total": 31,
+   "pass": 16,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 15
+  },
+  "behavior:form": {
+   "total": 36,
+   "pass": 5,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 31
+  },
+  "behavior:reset": {
+   "total": 36,
+   "pass": 18,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 18
+  }
+ },
+ "rows": [
+  {
+   "layer": "safety-markdown",
+   "id": "x01",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x02",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x03",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x04",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x05",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x06",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x07",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x08",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x09",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x10",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x11",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x12",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x13",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x14",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x15",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x16",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x17",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x18",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x19",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x20",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x21",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x22",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x23",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x24",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x25",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x26",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x27",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x28",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x29",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x30",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x31",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x32",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x33",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x34",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "safety-markdown",
+   "id": "x35",
+   "status": "pass",
+   "detail": "sanitized AST; browser execution corpus verified separately"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m01",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m02",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m03",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m04",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "5 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m05",
+   "split": "dev",
+   "status": "pass",
+   "detail": "5 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m06",
+   "split": "dev",
+   "status": "pass",
+   "detail": "5 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m07",
+   "split": "dev",
+   "status": "pass",
+   "detail": "2 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m08",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "2 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m09",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m10",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m11",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m12",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m13",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m14",
+   "split": "dev",
+   "status": "pass",
+   "detail": "4 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m15",
+   "split": "dev",
+   "status": "pass",
+   "detail": "4 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m16",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "4 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m17",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m18",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m19",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:registration",
+   "id": "m20",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1 registered metadata records; replay registration, not generated layout"
+  },
+  {
+   "layer": "media:catalog",
+   "id": "media-catalog",
+   "status": "pass",
+   "detail": "all content components; registered host IDs; original catalog wire preserved"
+  },
+  {
+   "layer": "media:resolver",
+   "id": "expired-refresh",
+   "status": "pass",
+   "detail": "one expired response, one refresh"
+  },
+  {
+   "layer": "media:layout-choice",
+   "id": "count",
+   "status": "pass",
+   "detail": "count/kind selection; physical layout separately measured"
+  },
+  {
+   "layer": "routing:host-policy",
+   "id": "markdown-only",
+   "status": "pass",
+   "detail": "host enforcement; model routing quality remains a live measurement"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "01",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "01",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "02",
+   "status": "pass",
+   "detail": "C: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "03",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "03",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "04",
+   "status": "pass",
+   "detail": "B: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "05",
+   "status": "pass",
+   "detail": "C: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "06",
+   "status": "pass",
+   "detail": "B: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "07",
+   "status": "pass",
+   "detail": "B: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "08",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "08",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "09",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "09",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "10",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "10",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "11",
+   "status": "pass",
+   "detail": "C: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "12",
+   "status": "pass",
+   "detail": "C: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "13",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "13",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "14",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "14",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "15",
+   "status": "pass",
+   "detail": "B: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "16",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "16",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "17",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "17",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "18",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "18",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "19",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "19",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "20",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "20",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "21",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "21",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "22",
+   "status": "pass",
+   "detail": "A: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "learning:showcase-proxy",
+   "id": "22",
+   "status": "not-run",
+   "detail": "Renderer/behavior fixtures are available. Human rubric remains uncalibrated."
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-01",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-02",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-03",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-04",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-05",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-06",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-07",
+   "status": "pass",
+   "detail": "H: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "showcase:replay",
+   "id": "H-08",
+   "status": "pass",
+   "detail": "C: declared state and bindings, not generation or human learning quality"
+  },
+  {
+   "layer": "numeric",
+   "id": "showcase:16",
+   "status": "pass",
+   "detail": "independent golden reference; replay calculation"
+  },
+  {
+   "layer": "numeric",
+   "id": "showcase:20",
+   "status": "pass",
+   "detail": "independent golden reference; replay calculation"
+  },
+  {
+   "layer": "numeric",
+   "id": "showcase:18",
+   "status": "pass",
+   "detail": "independent golden reference; replay calculation"
+  },
+  {
+   "layer": "numeric",
+   "id": "showcase:17",
+   "status": "pass",
+   "detail": "independent golden reference; replay calculation"
+  },
+  {
+   "layer": "numeric",
+   "id": "showcase:14",
+   "status": "pass",
+   "detail": "independent golden reference; replay calculation"
+  },
+  {
+   "layer": "structural",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "2.5ms"
+  },
+  {
+   "layer": "structural",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.7ms"
+  },
+  {
+   "layer": "structural",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1.6ms"
+  },
+  {
+   "layer": "structural",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1.5ms"
+  },
+  {
+   "layer": "structural",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.7ms"
+  },
+  {
+   "layer": "structural",
+   "id": "comparison",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.3ms"
+  },
+  {
+   "layer": "structural",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "0.9ms"
+  },
+  {
+   "layer": "structural",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.1ms"
+  },
+  {
+   "layer": "structural",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.4ms"
+  },
+  {
+   "layer": "structural",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1.1ms"
+  },
+  {
+   "layer": "structural",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "0.9ms"
+  },
+  {
+   "layer": "structural",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.0ms"
+  },
+  {
+   "layer": "structural",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.0ms"
+  },
+  {
+   "layer": "structural",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "0.9ms"
+  },
+  {
+   "layer": "structural",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass",
+   "detail": "2.4ms"
+  },
+  {
+   "layer": "structural",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass",
+   "detail": "2.1ms"
+  },
+  {
+   "layer": "structural",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "2.3ms"
+  },
+  {
+   "layer": "structural",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass",
+   "detail": "2.7ms"
+  },
+  {
+   "layer": "structural",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1.0ms"
+  },
+  {
+   "layer": "structural",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "0.6ms"
+  },
+  {
+   "layer": "structural",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "0.7ms"
+  },
+  {
+   "layer": "structural",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "0.7ms"
+  },
+  {
+   "layer": "structural",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "0.6ms"
+  },
+  {
+   "layer": "structural",
+   "id": "explanation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.8ms"
+  },
+  {
+   "layer": "structural",
+   "id": "streaming",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.7ms"
+  },
+  {
+   "layer": "structural",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "pass",
+   "detail": "1.4ms"
+  },
+  {
+   "layer": "structural",
+   "id": "components",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1.3ms"
+  },
+  {
+   "layer": "structural",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "1.8ms"
+  },
+  {
+   "layer": "structural",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "2.8ms"
+  },
+  {
+   "layer": "structural",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "3.3ms"
+  },
+  {
+   "layer": "numeric",
+   "id": "calculator",
+   "status": "pass",
+   "detail": "5 input pairs match"
+  },
+  {
+   "layer": "numeric",
+   "id": "trip-budget",
+   "status": "pass",
+   "detail": "5 input pairs match"
+  },
+  {
+   "layer": "numeric",
+   "id": "study-time",
+   "status": "pass",
+   "detail": "5 input pairs match"
+  },
+  {
+   "layer": "numeric",
+   "id": "unit-price",
+   "status": "pass",
+   "detail": "5 input pairs match"
+  },
+  {
+   "layer": "numeric",
+   "id": "remaining-budget",
+   "status": "pass",
+   "detail": "5 input pairs match"
+  },
+  {
+   "layer": "numeric",
+   "id": "golden:dutch-sum",
+   "status": "pass"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "fail",
+   "value": 4,
+   "detail": "{\"goal\":2,\"experiments\":1,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":1}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "energy",
+   "split": "dev",
+   "status": "fail",
+   "value": 4,
+   "detail": "{\"goal\":2,\"experiments\":1,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":1}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "activity",
+   "split": "dev",
+   "status": "fail",
+   "value": 4,
+   "detail": "{\"goal\":2,\"experiments\":1,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":1}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "experiment",
+   "split": "dev",
+   "status": "fail",
+   "value": 4,
+   "detail": "{\"goal\":2,\"experiments\":1,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":1}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "sales",
+   "split": "heldout",
+   "status": "fail",
+   "value": 4,
+   "detail": "{\"goal\":2,\"experiments\":1,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":1}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "explanation",
+   "split": "dev",
+   "status": "fail",
+   "value": 3,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":1,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "streaming",
+   "split": "dev",
+   "status": "fail",
+   "value": 3,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":1,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "fail",
+   "value": 3,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":1,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "components",
+   "split": "heldout",
+   "status": "fail",
+   "value": 3,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":1,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "fail",
+   "value": 2,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "fail",
+   "value": 2,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "learning-proxy",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "fail",
+   "value": 2,
+   "detail": "{\"goal\":2,\"experiments\":0,\"observation\":0,\"formula\":0,\"check\":0,\"simplification\":0}"
+  },
+  {
+   "layer": "safety-injection",
+   "id": "live-model-injection",
+   "status": "not-run",
+   "detail": "metadata/quoted prompt controls tested; no claim of an adversarial live-model success rate"
+  },
+  {
+   "layer": "routing",
+   "id": "r01",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r02",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r03",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r04",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r05",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r06",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r07",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r08",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r09",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r10",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r11",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r12",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r13",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r14",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r15",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r16",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r17",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r18",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r19",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r20",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r21",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r22",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r23",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r24",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r25",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r26",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r27",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r28",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r29",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r30",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r31",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r32",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r33",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r34",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r35",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r36",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r37",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r38",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r39",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "routing",
+   "id": "r40",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t01",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t02",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t03",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t04",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t05",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t06",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t07",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t08",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t09",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t10",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t11",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t12",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t13",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t14",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t15",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t16",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t17",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t18",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t19",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "multiturn",
+   "id": "t20",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "host contract exists; this row requires a captured live/replay behavior result"
+  },
+  {
+   "layer": "media",
+   "id": "m01",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m02",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m03",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m04",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m05",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m06",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m07",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m08",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m09",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m10",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m11",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m12",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m13",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m14",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m15",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m16",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m17",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m18",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m19",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "media",
+   "id": "m20",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "media display exists; generated answer quality requires live eval"
+  },
+  {
+   "layer": "showcase",
+   "id": "01",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "bicycle: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "02",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "black-hole: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "03",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "dna: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "04",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "predator-prey: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "05",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "civilization: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "06",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "solar-system: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "07",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "fluid: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "08",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "circuit: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "09",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "engine: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "10",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "climate: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "11",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "ants: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "12",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "ai-city: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "13",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "stock: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "14",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "virus: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "15",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "evolution: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "16",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "compound-interest: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "17",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "monty-hall: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "18",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "normal: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "19",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "interactive-math: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "20",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "dutch-pay: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "21",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "retro-game: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "22",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "itinerary-map: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-01",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "h-photos: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-02",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "h-pdf: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-03",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "h-video: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-04",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "h-trip: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-05",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "h-calc: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-06",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "h-fact: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-07",
+   "split": "heldout",
+   "status": "not-run",
+   "detail": "h-code: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "showcase",
+   "id": "H-08",
+   "split": "dev",
+   "status": "not-run",
+   "detail": "h-sandbox: replay implemented; generated semantic/human acceptance remains separate."
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "comparison",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "comparison",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "comparison",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "comparison",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "explanation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "explanation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "explanation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "explanation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "streaming",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "streaming",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "streaming",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "streaming",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "components",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "components",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "components",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "components",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:overflow",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:touch-44",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:contrast",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "layout:first-paint",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "16 configs"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "calculator",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "calculator",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "calculator",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "calculator",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "calculator",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "trip-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "study-time",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "unit-price",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "remaining-budget",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "comparison",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "comparison",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "comparison",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "comparison",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "comparison",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "comparison",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "travel-compare",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "plan-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "course-compare",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "form",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "form",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "form",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "reservation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "reservation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "reservation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "feedback",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "feedback",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "feedback",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "contact",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "contact",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "contact",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "onboarding",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "planner",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "planner",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "planner",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "planner",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "planner",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "packing",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "packing",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "packing",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "packing",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "packing",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "meeting",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "habit",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "habit",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "habit",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "habit",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "habit",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "dashboard",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "energy",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "energy",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "energy",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "energy",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "energy",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "activity",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "activity",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "activity",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "activity",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "activity",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "experiment",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "experiment",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "experiment",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "experiment",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "experiment",
+   "split": "dev",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "sales",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "sales",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "sales",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "sales",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "sales",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "explanation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "explanation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "explanation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "explanation",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "explanation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "explanation",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "streaming",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "streaming",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "streaming",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "streaming",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "streaming",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "streaming",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "accessibility",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "components",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "components",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "components",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "components",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "components",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "components",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "quiz",
+   "split": "heldout",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "counting-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "logic-game",
+   "split": "dev",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "h-calc",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "h-calc",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "h-calc",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "h-calc",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "h-calc",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "h-calc",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "h-fact",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "h-fact",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "h-fact",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "h-fact",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "h-fact",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "h-fact",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "h-code",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "h-code",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "h-code",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "h-code",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "h-code",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "h-code",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "h-explore",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "h-explore",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "h-explore",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "h-explore",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "h-explore",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "h-explore",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "h-two",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "h-two",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "h-two",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "h-two",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "h-two",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "h-two",
+   "status": "pass",
+   "detail": "no state change to undo"
+  },
+  {
+   "layer": "behavior:slider",
+   "id": "h-legacy",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:tabs",
+   "id": "h-legacy",
+   "status": "pass"
+  },
+  {
+   "layer": "behavior:checkbox",
+   "id": "h-legacy",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:button",
+   "id": "h-legacy",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "layer": "behavior:form",
+   "id": "h-legacy",
+   "status": "na"
+  },
+  {
+   "layer": "behavior:reset",
+   "id": "h-legacy",
+   "status": "na"
+  }
+ ]
+}

@@ -1,6 +1,5 @@
 import { type NativeViewProps, useUI } from "@engine/renderer-react-native";
-import React from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, type TextStyle, View } from "react-native";
 
 /**
  * Stand-in for a host's native design system. The brand kit swaps these in for the built-in
@@ -82,4 +81,36 @@ export function BrandCard({ node, children }: NativeViewProps) {
     </View>
   );
 }
-export const brandComponents = { BrandButton, BrandCard };
+export function BrandHeading({ node }: NativeViewProps) {
+  const { kit, mode } = useUI();
+  const t = kit.tokens.typography,
+    level = Number(node.props.level ?? 2),
+    size = t.baseSize * (t.scale[level - 1] ?? 1);
+  return (
+    <View
+      style={{
+        backgroundColor: kit.tokens[mode].accent,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 4,
+      }}
+    >
+      <Text
+        accessibilityRole="header"
+        style={{
+          color: kit.tokens[mode].onAccent,
+          fontSize: size,
+          lineHeight: size * t.headingLineHeight,
+          fontFamily:
+            typeof t.native.heading === "string"
+              ? t.native.heading
+              : t.native.heading?.[Platform.OS === "ios" ? "ios" : "android"],
+          fontWeight: String(t.headingWeight) as TextStyle["fontWeight"],
+        }}
+      >
+        {String(node.props.text ?? "")}
+      </Text>
+    </View>
+  );
+}
+export const brandComponents = { BrandButton, BrandCard, BrandHeading };

@@ -1,0 +1,71 @@
+{
+  "at": "2026-10-11",
+  "audit": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 2,
+      "critical": 0
+    },
+    "dependencies": 691,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 691
+  },
+  "advisories": [
+    {
+      "id": 1119441,
+      "module_name": "uuid",
+      "severity": "moderate",
+      "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+      "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+      "patched_versions": ">=11.1.1",
+      "vulnerable_versions": "<11.1.1",
+      "findings": [
+        {
+          "version": "7.0.3",
+          "paths": [
+            "apps__expo-lab>expo>@expo/config-plugins>xcode>uuid"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1240912,
+      "module_name": "node-forge",
+      "severity": "high",
+      "title": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+      "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+      "patched_versions": "<0.0.0",
+      "vulnerable_versions": "<=1.4.0",
+      "findings": [
+        {
+          "version": "1.4.0",
+          "paths": [
+            "apps__expo-lab>expo>@expo/cli>node-forge"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1240992,
+      "module_name": "braces",
+      "severity": "high",
+      "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+      "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+      "patched_versions": "<0.0.0",
+      "vulnerable_versions": "<=3.0.3",
+      "findings": [
+        {
+          "version": "3.0.3",
+          "paths": [
+            "apps__expo-lab>expo>@expo/metro>metro-file-map>micromatch>braces"
+          ]
+        }
+      ]
+    }
+  ],
+  "raw": "artifacts/continuation-dependency-audit-after.json",
+  "licenseInventory": "artifacts/continuation-dependency-licenses.json"
+}

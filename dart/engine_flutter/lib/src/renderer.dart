@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'learning.dart';
 import 'runtime.dart';
 import 'content.dart';
 import 'markdown.dart';
@@ -332,6 +333,14 @@ class _ComponentState extends State<_Component> {
           : FilledButton(onPressed: press, style: style, child: Text(title));
     }
 
+    if (learningNames.contains(node['component'])) {
+      return LearningView(
+        node: node,
+        sid: widget.sid,
+        scope: widget.scope,
+        children: widget.children,
+      );
+    }
     switch (node['component']) {
       case 'Form':
         return Semantics(

@@ -7,6 +7,19 @@ import "./brand.css";
  * Button and Card when the `brand` kit is active; props and actions mean exactly the same thing.
  */
 export const brandComponents: ComponentViews = {
+  BrandHeading: ({ node }) => {
+    const level = Number(node.props.level ?? 2);
+    return React.createElement(
+      `h${level}`,
+      {
+        className: "ui-heading bds-heading",
+        style: { fontSize: `var(--ui-h${level})`, lineHeight: `var(--ui-h${level}-line)` },
+        "data-brand": "heading",
+        "data-node": node.id,
+      },
+      String(node.props.text ?? ""),
+    );
+  },
   BrandButton: ({ node, runtime, surfaceId }) => {
     const p = node.props;
     return (

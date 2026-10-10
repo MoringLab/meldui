@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "${PICKER}"
+    timeout: 30000
+- tapOn: "${PICKER}"
+- scrollUntilVisible:
+    element:
+      text: "(?s).*h-photos.*"
+    direction: DOWN
+    timeout: 40000
+- tapOn: "(?s).*h-photos.*"
+- extendedWaitUntil:
+    visible: "(?s).*사진 비교.*"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "1 / 2"
+    direction: DOWN
+    timeout: 20000
+- assertVisible: "1 / 2"
+- takeScreenshot: gallery-ready

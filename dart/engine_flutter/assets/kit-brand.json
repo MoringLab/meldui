@@ -60,6 +60,51 @@
     "motionMs": 220
   },
   "components": {
+    "Confirmation": {
+      "implementation": "Confirmation"
+    },
+    "ControlPanel": {
+      "implementation": "ControlPanel"
+    },
+    "Stat": {
+      "implementation": "Stat"
+    },
+    "StatGroup": {
+      "implementation": "StatGroup"
+    },
+    "Legend": {
+      "implementation": "Legend"
+    },
+    "Formula": {
+      "implementation": "Formula"
+    },
+    "Annotation": {
+      "implementation": "Annotation"
+    },
+    "Walkthrough": {
+      "implementation": "Walkthrough"
+    },
+    "Quiz": {
+      "implementation": "Quiz"
+    },
+    "Timeline": {
+      "implementation": "Timeline"
+    },
+    "Playback": {
+      "implementation": "Playback"
+    },
+    "SvgScene": {
+      "implementation": "SvgScene"
+    },
+    "Plot": {
+      "implementation": "Plot"
+    },
+    "RouteMap": {
+      "implementation": "RouteMap"
+    },
+    "Simulation": {
+      "implementation": "Simulation"
+    },
     "Form": {
       "implementation": "Form"
     },
@@ -85,7 +130,7 @@
       "implementation": "Accordion"
     },
     "Heading": {
-      "implementation": "Heading"
+      "implementation": "BrandHeading"
     },
     "Text": {
       "implementation": "Text"
@@ -168,7 +213,8 @@
   },
   "hostImplementations": [
     "BrandButton",
-    "BrandCard"
+    "BrandCard",
+    "BrandHeading"
   ],
   "guide": "Speak in a warm, direct brand voice. Lead with a bold heading and one sentence of context. Prefer a single primary action per screen; secondary actions are quiet buttons. Group related fields in a card and keep everything else flat. Use friendly, concrete labels with units. All state, props and actions follow the core catalog exactly; never use kit-specific component names in model output.",
   "examples": [

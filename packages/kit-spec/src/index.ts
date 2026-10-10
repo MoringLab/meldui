@@ -163,3 +163,4 @@ export const KitExampleSchema = z.object({
 export type KitExample = z.infer<typeof KitExampleSchema>;
 
 export * from "./conformance.js";
+export * from "./patterns.js";

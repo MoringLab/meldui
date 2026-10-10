@@ -143,6 +143,7 @@ class ContentHost {
   final Future<void> Function(String url)? openLink;
   final void Function(String code, String id)? onDiagnostic;
   final int maxBytes;
+  final bool formattingHtml;
   const ContentHost({
     required this.attachments,
     required this.resolver,
@@ -153,6 +154,7 @@ class ContentHost {
     this.openLink,
     this.onDiagnostic,
     this.maxBytes = 50 * 1024 * 1024,
+    this.formattingHtml = false,
   });
   Future<ResolvedAttachment> resolve(
     String id, [
@@ -393,19 +395,45 @@ class _AttachmentMediaState extends State<AttachmentMedia> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (item['kind'] == 'image')
-          Image.network(
-            value!.url,
-            semanticLabel: label,
-            fit: BoxFit.contain,
-            headers: const {},
-            errorBuilder: (context, err, stack) {
-              if (retries++ == 0) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) load();
-                });
-              }
-              return FileCard(id: widget.id);
-            },
+          InkWell(
+            onTap: () => showDialog<void>(
+              context: context,
+              builder: (context) => Dialog(
+                child: Column(
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close image'),
+                    ),
+                    Expanded(
+                      child: InteractiveViewer(
+                        minScale: 1,
+                        maxScale: 4,
+                        child: Image.network(
+                          value!.url,
+                          semanticLabel: label,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            child: Image.network(
+              value!.url,
+              semanticLabel: label,
+              fit: BoxFit.contain,
+              headers: const {},
+              errorBuilder: (context, err, stack) {
+                if (retries++ == 0) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) load();
+                  });
+                }
+                return FileCard(id: widget.id);
+              },
+            ),
           )
         else
           _Video(
@@ -413,6 +441,7 @@ class _AttachmentMediaState extends State<AttachmentMedia> {
             seek: widget.seek,
             muted: widget.muted,
             label: label,
+            transcript: item['transcript'],
           ),
         for (final region in (item['regions'] as List? ?? []).where(
           (r) => widget.regionIds.contains(r['id']),
@@ -432,6 +461,7 @@ class _AttachmentMediaState extends State<AttachmentMedia> {
 
 class _Video extends StatefulWidget {
   final String url, label;
+  final dynamic transcript;
   final double? seek;
   final bool muted;
   const _Video({
@@ -439,6 +469,7 @@ class _Video extends StatefulWidget {
     required this.label,
     this.seek,
     required this.muted,
+    this.transcript,
   });
   @override
   State<_Video> createState() => _VideoState();
@@ -495,6 +526,14 @@ class _VideoState extends State<_Video> {
       ? const Text('Loading player…')
       : Column(
           children: [
+            if (widget.transcript is List)
+              for (final row in widget.transcript as List)
+                TextButton(
+                  onPressed: () => player.seekTo(
+                    Duration(milliseconds: ((row['t'] as num) * 1000).round()),
+                  ),
+                  child: Text('${row['t']}s · ${row['text']}'),
+                ),
             Semantics(
               label: widget.label,
               child: AspectRatio(
@@ -545,14 +584,7 @@ class MediaContent extends StatelessWidget {
       children: [
         if (caption != null) Text(caption!),
         if (chosen == 'carousel')
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final child in widgets) SizedBox(width: 260, child: child),
-              ],
-            ),
-          )
+          _SwipeGallery(ids: ids)
         else if (chosen == 'grid' || chosen == 'compare')
           LayoutBuilder(
             builder: (context, size) => Wrap(
@@ -574,4 +606,72 @@ class MediaContent extends StatelessWidget {
       ],
     );
   }
+}
+
+class _SwipeGallery extends StatefulWidget {
+  final List<String> ids;
+  const _SwipeGallery({required this.ids});
+  @override
+  State<_SwipeGallery> createState() => _SwipeGalleryState();
+}
+
+class _SwipeGalleryState extends State<_SwipeGallery> {
+  final PageController controller = PageController();
+  int page = 0;
+  @override
+  void didUpdateWidget(_SwipeGallery old) {
+    super.didUpdateWidget(old);
+    if (page >= widget.ids.length) {
+      page = (widget.ids.length - 1).clamp(0, 39);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && controller.hasClients) controller.jumpToPage(page);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, size) => Column(
+      children: [
+        SizedBox(
+          height: size.maxWidth * 0.75 + 64,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: widget.ids.length,
+            onPageChanged: (i) => setState(() => page = i),
+            itemBuilder: (context, i) => AttachmentMedia(id: widget.ids[i]),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              tooltip: 'Previous image',
+              onPressed: page == 0
+                  ? null
+                  : () => controller.jumpToPage(page - 1),
+              icon: const Icon(Icons.chevron_left),
+            ),
+            Semantics(
+              liveRegion: true,
+              child: Text('${page + 1} / ${widget.ids.length}'),
+            ),
+            IconButton(
+              tooltip: 'Next image',
+              onPressed: page >= widget.ids.length - 1
+                  ? null
+                  : () => controller.jumpToPage(page + 1),
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }

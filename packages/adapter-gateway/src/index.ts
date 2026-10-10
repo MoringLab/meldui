@@ -6,6 +6,7 @@ import {
   type UIModelEvent,
 } from "@engine/core";
 import { type Diagnostic, MessageSchema } from "@engine/protocol";
+import { normalizeMessage } from "./quality.js";
 
 export type GatewayOptions = {
   baseUrl: string;
@@ -23,7 +24,9 @@ export class GatewayAdapter implements UIModelAdapter {
   ): AsyncIterable<UIModelEvent> {
     const pending: Diagnostic[] = [];
     const decoder = new NDJSONDecoder((diagnostic) => pending.push(diagnostic));
-    const timeout = AbortSignal.timeout(this.options.timeoutMs ?? 120_000);
+    const timeout = AbortSignal.timeout(
+      Math.max(1, Math.min(this.options.timeoutMs ?? 120_000, request.latencyBudgetMs ?? 120_000)),
+    );
     const activeSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
     try {
       const response = await (this.options.fetch ?? fetch)(
@@ -39,6 +42,7 @@ export class GatewayAdapter implements UIModelAdapter {
           },
           body: JSON.stringify({
             model: request.model,
+            ...(request.responseFormat ? { response_format: request.responseFormat } : {}),
             messages: request.messages,
             stream: true,
             max_tokens: request.maxTokens ?? 4096,
@@ -87,7 +91,15 @@ export class GatewayAdapter implements UIModelAdapter {
                   yield { type: "text", text: content };
                 else if (typeof content === "string")
                   for (const message of decoder.push(content)) {
-                    const result = MessageSchema.safeParse(message);
+                    const normalized = normalizeMessage(message, request.normalization === "safe");
+                    for (const fix of normalized.fixes)
+                      pending.push({
+                        code: "NORMALIZED_OUTPUT",
+                        message: fix.rule,
+                        path: fix.path,
+                        severity: "warning",
+                      });
+                    const result = MessageSchema.safeParse(normalized.value);
                     if (result.success) yield { type: "message", message: result.data };
                     else
                       pending.push({
@@ -107,7 +119,15 @@ export class GatewayAdapter implements UIModelAdapter {
       }
       if (!activeSignal.aborted) {
         for (const message of request.format === "hybrid" ? [] : decoder.finish()) {
-          const result = MessageSchema.safeParse(message);
+          const normalized = normalizeMessage(message, request.normalization === "safe");
+          for (const fix of normalized.fixes)
+            pending.push({
+              code: "NORMALIZED_OUTPUT",
+              message: fix.rule,
+              path: fix.path,
+              severity: "warning",
+            });
+          const result = MessageSchema.safeParse(normalized.value);
           if (result.success) yield { type: "message", message: result.data };
           else
             pending.push({
@@ -151,3 +171,6 @@ export class GatewayAdapter implements UIModelAdapter {
 export * from "./examples.js";
 export * from "./health.js";
 export * from "./prompt.js";
+export * from "./quality.js";
+
+export * from "./vision.js";

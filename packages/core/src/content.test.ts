@@ -12,6 +12,22 @@ import {
 import { createUIRuntime } from "./index.js";
 import { markdownDestination, prepareMarkdown } from "./markdown.js";
 
+it("formatting HTML is opt-in, attribute-free, text-only and preserves fenced code", () => {
+  const source =
+    'Hello <strong>bold</strong> <em>soft</em> <code>x()</code> <b onclick="attack()">plain</b>\n\n```html\n<strong>literal</strong>\n```';
+  const text = (allow = false) =>
+    prepareMarkdown(source, 65536, allow)
+      .map((p) => ("markdown" in p ? p.markdown : ""))
+      .join("");
+  expect(text()).not.toContain("**bold**");
+  expect(text(true)).toContain("**bold**");
+  expect(text(true)).toContain("*soft*");
+  expect(text(true)).toContain("`x()`");
+  expect(text(true)).not.toContain("onclick");
+  expect(text(true)).toContain("<strong>literal</strong>");
+  for (const item of xss) expect(() => prepareMarkdown(item.payload, 65536, true)).not.toThrow();
+});
+
 const makeHost = (): ContentHost => {
   const attachments = new AttachmentRegistry();
   attachments.attach({

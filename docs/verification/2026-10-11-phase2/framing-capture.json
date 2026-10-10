@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-10T22:29:18.851Z",
+  "requestedModel": "auto/claude-sonnet",
+  "actualModel": "openai/gpt-oss-120b",
+  "scope": "Offline normalization of captured real output; no new model request, not a quality-rate or latency claim",
+  "before": "fail",
+  "after": "pass",
+  "fixes": [
+    {
+      "rule": "fenced-control",
+      "count": 1
+    }
+  ],
+  "wire": "{\"engine\":\"v1\",\"block\":\"media\",\"attachments\":[\"photo-a\",\"photo-b\"],\"layout\":\"carousel\",\"placement\":\"left\",\"mediaFraction\":0.4,\"markdown\":\"다음은 호스트가 제공한 두 사진을 왼쪽에 배치된 캐러셀 형태로 보여줍니다. 사진의 구체적인 내용은 추정하지 않고 그대로 표시합니다.\"}",
+  "blocks": [
+    {
+      "id": "b1",
+      "kind": "media",
+      "attachmentIds": [
+        "photo-a",
+        "photo-b"
+      ],
+      "layout": "carousel",
+      "markdown": "다음은 호스트가 제공한 두 사진을 왼쪽에 배치된 캐러셀 형태로 보여줍니다. 사진의 구체적인 내용은 추정하지 않고 그대로 표시합니다.",
+      "placement": "left",
+      "mediaFraction": 0.4,
+      "status": "complete"
+    }
+  ],
+  "diagnostics": []
+}

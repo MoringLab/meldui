@@ -453,6 +453,7 @@ class UIRuntime extends ChangeNotifier {
             entry.key:
                 [
                   'action',
+                  'nodes',
                   'onSubmit',
                   'children',
                   'tabs',
@@ -666,7 +667,9 @@ class UIRuntime extends ChangeNotifier {
           walk(children['componentId'] as String, depth + 1);
         }
         for (final item in (props['tabs'] ?? props['items'] ?? []) as List) {
-          walk(item['child'] as String, depth + 1);
+          if (item is Map && item['child'] is String) {
+            walk(item['child'] as String, depth + 1);
+          }
         }
       }
 

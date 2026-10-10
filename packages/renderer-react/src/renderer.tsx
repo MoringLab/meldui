@@ -21,6 +21,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
+import { LearningView, learningNames } from "./learning.js";
 import { SafeMarkdown } from "./markdown.js";
 
 export type ComponentViewProps = {
@@ -296,6 +297,8 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
     "aria-invalid": Boolean(p.error),
     "aria-describedby": p.error ? `${inputId}-error` : undefined,
   };
+  if (learningNames.includes(node.component ?? ""))
+    return <LearningView {...{ node, children, runtime, surfaceId, renderChild }} />;
   switch (node.component) {
     case "Form":
       return (

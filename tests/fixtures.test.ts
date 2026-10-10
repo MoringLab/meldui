@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import advanced from "../fixtures/advanced/cases.json";
 import fixtures from "../fixtures/cases.json";
 import media from "../fixtures/media/cases.json";
 import { createUIRuntime } from "../packages/core/src/index.js";
@@ -24,12 +25,12 @@ describe("portable fixtures", () => {
     });
   it("covers every catalog component and both complete kits", () => {
     const names = new Set(
-      [...fixtures, ...media].flatMap((f) =>
+      [...fixtures, ...media, ...advanced].flatMap((f) =>
         f.messages.flatMap((m) => m.updateComponents?.components.map((c) => c.component) ?? []),
       ),
     );
     expect([...names].sort()).toEqual([...COMPONENT_NAMES].sort());
-    expect(COMPONENT_NAMES).toHaveLength(35);
+    expect(COMPONENT_NAMES.length).toBeGreaterThan(35);
     expect(validateKit(neutral).catalogId).toBe(validateKit(editorial).catalogId);
   });
   it("exports only resolvable local schema references", () => {

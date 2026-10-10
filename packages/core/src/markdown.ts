@@ -27,7 +27,11 @@ export function attachmentIdFrom(value: string) {
  * Images become host media parts, including reference images. Code remains literal text.
  * Rich typography stays in Markdown; all links still need host approval at interaction time.
  */
-export function prepareMarkdown(text: string, maxChars = 65_536): MarkdownPart[] {
+export function prepareMarkdown(
+  text: string,
+  maxChars = 65_536,
+  formattingHtml = false,
+): MarkdownPart[] {
   if (text.length > maxChars) throw new Error("MARKDOWN_LIMIT");
   const tree = parser.parse(text);
   const definitions = new Map<string, string>();
@@ -46,10 +50,31 @@ export function prepareMarkdown(text: string, maxChars = 65_536): MarkdownPart[]
     for (const child of node.children ?? []) collect(child);
   };
   collect(root);
+  const formats: Record<string, string> = {
+    strong: "strong",
+    b: "strong",
+    em: "emphasis",
+    i: "emphasis",
+    s: "delete",
+    del: "delete",
+    code: "inlineCode",
+  };
+  const formatted = (tag: string, value: string): Node =>
+    formats[tag] === "inlineCode"
+      ? { type: "inlineCode", value }
+      : { type: formats[tag]!, children: [{ type: "text", value }] };
   const images: { attachmentId: string; alt: string }[] = [];
   const clean = (node: Node, depth = 0): Node | undefined => {
     if (depth > 64) throw new Error("MARKDOWN_DEPTH");
-    if (node.type === "html" || node.type === "definition") return;
+    if (node.type === "html") {
+      const pair =
+        formattingHtml &&
+        /^<(strong|b|em|i|s|del|code)>([^<>\n]*)<\/\1>\s*$/i.exec(node.value ?? "");
+      return pair
+        ? { type: "paragraph", children: [formatted(pair[1]!.toLowerCase(), pair[2]!)] }
+        : undefined;
+    }
+    if (node.type === "definition") return;
     const isImage = node.type === "image" || node.type === "imageReference";
     const isLink = node.type === "link" || node.type === "linkReference";
     if (isImage || isLink) {
@@ -65,11 +90,32 @@ export function prepareMarkdown(text: string, maxChars = 65_536): MarkdownPart[]
       node = { ...node, type: "link", url: destination };
       delete node.identifier;
     }
-    if (node.children)
+    if (node.children) {
+      if (formattingHtml) {
+        const children: Node[] = [];
+        for (let i = 0; i < node.children.length; i++) {
+          const current = node.children[i]!,
+            middle = node.children[i + 1],
+            closing = node.children[i + 2];
+          const open =
+            current.type === "html" && /^<(strong|b|em|i|s|del|code)>$/i.exec(current.value ?? "");
+          if (
+            open &&
+            middle?.type === "text" &&
+            closing?.type === "html" &&
+            closing.value?.toLowerCase() === `</${open[1]!.toLowerCase()}>`
+          ) {
+            children.push(formatted(open[1]!.toLowerCase(), middle.value ?? ""));
+            i += 2;
+          } else children.push(current);
+        }
+        node.children = children;
+      }
       node.children = node.children.flatMap((child) => {
         const safe = clean(child, depth + 1);
         return safe ? [safe] : [];
       });
+    }
     return node;
   };
   const parts: MarkdownPart[] = [];

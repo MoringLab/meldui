@@ -13,6 +13,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["packages/**/*.ts", "packages/**/*.tsx", "apps/playground/**/*.ts", "apps/playground/**/*.tsx", "apps/server/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "*.ts"],
+  "include": ["packages/**/*.ts", "packages/**/*.tsx", "apps/playground/**/*.ts", "apps/playground/**/*.tsx", "apps/server/**/*.ts", "apps/reservations/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "*.ts"],
   "exclude": ["**/node_modules", "**/dist", "apps/expo"]
 }

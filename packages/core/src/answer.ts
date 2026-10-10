@@ -14,7 +14,7 @@ import {
   type SurfaceDeclaration,
   type UIMessage,
 } from "@engine/protocol";
-import type { UIRuntime } from "./index.js";
+import type { UIModelEvent, UIRuntime } from "./index.js";
 
 export type AnswerItem =
   | { kind: "text"; text: string }
@@ -191,6 +191,7 @@ export type AnswerState = {
 export type AnswerSessionOptions = {
   policy?: Partial<HostPolicy>;
   sdkVersion?: string;
+  transformMessage?: (message: unknown) => unknown;
   /** Called for every emitted wire event (transport, logging). */
   onEvent?: (event: AnswerEvent) => void;
   /** When set, media blocks may only reference registered ids; unknown ids are reported for repair. */
@@ -350,13 +351,50 @@ export class AnswerSession {
   declareMedia(input: Partial<MediaDeclaration>): AnswerEvent[] {
     return this.control({ engine: ANSWER_WIRE_VERSION, block: "media", ...input });
   }
+  async consume(
+    stream: AsyncIterable<string | Uint8Array | UIModelEvent>,
+    options: { signal?: AbortSignal } = {},
+  ) {
+    let bytes = 0;
+    for await (const item of stream) {
+      if (options.signal?.aborted) return;
+      bytes +=
+        item instanceof Uint8Array
+          ? item.byteLength
+          : new TextEncoder().encode(typeof item === "string" ? item : JSON.stringify(item)).length;
+      if (bytes > this.runtime.limits.streamBytes) {
+        this.runtime.report({
+          code: "STREAM_LIMIT",
+          message: "Answer stream exceeds the host limit.",
+          severity: "error",
+        });
+        this.end();
+        return;
+      }
+      if (typeof item === "string" || item instanceof Uint8Array) this.push(item);
+      else if (item.type === "text") this.push(item.text);
+      else if (item.type === "message") this.pushMessage(item.message);
+      else if (item.type === "diagnostic") this.runtime.report(item.diagnostic);
+      else if (item.type === "complete") {
+        if (item.status === "completed") this.end();
+        return;
+      }
+    }
+    if (!options.signal?.aborted) this.end();
+  }
+  setMessageTransform(transform: AnswerSessionOptions["transformMessage"]) {
+    this.options.transformMessage = transform;
+  }
+  finishMarkdown(): AnswerEvent[] {
+    return this.closeMarkdown();
+  }
   pushMessage(message: unknown): AnswerEvent[] {
     return this.control(message as Record<string, unknown>);
   }
 
   private control(value: Record<string, unknown>): AnswerEvent[] {
     if ("engine" in value) return this.declaration(value);
-    return this.a2ui(value);
+    return this.a2ui((this.options.transformMessage?.(value) ?? value) as Record<string, unknown>);
   }
   private declaration(value: Record<string, unknown>): AnswerEvent[] {
     const events = this.closeMarkdown();
@@ -417,6 +455,9 @@ export class AnswerSession {
         attachmentIds: decl.attachments,
         layout: decl.layout,
         caption: decl.caption,
+        markdown: this.policy.mode === "engine-only" ? undefined : decl.markdown,
+        placement: decl.placement,
+        mediaFraction: decl.mediaFraction,
         alt: decl.alt,
         status: "complete",
       };
@@ -425,24 +466,23 @@ export class AnswerSession {
       events.push(this.emit({ type: "block", block }));
       return events;
     }
-    // sandbox
-    this.warnOnce(
-      "POLICY_SANDBOX_DISABLED",
-      "Sandboxed content is not enabled for this host.",
-      "error",
-    );
-    if (!this.policy.allowSandbox) {
-      const block: AnswerBlock = {
-        id: this.newId(),
-        kind: "sandbox",
-        mode: decl.mode,
-        fallbackText: decl.fallbackText,
-        status: "blocked",
-      };
-      this._blocks.push(block);
-      this.touch();
-      events.push(this.emit({ type: "block", block }));
-    }
+    if (!this.policy.allowSandbox)
+      this.warnOnce(
+        "POLICY_SANDBOX_DISABLED",
+        "Sandboxed content is not enabled for this host.",
+        "error",
+      );
+    const block: AnswerBlock = {
+      id: this.newId(),
+      kind: "sandbox",
+      mode: decl.mode,
+      source: this.policy.allowSandbox ? decl.source : undefined,
+      fallbackText: decl.fallbackText,
+      status: this.policy.allowSandbox ? "complete" : "blocked",
+    };
+    this._blocks.push(block);
+    this.touch();
+    events.push(this.emit({ type: "block", block }));
     return events;
   }
   private a2ui(value: Record<string, unknown>): AnswerEvent[] {
@@ -519,16 +559,32 @@ export class AnswerSession {
   }
   private filterComponents(message: any) {
     const allowed = this.policy.allowedComponents;
-    if (!allowed || !message.updateComponents) return message;
+    if (!message.updateComponents) return message;
     const kept = message.updateComponents.components.filter(
       (c: { id: string; component: string }) => {
-        if (allowed.includes(c.component)) return true;
+        const media = [
+          "Image",
+          "Gallery",
+          "Carousel",
+          "MediaGrid",
+          "ImageCompare",
+          "ImageAnnotations",
+          "Video",
+          "Audio",
+          "FileCard",
+          "DocumentPreview",
+        ];
+        if (
+          (!allowed || allowed.includes(c.component)) &&
+          (this.policy.allowMedia || !media.includes(c.component))
+        )
+          return true;
         this.report({
           code: "COMPONENT_NOT_ALLOWED",
           message: `Component ${c.component} is not allowed by the host policy.`,
           componentId: c.id,
           surfaceId: message.updateComponents.surfaceId,
-          expected: `one of ${JSON.stringify(allowed)}`,
+          expected: allowed ? `one of ${JSON.stringify(allowed)}` : "a non-media component",
           severity: "error",
         });
         return false;
@@ -541,9 +597,17 @@ export class AnswerSession {
 
   /** Close the stream: flush the decoder, resolve graph errors, fill generated fallbacks. */
   end(): AnswerEvent[] {
+    if (this.ended) return [];
     const events = this.apply(this.decoder.finish());
     events.push(...this.closeMarkdown());
     this.runtime.finish();
+    if (this.policy.mode === "engine-only" && !this._blocks.length)
+      this.report({
+        code: "MISSING_ANSWER",
+        message: "The host requested an interactive answer but received no supported block.",
+        expected: "At least one valid surface, media or allowed sandbox block",
+        severity: "error",
+      });
     let changed = false;
     this._blocks = this._blocks.map((block) => {
       if (block.kind !== "surface") return block;
@@ -701,3 +765,5 @@ export function migrateSnapshot(input: unknown): AnswerSnapshot {
   if (!parsed.success) throw new Error("UNSUPPORTED_SNAPSHOT");
   return parsed.data;
 }
+
+export { AnswerSession as AnswerComposer };

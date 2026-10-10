@@ -145,6 +145,7 @@ export function AttachmentMedia({
   const manifest = host?.attachments.get(id);
   const player = useRef<HTMLVideoElement | null>(null);
   const [captions, setCaptions] = useState<string>();
+  const [zoomed, setZoomed] = useState(false);
   useEffect(() => {
     const transcript = manifest?.transcript;
     if (!transcript) {
@@ -184,33 +185,39 @@ export function AttachmentMedia({
   return (
     <figure className="ui-media-item">
       {manifest.kind === "image" ? (
-        <div className="ui-image-stage">
-          <img
-            src={value.url}
-            alt={label}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            onError={failed}
-            width={manifest.width}
-            height={manifest.height}
-          />
-          {regions.map((r) => (
-            <span
-              className="ui-image-region"
-              key={r.id}
-              style={{
-                left: `${r.x * 100}%`,
-                top: `${r.y * 100}%`,
-                width: `${r.width * 100}%`,
-                height: `${r.height * 100}%`,
-              }}
-              role="note"
-              aria-label={r.label}
-            >
-              {r.label}
-            </span>
-          ))}
-        </div>
+        <>
+          <div className="ui-image-stage">
+            <img
+              src={value.url}
+              alt={label}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={failed}
+              width={manifest.width}
+              height={manifest.height}
+            />
+            {regions.map((r) => (
+              <span
+                className="ui-image-region"
+                key={r.id}
+                style={{
+                  left: `${r.x * 100}%`,
+                  top: `${r.y * 100}%`,
+                  width: `${r.width * 100}%`,
+                  height: `${r.height * 100}%`,
+                }}
+                role="note"
+                aria-label={r.label}
+              >
+                {r.label}
+              </span>
+            ))}
+          </div>
+          <button type="button" onClick={() => setZoomed(true)} aria-label={`Enlarge ${label}`}>
+            Enlarge image
+          </button>
+          {zoomed && <ImageZoom url={value.url} label={label} close={() => setZoomed(false)} />}
+        </>
       ) : manifest.kind === "video" ? (
         <>
           <video
@@ -229,6 +236,21 @@ export function AttachmentMedia({
               srcLang="en"
             />
           </video>
+          {Array.isArray(manifest.transcript) && (
+            <nav aria-label="Video chapters">
+              {manifest.transcript.map((t) => (
+                <button
+                  key={t.t}
+                  type="button"
+                  onClick={() => {
+                    if (player.current) player.current.currentTime = t.t;
+                  }}
+                >
+                  {t.t}s · {t.text}
+                </button>
+              ))}
+            </nav>
+          )}
           <details>
             <summary>Transcript</summary>
             <p>
@@ -267,17 +289,110 @@ export function MediaContent({
   caption?: string;
   alt?: string[];
 }) {
+  const [page, setPage] = useState(0);
+  const track = useRef<HTMLDivElement>(null);
   const host = useContentHost();
   const items = ids.flatMap((id) => (host?.attachments.get(id) ? [host.attachments.get(id)!] : []));
   const chosen = layout === "auto" ? mediaLayout(items) : layout;
+  const pageRef = useRef(page);
+  pageRef.current = page;
+  useEffect(() => {
+    setPage((old) => Math.min(old, Math.max(0, ids.length - 1)));
+  }, [ids.length]);
+  useEffect(() => {
+    if (chosen !== "carousel" || !track.current) return;
+    const observer = new ResizeObserver(() => {
+      const element = track.current;
+      if (element)
+        element.scrollTo({ left: pageRef.current * element.clientWidth, behavior: "instant" });
+    });
+    observer.observe(track.current);
+    return () => observer.disconnect();
+  }, [chosen]);
   return (
     <section className={`ui-media ui-media-${chosen}`} aria-label={caption || "Attachments"}>
       {caption && <p className="ui-media-caption">{caption}</p>}
-      <div className="ui-media-items">
+      <div
+        ref={track}
+        className={chosen === "carousel" ? "ui-gallery-pages" : "ui-media-items"}
+        onScroll={(event) => {
+          if (chosen === "carousel")
+            setPage(
+              Math.round(
+                event.currentTarget.scrollLeft / Math.max(1, event.currentTarget.clientWidth),
+              ),
+            );
+        }}
+      >
         {ids.map((id, i) => (
-          <AttachmentMedia key={id} id={id} alt={alt?.[i]} file={chosen === "files"} />
+          // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
+          <div key={`${id}-${i}`} className={chosen === "carousel" ? "ui-gallery-page" : undefined}>
+            <AttachmentMedia id={id} alt={alt?.[i]} file={chosen === "files"} />
+          </div>
         ))}
       </div>
+      {chosen === "carousel" && ids.length > 1 && (
+        <div className="ui-gallery-controls">
+          <button
+            type="button"
+            aria-label="Previous image"
+            disabled={page === 0}
+            onClick={() =>
+              track.current?.scrollTo({
+                left: (page - 1) * track.current.clientWidth,
+                behavior: "instant",
+              })
+            }
+          >
+            Previous
+          </button>
+          <span role="status" aria-live="polite">
+            {page + 1} / {ids.length}
+          </span>
+          <button
+            type="button"
+            aria-label="Next image"
+            disabled={page >= ids.length - 1}
+            onClick={() =>
+              track.current?.scrollTo({
+                left: (page + 1) * track.current.clientWidth,
+                behavior: "instant",
+              })
+            }
+          >
+            Next
+          </button>
+        </div>
+      )}
     </section>
+  );
+}
+
+function ImageZoom({ url, label, close }: { url: string; label: string; close: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    ref.current?.showModal();
+    ref.current?.querySelector("button")?.focus();
+    return () => {
+      ref.current?.close();
+      previous?.focus();
+    };
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      aria-label={label}
+      className="ui-image-zoom"
+      onCancel={(event) => {
+        event.preventDefault();
+        close();
+      }}
+    >
+      <button type="button" onClick={close}>
+        Close image
+      </button>
+      <img src={url} alt={label} referrerPolicy="no-referrer" />
+    </dialog>
   );
 }

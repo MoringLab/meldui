@@ -27,7 +27,7 @@ export function SafeMarkdown({ text, streaming = false }: { text: string; stream
   );
   let parts: ReturnType<typeof prepareMarkdown>;
   try {
-    parts = prepareMarkdown(text);
+    parts = prepareMarkdown(text, 65536, host?.policy.formattingHtml);
   } catch {
     return <Text accessibilityRole="alert">Markdown is too large to display.</Text>;
   }
@@ -38,7 +38,7 @@ export function SafeMarkdown({ text, streaming = false }: { text: string; stream
           <AttachmentMedia key={`image-${i}`} id={part.attachmentId} alt={part.alt} />
         ) : (
           <EnrichedMarkdownText
-            key={`text-${i}`}
+            key={`text-${i}-${kit.id}-${mode}`}
             markdown={part.markdown}
             flavor="github"
             streamingAnimation={streaming && !reduced}
@@ -80,7 +80,22 @@ export function SafeMarkdown({ text, streaming = false }: { text: string; stream
                 backgroundColor: colors.surface,
                 borderColor: colors.border,
               },
-              codeBlock: { color: colors.foreground, backgroundColor: colors.surface },
+              codeBlock: {
+                color: colors.foreground,
+                backgroundColor: colors.surface,
+                syntaxColors: {
+                  keyword: colors.accent,
+                  string: colors.success,
+                  number: colors.accent,
+                  comment: colors.muted,
+                  function: colors.foreground,
+                  type: colors.accent,
+                  variable: colors.foreground,
+                  property: colors.foreground,
+                  operator: colors.foreground,
+                  punctuation: colors.foreground,
+                },
+              },
             }}
           />
         ),

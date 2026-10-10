@@ -21,3 +21,6 @@ flutter:
     - assets/cases.json
     - assets/hybrid.json
     - assets/media.json
+
+    - assets/advanced.json
+    - assets/showcase.json

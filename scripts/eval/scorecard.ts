@@ -7,7 +7,8 @@ import { type Row, readJson, summarize } from "./common.js";
  * reported next to pass/fail so a number cannot improve by shrinking its denominator.
  */
 const label = process.argv[2] ?? `scorecard-${new Date().toISOString().slice(0, 10)}`;
-const outDir = process.argv[3] ?? "docs/verification/2026-10-10-phase2";
+const outDir =
+  process.argv[3] ?? `docs/verification/${new Date().toISOString().slice(0, 10)}-phase2`;
 const offline = existsSync("artifacts/eval/offline.json")
   ? readJson("artifacts/eval/offline.json")
   : undefined;
@@ -120,6 +121,44 @@ for (const [name, target] of [
     measured: fmt(s),
     status: judge(s),
     source: "artifacts/eval/offline.json",
+  });
+}
+// Live routing is a task check, not the structural `valid` flag on a Markdown answer.
+const routingFile = "artifacts/eval/routing-current.json";
+if (existsSync(routingFile)) {
+  const expected = new Map(readJson<any[]>("eval/routing.json").map((r) => [r.id, r.expect]));
+  const results = readJson(routingFile).results as any[];
+  for (const model of new Set(results.map((r) => r.model))) {
+    const mine = results.filter((r) => r.model === model);
+    const completed = mine.filter((r) => r.status === "completed" && r.valid);
+    const ui = completed.filter((r) => ["surface", "mixed"].includes(expected.get(r.id)));
+    const under = ui.filter((r) => !r.surfaces).length;
+    const media = completed.filter((r) => expected.get(r.id) === "media");
+    const mediaPass = media.filter((r) => r.blocks?.includes("media")).length;
+    const plain = completed.filter((r) => expected.get(r.id) === "markdown");
+    const over = plain.filter((r) => r.surfaces || r.blocks?.includes("media")).length;
+    dims.push({
+      dimension: `Routing · live ${model}`,
+      target: "over-viz ≤10%, under-viz ≤15%; media selected when requested",
+      measured: `${completed.length}/${mine.length} structurally readable; over ${over}/${plain.length}, under ${under}/${ui.length}, media ${mediaPass}/${media.length}; ${mine.filter((r) => r.infra).length} infra failures. Duplication/meaning unmeasured.`,
+      status: under || over || mediaPass < media.length ? "missed" : "open",
+      source: routingFile,
+    });
+  }
+}
+for (const [name, file] of [
+  ["Media", "artifacts/eval/media-current.json"],
+  ["Multi-turn", "artifacts/eval/multiturn-current.json"],
+] as const) {
+  if (!existsSync(file)) continue;
+  const data = readJson(file),
+    results = (data.results ?? data.rows) as any[];
+  dims.push({
+    dimension: `${name} · live denominator`,
+    target: name === "Media" ? "IDs/alt/layout 100%" : "state preserved and requested edit ≥90%",
+    measured: `${results.length} rows retained; statuses ${JSON.stringify(Object.fromEntries([...new Set(results.map((r) => r.status))].map((s) => [s, results.filter((r) => r.status === s).length])))}. Host-only bookkeeping does not establish model edit success.`,
+    status: "open",
+    source: file,
   });
 }
 // Preserve the Phase 1 measurement separately. Native M4 records contain both conditions

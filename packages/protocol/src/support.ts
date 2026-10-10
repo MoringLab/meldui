@@ -12,10 +12,14 @@ export const PLATFORM_SUPPORT: Record<
   { unsupported: string[]; fallbacks: Record<string, string>; unsupportedOps: string[] }
 > = {
   web: { unsupported: [], fallbacks: {}, unsupportedOps: [] },
-  "react-native": { unsupported: [], fallbacks: {}, unsupportedOps: [] },
+  "react-native": {
+    unsupported: ["Simulation"],
+    fallbacks: { Simulation: "Text" },
+    unsupportedOps: [],
+  },
   flutter: {
-    unsupported: ["Audio"],
-    fallbacks: { Audio: "FileCard", DocumentPreview: "FileCard" },
+    unsupported: ["Audio", "Simulation"],
+    fallbacks: { Simulation: "Text", Audio: "FileCard", DocumentPreview: "FileCard" },
     unsupportedOps: [],
   },
 };
@@ -33,6 +37,13 @@ export function capabilitiesFor(
     fallbacks: support.fallbacks,
     expressionOps: EXPRESSION_OPS.filter((op) => !support.unsupportedOps.includes(op)),
     answerWire: [ANSWER_WIRE_VERSION],
+    features: {
+      continuousPlayback: platform === "web",
+      directSceneDrag: platform === "web",
+      sceneHover: platform === "web",
+      isolatedSandbox: platform === "web",
+      advancedCharts: platform === "web",
+    },
   };
 }
 

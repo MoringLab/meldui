@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { neutral } from "../../kits/neutral/src/index.js";
+import { capabilitiesFor } from "../../protocol/src/index.js";
 import { buildSystemPrompt, GatewayAdapter } from "./index.js";
 
 const message = {
@@ -32,6 +33,53 @@ const request = {
   messages: [{ role: "user" as const, content: "test" }],
 };
 describe("gateway boundaries", () => {
+  it("enforces host output and latency budgets at the gateway boundary", async () => {
+    let sent: any;
+    const limited = new GatewayAdapter({
+      baseUrl: "http://local/v1",
+      apiKey: "test",
+      timeoutMs: 10000,
+      fetch: async (_url, init) => {
+        sent = JSON.parse(String(init!.body));
+        await new Promise<void>((resolve) => {
+          const fallback = setTimeout(resolve, 100);
+          init!.signal!.addEventListener(
+            "abort",
+            () => {
+              clearTimeout(fallback);
+              resolve();
+            },
+            { once: true },
+          );
+        });
+        expect(init!.signal!.aborted).toBe(true);
+        throw new DOMException("Timed out", "TimeoutError");
+      },
+    });
+    const events = [];
+    for await (const event of limited.stream({ ...request, maxTokens: 128, latencyBudgetMs: 10 }))
+      events.push(event);
+    expect(sent.max_tokens).toBe(128);
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        type: "diagnostic",
+        diagnostic: expect.objectContaining({ code: "GATEWAY_TIMEOUT" }),
+      }),
+    );
+  });
+  it("native authoring exposes only implemented Chart features and semantic media layout", () => {
+    const prompt = buildSystemPrompt({
+      kit: neutral,
+      capabilities: capabilitiesFor("react-native"),
+      attachments: [{ id: "photo-a", kind: "image" }],
+    });
+    const catalog = JSON.parse(prompt.split("Catalog: ")[1]!.split("\n\n")[0]!);
+    expect(catalog.components.Chart.properties.kind.enum).toEqual(["line", "bar", "scatter"]);
+    expect(catalog.components.Chart.properties.bands).toBeUndefined();
+    expect(prompt).toContain('"advancedCharts":false');
+    expect(prompt).toContain('"placement":"left|right|above|below"');
+    expect(prompt).not.toContain('kind:"line"|"bar"|"scatter"|"area"');
+  });
   it("uses a host catalog and rejects mismatched capabilities", () => {
     const catalog = { catalogId: "urn:host:custom", components: { HostText: { type: "object" } } };
     const kit = { ...neutral, catalogId: catalog.catalogId };

@@ -37,6 +37,9 @@ export const MediaDeclarationSchema = z
     attachments: z.array(attachmentId).min(1).max(40),
     layout: z.enum(MEDIA_LAYOUTS).default("auto"),
     caption: z.string().max(1000).optional(),
+    markdown: z.string().max(65536).optional(),
+    placement: z.enum(["left", "right", "above", "below"]).default("below"),
+    mediaFraction: z.number().min(0.25).max(0.65).default(0.4),
     alt: z.array(z.string().max(1024)).max(40).optional(),
   })
   .strict();
@@ -46,6 +49,7 @@ export const SandboxDeclarationSchema = z
     engine: z.literal(ANSWER_WIRE_VERSION),
     block: z.literal("sandbox"),
     mode: z.enum(["html", "app"]),
+    source: z.string().max(131072).optional(),
     fallbackText: z.string().min(1).max(4000),
   })
   .passthrough();
@@ -66,8 +70,8 @@ export const HostPolicySchema = z
     allowedComponents: z.array(z.string()).optional(),
     allowMedia: z.boolean().default(true),
     allowSandbox: z.boolean().default(false),
-    maxOutputTokens: z.number().int().positive().optional(),
-    latencyBudgetMs: z.number().int().positive().optional(),
+    maxOutputTokens: z.number().int().min(1).max(8192).optional(),
+    latencyBudgetMs: z.number().int().min(1).max(120000).optional(),
     /** Content height policy: undefined grows with content; a number caps it with internal scroll. */
     maxSurfaceHeight: z.number().positive().optional(),
   })
@@ -94,10 +98,20 @@ export type AnswerBlock =
       attachmentIds: string[];
       layout: MediaLayout;
       caption?: string;
+      markdown?: string;
+      placement?: "left" | "right" | "above" | "below";
+      mediaFraction?: number;
       alt?: string[];
       status: AnswerBlockStatus;
     }
-  | { id: string; kind: "sandbox"; mode: "html" | "app"; fallbackText: string; status: "blocked" };
+  | {
+      id: string;
+      kind: "sandbox";
+      mode: "html" | "app";
+      source?: string;
+      fallbackText: string;
+      status: "blocked" | "complete";
+    };
 
 export type AnswerEvent =
   | { seq: number; type: "markdown"; blockId: string; text: string }

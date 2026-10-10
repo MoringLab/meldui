@@ -3,3 +3,4 @@ export * from "./content.js";
 
 export * from "./markdown.js";
 export * from "./renderer.js";
+export * from "./sandbox.js";

@@ -60,6 +60,51 @@
     "motionMs": 140
   },
   "components": {
+    "Confirmation": {
+      "implementation": "Confirmation"
+    },
+    "ControlPanel": {
+      "implementation": "ControlPanel"
+    },
+    "Stat": {
+      "implementation": "Stat"
+    },
+    "StatGroup": {
+      "implementation": "StatGroup"
+    },
+    "Legend": {
+      "implementation": "Legend"
+    },
+    "Formula": {
+      "implementation": "Formula"
+    },
+    "Annotation": {
+      "implementation": "Annotation"
+    },
+    "Walkthrough": {
+      "implementation": "Walkthrough"
+    },
+    "Quiz": {
+      "implementation": "Quiz"
+    },
+    "Timeline": {
+      "implementation": "Timeline"
+    },
+    "Playback": {
+      "implementation": "Playback"
+    },
+    "SvgScene": {
+      "implementation": "SvgScene"
+    },
+    "Plot": {
+      "implementation": "Plot"
+    },
+    "RouteMap": {
+      "implementation": "RouteMap"
+    },
+    "Simulation": {
+      "implementation": "Simulation"
+    },
     "Form": {
       "implementation": "Form"
     },

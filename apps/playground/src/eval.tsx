@@ -12,10 +12,12 @@ import {
 } from "@engine/renderer-react";
 import React from "react";
 import { createRoot } from "react-dom/client";
+import advanced from "../../../fixtures/advanced/cases.json";
 import fixtures from "../../../fixtures/cases.json";
 import hybridFixtures from "../../../fixtures/hybrid/cases.json";
 import mediaFixtures from "../../../fixtures/media/cases.json";
 import { sampleContent } from "../../../fixtures/media/host";
+import showcases from "../../../fixtures/showcase/cases.json";
 import "@engine/renderer-react/styles.css";
 import { brandComponents } from "./brand";
 
@@ -46,7 +48,8 @@ w.__session = session;
 const id = q.get("fixture") ?? fixtures[0].id;
 const hybrid = hybridFixtures.find((f) => f.id === id);
 const legacy = fixtures.find((f) => f.id === id) ?? fixtures[0];
-const media = mediaFixtures.find((f) => f.id === id);
+const media = mediaFixtures.find((f) => f.id === id) ?? advanced.find((f) => f.id === id);
+const showcase = showcases.find((f) => f.id === id);
 const declaration = JSON.stringify({
   engine: "v1",
   block: "surface",
@@ -54,11 +57,15 @@ const declaration = JSON.stringify({
   fallbackText: `${legacy.title}. ${legacy.prompt}`,
 });
 session.push(
-  hybrid
-    ? hybrid.wire
-    : [declaration, ...(media?.messages ?? legacy.messages).map((m) => JSON.stringify(m))].join(
-        "\n",
-      ),
+  q.has("composition")
+    ? q.get("composition")! + "\n"
+    : showcase
+      ? showcase.wire
+      : hybrid
+        ? hybrid.wire
+        : [declaration, ...(media?.messages ?? legacy.messages).map((m) => JSON.stringify(m))].join(
+            "\n",
+          ),
 );
 session.end();
 const width = Number(q.get("width") ?? 720);

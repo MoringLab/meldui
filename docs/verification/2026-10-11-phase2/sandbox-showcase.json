@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-10T22:58:08.070Z",
+  "scope": "isolated reference apps, first control and changed readout; no scientific or generation-quality claim",
+  "rows": [
+    {
+      "id": "02",
+      "pass": true,
+      "before": "black-hole\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nMassSpinHorizon radius (GM/c²) 5.862",
+      "after": "black-hole\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nMassSpinHorizon radius (GM/c²) 7.816"
+    },
+    {
+      "id": "05",
+      "pass": true,
+      "before": "civilization\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nNext turnResetTurn 0 · Food 20 · People 5 · Economy 10\n🏠\n🏠\n🏠\n🏠\n🏠\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·",
+      "after": "civilization\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nNext turnResetTurn 1 · Food 25 · People 5 · Economy 15\n🏠\n🏠\n🏠\n🏠\n🏠\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\nHarvest and trade"
+    },
+    {
+      "id": "11",
+      "pass": true,
+      "before": "ants\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nFood patchesForageReset colonyAnts 8 · Stored food 0 · Turn 0",
+      "after": "ants\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nFood patchesForageReset colonyAnts 8 · Stored food 8 · Turn 1"
+    },
+    {
+      "id": "12",
+      "pass": true,
+      "before": "ai-city\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nNext turnResetTurn 0 · Food 20 · People 5 · Economy 10\n🏠\n🏠\n🏠\n🏠\n🏠\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·",
+      "after": "ai-city\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nNext turnResetTurn 1 · Food 25 · People 5 · Economy 15\n🏠\n🏠\n🏠\n🏠\n🏠\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\n🌾\n·\n·\n·\nHarvest and trade"
+    },
+    {
+      "id": "H-08",
+      "pass": true,
+      "before": "h-sandbox\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nStep particlesResetFrame 0",
+      "after": "h-sandbox\n\n교육용 단순화 모형 · 외부 데이터 없음\n\nStep particlesResetFrame 1"
+    }
+  ]
+}

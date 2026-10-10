@@ -244,6 +244,8 @@ function App() {
           Engine<span>인터페이스 랩</span>
         </a>
         <div className="header-controls">
+          <a href="/showcase.html">Showcase</a>
+          <a href="/reservation.html">예약 서비스</a>
           <label>
             스타일
             <select aria-label="디자인 킷" value={kitId} onChange={(e) => setKitId(e.target.value)}>

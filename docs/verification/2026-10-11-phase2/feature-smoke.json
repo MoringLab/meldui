@@ -1,0 +1,779 @@
+{
+  "at": "2026-10-10T22:07:52.020Z",
+  "rows": [
+    {
+      "id": "media-left",
+      "requestedModel": "auto/claude-sonnet",
+      "actualModel": "openai/gpt-oss-120b",
+      "status": "fail",
+      "scope": "model-authored registered media layout",
+      "events": [
+        {
+          "type": "session",
+          "sessionId": "2e4acd32-cb9c-4af4-9463-62b41bc6b5e2"
+        },
+        {
+          "type": "text",
+          "text": ""
+        },
+        {
+          "type": "text",
+          "text": "```"
+        },
+        {
+          "type": "text",
+          "text": "json"
+        },
+        {
+          "type": "text",
+          "text": "\n"
+        },
+        {
+          "type": "text",
+          "text": "{\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "engine"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "v"
+        },
+        {
+          "type": "text",
+          "text": "1"
+        },
+        {
+          "type": "text",
+          "text": "\",\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "block"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "media"
+        },
+        {
+          "type": "text",
+          "text": "\",\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "attachments"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " [\""
+        },
+        {
+          "type": "text",
+          "text": "photo"
+        },
+        {
+          "type": "text",
+          "text": "-a"
+        },
+        {
+          "type": "text",
+          "text": "\","
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "photo"
+        },
+        {
+          "type": "text",
+          "text": "-b"
+        },
+        {
+          "type": "text",
+          "text": "\"],\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "layout"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "carousel"
+        },
+        {
+          "type": "text",
+          "text": "\",\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "placement"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "left"
+        },
+        {
+          "type": "text",
+          "text": "\",\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "media"
+        },
+        {
+          "type": "text",
+          "text": "Fraction"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": "0"
+        },
+        {
+          "type": "text",
+          "text": "."
+        },
+        {
+          "type": "text",
+          "text": "4"
+        },
+        {
+          "type": "text",
+          "text": ",\n"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "markdown"
+        },
+        {
+          "type": "text",
+          "text": "\":"
+        },
+        {
+          "type": "text",
+          "text": " \""
+        },
+        {
+          "type": "text",
+          "text": "다"
+        },
+        {
+          "type": "text",
+          "text": "음"
+        },
+        {
+          "type": "text",
+          "text": "은"
+        },
+        {
+          "type": "text",
+          "text": " 호"
+        },
+        {
+          "type": "text",
+          "text": "스트"
+        },
+        {
+          "type": "text",
+          "text": "가"
+        },
+        {
+          "type": "text",
+          "text": " 제공"
+        },
+        {
+          "type": "text",
+          "text": "한"
+        },
+        {
+          "type": "text",
+          "text": " 두"
+        },
+        {
+          "type": "text",
+          "text": " 사진"
+        },
+        {
+          "type": "text",
+          "text": "을"
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": "왼"
+        },
+        {
+          "type": "text",
+          "text": "쪽"
+        },
+        {
+          "type": "text",
+          "text": "에"
+        },
+        {
+          "type": "text",
+          "text": " 배"
+        },
+        {
+          "type": "text",
+          "text": "치"
+        },
+        {
+          "type": "text",
+          "text": "된"
+        },
+        {
+          "type": "text",
+          "text": " 캐"
+        },
+        {
+          "type": "text",
+          "text": "러"
+        },
+        {
+          "type": "text",
+          "text": "셀"
+        },
+        {
+          "type": "text",
+          "text": " 형태"
+        },
+        {
+          "type": "text",
+          "text": "로"
+        },
+        {
+          "type": "text",
+          "text": " 보여"
+        },
+        {
+          "type": "text",
+          "text": "줍"
+        },
+        {
+          "type": "text",
+          "text": "니다"
+        },
+        {
+          "type": "text",
+          "text": "."
+        },
+        {
+          "type": "text",
+          "text": " 사진"
+        },
+        {
+          "type": "text",
+          "text": "의"
+        },
+        {
+          "type": "text",
+          "text": " 구"
+        },
+        {
+          "type": "text",
+          "text": "체"
+        },
+        {
+          "type": "text",
+          "text": "적인"
+        },
+        {
+          "type": "text",
+          "text": " 내용"
+        },
+        {
+          "type": "text",
+          "text": "은"
+        },
+        {
+          "type": "text",
+          "text": " 추"
+        },
+        {
+          "type": "text",
+          "text": "정"
+        },
+        {
+          "type": "text",
+          "text": "하지"
+        },
+        {
+          "type": "text",
+          "text": " 않고"
+        },
+        {
+          "type": "text",
+          "text": " 그대로"
+        },
+        {
+          "type": "text",
+          "text": " 표시"
+        },
+        {
+          "type": "text",
+          "text": "합니다"
+        },
+        {
+          "type": "text",
+          "text": ".\"\n"
+        },
+        {
+          "type": "text",
+          "text": "}\n"
+        },
+        {
+          "type": "text",
+          "text": "```"
+        },
+        {
+          "type": "usage",
+          "inputTokens": 681,
+          "outputTokens": 406,
+          "model": "openai/gpt-oss-120b"
+        },
+        {
+          "type": "usage",
+          "inputTokens": 681,
+          "outputTokens": 406,
+          "model": "openai/gpt-oss-120b"
+        },
+        {
+          "type": "complete",
+          "status": "completed"
+        }
+      ],
+      "blocks": [
+        {
+          "id": "b1",
+          "kind": "markdown",
+          "text": "```json\n{\n  \"engine\": \"v1\",\n  \"block\": \"media\",\n  \"attachments\": [\"photo-a\", \"photo-b\"],\n  \"layout\": \"carousel\",\n  \"placement\": \"left\",\n  \"mediaFraction\": 0.4,\n  \"markdown\": \"다음은 호스트가 제공한 두 사진을 왼쪽에 배치된 캐러셀 형태로 보여줍니다. 사진의 구체적인 내용은 추정하지 않고 그대로 표시합니다.\"\n}\n```",
+          "status": "complete"
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "local-calculator",
+      "requestedModel": "auto/claude-sonnet",
+      "actualModel": null,
+      "status": "infra-fail",
+      "scope": "model-authored state + local input calculation",
+      "events": [
+        {
+          "type": "session",
+          "sessionId": "d4a6729f-a1cf-47dd-9b2b-408d388cb5f3"
+        },
+        {
+          "type": "text",
+          "text": "{\""
+        },
+        {
+          "type": "text",
+          "text": "engine"
+        },
+        {
+          "type": "text",
+          "text": "\":\""
+        },
+        {
+          "type": "text",
+          "text": "v"
+        },
+        {
+          "type": "text",
+          "text": "1"
+        },
+        {
+          "type": "text",
+          "text": "\",\""
+        },
+        {
+          "type": "text",
+          "text": "block"
+        },
+        {
+          "type": "text",
+          "text": "\":\""
+        },
+        {
+          "type": "text",
+          "text": "surface"
+        },
+        {
+          "type": "text",
+          "text": "\",\""
+        },
+        {
+          "type": "text",
+          "text": "surface"
+        },
+        {
+          "type": "text",
+          "text": "Id"
+        },
+        {
+          "type": "text",
+          "text": "\":\""
+        },
+        {
+          "type": "text",
+          "text": "main"
+        },
+        {
+          "type": "text",
+          "text": "\",\""
+        },
+        {
+          "type": "text",
+          "text": "fallback"
+        },
+        {
+          "type": "text",
+          "text": "Text"
+        },
+        {
+          "type": "text",
+          "text": "\":\""
+        },
+        {
+          "type": "text",
+          "text": "두"
+        },
+        {
+          "type": "text",
+          "text": " 입력"
+        },
+        {
+          "type": "text",
+          "text": "의"
+        },
+        {
+          "type": "text",
+          "text": " 값을"
+        },
+        {
+          "type": "text",
+          "text": " 슬"
+        },
+        {
+          "type": "text",
+          "text": "라이"
+        },
+        {
+          "type": "text",
+          "text": "더"
+        },
+        {
+          "type": "text",
+          "text": "로"
+        },
+        {
+          "type": "text",
+          "text": " 바"
+        },
+        {
+          "type": "text",
+          "text": "꾸"
+        },
+        {
+          "type": "text",
+          "text": "고"
+        },
+        {
+          "type": "text",
+          "text": " 합"
+        },
+        {
+          "type": "text",
+          "text": "계를"
+        },
+        {
+          "type": "text",
+          "text": " 즉"
+        },
+        {
+          "type": "text",
+          "text": "시"
+        },
+        {
+          "type": "text",
+          "text": " 확인"
+        },
+        {
+          "type": "text",
+          "text": "하세요"
+        },
+        {
+          "type": "text",
+          "text": "."
+        },
+        {
+          "type": "text",
+          "text": " 입력"
+        },
+        {
+          "type": "text",
+          "text": "값"
+        },
+        {
+          "type": "text",
+          "text": "은"
+        },
+        {
+          "type": "text",
+          "text": " /"
+        },
+        {
+          "type": "text",
+          "text": "a"
+        },
+        {
+          "type": "text",
+          "text": "와"
+        },
+        {
+          "type": "text",
+          "text": " /"
+        },
+        {
+          "type": "text",
+          "text": "b"
+        },
+        {
+          "type": "text",
+          "text": "에"
+        },
+        {
+          "type": "text",
+          "text": " 바"
+        },
+        {
+          "type": "text",
+          "text": "인"
+        },
+        {
+          "type": "text",
+          "text": "딩"
+        },
+        {
+          "type": "text",
+          "text": "되"
+        },
+        {
+          "type": "text",
+          "text": "며"
+        },
+        {
+          "type": "text",
+          "text": " 합"
+        },
+        {
+          "type": "text",
+          "text": "계"
+        },
+        {
+          "type": "text",
+          "text": "는"
+        },
+        {
+          "type": "text",
+          "text": " add"
+        },
+        {
+          "type": "text",
+          "text": " 표현"
+        },
+        {
+          "type": "text",
+          "text": "식"
+        },
+        {
+          "type": "text",
+          "text": "으로"
+        },
+        {
+          "type": "text",
+          "text": " 기"
+        },
+        {
+          "type": "text",
+          "text": "기"
+        },
+        {
+          "type": "text",
+          "text": "에서"
+        },
+        {
+          "type": "text",
+          "text": " 계산"
+        },
+        {
+          "type": "text",
+          "text": "됩니다"
+        },
+        {
+          "type": "text",
+          "text": ".\""
+        },
+        {
+          "type": "text",
+          "text": "}\n"
+        },
+        {
+          "type": "text",
+          "text": "{\""
+        },
+        {
+          "type": "diagnostic",
+          "diagnostic": {
+            "code": "GATEWAY_TIMEOUT",
+            "message": "The model stream could not complete. Retry the request or select another configured model.",
+            "severity": "error"
+          }
+        },
+        {
+          "type": "diagnostic",
+          "diagnostic": {
+            "code": "POLICY_MARKDOWN_DISABLED",
+            "message": "This host accepts interactive content only; Markdown was dropped.",
+            "severity": "warning"
+          }
+        },
+        {
+          "type": "diagnostic",
+          "diagnostic": {
+            "code": "MISSING_ANSWER",
+            "message": "The host requested an interactive answer but received no supported block.",
+            "expected": "At least one valid surface, media or allowed sandbox block",
+            "severity": "error"
+          }
+        },
+        {
+          "type": "complete",
+          "status": "failed"
+        }
+      ],
+      "blocks": [],
+      "diagnostics": [
+        {
+          "code": "POLICY_MARKDOWN_DISABLED",
+          "message": "This host accepts interactive content only; Markdown was dropped.",
+          "severity": "warning"
+        },
+        {
+          "code": "MISSING_ANSWER",
+          "message": "The host requested an interactive answer but received no supported block.",
+          "expected": "At least one valid surface, media or allowed sandbox block",
+          "severity": "error"
+        }
+      ]
+    }
+  ]
+}

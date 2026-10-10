@@ -2,7 +2,7 @@ import type { AnswerSession } from "@engine/core";
 import type { AnswerBlock } from "@engine/protocol";
 import React, { type ReactNode, useState, useSyncExternalStore } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { MediaContent } from "./content.js";
+import { ContentProvider, MediaContent, useContentHost } from "./content.js";
 import { SafeMarkdown } from "./markdown.js";
 import { UISurface, useUI } from "./renderer.js";
 
@@ -52,54 +52,98 @@ export function AnswerView({
   chrome = true,
   labels: custom,
 }: AnswerViewProps) {
+  const contentHost = useContentHost();
   const state = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const [width, setWidth] = useState(0);
   const { kit, mode } = useUI();
   const t = kit.tokens[mode];
   const labels = { ...defaultAnswerLabels, ...custom };
   const height = maxSurfaceHeight ?? session.policy.maxSurfaceHeight;
   const Markdown = markdown;
   return (
-    <View style={{ gap: 16 }}>
-      {state.blocks.map((block) => {
-        switch (block.kind) {
-          case "markdown":
-            return (
-              <Markdown key={block.id} text={block.text} streaming={block.status === "streaming"} />
-            );
-          case "surface":
-            return (
-              <SurfaceFrame
-                key={block.id}
-                block={block}
-                session={session}
-                chrome={chrome}
-                labels={labels}
-                maxHeight={height}
-                onExpand={onExpand}
-              />
-            );
-          case "media":
-            return (
-              <View key={block.id}>
-                {renderMedia?.(block) ?? (
-                  <MediaContent
-                    ids={block.attachmentIds}
-                    layout={block.layout}
-                    caption={block.caption}
-                    alt={block.alt}
-                  />
-                )}
-              </View>
-            );
-          default:
-            return (
-              <Text key={block.id} accessibilityRole="alert" style={{ color: t.muted }}>
-                {labels.sandboxBlocked} {block.fallbackText}
-              </Text>
-            );
-        }
-      })}
-    </View>
+    <ContentProvider host={session.policy.allowMedia ? contentHost : undefined}>
+      <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={{ gap: 16 }}>
+        {state.blocks.map((block) => {
+          switch (block.kind) {
+            case "markdown":
+              return (
+                <Markdown
+                  key={block.id}
+                  text={block.text}
+                  streaming={block.status === "streaming"}
+                />
+              );
+            case "surface":
+              return (
+                <SurfaceFrame
+                  key={block.id}
+                  block={block}
+                  session={session}
+                  chrome={chrome}
+                  labels={labels}
+                  maxHeight={height}
+                  onExpand={onExpand}
+                />
+              );
+            case "media":
+              return (
+                <View
+                  key={block.id}
+                  style={{
+                    gap: 16,
+                    flexDirection:
+                      width >= 600 && ["left", "right"].includes(block.placement ?? "below")
+                        ? block.placement === "left"
+                          ? "row-reverse"
+                          : "row"
+                        : block.placement === "above" || block.placement === "left"
+                          ? "column-reverse"
+                          : "column",
+                  }}
+                >
+                  {block.markdown && (
+                    <View
+                      style={{
+                        flex:
+                          width >= 600 && ["left", "right"].includes(block.placement ?? "below")
+                            ? 1 - (block.mediaFraction ?? 0.4)
+                            : undefined,
+                        minWidth: 0,
+                      }}
+                    >
+                      <Markdown text={block.markdown} streaming={false} />
+                    </View>
+                  )}
+                  <View
+                    style={{
+                      flex:
+                        width >= 600 && ["left", "right"].includes(block.placement ?? "below")
+                          ? (block.mediaFraction ?? 0.4)
+                          : undefined,
+                      minWidth: 0,
+                    }}
+                  >
+                    {renderMedia?.(block) ?? (
+                      <MediaContent
+                        ids={block.attachmentIds}
+                        layout={block.layout}
+                        caption={block.caption}
+                        alt={block.alt}
+                      />
+                    )}
+                  </View>
+                </View>
+              );
+            default:
+              return (
+                <Text key={block.id} accessibilityRole="alert" style={{ color: t.muted }}>
+                  {labels.sandboxBlocked} {block.fallbackText}
+                </Text>
+              );
+          }
+        })}
+      </View>
+    </ContentProvider>
   );
 }
 

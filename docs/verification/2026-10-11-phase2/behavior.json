@@ -1,0 +1,1324 @@
+{
+ "timestamp": "2026-10-10T22:56:01.784Z",
+ "rows": [
+  {
+   "fixture": "calculator",
+   "category": "calculator",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "calculator",
+   "category": "calculator",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "calculator",
+   "category": "calculator",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "calculator",
+   "category": "calculator",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "calculator",
+   "category": "calculator",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "calculator",
+   "category": "calculator",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "trip-budget",
+   "category": "calculator",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "trip-budget",
+   "category": "calculator",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "trip-budget",
+   "category": "calculator",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "trip-budget",
+   "category": "calculator",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "trip-budget",
+   "category": "calculator",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "trip-budget",
+   "category": "calculator",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "study-time",
+   "category": "calculator",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "study-time",
+   "category": "calculator",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "study-time",
+   "category": "calculator",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "study-time",
+   "category": "calculator",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "study-time",
+   "category": "calculator",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "study-time",
+   "category": "calculator",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "unit-price",
+   "category": "calculator",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "unit-price",
+   "category": "calculator",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "unit-price",
+   "category": "calculator",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "unit-price",
+   "category": "calculator",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "unit-price",
+   "category": "calculator",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "unit-price",
+   "category": "calculator",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "remaining-budget",
+   "category": "calculator",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "remaining-budget",
+   "category": "calculator",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "remaining-budget",
+   "category": "calculator",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "remaining-budget",
+   "category": "calculator",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "remaining-budget",
+   "category": "calculator",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "remaining-budget",
+   "category": "calculator",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "comparison",
+   "category": "comparison",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "comparison",
+   "category": "comparison",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "comparison",
+   "category": "comparison",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "comparison",
+   "category": "comparison",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "comparison",
+   "category": "comparison",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "comparison",
+   "category": "comparison",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "travel-compare",
+   "category": "comparison",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "travel-compare",
+   "category": "comparison",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "travel-compare",
+   "category": "comparison",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "travel-compare",
+   "category": "comparison",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "travel-compare",
+   "category": "comparison",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "travel-compare",
+   "category": "comparison",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "plan-compare",
+   "category": "comparison",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "plan-compare",
+   "category": "comparison",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "plan-compare",
+   "category": "comparison",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "plan-compare",
+   "category": "comparison",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "plan-compare",
+   "category": "comparison",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "plan-compare",
+   "category": "comparison",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "course-compare",
+   "category": "comparison",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "course-compare",
+   "category": "comparison",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "course-compare",
+   "category": "comparison",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "course-compare",
+   "category": "comparison",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "course-compare",
+   "category": "comparison",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "course-compare",
+   "category": "comparison",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "form",
+   "category": "form",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "form",
+   "category": "form",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "form",
+   "category": "form",
+   "check": "checkbox",
+   "status": "pass"
+  },
+  {
+   "fixture": "form",
+   "category": "form",
+   "check": "form",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "fixture": "form",
+   "category": "form",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "reservation",
+   "category": "form",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "reservation",
+   "category": "form",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "reservation",
+   "category": "form",
+   "check": "checkbox",
+   "status": "pass"
+  },
+  {
+   "fixture": "reservation",
+   "category": "form",
+   "check": "form",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "fixture": "reservation",
+   "category": "form",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "feedback",
+   "category": "form",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "feedback",
+   "category": "form",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "feedback",
+   "category": "form",
+   "check": "checkbox",
+   "status": "pass"
+  },
+  {
+   "fixture": "feedback",
+   "category": "form",
+   "check": "form",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "fixture": "feedback",
+   "category": "form",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "contact",
+   "category": "form",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "contact",
+   "category": "form",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "contact",
+   "category": "form",
+   "check": "checkbox",
+   "status": "pass"
+  },
+  {
+   "fixture": "contact",
+   "category": "form",
+   "check": "form",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "fixture": "contact",
+   "category": "form",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "onboarding",
+   "category": "form",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "onboarding",
+   "category": "form",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "onboarding",
+   "category": "form",
+   "check": "checkbox",
+   "status": "pass"
+  },
+  {
+   "fixture": "onboarding",
+   "category": "form",
+   "check": "form",
+   "status": "pass",
+   "detail": "actions emitted: submit_form"
+  },
+  {
+   "fixture": "onboarding",
+   "category": "form",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "planner",
+   "category": "planner",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "planner",
+   "category": "planner",
+   "check": "tabs",
+   "status": "pass"
+  },
+  {
+   "fixture": "planner",
+   "category": "planner",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "planner",
+   "category": "planner",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "planner",
+   "category": "planner",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "planner",
+   "category": "planner",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "packing",
+   "category": "planner",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "packing",
+   "category": "planner",
+   "check": "tabs",
+   "status": "pass"
+  },
+  {
+   "fixture": "packing",
+   "category": "planner",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "packing",
+   "category": "planner",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "packing",
+   "category": "planner",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "packing",
+   "category": "planner",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "meeting",
+   "category": "planner",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "meeting",
+   "category": "planner",
+   "check": "tabs",
+   "status": "pass"
+  },
+  {
+   "fixture": "meeting",
+   "category": "planner",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "meeting",
+   "category": "planner",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "meeting",
+   "category": "planner",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "meeting",
+   "category": "planner",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "habit",
+   "category": "planner",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "habit",
+   "category": "planner",
+   "check": "tabs",
+   "status": "pass"
+  },
+  {
+   "fixture": "habit",
+   "category": "planner",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "habit",
+   "category": "planner",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "habit",
+   "category": "planner",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "habit",
+   "category": "planner",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "dashboard",
+   "category": "dashboard",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "dashboard",
+   "category": "dashboard",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "dashboard",
+   "category": "dashboard",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "dashboard",
+   "category": "dashboard",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "dashboard",
+   "category": "dashboard",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "dashboard",
+   "category": "dashboard",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "energy",
+   "category": "dashboard",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "energy",
+   "category": "dashboard",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "energy",
+   "category": "dashboard",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "energy",
+   "category": "dashboard",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "energy",
+   "category": "dashboard",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "energy",
+   "category": "dashboard",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "activity",
+   "category": "dashboard",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "activity",
+   "category": "dashboard",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "activity",
+   "category": "dashboard",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "activity",
+   "category": "dashboard",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "activity",
+   "category": "dashboard",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "activity",
+   "category": "dashboard",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "experiment",
+   "category": "dashboard",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "experiment",
+   "category": "dashboard",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "experiment",
+   "category": "dashboard",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "experiment",
+   "category": "dashboard",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "experiment",
+   "category": "dashboard",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "experiment",
+   "category": "dashboard",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "sales",
+   "category": "dashboard",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "sales",
+   "category": "dashboard",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "sales",
+   "category": "dashboard",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "sales",
+   "category": "dashboard",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "sales",
+   "category": "dashboard",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "sales",
+   "category": "dashboard",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "explanation",
+   "category": "explanation",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "explanation",
+   "category": "explanation",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "explanation",
+   "category": "explanation",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "explanation",
+   "category": "explanation",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "explanation",
+   "category": "explanation",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "explanation",
+   "category": "explanation",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "streaming",
+   "category": "explanation",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "streaming",
+   "category": "explanation",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "streaming",
+   "category": "explanation",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "streaming",
+   "category": "explanation",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "streaming",
+   "category": "explanation",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "streaming",
+   "category": "explanation",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "accessibility",
+   "category": "explanation",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "accessibility",
+   "category": "explanation",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "accessibility",
+   "category": "explanation",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "accessibility",
+   "category": "explanation",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "accessibility",
+   "category": "explanation",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "accessibility",
+   "category": "explanation",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "components",
+   "category": "explanation",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "components",
+   "category": "explanation",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "components",
+   "category": "explanation",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "components",
+   "category": "explanation",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "components",
+   "category": "explanation",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "components",
+   "category": "explanation",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "quiz",
+   "category": "game",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "quiz",
+   "category": "game",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "quiz",
+   "category": "game",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "quiz",
+   "category": "game",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "quiz",
+   "category": "game",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "quiz",
+   "category": "game",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "counting-game",
+   "category": "game",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "counting-game",
+   "category": "game",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "counting-game",
+   "category": "game",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "counting-game",
+   "category": "game",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "counting-game",
+   "category": "game",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "counting-game",
+   "category": "game",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "logic-game",
+   "category": "game",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "logic-game",
+   "category": "game",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "logic-game",
+   "category": "game",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "logic-game",
+   "category": "game",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "logic-game",
+   "category": "game",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "logic-game",
+   "category": "game",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "h-calc",
+   "category": "hybrid",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "h-calc",
+   "category": "hybrid",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "h-calc",
+   "category": "hybrid",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "h-calc",
+   "category": "hybrid",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "h-calc",
+   "category": "hybrid",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "h-calc",
+   "category": "hybrid",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "h-fact",
+   "category": "hybrid",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "h-fact",
+   "category": "hybrid",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "h-fact",
+   "category": "hybrid",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "h-fact",
+   "category": "hybrid",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "h-fact",
+   "category": "hybrid",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "h-fact",
+   "category": "hybrid",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "h-code",
+   "category": "hybrid",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "h-code",
+   "category": "hybrid",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "h-code",
+   "category": "hybrid",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "h-code",
+   "category": "hybrid",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "h-code",
+   "category": "hybrid",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "h-code",
+   "category": "hybrid",
+   "check": "reset",
+   "status": "na"
+  },
+  {
+   "fixture": "h-explore",
+   "category": "hybrid",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "h-explore",
+   "category": "hybrid",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "h-explore",
+   "category": "hybrid",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "h-explore",
+   "category": "hybrid",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "h-explore",
+   "category": "hybrid",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "h-explore",
+   "category": "hybrid",
+   "check": "reset",
+   "status": "pass",
+   "detail": "state changed, then restored"
+  },
+  {
+   "fixture": "h-two",
+   "category": "hybrid",
+   "check": "slider",
+   "status": "pass",
+   "detail": "changing the slider updates the surface"
+  },
+  {
+   "fixture": "h-two",
+   "category": "hybrid",
+   "check": "tabs",
+   "status": "na"
+  },
+  {
+   "fixture": "h-two",
+   "category": "hybrid",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "h-two",
+   "category": "hybrid",
+   "check": "button",
+   "status": "na"
+  },
+  {
+   "fixture": "h-two",
+   "category": "hybrid",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "h-two",
+   "category": "hybrid",
+   "check": "reset",
+   "status": "pass",
+   "detail": "no state change to undo"
+  },
+  {
+   "fixture": "h-legacy",
+   "category": "hybrid",
+   "check": "slider",
+   "status": "na"
+  },
+  {
+   "fixture": "h-legacy",
+   "category": "hybrid",
+   "check": "tabs",
+   "status": "pass"
+  },
+  {
+   "fixture": "h-legacy",
+   "category": "hybrid",
+   "check": "checkbox",
+   "status": "na"
+  },
+  {
+   "fixture": "h-legacy",
+   "category": "hybrid",
+   "check": "button",
+   "status": "pass",
+   "detail": "local update"
+  },
+  {
+   "fixture": "h-legacy",
+   "category": "hybrid",
+   "check": "form",
+   "status": "na"
+  },
+  {
+   "fixture": "h-legacy",
+   "category": "hybrid",
+   "check": "reset",
+   "status": "na"
+  }
+ ],
+ "pageErrors": []
+}

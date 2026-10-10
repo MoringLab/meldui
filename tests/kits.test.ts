@@ -22,9 +22,9 @@ const kits = [
   { kit: brand, examples: brandExamples },
 ];
 const hostRegistered: Record<Platform, string[]> = {
-  web: ["BrandButton", "BrandCard"],
-  "react-native": ["BrandButton", "BrandCard"],
-  flutter: ["BrandButton", "BrandCard"],
+  web: ["BrandButton", "BrandCard", "BrandHeading"],
+  "react-native": ["BrandButton", "BrandCard", "BrandHeading"],
+  flutter: ["BrandButton", "BrandCard", "BrandHeading"],
 };
 const platforms: Platform[] = ["web", "react-native", "flutter"];
 
@@ -100,8 +100,8 @@ describe("example selection", () => {
     expect(a.map((e) => e.id)).toEqual(b.map((e) => e.id));
     expect(a.map((e) => e.id)).toEqual(library.slice(0, 2).map((e) => e.id));
   });
-  it("respects a tight budget but never returns nothing", () => {
-    expect(selectExamples(library, { prompt: "계산", tokenBudget: 1 }).length).toBe(1);
+  it("respects the host budget even when no example fits", () => {
+    expect(selectExamples(library, { prompt: "계산", tokenBudget: 1 })).toEqual([]);
   });
 });
 
@@ -114,7 +114,9 @@ describe("renderer declarations match PLATFORM_SUPPORT", () => {
   for (const platform of platforms)
     it(`${platform} renderer handles every component it declares`, () => {
       const [file, re] = sources[platform];
-      const handled = new Set([...readFileSync(file, "utf8").matchAll(re)].map((m) => m[1]));
+      const source =
+        readFileSync(file, "utf8") + readFileSync(file.replace("renderer.", "learning."), "utf8");
+      const handled = new Set([...source.matchAll(re)].map((m) => m[1]));
       const declared = COMPONENT_NAMES.filter(
         (n) => !PLATFORM_SUPPORT[platform].unsupported.includes(n),
       );

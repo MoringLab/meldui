@@ -59,7 +59,8 @@
         "kind": "file",
         "mime": "application/pdf",
         "name": "Host report",
-        "size": 12000
+        "size": 12000,
+        "textExtract": "Synthetic host report. Revenue: 2024 = 120, 2025 = 150. Unit: million KRW."
       }
     ],
     "messages": [

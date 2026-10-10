@@ -3,11 +3,12 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import fixtures from "../../fixtures/cases.json";
 import { createUIRuntime } from "../../packages/core/src/index.js";
+import { evaluateAdvanced } from "./advanced.js";
 import { type Row, readJson, split, summarize } from "./common.js";
 import { evaluateContent } from "./content.js";
 import { dutchShares } from "./golden.js";
 
-const rows: Row[] = await evaluateContent();
+const rows: Row[] = [...(await evaluateContent()), ...evaluateAdvanced()];
 const node = (runtime: ReturnType<typeof createUIRuntime>, id: string) =>
   runtime.getNodeSnapshot("main", id);
 
@@ -73,22 +74,6 @@ for (const [id, golden] of Object.entries(calc)) {
 }
 const shareSum = dutchShares(168000, 4).reduce((a, b) => a + b, 0) === 168000;
 rows.push({ layer: "numeric", id: "golden:dutch-sum", status: shareSum ? "pass" : "fail" });
-const numericGaps: [string, string][] = [
-  ["compound-interest", "M8"],
-  ["dutch-pay-weighted", "M7"],
-  ["normal-pdf", "M8"],
-  ["monty-hall-seeded", "M8"],
-  ["sir-conservation", "M8"],
-];
-for (const [id, unlockedBy] of numericGaps)
-  rows.push({
-    layer: "numeric",
-    id,
-    status: "expected-fail",
-    unlockedBy,
-    detail: "needs pow/exp/scan/rng or per-person inputs not in the current expression language",
-  });
-
 // ── Layer 4: learning-content rubric, structural proxy (the LLM judge covers meaning) ──────
 const rubric = readJson("eval/rubric/learning.json");
 function proxyScore(components: any[]) {
@@ -134,7 +119,7 @@ for (const fixture of learningTargets) {
   });
 }
 
-// ── Layers needing later milestones are registered, never silently skipped ──────────────────
+// Generated semantic results remain separate from hand-authored replays.
 rows.push({
   layer: "safety-injection",
   id: "live-model-injection",
@@ -159,28 +144,33 @@ for (const item of readJson<any[]>("eval/media.json"))
     status: "not-run",
     detail: "media display exists; generated answer quality requires live eval",
   });
-const partialShowcase = new Set(["h-photos", "h-pdf", "h-video", "h-calc", "h-fact", "h-code"]);
-for (const item of readJson<any[]>("eval/showcase.json")) {
-  const key = `fixtures/showcase/${item.key}.json`;
+for (const item of readJson<any[]>("eval/showcase.json"))
   rows.push({
     layer: "showcase",
     id: item.id,
     split: split("showcase", item.id),
-    status: existsSync(key) || partialShowcase.has(item.key) ? "not-run" : "expected-fail",
-    unlockedBy: existsSync(key) ? undefined : item.unlockedBy,
-    detail: `${item.key} · path ${item.path} · ${item.native}${partialShowcase.has(item.key) ? " · partial display baseline; item-specific generation/behavior/rubric acceptance not run" : ""}`,
+    status: "not-run",
+    detail: `${item.key}: replay implemented; generated semantic/human acceptance remains separate.`,
   });
-}
 
 // ── Browser layers: layout and behavior (Playwright) ────────────────────────────────────────
+let browserRun: "not-run" | "completed" | "failed" = "not-run";
 if (!process.argv.includes("--no-browser")) {
   const run = spawnSync("pnpm", ["exec", "playwright", "test", "-c", "playwright.eval.config.ts"], {
     stdio: "inherit",
-    timeout: 240_000,
+    // The exhaustive layout/axe matrix has its own 10-minute test deadline.
+    timeout: 630_000,
   });
-  if (run.status !== 0) process.exitCode = 1;
+  browserRun = run.status === 0 ? "completed" : "failed";
+  if (run.status !== 0) {
+    console.error(
+      "Browser evaluation did not complete:",
+      run.error?.message ?? run.signal ?? run.status,
+    );
+    process.exitCode = 1;
+  }
 }
-if (existsSync("artifacts/eval/layout.json")) {
+if (browserRun !== "failed" && existsSync("artifacts/eval/layout.json")) {
   const layout = readJson("artifacts/eval/layout.json").rows as any[];
   for (const fixture of fixtures) {
     const mine = layout.filter((r) => r.fixture === fixture.id);
@@ -204,7 +194,7 @@ if (existsSync("artifacts/eval/layout.json")) {
     }
   }
 }
-if (existsSync("artifacts/eval/behavior.json"))
+if (browserRun !== "failed" && existsSync("artifacts/eval/behavior.json"))
   for (const r of readJson("artifacts/eval/behavior.json").rows as any[])
     rows.push({
       layer: `behavior:${r.check}`,
@@ -222,7 +212,7 @@ const summary = Object.fromEntries(
 );
 await writeFile(
   "artifacts/eval/offline.json",
-  JSON.stringify({ timestamp: new Date().toISOString(), summary, rows }, null, 1),
+  JSON.stringify({ timestamp: new Date().toISOString(), browserRun, summary, rows }, null, 1),
 );
 console.table(summary);
 const hardFail = rows.filter(

@@ -12,4 +12,4 @@ Good first contributions:
 
 Before production release, improve model first-pass validity against the complete 30-prompt evaluation, validate TalkBack and enlarged text, and measure native frame performance on more devices. Semantic task quality must be reviewed separately from schema validity.
 
-Desktop follows concrete embedding requirements. A free-form web sandbox is a later experimental package with its own threat model; catalog components will not gain arbitrary HTML, JavaScript or remote imports. See ADR 0003 for isolation limits and the deferred scope.
+Desktop follows concrete embedding requirements. An opt-in experimental Docker/Chromium web provider now supplies isolated previews; ordinary catalog components still cannot execute HTML/JS or import remote code. See ADR 0005 and the provider README. Production deployment threat review, persistent low-latency app interaction and native sandbox remain separate gates.

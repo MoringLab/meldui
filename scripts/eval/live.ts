@@ -134,7 +134,13 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
     return;
   }
   const runtime = createUIRuntime();
-  const answer = format === "hybrid" ? new AnswerSession(runtime, { policy }) : undefined;
+  if (job.extra?.attachments)
+    for (const record of attachmentSets[String(job.extra.attachments)] ?? [])
+      runtime.attachments.attach(record as any);
+  const answer =
+    format === "hybrid"
+      ? new AnswerSession(runtime, { policy, attachments: runtime.attachments })
+      : undefined;
   const start = performance.now();
   let waitedMs = 0;
   let sessionId = "";
@@ -155,7 +161,7 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
       : undefined;
     let response: Response | undefined;
     // Availability backoff only (never schema repair): wait out a short route cooldown, then record infra.
-    for (let attempt = 0; attempt < 4; attempt++) {
+    for (let attempt = 0; attempt < (flag("no-backoff") ? 1 : 4); attempt++) {
       response = await fetch(`${base}/api/ui`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -295,7 +301,9 @@ async function worker() {
     await persist();
   }
 }
-await Promise.all([worker(), worker(), worker()]);
+await Promise.all(
+  Array.from({ length: Math.min(3, Math.max(1, Number(opt("workers", "3")))) }, () => worker()),
+);
 await persist();
 for (const model of models) {
   const mine = rows.filter((r) => r.model === model);

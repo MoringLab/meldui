@@ -8,9 +8,10 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import { MediaContent } from "./content.js";
+import { ContentProvider, MediaContent, useContentHost } from "./content.js";
 import { SafeMarkdown } from "./markdown.js";
 import { UISurface } from "./renderer.js";
+import { SandboxView, type SandboxViewerRuntime } from "./sandbox.js";
 
 export type MarkdownRendererProps = { text: string; streaming: boolean };
 /** Hosts replace this to reuse their own Markdown pipeline (it must sanitize; see docs/hybrid). */
@@ -62,6 +63,7 @@ export const PlainMarkdown: MarkdownRenderer = ({ text }) => {
 
 export type AnswerViewProps = {
   session: AnswerSession;
+  sandbox?: SandboxViewerRuntime;
   markdown?: MarkdownRenderer;
   /** Render a media block. Default: a plain list of attachment ids until the media components land. */
   renderMedia?: (block: MediaBlockView) => ReactNode;
@@ -77,6 +79,7 @@ export type AnswerViewProps = {
 /** Ordered Markdown, surface and media blocks for one answer. */
 export function AnswerView({
   session,
+  sandbox,
   markdown = SafeMarkdown,
   renderMedia,
   onExpand,
@@ -84,53 +87,76 @@ export function AnswerView({
   chrome = true,
   labels: custom,
 }: AnswerViewProps) {
+  const contentHost = useContentHost();
   const state = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const Markdown = markdown;
   const labels = { ...defaultAnswerLabels, ...custom };
   const height = maxSurfaceHeight ?? session.policy.maxSurfaceHeight;
   return (
-    <div className="ui-answer">
-      {state.blocks.map((block) => {
-        switch (block.kind) {
-          case "markdown":
-            return (
-              <div className="ui-answer-text" key={block.id} data-block={block.id}>
-                {markdown({ text: block.text, streaming: block.status === "streaming" })}
-              </div>
-            );
-          case "surface":
-            return (
-              <SurfaceFrame
-                key={block.id}
-                block={block}
-                session={session}
-                chrome={chrome}
-                labels={labels}
-                maxHeight={height}
-                onExpand={onExpand}
-              />
-            );
-          case "media":
-            return (
-              <div className="ui-answer-media" key={block.id} data-block={block.id}>
-                {renderMedia?.(block) ?? (
-                  <MediaContent
-                    ids={block.attachmentIds}
-                    layout={block.layout}
-                    caption={block.caption}
-                    alt={block.alt}
-                  />
-                )}
-              </div>
-            );
-          default:
-            return (
-              <p className="ui-answer-blocked" key={block.id} role="note">
-                {labels.sandboxBlocked} {block.fallbackText}
-              </p>
-            );
-        }
-      })}
-    </div>
+    <ContentProvider host={session.policy.allowMedia ? contentHost : undefined}>
+      <div className="ui-answer">
+        {state.blocks.map((block) => {
+          switch (block.kind) {
+            case "markdown":
+              return (
+                <div className="ui-answer-text" key={block.id} data-block={block.id}>
+                  {<Markdown text={block.text} streaming={block.status === "streaming"} />}
+                </div>
+              );
+            case "surface":
+              return (
+                <SurfaceFrame
+                  key={block.id}
+                  block={block}
+                  session={session}
+                  chrome={chrome}
+                  labels={labels}
+                  maxHeight={height}
+                  onExpand={onExpand}
+                />
+              );
+            case "media":
+              return (
+                <div
+                  className={`ui-answer-media ui-composition ui-composition-${block.placement ?? "below"}`}
+                  key={block.id}
+                  data-block={block.id}
+                  style={
+                    {
+                      "--media-fraction": `${(block.mediaFraction ?? 0.4) * 100}%`,
+                    } as React.CSSProperties
+                  }
+                >
+                  {block.markdown && (
+                    <div className="ui-composition-text">
+                      {<Markdown text={block.markdown} streaming={false} />}
+                    </div>
+                  )}
+                  <div className="ui-composition-media">
+                    {renderMedia?.(block) ?? (
+                      <MediaContent
+                        ids={block.attachmentIds}
+                        layout={block.layout}
+                        caption={block.caption}
+                        alt={block.alt}
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            case "sandbox":
+              if (sandbox?.verified && block.status !== "blocked")
+                return <SandboxView key={block.id} block={block} provider={sandbox} />;
+              return (
+                <p className="ui-answer-blocked" key={block.id} role="note">
+                  {labels.sandboxBlocked} {block.fallbackText}
+                </p>
+              );
+          }
+          return null;
+        })}
+      </div>
+    </ContentProvider>
   );
 }
 

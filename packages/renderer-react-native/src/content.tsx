@@ -1,4 +1,5 @@
 // biome-ignore-all lint/correctness/useExhaustiveDependencies: generation explicitly refreshes resolver URLs; identity changes reset retries
+// biome-ignore-all lint/suspicious/noArrayIndexKey: duplicate attachment ids are distinguished by their media occurrence
 import {
   attachmentIdFrom,
   type ContentHost,
@@ -20,11 +21,14 @@ import React, {
 } from "react";
 import {
   Image,
+  Modal,
   Text as NativeText,
   Platform,
   Pressable,
   ScrollView,
   type TextProps,
+  type TextStyle,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useUI } from "./renderer.js";
@@ -39,6 +43,7 @@ function Text({ style, ...props }: TextProps) {
         {
           color: kit.tokens[mode].foreground,
           fontFamily: body.nativeFamily,
+          fontWeight: String(body.weight) as TextStyle["fontWeight"],
           fontSize: body.size,
           lineHeight: body.lineHeight,
         },
@@ -126,7 +131,9 @@ function Video({
   seek,
   muted,
   label,
+  transcript,
 }: {
+  transcript?: string | { t: number; text: string }[];
   url: string;
   seek?: number;
   muted: boolean;
@@ -134,17 +141,44 @@ function Video({
 }) {
   const player = useVideoPlayer(url, (p) => {
     p.muted = muted;
+    p.timeUpdateEventInterval = 0.5;
   });
+  const [currentTime, setCurrentTime] = useState(0);
+  useEffect(() => {
+    const sub = player.addListener("timeUpdate", (event) => setCurrentTime(event.currentTime));
+    return () => sub.remove();
+  }, [player]);
+  const line = Array.isArray(transcript)
+    ? transcript.filter((row) => row.t <= currentTime).at(-1)?.text
+    : undefined;
   useEffect(() => {
     if (seek !== undefined && Number.isFinite(seek)) player.currentTime = Math.max(0, seek);
   }, [seek, player]);
   return (
-    <VideoView
-      player={player}
-      nativeControls
-      accessibilityLabel={label}
-      style={{ width: "100%", aspectRatio: 16 / 9 }}
-    />
+    <View>
+      <VideoView
+        player={player}
+        nativeControls
+        accessibilityLabel={label}
+        style={{ width: "100%", aspectRatio: 16 / 9 }}
+      />
+      {line && <Text accessibilityLiveRegion="polite">{line}</Text>}
+      {Array.isArray(transcript) &&
+        transcript.map((row) => (
+          <Pressable
+            key={row.t}
+            accessibilityRole="button"
+            style={buttonStyle}
+            onPress={() => {
+              player.currentTime = row.t;
+            }}
+          >
+            <Text>
+              {row.t}s · {row.text}
+            </Text>
+          </Pressable>
+        ))}
+    </View>
   );
 }
 function Audio({ url, label }: { url: string; label: string }) {
@@ -183,6 +217,9 @@ export function AttachmentMedia({
   regionIds?: string[];
 }) {
   const host = useContentHost();
+  const [zoomed, setZoomed] = useState(false),
+    [zoom, setZoom] = useState(1);
+  const screen = useWindowDimensions();
   const [state, setState] = useState<{ id: string; value?: ResolvedAttachment; error?: boolean }>({
     id,
   });
@@ -252,10 +289,74 @@ export function AttachmentMedia({
                 {r.label} ({r.x}, {r.y})
               </Text>
             ))}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Enlarge ${label}`}
+            style={buttonStyle}
+            onPress={() => {
+              setZoom(1);
+              setZoomed(true);
+            }}
+          >
+            <Text>Enlarge image</Text>
+          </Pressable>
+          <Modal visible={zoomed} onRequestClose={() => setZoomed(false)}>
+            <View style={{ flex: 1, backgroundColor: "#17212b" }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setZoomed(false)}
+                style={buttonStyle}
+              >
+                <NativeText style={{ color: "#fff" }}>Close image</NativeText>
+              </Pressable>
+              {Platform.OS === "android" && (
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Zoom out"
+                    style={buttonStyle}
+                    disabled={zoom <= 1}
+                    onPress={() => setZoom(Math.max(1, zoom - 1))}
+                  >
+                    <NativeText style={{ color: "#fff" }}>−</NativeText>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Zoom in"
+                    style={buttonStyle}
+                    disabled={zoom >= 4}
+                    onPress={() => setZoom(Math.min(4, zoom + 1))}
+                  >
+                    <NativeText style={{ color: "#fff" }}>+</NativeText>
+                  </Pressable>
+                </View>
+              )}
+              <ScrollView
+                maximumZoomScale={4}
+                minimumZoomScale={1}
+                contentContainerStyle={{ flexGrow: 1 }}
+              >
+                <ScrollView horizontal contentContainerStyle={{ flexGrow: 1 }}>
+                  <Image
+                    source={{ uri: state.value.url }}
+                    accessibilityLabel={label}
+                    resizeMode="contain"
+                    style={{ width: screen.width * zoom, height: 600 * zoom }}
+                  />
+                </ScrollView>
+              </ScrollView>
+            </View>
+          </Modal>
         </View>
       ) : manifest.kind === "video" ? (
         <>
-          <Video url={state.value.url} seek={seek} muted={muted} label={label} />
+          <Video
+            url={state.value.url}
+            seek={seek}
+            muted={muted}
+            label={label}
+            transcript={manifest.transcript}
+          />
           <Text>
             {typeof manifest.transcript === "string"
               ? manifest.transcript
@@ -282,22 +383,93 @@ export function MediaContent({
   alt?: string[];
 }) {
   const host = useContentHost();
+  const [width, setWidth] = useState(0);
+  const [page, setPage] = useState(0);
+  const track = useRef<React.ElementRef<typeof ScrollView>>(null);
   const items = ids.flatMap((id) => (host?.attachments.get(id) ? [host.attachments.get(id)!] : []));
   const chosen = layout === "auto" ? mediaLayout(items) : layout;
-  const children = ids.map((id, i) => (
-    <View key={id} style={chosen === "carousel" ? { width: 260 } : undefined}>
-      <AttachmentMedia id={id} alt={alt?.[i]} file={chosen === "files"} />
-    </View>
-  ));
+  const carousel = chosen === "carousel";
+  const columns = width >= 480 && ["grid", "compare"].includes(chosen) ? 2 : 1;
+  useEffect(() => {
+    setPage((old) => Math.min(old, Math.max(0, ids.length - 1)));
+  }, [ids.length]);
+  useEffect(() => {
+    if (carousel && width > 0) track.current?.scrollTo({ x: page * width, animated: false });
+  }, [width, carousel]);
   return (
-    <View style={{ gap: 16 }}>
+    <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ gap: 16 }}>
       {caption && <Text>{caption}</Text>}
-      {chosen === "carousel" ? (
-        <ScrollView horizontal contentContainerStyle={{ gap: 16 }}>
-          {children}
-        </ScrollView>
+      {carousel ? (
+        <>
+          <ScrollView
+            ref={track}
+            horizontal
+            pagingEnabled
+            directionalLockEnabled
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(e) =>
+              setPage(Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)))
+            }
+          >
+            {ids.map((id, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
+              <View key={`${id}-${i}`} style={{ width: Math.max(1, width) }}>
+                <AttachmentMedia id={id} alt={alt?.[i]} />
+              </View>
+            ))}
+          </ScrollView>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Previous image"
+              disabled={page === 0}
+              style={buttonStyle}
+              onPress={() => {
+                setPage(page - 1);
+                track.current?.scrollTo({ x: (page - 1) * width, animated: false });
+              }}
+            >
+              <Text>Previous</Text>
+            </Pressable>
+            <Text accessibilityLiveRegion="polite">
+              {page + 1} / {ids.length}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Next image"
+              disabled={page >= ids.length - 1}
+              style={buttonStyle}
+              onPress={() => {
+                setPage(page + 1);
+                track.current?.scrollTo({ x: (page + 1) * width, animated: false });
+              }}
+            >
+              <Text>Next</Text>
+            </Pressable>
+          </View>
+        </>
       ) : (
-        <View style={{ gap: 16 }}>{children}</View>
+        <View
+          style={{ flexDirection: columns === 2 ? "row" : "column", flexWrap: "wrap", gap: 16 }}
+        >
+          {ids.map((id, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
+            <View
+              key={`${id}-${i}`}
+              style={{ width: columns === 2 ? (width - 16) / 2 : undefined }}
+            >
+              <AttachmentMedia id={id} alt={alt?.[i]} file={chosen === "files"} />
+            </View>
+          ))}
+        </View>
       )}
     </View>
   );

@@ -1,0 +1,20 @@
+Engine
+Copyright 2026 Engine contributors
+
+Engine uses A2UI TypeScript/React and Dart cores under Apache-2.0.
+A2UI copyright holders retain rights to their upstream work.
+React, React Native, Expo, Zod and Flutter and other dependencies retain their original licenses. The sandbox seccomp profile is adapted from Playwright v1.58.2 (Microsoft contributors, Apache-2.0); its source is https://github.com/microsoft/playwright/blob/v1.58.2/utils/docker/seccomp_profile.json. Package dependency metadata identifies the pinned versions; generated native scaffolds retain their platform notices.
+
+Phase 2 Markdown/media dependencies (not copied source):
+- react-markdown, remark/unified, remark-gfm, remark-math, remark-stringify,
+  rehype-highlight and highlight.js: MIT (see installed package LICENSE files).
+- KaTeX (including bundled fonts): MIT; package LICENSE applies.
+- react-native-enriched-markdown: MIT; Software Mansion contributors.
+- Expo video/audio: MIT; Expo contributors.
+- flutter_markdown_plus, markdown, video_player: BSD-3-Clause.
+- flutter_math_fork: Apache-2.0; upstream library notices apply.
+Synthetic PNG/video/audio/PDF fixture assets are authored for this repository
+and distributed under Engine's Apache-2.0 license. No external media assets
+or network-loaded fonts are included.
+
+flutter_svg is used under MIT; see its upstream LICENSE.

@@ -126,6 +126,8 @@ class HostPolicy {
   final bool allowMedia;
   final bool allowSandbox;
   final double? maxSurfaceHeight;
+  final int? maxOutputTokens;
+  final int? latencyBudgetMs;
   const HostPolicy({
     this.mode = 'auto',
     this.maxSurfaces = 3,
@@ -133,6 +135,8 @@ class HostPolicy {
     this.allowMedia = true,
     this.allowSandbox = false,
     this.maxSurfaceHeight,
+    this.maxOutputTokens,
+    this.latencyBudgetMs,
   });
   factory HostPolicy.fromJson(JsonMap json) => HostPolicy(
     mode: json['mode'] as String? ?? 'auto',
@@ -141,6 +145,8 @@ class HostPolicy {
     allowMedia: json['allowMedia'] as bool? ?? true,
     allowSandbox: json['allowSandbox'] as bool? ?? false,
     maxSurfaceHeight: (json['maxSurfaceHeight'] as num?)?.toDouble(),
+    maxOutputTokens: json['maxOutputTokens'] as int?,
+    latencyBudgetMs: json['latencyBudgetMs'] as int?,
   );
 }
 
@@ -193,7 +199,18 @@ class MediaBlock extends AnswerBlock {
   final List<String> attachmentIds;
   final String layout;
   final String? caption;
-  const MediaBlock(super.id, this.attachmentIds, this.layout, this.caption);
+  final String? markdown;
+  final String placement;
+  final double mediaFraction;
+  const MediaBlock(
+    super.id,
+    this.attachmentIds,
+    this.layout,
+    this.caption, {
+    this.markdown,
+    this.placement = "below",
+    this.mediaFraction = 0.4,
+  });
   @override
   String get kind => 'media';
 }
@@ -359,6 +376,12 @@ class AnswerSession extends ChangeNotifier {
             ids,
             decl['layout'] as String? ?? 'auto',
             decl['caption'] as String?,
+            markdown: policy.mode == 'engine-only'
+                ? null
+                : decl['markdown'] as String?,
+            placement: decl['placement'] as String? ?? 'below',
+            mediaFraction: ((decl['mediaFraction'] as num?)?.toDouble() ?? 0.4)
+                .clamp(0.25, 0.65),
           ),
         );
         _touch();
@@ -442,10 +465,23 @@ class AnswerSession extends ChangeNotifier {
   JsonMap _filter(JsonMap message) {
     final allowed = policy.allowedComponents;
     final update = message['updateComponents'] as Map?;
-    if (allowed == null || update == null) return message;
+    if (update == null) return message;
     final kept = <dynamic>[];
     for (final c in update['components'] as List) {
-      if (allowed.contains((c as Map)['component'])) {
+      if ((allowed == null || allowed.contains((c as Map)['component'])) &&
+          (policy.allowMedia ||
+              ![
+                'Image',
+                'Gallery',
+                'Carousel',
+                'MediaGrid',
+                'ImageCompare',
+                'ImageAnnotations',
+                'Video',
+                'Audio',
+                'FileCard',
+                'DocumentPreview',
+              ].contains(c['component']))) {
         kept.add(c);
       } else {
         runtime.report(
@@ -465,6 +501,9 @@ class AnswerSession extends ChangeNotifier {
     _apply(_decoder.finish());
     _closeMarkdown();
     runtime.finish();
+    if (policy.mode == 'engine-only' && _blocks.isEmpty) {
+      runtime.report('MISSING_ANSWER');
+    }
     _blocks = [
       for (final block in _blocks)
         if (block is SurfaceBlock)
@@ -572,6 +611,9 @@ class AnswerSession extends ChangeNotifier {
       'attachmentIds': b.attachmentIds,
       'layout': b.layout,
       if (b.caption != null) 'caption': b.caption,
+      if (b.markdown != null) 'markdown': b.markdown,
+      'placement': b.placement,
+      'mediaFraction': b.mediaFraction,
       'status': 'complete',
     },
     SandboxBlock() => {
@@ -611,6 +653,9 @@ class AnswerSession extends ChangeNotifier {
               (b['attachmentIds'] as List).cast<String>(),
               b['layout'] as String? ?? 'auto',
               b['caption'] as String?,
+              markdown: b['markdown'] as String?,
+              placement: b['placement'] as String? ?? 'below',
+              mediaFraction: (b['mediaFraction'] as num?)?.toDouble() ?? 0.4,
             ),
           );
         case 'sandbox':

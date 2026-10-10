@@ -29,12 +29,12 @@
     "@engine/core": "workspace:*",
     "@engine/kit-spec": "workspace:*",
     "@engine/protocol": "workspace:*",
-    "katex": "0.16.22",
+    "katex": "0.18.2",
     "react-markdown": "10.1.0",
     "rehype-highlight": "7.0.2",
-    "rehype-katex": "7.0.1",
     "remark-gfm": "4.0.1",
-    "remark-math": "6.0.0"
+    "remark-math": "6.0.0",
+    "hast-util-from-html-isomorphic": "2.0.0"
   },
   "peerDependencies": {
     "react": ">=18 <20",

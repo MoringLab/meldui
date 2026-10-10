@@ -130,6 +130,8 @@ export type ContentPolicy = {
   schemes?: string[];
   maxBytes?: number;
   timeoutMs?: number;
+  /** Attribute-free b/strong/i/em/s/del/code pairs only; raw HTML is never rendered. */
+  formattingHtml?: boolean;
 };
 export type ContentHost = {
   attachments: AttachmentRegistry;

@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-10T13:33:50.241Z",
+  "rows": [
+    {
+      "id": "calculator",
+      "split": "dev",
+      "variant": "compact",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 55932,
+        "outputTokens": 127
+      },
+      "firstTokenMs": 14806.445327,
+      "elapsedMs": 15633.148904,
+      "output": "총 금액과 인원을 알려주시면 1인당 금액을 계산해 드리겠습니다. 값을 입력해 주세요.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "study-time",
+      "split": "heldout",
+      "variant": "compact",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 55928,
+        "outputTokens": 258
+      },
+      "firstTokenMs": 14015.046515999999,
+      "elapsedMs": 19899.107935000004,
+      "output": "계획을 세우기 위해 몇 가지 정보가 필요합니다. 다음 내용을 알려주시면 맞춤형 계획을 수립해 드리겠습니다.\n\n1. **목표**: 어떤 시험이나 목표를 달성하고 싶으신가요? (예: TOEIC, 수능, 코딩 학습, 외국어 등)\n2. **매일 공부 가능 시간**: 하루에 몇 시간 정도 투자할 수 있나요?\n3. **기한**: 얼마나 남았나요? (예: 1개월, 3개월, 1년 등)\n4. **주요 공부 과목/주제**: 무엇을 어떤 순서로 공부하면 좋을까요?",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    }
+  ],
+  "adoption": "No defaults changed from this small uncalibrated experiment."
+}

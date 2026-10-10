@@ -1,0 +1,94 @@
+{
+  "at": "2026-10-10T13:14:30.723Z",
+  "rows": [
+    {
+      "id": "study-time",
+      "split": "heldout",
+      "variant": "baseline",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 90244,
+        "outputTokens": 142
+      },
+      "firstTokenMs": 9257.993876999999,
+      "elapsedMs": 14165.4712,
+      "output": "현재 학습 계획을 세울 수 있도록 몇 가지 정보가 필요합니다:\n\n1. **공부하고 싶은 과목/목표**는 무엇인가요? (예: TOEIC, 프로그래밍, 수능 등)\n2. **전체 공부 기간**은 얼마나 예상하시나요?\n3. **하루에 투자 가능한 시간**은 대략 몇 시간인가요?\n4. **현재 난이도**나 **기초 수준**은 어느 정도인가요?\n\n이 정보를 알려주시면 세부 계획을 작성해 드릴게요.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "study-time",
+      "split": "heldout",
+      "variant": "compact",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 90171,
+        "outputTokens": 332
+      },
+      "firstTokenMs": 18755.062433,
+      "elapsedMs": 22616.252155,
+      "output": "현재 계획을 세우기 위해 몇 가지 정보가 필요합니다.\n\n1. **목표 학습 과목/주제**는 무엇인가요?\n2. **목표 달성을 위해 얼마나 많은 시간**이 필요한지, 또는 어느 정도 수준까지 도달하고 싶은지 알고 계신가요?\n3. **공부를 시작할 예정일**은 언제인가요?\n4. **총 공부 일수**를 얼마로 잡고 싶으신가요? (예: 30일, 90일 등)\n\n이 정보를 알려주시면, 매일의 공부 시간과 전체 일수를 조정하여 현실적이고 효율적인 학습 계획을 세워드리겠습니다.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "study-time",
+      "split": "heldout",
+      "variant": "design-brief",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "pass",
+      "errors": [],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 90467,
+        "outputTokens": 452
+      },
+      "firstTokenMs": 16847.965218999998,
+      "elapsedMs": 31725.556934999993,
+      "briefUsage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 405,
+        "outputTokens": 155
+      },
+      "output": "네, 맞춤형 공부 계획을 세워드리겠습니다. 위 설문지에 답변해 주시면 바로 계획을 짜드리겠습니다.\n\n1. **목표是什么？** (어떤 시험, 과목, 스킬 등을 공부하시나요?)\n2. **총 공부 시간이나 목표 시간은 얼마인가요?**\n3. **공부를 시작할 날짜나 목표 완료 날짜는 얼제인가요?**\n4. **하루에 얼마나 시간을 투자할 수 있나요?**\n\n위 4가지 정보를 알려주세요.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    },
+    {
+      "id": "study-time",
+      "split": "heldout",
+      "variant": "structured",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "status": "fail",
+      "errors": [
+        "SyntaxError: Unexpected token '학', \"학습 계획을 생성하\"... is not valid JSON"
+      ],
+      "usage": {
+        "type": "usage",
+        "model": "zai-org/glm-5.2",
+        "inputTokens": 90421,
+        "outputTokens": 134
+      },
+      "firstTokenMs": 7361.741162000006,
+      "elapsedMs": 25621.105394,
+      "output": "학습 계획을 생성하겠습니다. 현재 요청하신 내용만으로는 구체적인 계획을 세우기 어렵습니다. 몇 가지 정보를 더 필요로 합니다:\n\n1. **목표**: 어떤 과목이나 목표를 달성하고 싶으신가요?\n2. **현재 수준**: 얼마나 자신이 있는가요?\n3. **선호 시간대**: 오전, 오후, 밤 중 어느 시간에 공부하기 원하시나요?\n4. **기간**: 몇 일 동안 계획을 세우길 원하시나요?\n\n이 정보들을 알려주시면 구체적인 학습 계획을 세워드리겠습니다.",
+      "semantic": "unmeasured",
+      "learningJudge": "uncalibrated"
+    }
+  ],
+  "adoption": "No defaults changed from this small uncalibrated experiment."
+}

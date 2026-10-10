@@ -1,0 +1,12 @@
+{
+  "platform": "flutter",
+  "physicalSwipe": true,
+  "imageBounds": [
+    20,
+    210,
+    364,
+    468
+  ],
+  "modelCalls": 0,
+  "preferencesChanged": false
+}

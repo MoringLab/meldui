@@ -39,6 +39,24 @@ export const EXPRESSION_OPS = [
   "max",
   "array",
   "round",
+  "sin",
+  "cos",
+  "exp",
+  "log",
+  "pow",
+  "sqrt",
+  "clamp",
+  "lerp",
+  "floor",
+  "range",
+  "map",
+  "filter",
+  "reduce",
+  "scan",
+  "series",
+  "rng",
+  "get",
+  "numberFormat",
 ] as const;
 const ops = EXPRESSION_OPS;
 export const ExprSchema: z.ZodType<Expr> = z.lazy(() =>
@@ -146,8 +164,221 @@ const input = {
 };
 const item = z.object({ id: z.string().min(1), label: text, child }).strict();
 
+const sceneColor = z
+  .string()
+  .regex(
+    /^(#[0-9a-fA-F]{3,8}|none|currentColor|accent|foreground|muted|border|surface|success|danger|gradient:[A-Za-z0-9_-]{1,64})$/,
+  );
+function sceneNodeSchema(depth: number): z.ZodType<any> {
+  return z
+    .object({
+      id: z.string().max(128).optional(),
+      type: z.enum([
+        "group",
+        "rect",
+        "circle",
+        "ellipse",
+        "line",
+        "polyline",
+        "polygon",
+        "path",
+        "text",
+        "repeat",
+      ]),
+      attrs: z
+        .object({
+          x: number.optional(),
+          y: number.optional(),
+          x1: number.optional(),
+          x2: number.optional(),
+          y1: number.optional(),
+          y2: number.optional(),
+          cx: number.optional(),
+          cy: number.optional(),
+          r: number.optional(),
+          rx: number.optional(),
+          ry: number.optional(),
+          width: number.optional(),
+          height: number.optional(),
+          opacity: number.optional(),
+          strokeWidth: number.optional(),
+          clipId: z
+            .string()
+            .regex(/^[A-Za-z0-9_-]{1,64}$/)
+            .optional(),
+          fill: sceneColor.optional(),
+          stroke: sceneColor.optional(),
+          d: z
+            .string()
+            .max(8192)
+            .regex(/^[MmLlHhVvCcSsQqTtAaZz0-9., eE+-]*$/)
+            .optional(),
+          points: z
+            .string()
+            .max(8192)
+            .regex(/^[0-9., +-]*$/)
+            .optional(),
+          transform: z
+            .string()
+            .max(256)
+            .regex(/^(?:(?:translate|rotate|scale)\([0-9., +-]+\)\s*)*$/)
+            .optional(),
+        })
+        .strict()
+        .optional(),
+      text: text.optional(),
+      children:
+        depth === 0
+          ? z.array(z.never()).max(0).optional()
+          : z
+              .array(sceneNodeSchema(depth - 1))
+              .max(300)
+              .optional(),
+      items: array.optional(),
+      action: ActionSchema.optional(),
+      onHover: ActionSchema.optional(),
+      dragPath: z.string().max(1024).optional(),
+    })
+    .strict();
+}
+// Finite nesting also keeps upstream schema introspection bounded.
+export const SceneNodeSchema = sceneNodeSchema(12);
+const seriesSchema = z
+  .object({ key: z.string().max(128), label: z.string().max(256), color: sceneColor.optional() })
+  .strict();
 /** Semantic component props: no HTML, CSS, executable code, or remote URLs. */
 export const componentSchemas = {
+  Confirmation: z.object({
+    ...common,
+    title: text,
+    detail: text,
+    label: text,
+    action: ActionSchema,
+  }),
+  ControlPanel: z.object({ ...common, ...layout, title: text.optional() }),
+  Stat: z.object({ ...common, label: text, value: z.union([text, number]), unit: text.optional() }),
+  StatGroup: z.object({ ...common, ...layout }),
+  Legend: z.object({
+    ...common,
+    items: z.array(z.object({ label: text, color: sceneColor.optional() }).strict()).max(30),
+  }),
+  Formula: z.object({ ...common, latex: text, meaning: text.optional() }),
+  Annotation: z.object({ ...common, text }),
+  Walkthrough: z.object({
+    ...common,
+    steps: z
+      .array(z.object({ title: text, text }).strict())
+      .min(1)
+      .max(30),
+    value: number,
+  }),
+  Quiz: z.object({
+    ...common,
+    prompt: text,
+    choices: z.array(text).min(2).max(10),
+    correctIndex: z.number().int().min(0).max(9),
+    explanation: text,
+    value: number,
+  }),
+  Timeline: z.object({
+    ...common,
+    items: z
+      .array(
+        z
+          .object({ label: text, detail: text.optional(), action: ActionSchema.optional() })
+          .strict(),
+      )
+      .min(1)
+      .max(100),
+  }),
+  Playback: z.object({
+    ...common,
+    path: z.string().max(1024).default("/clock"),
+    label: text.optional(),
+  }),
+  SvgScene: z.object({
+    ...common,
+    title: text,
+    description: text,
+    viewBox: z.tuple([z.number(), z.number(), z.number().positive(), z.number().positive()]),
+    gradients: z
+      .array(
+        z
+          .object({
+            id: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
+            stops: z
+              .array(
+                z
+                  .object({
+                    offset: z.number().min(0).max(1),
+                    color: z
+                      .string()
+                      .regex(/^(#[0-9a-fA-F]{3,8}|accent|foreground|muted|surface)$/),
+                  })
+                  .strict(),
+              )
+              .min(2)
+              .max(10),
+          })
+          .strict(),
+      )
+      .max(10)
+      .optional(),
+    clips: z
+      .array(
+        z
+          .object({
+            id: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
+            x: z.number(),
+            y: z.number(),
+            width: z.number().nonnegative(),
+            height: z.number().nonnegative(),
+          })
+          .strict(),
+      )
+      .max(10)
+      .optional(),
+    nodes: z.array(SceneNodeSchema).max(300).describe("REF:#/$defs/DynamicValue"),
+  }),
+  Plot: z.object({
+    ...common,
+    title: text,
+    kind: z.enum(["line", "scatter", "histogram", "area", "parametric"]).default("line"),
+    values: array,
+    xKey: z.string().default("x"),
+    yKey: z.string().default("y"),
+    xUnit: text.optional(),
+    yUnit: text.optional(),
+    references: z.array(z.number()).max(20).optional(),
+  }),
+  RouteMap: z.object({
+    ...common,
+    title: text,
+    points: z
+      .array(
+        z
+          .object({ label: text, x: z.number().min(-180).max(180), y: z.number().min(-90).max(90) })
+          .strict(),
+      )
+      .min(1)
+      .max(100),
+    verifyAction: ActionSchema.optional(),
+    approximate: z.literal(true).default(true),
+  }),
+  Simulation: z.object({
+    ...common,
+    module: z.enum(["nBody", "cellular", "agents"]),
+    seed: z.number().int(),
+    params: z
+      .object({
+        count: z.number().int().min(2).max(64).optional(),
+        gravity: z.number().min(0).max(10).optional(),
+        size: z.number().int().min(8).max(64).optional(),
+      })
+      .strict()
+      .default({}),
+    title: text,
+  }),
   Form: z.object({ ...common, label: text, children: ChildListSchema, onSubmit: ActionSchema }),
   Row: z.object({ ...common, ...layout }),
   Column: z.object({ ...common, ...layout }),
@@ -245,7 +476,18 @@ export const componentSchemas = {
     ...common,
     title: text,
     text,
-    tone: z.enum(["info", "warning", "success", "danger"]).default("info"),
+    tone: z
+      .enum([
+        "info",
+        "warning",
+        "success",
+        "danger",
+        "tip",
+        "observe",
+        "misconception",
+        "model-note",
+      ])
+      .default("info"),
   }),
   CodeBlock: z.object({ ...common, code: text, language: z.string().max(32).optional() }),
   List: z.object({ ...common, children: ChildListSchema, ordered: z.boolean().optional() }),
@@ -306,7 +548,17 @@ export const componentSchemas = {
   Chart: z.object({
     ...common,
     title: text,
-    kind: z.enum(["line", "bar", "scatter"]),
+    kind: z.enum(["line", "bar", "scatter", "histogram", "area", "stacked"]),
+    series: z.array(seriesSchema).max(10).optional(),
+    window: z.number().int().min(2).max(1000).optional(),
+    xUnit: text.optional(),
+    yUnit: text.optional(),
+    scale: z.enum(["linear", "log"]).default("linear"),
+    references: z.array(z.number()).max(20).optional(),
+    bands: z
+      .array(z.object({ from: z.number(), to: z.number(), label: text.optional() }).strict())
+      .max(20)
+      .optional(),
     values: array,
     xKey: z.string().default("x"),
     yKey: z.string().default("y"),
@@ -384,6 +636,13 @@ export type Capabilities = {
   expressionOps?: string[];
   /** Hybrid answer wire versions the host understands. */
   answerWire?: string[];
+  features?: {
+    continuousPlayback: boolean;
+    directSceneDrag: boolean;
+    sceneHover?: boolean;
+    isolatedSandbox: boolean;
+    advancedCharts: boolean;
+  };
 };
 
 /** Validate a component independently so malformed siblings can be quarantined. */
@@ -414,6 +673,11 @@ export function buildCatalogSchema() {
       if (!value || typeof value !== "object") return;
       if (typeof value.$ref === "string" && value.$ref.startsWith("#/properties/"))
         value.$ref = value.$ref.replace("#/properties/", `#/components/${name}/properties/`);
+      // zod-to-json-schema emits draft-7 tuples; the portable catalog declares 2020-12.
+      if (Array.isArray(value.items)) {
+        value.prefixItems = value.items;
+        value.items = false;
+      }
       for (const child of Object.values(value)) rewrite(child);
     };
     rewrite(props);
@@ -435,6 +699,11 @@ export function buildCatalogSchema() {
           "#/properties/",
           `#/functions/${fn.name}/properties/args/properties/`,
         );
+      // zod-to-json-schema emits draft-7 tuples; the portable catalog declares 2020-12.
+      if (Array.isArray(value.items)) {
+        value.prefixItems = value.items;
+        value.items = false;
+      }
       for (const child of Object.values(value)) rewrite(child);
     };
     rewrite(args);

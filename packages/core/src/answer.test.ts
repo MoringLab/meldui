@@ -206,3 +206,38 @@ describe("AnswerSession", () => {
     expect(() => migrateSnapshot({ schema: 9 })).toThrow("UNSUPPORTED_SNAPSHOT");
   });
 });
+
+it("composer consumes model events", async () => {
+  const runtime = createUIRuntime(),
+    session = new AnswerSession(runtime);
+  async function* stream() {
+    yield { type: "text" as const, text: "Hello\n" };
+    yield { type: "complete" as const, status: "completed" as const };
+  }
+  await session.consume(stream());
+  expect(session.asText()).toContain("Hello");
+  runtime.dispose();
+});
+it("an empty engine-only answer is a repairable error rather than a successful blank screen", () => {
+  const runtime = createUIRuntime(),
+    session = new AnswerSession(runtime, { policy: { mode: "engine-only" } });
+  session.push("Plain prose");
+  session.end();
+  session.end();
+  expect(runtime.diagnostics.filter((d) => d.code === "MISSING_ANSWER")).toHaveLength(1);
+  runtime.dispose();
+});
+it("cancelled model streams retain the last received content without completing the answer", async () => {
+  const runtime = createUIRuntime(),
+    session = new AnswerSession(runtime);
+  async function* stream() {
+    yield { type: "text" as const, text: "Received\n" };
+    yield { type: "complete" as const, status: "cancelled" as const };
+    yield { type: "text" as const, text: "Late output" };
+  }
+  await session.consume(stream());
+  expect(session.asText()).toContain("Received");
+  expect(session.asText()).not.toContain("Late output");
+  expect(session.blocks.some((b) => b.status === "complete")).toBe(false);
+  runtime.dispose();
+});

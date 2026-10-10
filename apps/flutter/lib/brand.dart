@@ -11,6 +11,31 @@ Map<String, EngineWidgetBuilder> brandComponents(UIKit kit, bool dark) {
     ),
   );
   return {
+    'BrandHeading': (context, node, children, runtime, sid, scope) {
+      final p = node['props'] as Map, ty = kit.typography();
+      final level =
+          ((p['level'] as num?)?.toInt() ?? 2).clamp(1, 6).toInt() - 1;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: color('accent'),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Semantics(
+          header: true,
+          child: Text(
+            displayValue(p['text']),
+            style: TextStyle(
+              color: color('onAccent'),
+              fontFamily: ty.headingFamily,
+              fontSize: ty.headingSizes[level],
+              height: ty.headingLineHeights[level] / ty.headingSizes[level],
+              fontWeight: FontWeight.values[ty.headingWeight ~/ 100 - 1],
+            ),
+          ),
+        ),
+      );
+    },
     'BrandButton': (context, node, children, runtime, sid, scope) {
       final p = Map<String, dynamic>.from(node['props'] as Map);
       final variant = (p['variant'] as String?) ?? 'primary';

@@ -1,0 +1,149 @@
+{
+  "at": "2026-10-10T20:45:03.018Z",
+  "model": "cfp/zai-org/glm-5.2",
+  "rows": [
+    {
+      "id": "t01",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "actualModel": "zai-org/glm-5.2",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 8216.869288,
+      "scope": "seeded prior UI + edited input + a real follow-up; noModelUi rows run local host actions"
+    },
+    {
+      "id": "t02",
+      "status": "infra-fail",
+      "reason": "TimeoutError: The operation was aborted due to timeout",
+      "elapsedMs": 90015.00227299999
+    },
+    {
+      "id": "t03",
+      "requestedModel": "cfp/zai-org/glm-5.2",
+      "requests": 0,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 7.69838199998776,
+      "scope": "seeded prior UI + edited input + a real follow-up; noModelUi rows run local host actions"
+    },
+    {
+      "id": "t04",
+      "status": "infra-fail",
+      "reason": "TimeoutError: The operation was aborted due to timeout",
+      "elapsedMs": 90009.628166
+    },
+    {
+      "id": "t05",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t06",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t07",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t08",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t09",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t10",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t11",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t12",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t13",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t14",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t15",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t16",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t17",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t18",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t19",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    },
+    {
+      "id": "t20",
+      "status": "not-run",
+      "infra": true,
+      "reason": "bounded stop after two infrastructure failures"
+    }
+  ]
+}

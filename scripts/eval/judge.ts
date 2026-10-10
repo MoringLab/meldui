@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import fixtures from "../../fixtures/cases.json";
+import showcase from "../../fixtures/showcase/cases.json";
 import { parseCsvLine, readJson } from "./common.js";
 
 /**
@@ -27,11 +28,22 @@ const sheet = readFileSync("eval/human/rating-sheet.csv", "utf8")
   .map((l) => parseCsvLine(l)[0])
   .filter(Boolean);
 const samples = (ids.length ? ids : sheet)
-  .map((id) => fixtures.find((f) => f.id === id))
-  .filter(Boolean) as typeof fixtures;
+  .map((id) => fixtures.find((f) => f.id === id) ?? showcase.find((f) => f.id === id))
+  .filter(Boolean);
 const results: unknown[] = [];
 for (const f of samples) {
-  const text = f.messages
+  if (!f) continue;
+  const messages =
+    "messages" in f
+      ? f.messages
+      : f.wire.split("\n").flatMap((line) => {
+          try {
+            return [JSON.parse(line)];
+          } catch {
+            return [];
+          }
+        });
+  const text = messages
     .flatMap((m: any) => m.updateComponents?.components ?? [])
     .map(
       (c: any) =>

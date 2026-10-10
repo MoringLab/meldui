@@ -34,10 +34,22 @@ export type UIModelEvent =
   | { type: "diagnostic"; diagnostic: Diagnostic }
   | { type: "usage"; inputTokens?: number; outputTokens?: number; model?: string }
   | { type: "complete"; status: "completed" | "cancelled" | "failed" };
+export type ModelMessage = {
+  role: "system" | "user" | "assistant";
+  content:
+    | string
+    | (
+        | { type: "text"; text: string }
+        | { type: "image_url"; image_url: { url: string; detail: "low" | "high" | "auto" } }
+      )[];
+};
 export type ModelRequest = {
-  messages: { role: "system" | "user" | "assistant"; content: string }[];
+  messages: ModelMessage[];
   model: string;
   maxTokens?: number;
+  latencyBudgetMs?: number;
+  responseFormat?: Record<string, unknown>;
+  normalization?: "off" | "safe";
   /** "a2ui" (default): adapter decodes NDJSON envelopes. "hybrid": adapter forwards raw text. */
   format?: "a2ui" | "hybrid";
 };
@@ -51,6 +63,7 @@ export type NodeSnapshot = {
   props: Record<string, any>;
   scope: string;
   error?: string;
+  revision?: number;
 };
 
 import { type AttachInput, AttachmentRegistry } from "./attachments.js";
@@ -101,6 +114,7 @@ export class UIRuntime {
   readonly limits;
   private listeners = new Set<() => void>();
   private nodeListeners = new Map<string, Set<() => void>>();
+  private sceneRevisions = new Map<string, number>();
   private snapshots = new Map<string, { signature: string; snapshot: NodeSnapshot }>();
   private dirty = new Map<string, Set<string>>();
   private pending = new Map<string, Map<string, UIMessage>>();
@@ -276,6 +290,8 @@ export class UIRuntime {
         this.pending.delete(surfaceId);
         for (const key of this.errors.keys())
           if (key.startsWith(`${surfaceId}\0`)) this.errors.delete(key);
+        for (const key of this.sceneRevisions.keys())
+          if (key.startsWith(`${surfaceId}\0`)) this.sceneRevisions.delete(key);
         for (const key of this.snapshots.keys())
           if (key.startsWith(`${surfaceId}\0`)) this.snapshots.delete(key);
         for (const key of this.nodeListeners.keys())
@@ -493,7 +509,7 @@ export class UIRuntime {
         const props = Object.fromEntries(
           Object.entries(component.properties).map(([k, v]) => [
             k,
-            ["action", "onSubmit", "children", "tabs", "items"].includes(k)
+            ["action", "onSubmit", "children", "tabs", "items", "nodes"].includes(k)
               ? v
               : this.resolve(surfaceId, v, scope),
           ]),
@@ -508,6 +524,7 @@ export class UIRuntime {
         };
       }
     }
+    if (component?.type === "SvgScene") snapshot.revision = this.sceneRevisions.get(key) ?? 0;
     const signature = JSON.stringify(snapshot);
     if (this.snapshots.get(key)?.signature === signature) return this.snapshots.get(key)!.snapshot;
     this.snapshots.set(key, { signature, snapshot });
@@ -536,7 +553,13 @@ export class UIRuntime {
       if (component) {
         walk(component.properties);
         for (const path of paths) {
-          const sub = surface!.dataModel.subscribe(path, listener);
+          const sub = surface!.dataModel.subscribe(path, () => {
+            if (component.type === "SvgScene") {
+              const fullKey = `${key}\0${scope}`;
+              this.sceneRevisions.set(fullKey, (this.sceneRevisions.get(fullKey) ?? 0) + 1);
+            }
+            listener();
+          });
           unsubscribers.push(() => sub.unsubscribe());
         }
       }
@@ -630,6 +653,7 @@ export class UIRuntime {
     this.listeners.clear();
     this.nodeListeners.clear();
     this.snapshots.clear();
+    this.sceneRevisions.clear();
     this.dirty.clear();
     this.pending.clear();
     this.errors.clear();
@@ -641,3 +665,6 @@ export function createUIRuntime(options?: RuntimeOptions) {
   return new UIRuntime(options);
 }
 export * from "./markdown.js";
+export * from "./simulations.js";
+export * from "./ticker.js";
+export * from "./visuals.js";

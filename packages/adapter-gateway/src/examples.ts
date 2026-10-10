@@ -72,7 +72,7 @@ export function selectExamples(
   for (const { example, score } of scored) {
     if (picked.length >= max) break;
     if (picked.length >= min && score === 0) break;
-    if (used + example.tokens > tokenBudget && picked.length > 0) continue;
+    if (used + example.tokens > tokenBudget) continue;
     picked.push(example);
     used += example.tokens;
   }

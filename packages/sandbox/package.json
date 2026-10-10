@@ -1,0 +1,31 @@
+{
+  "name": "@engine/sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "Dockerfile",
+    "worker.cjs",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "seccomp_profile.json"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --clean"
+  },
+  "dependencies": {
+    "zod": "3.25.76"
+  }
+}

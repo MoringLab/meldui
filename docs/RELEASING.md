@@ -1,6 +1,6 @@
 # Release preparation
 
-Packages remain private at 0.1.0. A proposed next preview is 0.2.0 once the owner, npm scope, pub.dev package name, repository and private security reporting contact are supplied. They are deliberately not invented. No registry or repository publication is part of this task.
+MeldUI's source repository is [MoringLab/meldui](https://github.com/MoringLab/meldui), currently private. Existing package and catalog identifiers remain unchanged for compatibility. Packages remain private at 0.1.0. A proposed next preview is 0.2.0 once registry ownership, npm scope, pub.dev package name and private security reporting contact are supplied. They are deliberately not invented. No registry publication or public deployment has occurred.
 
 Run `pnpm install --frozen-lockfile`, `pnpm check`, `pnpm eval`, Expo lint/typecheck, both Flutter SDK/app analysis/tests, then `pnpm exec tsx scripts/package-check.ts`. The package check packs all twelve SDK packages, installs them into an independent consumer, exercises client rendering/custom catalog and runs npm publish dry-runs. It does not contact a publication endpoint. Expo and Flutter demo APKs must also pass the functional device flows. iOS simulator/build jobs exist but remain unexecuted on this Linux workstation.
 

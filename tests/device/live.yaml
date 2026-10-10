@@ -8,6 +8,10 @@ appId: ${APP_ID}
 - tapOn: "(?s)만들고 싶은 인터페이스.*"
 - inputText: "Create a compact calculator titled LIVE VERIFY with two sliders and a local sum."
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "만들기"
+    direction: DOWN
 - tapOn: "만들기"
 - extendedWaitUntil:
     visible: "완료되었습니다."

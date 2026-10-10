@@ -19,7 +19,11 @@ try {
   if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
 }
 const port = Number(process.env.PORT ?? 8787);
-const modelIds = ["cx/gpt-5.6-sol-medium", "agy/claude-sonnet-4-6", "agy/gemini-3.7-flash-medium"];
+const modelIds = process.env.ENGINE_MODELS?.split(",").filter(Boolean) ?? [
+  "cx/gpt-5.6-sol-medium",
+  "agy/claude-sonnet-4-6",
+  "agy/gemini-3.7-flash-medium",
+];
 const defaultModel = process.env.OMNIROUTE_MODEL ?? modelIds[0];
 if (!modelIds.includes(defaultModel)) modelIds.unshift(defaultModel);
 const fixtures = JSON.parse(

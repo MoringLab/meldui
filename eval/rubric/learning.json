@@ -1,0 +1,53 @@
+{
+ "scale": "0-2 per item",
+ "pass": {
+  "total": 10,
+  "minEachItem": 1
+ },
+ "items": [
+  {
+   "id": "goal",
+   "question": "States one clear learning goal in a single line before the visualization.",
+   "0": "absent",
+   "1": "present but vague or buried",
+   "2": "one concrete line at the top"
+  },
+  {
+   "id": "experiments",
+   "question": "Offers guided 'try this' experiments tied to specific controls.",
+   "0": "none",
+   "1": "generic invitation",
+   "2": "1-3 concrete experiments naming controls and expected changes"
+  },
+  {
+   "id": "observation",
+   "question": "Prompts what the learner should notice.",
+   "0": "none",
+   "1": "a general note",
+   "2": "specific 'what you should notice' callout linked to the visual"
+  },
+  {
+   "id": "formula",
+   "question": "Shows the formula with a plain-language meaning (when a formula applies).",
+   "0": "formula missing or unexplained",
+   "1": "formula or explanation but not both",
+   "2": "formula plus plain-language meaning of each symbol"
+  },
+  {
+   "id": "check",
+   "question": "Includes a check-understanding question or practice item.",
+   "0": "none",
+   "1": "rhetorical question only",
+   "2": "interactive or answerable question with feedback"
+  },
+  {
+   "id": "simplification",
+   "question": "Honestly labels the model as simplified and avoids invented facts.",
+   "0": "claims realism or invents facts",
+   "1": "implicit",
+   "2": "explicit simplification note, no fabricated claims"
+  }
+ ],
+ "duplicateTarget": 0.2,
+ "duplicateNote": "Share of surface text (excluding required fallbackText) repeated in the markdown blocks."
+}

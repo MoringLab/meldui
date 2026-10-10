@@ -35,7 +35,12 @@ for (const route of routes) {
     for (const c of r.errors ?? []) codes.set(c, (codes.get(c) ?? 0) + 1);
   lines.push(
     "",
-    `Raw diagnostic codes: ${[...codes.entries()].sort((a, b) => b[1] - a[1]).map(([c, n]) => `\`${c}\`×${n}`).join(", ") || "none"}`,
+    `Raw diagnostic codes: ${
+      [...codes.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([c, n]) => `\`${c}\`×${n}`)
+        .join(", ") || "none"
+    }`,
     "",
   );
 }

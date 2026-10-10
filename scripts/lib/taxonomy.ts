@@ -11,8 +11,14 @@ export const FAILURE_CLASSES = [
 export type FailureClass = (typeof FAILURE_CLASSES)[number];
 
 const table: [RegExp, FailureClass][] = [
-  [/^(INVALID_JSON|INVALID_ENVELOPE|INVALID_MESSAGE|INVALID_SCHEMA|MESSAGE_LIMIT|STREAM_LIMIT)$/, "invalid-envelope"],
-  [/^(MISSING_ROOT|INCOMPLETE_OUTPUT|UNKNOWN_SURFACE|DUPLICATE_|MISSING_CHILD|CYCLE)/, "incomplete-graph"],
+  [
+    /^(INVALID_JSON|INVALID_ENVELOPE|INVALID_MESSAGE|INVALID_SCHEMA|MESSAGE_LIMIT|STREAM_LIMIT)$/,
+    "invalid-envelope",
+  ],
+  [
+    /^(MISSING_ROOT|INCOMPLETE_OUTPUT|UNKNOWN_SURFACE|DUPLICATE_|MISSING_CHILD|CYCLE)/,
+    "incomplete-graph",
+  ],
   [/^(EXPECTED_|EXPRESSION_|IMPURE_EXPRESSION)/, "unresolvable-expression"],
   [/^(INVALID_COMPONENT|UNKNOWN_COMPONENT|COMPONENT_)/, "component-error"],
   [/^(SEMANTIC_|ROUTING_|NUMERIC_|BEHAVIOR_|LAYOUT_)/, "semantic"],
@@ -38,6 +44,7 @@ export function classifyRow(row: Row): FailureClass | null {
   if (!codes.length) return row.initialValid ? null : "component-error";
   if (codes.some(isInfraFailure)) return "infra";
   const counts = new Map<FailureClass, number>();
-  for (const code of codes) counts.set(classifyCode(code), (counts.get(classifyCode(code)) ?? 0) + 1);
+  for (const code of codes)
+    counts.set(classifyCode(code), (counts.get(classifyCode(code)) ?? 0) + 1);
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
 }

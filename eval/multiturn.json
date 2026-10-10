@@ -1,0 +1,261 @@
+[
+ {
+  "id": "t01",
+  "base": "calculator",
+  "turns": [
+   {
+    "prompt": "슬라이더 범위를 더 넓게 바꿔줘.",
+    "expect": {
+     "preserveState": true,
+     "changed": "Slider.max"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t02",
+  "base": "calculator",
+  "turns": [
+   {
+    "prompt": "Add a chart that shows the result.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Chart"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t03",
+  "base": "calculator",
+  "turns": [
+   {
+    "prompt": "다크 킷으로 바꿔줘.",
+    "expect": {
+     "clientAction": "switchKit",
+     "noModelUi": true
+    }
+   }
+  ]
+ },
+ {
+  "id": "t04",
+  "base": "trip-budget",
+  "turns": [
+   {
+    "prompt": "Add a field for the number of travelers.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Slider|TextField"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t05",
+  "base": "trip-budget",
+  "turns": [
+   {
+    "prompt": "결과를 원화와 달러로 같이 보여줘.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Text"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t06",
+  "base": "comparison",
+  "turns": [
+   {
+    "prompt": "Add a fourth option to the table.",
+    "expect": {
+     "preserveState": true,
+     "changed": "Table.rows"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t07",
+  "base": "comparison",
+  "turns": [
+   {
+    "prompt": "가장 저렴한 항목을 강조해줘.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Badge|Callout"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t08",
+  "base": "form",
+  "turns": [
+   {
+    "prompt": "Make the email field required and show an error if empty.",
+    "expect": {
+     "preserveState": true,
+     "changed": "TextField.error"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t09",
+  "base": "form",
+  "turns": [
+   {
+    "prompt": "전화번호 입력란을 추가해줘.",
+    "expect": {
+     "preserveState": true,
+     "adds": "TextField"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t10",
+  "base": "planner",
+  "turns": [
+   {
+    "prompt": "Add two more tasks.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Checkbox"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t11",
+  "base": "planner",
+  "turns": [
+   {
+    "prompt": "진행률을 퍼센트 텍스트로도 보여줘.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Text"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t12",
+  "base": "dashboard",
+  "turns": [
+   {
+    "prompt": "Switch the chart to a bar chart.",
+    "expect": {
+     "preserveState": true,
+     "changed": "Chart.kind"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t13",
+  "base": "dashboard",
+  "turns": [
+   {
+    "prompt": "차트 제목을 '주간 매출'로 바꿔줘.",
+    "expect": {
+     "preserveState": true,
+     "changed": "Chart.title"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t14",
+  "base": "quiz",
+  "turns": [
+   {
+    "prompt": "Make the answer 12 instead.",
+    "expect": {
+     "changed": "answer logic"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t15",
+  "base": "quiz",
+  "turns": [
+   {
+    "prompt": "틀렸을 때 힌트를 보여줘.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Text|Callout"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t16",
+  "base": "explanation",
+  "turns": [
+   {
+    "prompt": "Add a short quiz at the end.",
+    "expect": {
+     "preserveState": true,
+     "adds": "Quiz|Button"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t17",
+  "base": "calculator",
+  "turns": [
+   {
+    "prompt": "Reset everything to the defaults.",
+    "expect": {
+     "clientAction": "reset",
+     "noModelUi": true
+    }
+   }
+  ]
+ },
+ {
+  "id": "t18",
+  "base": "calculator",
+  "turns": [
+   {
+    "prompt": "이 화면을 텍스트로 요약해줘.",
+    "expect": {
+     "clientAction": "viewAsText",
+     "noModelUi": true
+    }
+   }
+  ]
+ },
+ {
+  "id": "t19",
+  "base": "trip-budget",
+  "turns": [
+   {
+    "prompt": "Now explain the formula in plain words, but keep the calculator.",
+    "expect": {
+     "preserveState": true,
+     "mode": "mixed"
+    }
+   }
+  ]
+ },
+ {
+  "id": "t20",
+  "base": "unit-price",
+  "turns": [
+   {
+    "prompt": "Delete this and just tell me which is cheaper per unit in one sentence.",
+    "expect": {
+     "deleteSurface": true,
+     "mode": "markdown"
+    }
+   }
+  ]
+ }
+]

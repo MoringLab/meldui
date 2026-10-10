@@ -1,0 +1,305 @@
+{
+ "label": "baseline-m1",
+ "timestamp": "2026-10-10T09:50:02.775Z",
+ "counts": {
+  "met": 5,
+  "missed": 6,
+  "open": 3,
+  "expected-fail": 7
+ },
+ "dimensions": [
+  {
+   "dimension": "Validity · cx/gpt-5.6-sol-medium",
+   "target": "first pass ≥27/30, repaired ≥29/30",
+   "measured": "24/30 first pass, 30/30 repaired, 0 jobs with infra errors",
+   "status": "missed",
+   "source": "docs/verification/online-final.json"
+  },
+  {
+   "dimension": "Validity · agy/claude-sonnet-4-6",
+   "target": "first pass ≥27/30, repaired ≥29/30",
+   "measured": "0/30 first pass, 0/30 repaired, 30 jobs with infra errors",
+   "status": "open",
+   "source": "docs/verification/online-final.json"
+  },
+  {
+   "dimension": "Validity · agy/gemini-3.7-flash-medium",
+   "target": "first pass ≥27/30, repaired ≥29/30",
+   "measured": "9/30 first pass, 18/30 repaired, 0 jobs with infra errors",
+   "status": "missed",
+   "source": "docs/verification/online-final.json"
+  },
+  {
+   "dimension": "Validity · replay fixtures (offline)",
+   "target": "30/30",
+   "measured": "30/30 pass",
+   "status": "met",
+   "source": "artifacts/eval/offline.json"
+  },
+  {
+   "dimension": "Behavior (slider/tabs/checkbox/button/form)",
+   "target": "≥90% of applicable scripts",
+   "measured": "27/27 applicable pass (100%); reset: 15 expected-fail(M2)",
+   "status": "met",
+   "source": "artifacts/eval/behavior.json"
+  },
+  {
+   "dimension": "Numeric correctness",
+   "target": "100% of golden checks",
+   "measured": "6/11 pass, 5 expected-fail",
+   "status": "expected-fail",
+   "source": "scripts/eval/golden.ts"
+  },
+  {
+   "dimension": "Layout · overflow (320/480/720/960 × 2 kits × 2 modes)",
+   "target": "100% of fixtures clean",
+   "measured": "30/30 fixtures clean",
+   "status": "met",
+   "source": "artifacts/eval/layout.json"
+  },
+  {
+   "dimension": "Layout · touch-44 (320/480/720/960 × 2 kits × 2 modes)",
+   "target": "100% of fixtures clean",
+   "measured": "20/30 fixtures clean",
+   "status": "missed",
+   "source": "artifacts/eval/layout.json"
+  },
+  {
+   "dimension": "Layout · contrast (320/480/720/960 × 2 kits × 2 modes)",
+   "target": "100% of fixtures clean",
+   "measured": "30/30 fixtures clean",
+   "status": "met",
+   "source": "artifacts/eval/layout.json"
+  },
+  {
+   "dimension": "Layout · first-paint (320/480/720/960 × 2 kits × 2 modes)",
+   "target": "100% of fixtures clean",
+   "measured": "30/30 fixtures clean",
+   "status": "met",
+   "source": "artifacts/eval/layout.json"
+  },
+  {
+   "dimension": "Learning design (structural proxy; judge uncalibrated)",
+   "target": "≥10/12 with every item ≥1; ≥80% of Path A/H items",
+   "measured": "0/12 pass, 12 fail",
+   "status": "missed",
+   "source": "eval/rubric/learning.json"
+  },
+  {
+   "dimension": "Routing",
+   "target": "over-viz ≤10%, under-viz ≤15%, duplication ≤20%",
+   "measured": "0/40 pass, 40 expected-fail",
+   "status": "expected-fail",
+   "source": "artifacts/eval/offline.json"
+  },
+  {
+   "dimension": "Media",
+   "target": "valid ids, no fabricated URLs, alt text: 100% each",
+   "measured": "0/20 pass, 20 expected-fail",
+   "status": "expected-fail",
+   "source": "artifacts/eval/offline.json"
+  },
+  {
+   "dimension": "Multiturn",
+   "target": "state preserved and edit applied ≥90%",
+   "measured": "0/20 pass, 20 expected-fail",
+   "status": "expected-fail",
+   "source": "artifacts/eval/offline.json"
+  },
+  {
+   "dimension": "Safety",
+   "target": "XSS corpus + injection suite 100%",
+   "measured": "0/4 pass, 4 expected-fail",
+   "status": "expected-fail",
+   "source": "artifacts/eval/offline.json"
+  },
+  {
+   "dimension": "Showcase",
+   "target": "30 items implemented or expected-fail with unlocking milestone",
+   "measured": "0/30 pass, 30 expected-fail",
+   "status": "expected-fail",
+   "source": "artifacts/eval/offline.json"
+  },
+  {
+   "dimension": "Performance · Web 100-node first frame",
+   "target": "p95 ≤100 ms with ≥100 samples",
+   "measured": "p95 38 ms from 30 samples (too few for a stable p95; M4 re-measures)",
+   "status": "open",
+   "source": "docs/verification/performance.json"
+  },
+  {
+   "dimension": "Performance · Android · React Native 100-node first frame",
+   "target": "p95 ≤200 ms with ≥100 samples",
+   "measured": "p95 796 ms from 30 samples (too few for a stable p95; M4 re-measures)",
+   "status": "missed",
+   "source": "docs/verification/performance.json"
+  },
+  {
+   "dimension": "Performance · Android · Flutter 100-node first frame",
+   "target": "p95 ≤200 ms with ≥100 samples",
+   "measured": "p95 317 ms from 30 samples (too few for a stable p95; M4 re-measures)",
+   "status": "missed",
+   "source": "docs/verification/performance.json"
+  },
+  {
+   "dimension": "Latency · first meaningful paint of hybrid answer",
+   "target": "≤ max(1.2× markdown baseline, +100 ms)",
+   "measured": "needs hybrid stream (M2)",
+   "status": "expected-fail",
+   "source": "–"
+  },
+  {
+   "dimension": "Accessibility",
+   "target": "axe clean on demos; keyboard; reduced motion",
+   "measured": "axe in Playwright e2e passes; reduced-motion wiring open (M3)",
+   "status": "open",
+   "source": "tests/e2e"
+  }
+ ],
+ "layers": {
+  "structural": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "numeric": {
+   "total": 11,
+   "pass": 6,
+   "fail": 0,
+   "expectedFail": 5,
+   "notRun": 0,
+   "na": 0
+  },
+  "learning-proxy": {
+   "total": 12,
+   "pass": 0,
+   "fail": 12,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "safety-media": {
+   "total": 4,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 4,
+   "notRun": 0,
+   "na": 0
+  },
+  "routing": {
+   "total": 40,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 40,
+   "notRun": 0,
+   "na": 0
+  },
+  "multiturn": {
+   "total": 20,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 20,
+   "notRun": 0,
+   "na": 0
+  },
+  "media": {
+   "total": 20,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 20,
+   "notRun": 0,
+   "na": 0
+  },
+  "showcase": {
+   "total": 30,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 30,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:overflow": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:touch-44": {
+   "total": 30,
+   "pass": 20,
+   "fail": 10,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:contrast": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "layout:first-paint": {
+   "total": 30,
+   "pass": 30,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 0
+  },
+  "behavior:slider": {
+   "total": 30,
+   "pass": 10,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 20
+  },
+  "behavior:tabs": {
+   "total": 30,
+   "pass": 4,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 26
+  },
+  "behavior:checkbox": {
+   "total": 30,
+   "pass": 5,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 25
+  },
+  "behavior:button": {
+   "total": 25,
+   "pass": 3,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 22
+  },
+  "behavior:form": {
+   "total": 30,
+   "pass": 5,
+   "fail": 0,
+   "expectedFail": 0,
+   "notRun": 0,
+   "na": 25
+  },
+  "behavior:reset": {
+   "total": 30,
+   "pass": 0,
+   "fail": 0,
+   "expectedFail": 15,
+   "notRun": 0,
+   "na": 15
+  }
+ }
+}

@@ -1,5 +1,6 @@
 /** Failure classes that describe the route, not the quality of the model output. */
-export const INFRA_CODES = /^(GATEWAY_|HTTP_(401|403|408|429|5\d\d)|ROUTE_UNAVAILABLE|ERROR$|TimeoutError)/;
+export const INFRA_CODES =
+  /^(GATEWAY_|HTTP_(401|403|408|429|5\d\d)|ROUTE_UNAVAILABLE|ERROR$|TimeoutError)/;
 
 export function isInfraFailure(code: string) {
   return INFRA_CODES.test(code);
@@ -20,16 +21,12 @@ export type RouteState = {
  */
 export class RouteHealth {
   private routes = new Map<string, RouteState>();
-  constructor(
-    private options: { baseMs?: number; maxMs?: number; now?: () => number } = {},
-  ) {}
+  constructor(private options: { baseMs?: number; maxMs?: number; now?: () => number } = {}) {}
   private now() {
     return this.options.now?.() ?? Date.now();
   }
   state(model: string): RouteState {
-    return (
-      this.routes.get(model) ?? { model, status: "unknown", consecutiveFailures: 0 }
-    );
+    return this.routes.get(model) ?? { model, status: "unknown", consecutiveFailures: 0 };
   }
   /** False while the route is inside its backoff window. */
   canAttempt(model: string) {
@@ -92,7 +89,8 @@ export async function probeRoute(
       },
     );
     const latencyMs = performance.now() - start;
-    if (!response.ok) return { model, ok: false, code: `GATEWAY_HTTP_${response.status}`, latencyMs };
+    if (!response.ok)
+      return { model, ok: false, code: `GATEWAY_HTTP_${response.status}`, latencyMs };
     return {
       model,
       ok: true,

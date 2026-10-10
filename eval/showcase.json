@@ -1,0 +1,487 @@
+[
+ {
+  "id": "01",
+  "key": "bicycle",
+  "path": "A",
+  "needs": "SvgScene, slider-driven translation, labels",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "자전거를 분해해서 각 부품이 어떻게 연결되는지 보여줘.",
+   "en": "Show an exploded view of a bicycle with a slider that pulls the parts apart."
+  },
+  "checks": [
+   "slider moves parts",
+   "labels present",
+   "aria text alternative"
+  ]
+ },
+ {
+  "id": "02",
+  "key": "black-hole",
+  "path": "C",
+  "needs": "shader or canvas; Path A stylized fallback",
+  "native": "web",
+  "unlockedBy": "M10",
+  "prompts": {
+   "ko": "블랙홀을 시각화해서 질량과 회전을 바꿔볼 수 있게 해줘.",
+   "en": "Visualize a black hole where I can change mass and spin."
+  },
+  "checks": [
+   "mass control changes horizon radius readout",
+   "reduced motion honored"
+  ]
+ },
+ {
+  "id": "03",
+  "key": "dna",
+  "path": "A",
+  "needs": "pseudo-3D projection, drag-rotate, separation slider",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "DNA 이중나선을 3D처럼 돌려보고 가닥을 벌려볼 수 있게 해줘.",
+   "en": "Let me rotate a DNA double helix and separate the strands."
+  },
+  "checks": [
+   "drag rotates",
+   "strand separation slider",
+   "base pairing rule shown"
+  ]
+ },
+ {
+  "id": "04",
+  "key": "predator-prey",
+  "path": "B",
+  "needs": "agents module + live chart; Path A baseline via scan",
+  "native": "web",
+  "unlockedBy": "M9",
+  "prompts": {
+   "ko": "포식자와 피식자 개체수가 어떻게 변하는지 보여줘.",
+   "en": "Simulate predator and prey populations over time."
+  },
+  "checks": [
+   "deterministic with seed",
+   "chart updates",
+   "populations non-negative"
+  ]
+ },
+ {
+  "id": "05",
+  "key": "civilization",
+  "path": "C",
+  "needs": "turn state, map, events",
+  "native": "web",
+  "unlockedBy": "M10",
+  "prompts": {
+   "ko": "문명이 발전하는 턴제 시뮬레이션을 만들어줘.",
+   "en": "Build a turn-based civilization simulation."
+  },
+  "checks": [
+   "turn counter increments",
+   "events appear"
+  ]
+ },
+ {
+  "id": "06",
+  "key": "solar-system",
+  "path": "B",
+  "needs": "nBody module; Path A parametric baseline",
+  "native": "web",
+  "unlockedBy": "M9",
+  "prompts": {
+   "ko": "태양계 중력으로 행성이 움직이는 모습을 보여줘.",
+   "en": "Show planets orbiting under gravity."
+  },
+  "checks": [
+   "energy conserved within tolerance",
+   "speed control"
+  ]
+ },
+ {
+  "id": "07",
+  "key": "fluid",
+  "path": "B",
+  "needs": "cellular module",
+  "native": "web",
+  "unlockedBy": "M9",
+  "prompts": {
+   "ko": "유체가 흐르는 모습을 시뮬레이션해줘.",
+   "en": "Simulate fluid flow I can pour into."
+  },
+  "checks": [
+   "cells conserved",
+   "reset works"
+  ]
+ },
+ {
+  "id": "08",
+  "key": "circuit",
+  "path": "A",
+  "needs": "SvgScene, Ohm expressions, animated current",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "옴의 법칙을 전기회로로 보여줘.",
+   "en": "Show Ohm's law with an animated electric circuit."
+  },
+  "checks": [
+   "V=IR readouts consistent",
+   "current animation pauses on reduced motion"
+  ]
+ },
+ {
+  "id": "09",
+  "key": "engine",
+  "path": "A",
+  "needs": "SvgScene, ticker, crank kinematics, RPM slider",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "자동차 엔진의 피스톤과 크랭크가 움직이는 모습을 보여줘.",
+   "en": "Show how a car engine's pistons and crankshaft move."
+  },
+  "checks": [
+   "RPM slider changes speed",
+   "exploded toggle",
+   "kinematics numeric check"
+  ]
+ },
+ {
+  "id": "10",
+  "key": "climate",
+  "path": "A",
+  "needs": "scan box model, Plot, Chart, Stat",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "이산화탄소가 늘면 기후가 어떻게 변하는지 보여줘.",
+   "en": "Show how CO2 emissions change global temperature."
+  },
+  "checks": [
+   "emissions slider changes projection",
+   "simplification note present"
+  ]
+ },
+ {
+  "id": "11",
+  "key": "ants",
+  "path": "C",
+  "needs": "agent AI",
+  "native": "web",
+  "unlockedBy": "M10",
+  "prompts": {
+   "ko": "개미 왕국을 키우는 시뮬레이션을 만들어줘.",
+   "en": "Build an ant colony simulation."
+  },
+  "checks": [
+   "colony grows",
+   "controls labeled"
+  ]
+ },
+ {
+  "id": "12",
+  "key": "ai-city",
+  "path": "C",
+  "needs": "grid, economy, agents",
+  "native": "web",
+  "unlockedBy": "M10",
+  "prompts": {
+   "ko": "AI가 운영하는 도시를 시뮬레이션해줘.",
+   "en": "Simulate a city run by AI agents."
+  },
+  "checks": [
+   "economy metrics update"
+  ]
+ },
+ {
+  "id": "13",
+  "key": "stock",
+  "path": "A",
+  "needs": "seeded RNG, ticker, chart, local buy/sell",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "주식시장을 체험할 수 있는 시뮬레이션을 만들어줘.",
+   "en": "Make a stock market simulator where I can buy and sell."
+  },
+  "checks": [
+   "seeded prices reproducible",
+   "cash+holdings conserved on trade"
+  ]
+ },
+ {
+  "id": "14",
+  "key": "virus",
+  "path": "A",
+  "needs": "SIR via scan, chart",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "바이러스가 퍼지는 과정을 보여줘.",
+   "en": "Show how a virus spreads through a population."
+  },
+  "checks": [
+   "S+I+R=N",
+   "R0 slider changes peak"
+  ]
+ },
+ {
+  "id": "15",
+  "key": "evolution",
+  "path": "B",
+  "needs": "agents module; scan feasibility first",
+  "native": "web",
+  "unlockedBy": "M9",
+  "prompts": {
+   "ko": "생명이 진화하는 과정을 시뮬레이션해줘.",
+   "en": "Simulate evolution by natural selection."
+  },
+  "checks": [
+   "deterministic with seed",
+   "trait distribution chart"
+  ]
+ },
+ {
+  "id": "16",
+  "key": "compound-interest",
+  "path": "A",
+  "needs": "sliders, scan, chart, Stat",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "복리 투자 결과를 슬라이더로 바꿔보며 보여줘.",
+   "en": "Show compound investment growth with sliders."
+  },
+  "checks": [
+   "future value matches closed form",
+   "chart reflects slider"
+  ]
+ },
+ {
+  "id": "17",
+  "key": "monty-hall",
+  "path": "A",
+  "needs": "seeded RNG, local actions, trials chart",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "몬티홀 문제를 직접 해보고 확률을 확인하게 해줘.",
+   "en": "Let me play the Monty Hall problem and see the odds."
+  },
+  "checks": [
+   "stay≈1/3, switch≈2/3 with fixed seed",
+   "reset works"
+  ]
+ },
+ {
+  "id": "18",
+  "key": "normal",
+  "path": "A",
+  "needs": "Plot, histogram, seeded sampling",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "정규분포와 확률을 직접 만져보게 해줘.",
+   "en": "Let me explore the normal distribution and probabilities."
+  },
+  "checks": [
+   "pdf values match golden",
+   "area under curve ≈ probability"
+  ]
+ },
+ {
+  "id": "19",
+  "key": "interactive-math",
+  "path": "A",
+  "needs": "Plot, sliders, annotations",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "함수 그래프를 매개변수로 바꿔보며 이해하게 해줘.",
+   "en": "Let me explore a function graph by changing its parameters."
+  },
+  "checks": [
+   "slider updates curve",
+   "annotation visible"
+  ]
+ },
+ {
+  "id": "20",
+  "key": "dutch-pay",
+  "path": "A",
+  "needs": "inputs, expressions, per-person results",
+  "native": "web+native",
+  "unlockedBy": "M7",
+  "prompts": {
+   "ko": "더치페이를 인원별로 계산해줘.",
+   "en": "Split a dinner bill among people with different shares."
+  },
+  "checks": [
+   "shares sum to total",
+   "per-person results labeled"
+  ]
+ },
+ {
+  "id": "21",
+  "key": "retro-game",
+  "path": "A",
+  "needs": "SvgScene, ticker, local actions (richer: C)",
+  "native": "web+native",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "레트로 스타일 미니게임을 만들어줘.",
+   "en": "Make a retro mini-game."
+  },
+  "checks": [
+   "score updates",
+   "reset works",
+   "keyboard operable"
+  ]
+ },
+ {
+  "id": "22",
+  "key": "itinerary-map",
+  "path": "A",
+  "needs": "RouteMap, Tabs, Timeline, geocode/verify",
+  "native": "web",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "여행 일정을 지도와 함께 보여줘.",
+   "en": "Show a travel itinerary on a map."
+  },
+  "checks": [
+   "coordinates marked approximate",
+   "verify action routed to host"
+  ]
+ },
+ {
+  "id": "H-01",
+  "key": "h-photos",
+  "path": "H",
+  "needs": "gallery or compare plus markdown",
+  "native": "web+native",
+  "unlockedBy": "M5",
+  "prompts": {
+   "ko": "첨부한 사진들을 비교해서 차이를 설명해줘.",
+   "en": "Compare the attached photos and explain the differences."
+  },
+  "checks": [
+   "only valid ids",
+   "alt present",
+   "markdown explanation"
+  ]
+ },
+ {
+  "id": "H-02",
+  "key": "h-pdf",
+  "path": "H",
+  "needs": "file card, stat cards, chart, markdown",
+  "native": "web+native",
+  "unlockedBy": "M5",
+  "prompts": {
+   "ko": "첨부한 PDF를 요약하고 핵심 수치를 차트로 보여줘.",
+   "en": "Summarize the attached PDF and chart the key figures."
+  },
+  "checks": [
+   "figures match extract",
+   "FileCard present"
+  ]
+ },
+ {
+  "id": "H-03",
+  "key": "h-video",
+  "path": "H",
+  "needs": "host transcript, Video, Timeline",
+  "native": "web+native",
+  "unlockedBy": "M5",
+  "prompts": {
+   "ko": "영상을 챕터별로 나눠서 클릭하면 해당 위치로 이동하게 해줘.",
+   "en": "Give me a video with a chapter timeline that seeks the player."
+  },
+  "checks": [
+   "seek actions bound",
+   "no autoplay with sound"
+  ]
+ },
+ {
+  "id": "H-04",
+  "key": "h-trip",
+  "path": "H",
+  "needs": "media, RouteMap, markdown",
+  "native": "web",
+  "unlockedBy": "M8",
+  "prompts": {
+   "ko": "여행 일정에 사진 갤러리와 경로 지도와 팁을 같이 넣어줘.",
+   "en": "Travel itinerary with a photo gallery, route map, and markdown tips."
+  },
+  "checks": [
+   "gallery ids valid",
+   "map approximate",
+   "markdown tips"
+  ]
+ },
+ {
+  "id": "H-05",
+  "key": "h-calc",
+  "path": "H",
+  "needs": "surface plus markdown",
+  "native": "web+native",
+  "unlockedBy": "M2",
+  "prompts": {
+   "ko": "계산기 화면과 가정을 설명하는 글을 같이 보여줘.",
+   "en": "A calculator plus a markdown explanation of assumptions."
+  },
+  "checks": [
+   "one surface",
+   "markdown not duplicating surface"
+  ]
+ },
+ {
+  "id": "H-06",
+  "key": "h-fact",
+  "path": "H",
+  "needs": "routing (negative control)",
+  "native": "all",
+  "unlockedBy": "M2",
+  "prompts": {
+   "ko": "프랑스의 수도는 어디야?",
+   "en": "What is the capital of France?"
+  },
+  "checks": [
+   "zero surfaces"
+  ]
+ },
+ {
+  "id": "H-07",
+  "key": "h-code",
+  "path": "H",
+  "needs": "routing (negative control)",
+  "native": "all",
+  "unlockedBy": "M2",
+  "prompts": {
+   "ko": "JavaScript에서 배열 중복을 제거하는 코드를 알려줘.",
+   "en": "How do I remove duplicates from a JS array?"
+  },
+  "checks": [
+   "zero surfaces",
+   "code block present"
+  ]
+ },
+ {
+  "id": "H-08",
+  "key": "h-sandbox",
+  "path": "C",
+  "needs": "sandbox policy (allowSandbox on only)",
+  "native": "web",
+  "unlockedBy": "M10",
+  "prompts": {
+   "ko": "작은 샌드박스 데모로 파티클을 보여줘.",
+   "en": "Show a small sandbox demo of particles."
+  },
+  "checks": [
+   "sandbox emitted only when allowed",
+   "policy off: no sandbox block"
+  ]
+ }
+]

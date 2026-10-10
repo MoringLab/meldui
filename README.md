@@ -1,6 +1,8 @@
-# Engine
+# MeldUI
 
 A private A2UI SDK for React web, React Native/Expo and Flutter. It composes Markdown, interactive surfaces and host media, with three replaceable design kits and local state that survives kit changes. [한국어](README.ko.md).
+
+MeldUI is the project name. Existing `@engine/*` packages, `engine_flutter`, application IDs and wire/catalog identifiers are retained for compatibility.
 
 ```sh
 pnpm install --frozen-lockfile

@@ -1,6 +1,8 @@
-# Engine
+# MeldUI · 멜드유아이
 
 React 웹, React Native·Expo, Flutter용 생성형 답변 SDK입니다. Markdown·인터랙티브 화면·호스트 미디어를 섞고, 세 디자인 Kit를 바꿔도 입력값을 유지합니다. 공통 카탈로그는 50개 컴포넌트입니다.
+
+프로젝트 이름은 MeldUI입니다. 기존 `@engine/*` 패키지명, `engine_flutter`, 앱 ID와 프로토콜·카탈로그 ID는 호환성을 위해 유지합니다.
 
 ```sh
 pnpm install --frozen-lockfile

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import hybrid from "../fixtures/hybrid/cases.json" with { type: "json" };
 import { AnswerSession, createUIRuntime } from "../packages/core/src/index.js";
+import type { HostPolicy } from "../packages/protocol/src/index.js";
 
 const slices = (text: string, size: number) =>
   text.match(new RegExp(`[\\s\\S]{1,${size}}`, "g")) ?? [];
@@ -59,7 +60,8 @@ describe("parity vectors (reference for the Dart port)", () => {
   const merge = (items: { kind: string; text?: string }[]) =>
     items.reduce<{ kind: string; text?: string }[]>((acc, item) => {
       const last = acc.at(-1);
-      if (last?.kind === "text" && item.kind === "text") last.text += item.text;
+      if (last?.kind === "text" && item.kind === "text")
+        last.text = (last.text ?? "") + (item.text ?? "");
       else acc.push({ ...item });
       return acc;
     }, []);
@@ -75,7 +77,7 @@ describe("parity vectors (reference for the Dart port)", () => {
   for (const v of vectors.session)
     it(`session ${v.name}`, () => {
       const runtime = createUIRuntime();
-      const session = new AnswerSession(runtime, { policy: v.policy });
+      const session = new AnswerSession(runtime, { policy: v.policy as HostPolicy });
       for (const chunk of slices(v.text, 9)) session.push(chunk);
       session.end();
       expect(session.blocks.map((b) => b.kind)).toEqual(v.blocks);

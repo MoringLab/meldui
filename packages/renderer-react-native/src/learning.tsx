@@ -101,10 +101,22 @@ export function LearningView({ node, children, runtime, surfaceId }: NativeViewP
     case "StatGroup":
       return <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>{children}</View>;
     case "Stat":
+      // A label above a prominent value: the value is what changes when controls move.
       return (
-        <View accessibilityLiveRegion="polite">
-          {text(p.label)}
-          {text(`${p.value} ${p.unit ?? ""}`)}
+        <View accessibilityLiveRegion="polite" style={{ gap: 2 }}>
+          <Text style={{ color: t.muted, fontSize: kit.tokens.typography.baseSize * 0.87 }}>
+            {String(p.label ?? "")}
+          </Text>
+          <Text
+            style={{
+              color: t.foreground,
+              fontSize: kit.tokens.typography.baseSize * 1.47,
+              fontWeight: "700",
+              fontVariant: ["tabular-nums"],
+            }}
+          >
+            {`${p.value ?? ""}${p.unit ? ` ${p.unit}` : ""}`}
+          </Text>
         </View>
       );
     case "Legend":

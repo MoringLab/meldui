@@ -8,6 +8,7 @@ import { UISurface, useUI } from "./renderer.js";
 
 export type MarkdownRenderer = (props: { text: string; streaming: boolean }) => ReactNode;
 export type MediaBlockView = Extract<AnswerBlock, { kind: "media" }>;
+export type SurfaceBlockView = Extract<AnswerBlock, { kind: "surface" }>;
 export type AnswerLabels = {
   surface: string;
   reset: string;
@@ -35,6 +36,12 @@ export type AnswerViewProps = {
   session: AnswerSession;
   markdown?: MarkdownRenderer;
   renderMedia?: (block: MediaBlockView) => ReactNode;
+  /**
+   * Host frame for a surface (its own toolbar, card, height policy). Draw the contents with
+   * `<UISurface surfaceId={block.surfaceId} />`; `session.reset(id)` and `block.fallbackText`
+   * provide reset and the text view. Without it the built-in frame is used.
+   */
+  renderSurface?: (block: SurfaceBlockView, session: AnswerSession) => ReactNode;
   /** Host handler for `expand`; without it a full-screen Modal is shown. */
   onExpand?: (surfaceId: string) => void;
   maxSurfaceHeight?: number;
@@ -47,6 +54,7 @@ export function AnswerView({
   session,
   markdown = SafeMarkdown,
   renderMedia,
+  renderSurface,
   onExpand,
   maxSurfaceHeight,
   chrome = true,
@@ -74,6 +82,10 @@ export function AnswerView({
                 />
               );
             case "surface":
+              if (renderSurface)
+                return (
+                  <React.Fragment key={block.id}>{renderSurface(block, session)}</React.Fragment>
+                );
               return (
                 <SurfaceFrame
                   key={block.id}

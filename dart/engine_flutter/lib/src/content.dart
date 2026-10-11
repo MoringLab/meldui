@@ -585,7 +585,7 @@ class MediaContent extends StatelessWidget {
         if (caption != null) Text(caption!),
         if (chosen == 'carousel')
           _SwipeGallery(ids: ids)
-        else if (chosen == 'grid' || chosen == 'compare')
+        else if (chosen == 'grid' || chosen == 'compare' || chosen == 'mosaic')
           LayoutBuilder(
             builder: (context, size) => Wrap(
               spacing: 16,

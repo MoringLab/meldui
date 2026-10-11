@@ -24,3 +24,7 @@ flutter:
 
     - assets/advanced.json
     - assets/showcase.json
+
+    - assets/custom.json
+    - assets/custom-catalog.json
+    - assets/service.json

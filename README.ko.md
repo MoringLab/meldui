@@ -25,3 +25,5 @@ AI는 등록된 이미지 ID를 골라 스와이프 갤러리/비교/그리드�
 Android 두 앱은 서로 다른 앱 ID로 설치합니다. `adb reverse tcp:8787 tcp:8787` 후 사용하세요. 일반 실기기 검증과 CI는 성능 벤치마크를 실행하지 않습니다. 모델 평가에는 `--live`가 필요하고, 평가 결과는 구조·행동·수치·라우팅·학습·인프라를 구분합니다.
 
 [현재 상태](docs/STATUS.md) · [영문 API 안내](README.md) · [Kit 커스텀](docs/KITS.md) · [배포 준비](docs/RELEASING.md). 현재는 private 프리뷰입니다. 모델의 UI 선택/의미 품질, RN p95, 인간 평가 보정, iOS, 일부 의존성 경고는 출시 게이트로 남습니다. 실제 공개 배포나 패키지 등록은 하지 않았습니다.
+
+See [custom components, SVG compilation and code artifacts](docs/PHASE3.md) and [Phase 3 verification](docs/verification/2026-10-11-phase3/REPORT.md).

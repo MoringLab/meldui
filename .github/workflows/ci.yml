@@ -10,7 +10,7 @@ jobs:
         with: {node-version: 22, cache: pnpm}
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
-      - run: pnpm check && pnpm eval && pnpm --filter @engine/expo-lab typecheck
+      - run: pnpm check && pnpm eval && pnpm --filter @engine/expo-lab typecheck && pnpm --filter @engine/expo-lab exec expo lint
       - run: pnpm exec tsx scripts/package-check.ts
   flutter:
     runs-on: ubuntu-latest

@@ -170,6 +170,68 @@
   {
     "id": 15,
     "expr": {
+      "op": "sort",
+      "args": [
+        {
+          "op": "array",
+          "args": [
+            3,
+            1,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    "expected": [
+      1,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": 16,
+    "expr": {
+      "op": "sort",
+      "args": [
+        {
+          "op": "array",
+          "args": [
+            {
+              "op": "array",
+              "args": [
+                "A",
+                2
+              ]
+            },
+            {
+              "op": "array",
+              "args": [
+                "B",
+                1
+              ]
+            }
+          ]
+        },
+        1,
+        false
+      ]
+    },
+    "expected": [
+      [
+        "B",
+        1
+      ],
+      [
+        "A",
+        2
+      ]
+    ]
+  },
+  {
+    "id": 17,
+    "expr": {
       "op": "map",
       "args": [
         {
@@ -198,7 +260,7 @@
     ]
   },
   {
-    "id": 16,
+    "id": 18,
     "expr": {
       "op": "filter",
       "args": [
@@ -227,7 +289,7 @@
     ]
   },
   {
-    "id": 17,
+    "id": 19,
     "expr": {
       "op": "reduce",
       "args": [
@@ -256,7 +318,7 @@
     "expected": 6
   },
   {
-    "id": 18,
+    "id": 20,
     "expr": {
       "op": "scan",
       "args": [
@@ -298,7 +360,7 @@
     ]
   },
   {
-    "id": 19,
+    "id": 21,
     "expr": {
       "op": "series",
       "args": [
@@ -323,7 +385,7 @@
     ]
   },
   {
-    "id": 20,
+    "id": 22,
     "expr": {
       "op": "get",
       "args": [
@@ -341,7 +403,7 @@
     "expected": 3
   },
   {
-    "id": 21,
+    "id": 23,
     "expr": {
       "op": "numberFormat",
       "args": [
@@ -352,7 +414,7 @@
     "expected": "1.23"
   },
   {
-    "id": 22,
+    "id": 24,
     "expr": {
       "op": "range",
       "args": [
@@ -362,7 +424,7 @@
     "error": "ITERATION_LIMIT"
   },
   {
-    "id": 23,
+    "id": 25,
     "expr": {
       "op": "series",
       "args": [

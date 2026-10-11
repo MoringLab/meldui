@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'runtime.dart';
+import 'expression.dart' show assertSafeJson;
 
 /// One decoded piece of a hybrid stream: Markdown text, a one-line JSON control object, or a
 /// control-looking line that failed to parse.
@@ -237,6 +238,8 @@ class AnswerSession extends ChangeNotifier {
   final Map<String, ({String catalogId, List<JsonMap> messages})> _log = {};
   final Set<String> _warned = {};
   int revision = 0;
+  final Map<String, int> _artifactRevisions = {};
+  int artifactRevision(String id) => _artifactRevisions[id] ?? 0;
 
   AnswerSession(
     this.runtime, {
@@ -554,11 +557,83 @@ class AnswerSession extends ChangeNotifier {
     _touch();
   }
 
+  /// Preflight a revision before applying it; edited data remains protected by the runtime.
+  Future<void> updateArtifact(
+    String id,
+    int expectedRevision, {
+    String? text,
+    List<JsonMap>? messages,
+  }) async {
+    final index = _blocks.indexWhere((b) => b.id == id);
+    if (index < 0 || artifactRevision(id) != expectedRevision) {
+      throw StateError('ARTIFACT_REVISION');
+    }
+    final block = _blocks[index];
+    if (block is MarkdownBlock && text != null && text.length <= 65536) {
+      _blocks[index] = block.copy(text: text, streaming: false);
+    } else if (block is SurfaceBlock &&
+        messages != null &&
+        messages.length <= 100) {
+      assertSafeJson(messages);
+      final validation = await UIRuntime.create(
+        schema: runtime.catalogSchema,
+        prewarm: false,
+      );
+      try {
+        for (final message in _log[block.surfaceId]!.messages) {
+          validation.accept(jsonDecode(jsonEncode(message)));
+        }
+        validation.accept({
+          'version': 'v0.9',
+          'updateDataModel': {
+            'surfaceId': block.surfaceId,
+            'path': '/',
+            'value': jsonDecode(jsonEncode(runtime.read(block.surfaceId, '/'))),
+          },
+        });
+        for (final message in messages) {
+          final body =
+              message['updateComponents'] ?? message['updateDataModel'];
+          if (body is! Map || body['surfaceId'] != block.surfaceId) {
+            throw StateError('ARTIFACT_SCOPE');
+          }
+          if (validation.accept(message).any((d) => d['severity'] == 'error')) {
+            throw StateError('ARTIFACT_INVALID');
+          }
+        }
+        validation.finish();
+        if (validation.diagnostics.any((d) => d['severity'] == 'error')) {
+          throw StateError('ARTIFACT_INVALID');
+        }
+        if (artifactRevision(id) != expectedRevision ||
+            !_blocks.any((b) => identical(b, block))) {
+          throw StateError('ARTIFACT_REVISION');
+        }
+        for (final message in messages) {
+          pushMessage(message);
+        }
+      } finally {
+        validation.dispose();
+      }
+    } else {
+      throw StateError('ARTIFACT_UPDATE');
+    }
+    _artifactRevisions[id] = expectedRevision + 1;
+    _touch();
+  }
+
   JsonMap serialize() =>
       _redactHistory({
             'schema': 2,
             'protocol': 'v0.9',
-            'blocks': [for (final b in _blocks) _blockJson(b)],
+            'blocks': [
+              for (final b in _blocks)
+                {
+                  ..._blockJson(b),
+                  if (artifactRevision(b.id) > 0)
+                    'revision': artifactRevision(b.id),
+                },
+            ],
             'surfaces': {
               for (final entry in _log.entries)
                 entry.key: {
@@ -637,6 +712,11 @@ class AnswerSession extends ChangeNotifier {
     for (final raw in snapshot['blocks'] as List) {
       final b = raw as Map;
       final id = b['id'] as String;
+      final revision = b['revision'] ?? 0;
+      if (revision is! int || revision < 0) {
+        throw StateError('ARTIFACT_REVISION');
+      }
+      session._artifactRevisions[id] = revision;
       session._nextBlock = [
         session._nextBlock,
         (int.tryParse(id.replaceAll(RegExp(r'\D'), '')) ?? 0) + 1,

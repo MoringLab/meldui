@@ -82,6 +82,28 @@ export function evaluateExpression(expression: Expr, read: (path: string) => unk
           throw new Error("EXPECTED_ARRAY_INDEX");
         return target[key as number] ?? null;
       }
+      case "sort": {
+        const source = at(0);
+        if (!Array.isArray(source)) throw Error("EXPECTED_ARRAY");
+        loop(source.length);
+        const field = item.args.length > 1 ? at(1) : null,
+          descending = item.args.length > 2 ? Boolean(at(2)) : false;
+        if (field !== null && (!Number.isInteger(field) || Number(field) < 0))
+          throw Error("EXPECTED_ARRAY_INDEX");
+        const key = (value: any) =>
+          field === null ? value : Array.isArray(value) ? value[Number(field)] : null;
+        return source
+          .map((value, index) => ({ value, index }))
+          .sort((a, b) => {
+            const x = key(a.value),
+              y = key(b.value);
+            if (!["number", "string"].includes(typeof x) || typeof x !== typeof y)
+              throw Error("SORT_TYPE");
+            const order = x < y ? -1 : x > y ? 1 : 0;
+            return (descending ? -order : order) || a.index - b.index;
+          })
+          .map((item) => item.value);
+      }
       case "numberFormat": {
         const digits = item.args.length > 1 ? num(at(1)) : 2;
         if (!Number.isInteger(digits) || digits < 0 || digits > 8) throw new Error("ROUND_LIMIT");

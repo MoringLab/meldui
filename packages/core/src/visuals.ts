@@ -2,6 +2,8 @@ import { evaluateExpression, resolvePath } from "./expression.js";
 import type { UIRuntime } from "./index.js";
 export type SceneShape = {
   type: string;
+  id?: string;
+  label?: string;
   attrs: Record<string, unknown>;
   text?: string;
   action?: unknown;
@@ -17,7 +19,13 @@ export function sceneShapes(
 ): SceneShape[] {
   const shapes: SceneShape[] = [];
   let visited = 0;
-  const visit = (items: any[], depth: number, local: any = {}) => {
+  const visit = (
+    items: any[],
+    depth: number,
+    local: any = {},
+    inheritedAction?: unknown,
+    inheritedLabel?: string,
+  ) => {
     if (depth > 12) throw new Error("SCENE_DEPTH");
     for (const node of items) {
       if (++visited > 300) throw new Error("SCENE_ELEMENT_LIMIT");
@@ -35,22 +43,55 @@ export function sceneShapes(
         const values = value(node.items);
         if (!Array.isArray(values) || values.length > 300) throw new Error("SCENE_REPEAT_LIMIT");
         values.forEach((item: any, i: number) => {
-          visit(node.children ?? [], depth + 1, { $item: item, $index: i });
+          visit(
+            node.children ?? [],
+            depth + 1,
+            { ...local, $item: item, $index: i },
+            inheritedAction,
+            inheritedLabel,
+          );
         });
         continue;
       }
-      const attrs = Object.fromEntries(
+      const attrs: Record<string, unknown> = Object.fromEntries(
         Object.entries(node.attrs ?? {}).map(([k, v]) => [k, value(v)]),
       );
+      if (node.transforms?.length) {
+        const finite = (v: any, fallback: number) => {
+          const n = v === undefined ? fallback : Number(value(v));
+          if (!Number.isFinite(n) || Math.abs(n) > 100000) throw Error("SCENE_TRANSFORM");
+          return n;
+        };
+        attrs.transform = [
+          attrs.transform ?? "",
+          ...node.transforms.map((t: any) =>
+            t.kind === "translate"
+              ? `translate(${finite(t.x, 0)},${finite(t.y, 0)})`
+              : t.kind === "rotate"
+                ? `rotate(${finite(t.angle, 0)},${finite(t.cx, 0)},${finite(t.cy, 0)})`
+                : `scale(${finite(t.x, 1)},${finite(t.y, 1)})`,
+          ),
+        ]
+          .join(" ")
+          .trim();
+      }
       if (node.type === "group") {
-        shapes.push({ type: "group", attrs });
-        visit(node.children ?? [], depth + 1, local);
-        shapes.push({ type: "group-end", attrs: {} });
+        shapes.push({ type: "group", attrs, id: node.id, label: node.label, action: node.action });
+        visit(
+          node.children ?? [],
+          depth + 1,
+          local,
+          node.action ?? inheritedAction,
+          node.label ?? inheritedLabel,
+        );
+        shapes.push({ type: "group-end", attrs: {}, id: node.id, label: node.label });
       } else
         shapes.push({
           type: node.type,
           attrs,
           text: node.text === undefined ? undefined : String(value(node.text)),
+          id: node.id,
+          label: node.label ?? inheritedLabel,
           action: node.action,
           onHover: node.onHover,
           dragPath: node.dragPath ? resolvePath(node.dragPath, scope) : undefined,
@@ -73,4 +114,10 @@ export function routePoints(points: { x: number; y: number; label: string }[]) {
     x: 30 + ((p.x - x) / w) * 440,
     y: 30 + (1 - (p.y - y) / h) * 220,
   }));
+}
+
+export function formatStat(value: unknown, precision = 2): string {
+  return typeof value === "number" && Number.isFinite(value)
+    ? String(evaluateExpression({ op: "numberFormat", args: [value, precision, true] }, () => null))
+    : String(value ?? "");
 }

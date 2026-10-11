@@ -1,0 +1,453 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T10:39:00.511097+00:00",
+  "title": "Design System: MeldUI",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "White Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 0.00)",
+          "oklch(26.43% 0.00000 0.00)",
+          "oklch(37.86% 0.00000 0.00)",
+          "oklch(49.29% 0.00000 0.00)",
+          "oklch(60.71% 0.00000 0.00)",
+          "oklch(72.14% 0.00000 0.00)",
+          "oklch(83.57% 0.00000 0.00)",
+          "oklch(95.00% 0.00000 0.00)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "White Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 0.00)",
+          "oklch(26.43% 0.00000 0.00)",
+          "oklch(37.86% 0.00000 0.00)",
+          "oklch(49.29% 0.00000 0.00)",
+          "oklch(60.71% 0.00000 0.00)",
+          "oklch(72.14% 0.00000 0.00)",
+          "oklch(83.57% 0.00000 0.00)",
+          "oklch(95.00% 0.00000 0.00)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Dark Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.03842 256.66)",
+          "oklch(26.43% 0.03842 256.66)",
+          "oklch(37.86% 0.03842 256.66)",
+          "oklch(49.29% 0.03842 256.66)",
+          "oklch(60.71% 0.03842 256.66)",
+          "oklch(72.14% 0.03842 256.66)",
+          "oklch(83.57% 0.03842 256.66)",
+          "oklch(95.00% 0.03842 256.66)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.03913 255.34)",
+          "oklch(26.43% 0.03913 255.34)",
+          "oklch(37.86% 0.03913 255.34)",
+          "oklch(49.29% 0.03913 255.34)",
+          "oklch(60.71% 0.03913 255.34)",
+          "oklch(72.14% 0.03913 255.34)",
+          "oklch(83.57% 0.03913 255.34)",
+          "oklch(95.00% 0.03913 255.34)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Restrained Blue",
+        "tonalRamp": [
+          "oklch(15.00% 0.18361 262.47)",
+          "oklch(26.43% 0.18361 262.47)",
+          "oklch(37.86% 0.18361 262.47)",
+          "oklch(49.29% 0.18361 262.47)",
+          "oklch(60.71% 0.18361 262.47)",
+          "oklch(72.14% 0.18361 262.47)",
+          "oklch(83.57% 0.18361 262.47)",
+          "oklch(95.00% 0.18361 262.47)"
+        ]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "White Action Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 0.00)",
+          "oklch(26.43% 0.00000 0.00)",
+          "oklch(37.86% 0.00000 0.00)",
+          "oklch(49.29% 0.00000 0.00)",
+          "oklch(60.71% 0.00000 0.00)",
+          "oklch(72.14% 0.00000 0.00)",
+          "oklch(83.57% 0.00000 0.00)",
+          "oklch(95.00% 0.00000 0.00)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Cool Boundary",
+        "tonalRamp": [
+          "oklch(15.00% 0.01044 247.94)",
+          "oklch(26.43% 0.01044 247.94)",
+          "oklch(37.86% 0.01044 247.94)",
+          "oklch(49.29% 0.01044 247.94)",
+          "oklch(60.71% 0.01044 247.94)",
+          "oklch(72.14% 0.01044 247.94)",
+          "oklch(83.57% 0.01044 247.94)",
+          "oklch(95.00% 0.01044 247.94)"
+        ]
+      },
+      "danger": {
+        "role": "neutral",
+        "displayName": "Danger Red",
+        "tonalRamp": [
+          "oklch(15.00% 0.18205 29.51)",
+          "oklch(26.43% 0.18205 29.51)",
+          "oklch(37.86% 0.18205 29.51)",
+          "oklch(49.29% 0.18205 29.51)",
+          "oklch(60.71% 0.18205 29.51)",
+          "oklch(72.14% 0.18205 29.51)",
+          "oklch(83.57% 0.18205 29.51)",
+          "oklch(95.00% 0.18205 29.51)"
+        ]
+      },
+      "success": {
+        "role": "neutral",
+        "displayName": "Success Green",
+        "tonalRamp": [
+          "oklch(15.00% 0.09043 155.42)",
+          "oklch(26.43% 0.09043 155.42)",
+          "oklch(37.86% 0.09043 155.42)",
+          "oklch(49.29% 0.09043 155.42)",
+          "oklch(60.71% 0.09043 155.42)",
+          "oklch(72.14% 0.09043 155.42)",
+          "oklch(83.57% 0.09043 155.42)",
+          "oklch(95.00% 0.09043 155.42)"
+        ]
+      },
+      "dark-background": {
+        "role": "neutral",
+        "displayName": "Night Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.02400 251.59)",
+          "oklch(26.43% 0.02400 251.59)",
+          "oklch(37.86% 0.02400 251.59)",
+          "oklch(49.29% 0.02400 251.59)",
+          "oklch(60.71% 0.02400 251.59)",
+          "oklch(72.14% 0.02400 251.59)",
+          "oklch(83.57% 0.02400 251.59)",
+          "oklch(95.00% 0.02400 251.59)"
+        ]
+      },
+      "dark-surface": {
+        "role": "neutral",
+        "displayName": "Raised Night Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.03137 252.79)",
+          "oklch(26.43% 0.03137 252.79)",
+          "oklch(37.86% 0.03137 252.79)",
+          "oklch(49.29% 0.03137 252.79)",
+          "oklch(60.71% 0.03137 252.79)",
+          "oklch(72.14% 0.03137 252.79)",
+          "oklch(83.57% 0.03137 252.79)",
+          "oklch(95.00% 0.03137 252.79)"
+        ]
+      },
+      "dark-foreground": {
+        "role": "neutral",
+        "displayName": "Light Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.00686 247.90)",
+          "oklch(26.43% 0.00686 247.90)",
+          "oklch(37.86% 0.00686 247.90)",
+          "oklch(49.29% 0.00686 247.90)",
+          "oklch(60.71% 0.00686 247.90)",
+          "oklch(72.14% 0.00686 247.90)",
+          "oklch(83.57% 0.00686 247.90)",
+          "oklch(95.00% 0.00686 247.90)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Muted Light Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02852 253.27)",
+          "oklch(26.43% 0.02852 253.27)",
+          "oklch(37.86% 0.02852 253.27)",
+          "oklch(49.29% 0.02852 253.27)",
+          "oklch(60.71% 0.02852 253.27)",
+          "oklch(72.14% 0.02852 253.27)",
+          "oklch(83.57% 0.02852 253.27)",
+          "oklch(95.00% 0.02852 253.27)"
+        ]
+      },
+      "dark-accent": {
+        "role": "primary",
+        "displayName": "Pale Blue",
+        "tonalRamp": [
+          "oklch(15.00% 0.10486 264.95)",
+          "oklch(26.43% 0.10486 264.95)",
+          "oklch(37.86% 0.10486 264.95)",
+          "oklch(49.29% 0.10486 264.95)",
+          "oklch(60.71% 0.10486 264.95)",
+          "oklch(72.14% 0.10486 264.95)",
+          "oklch(83.57% 0.10486 264.95)",
+          "oklch(95.00% 0.10486 264.95)"
+        ]
+      },
+      "dark-on-accent": {
+        "role": "neutral",
+        "displayName": "Night Action Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.02400 251.59)",
+          "oklch(26.43% 0.02400 251.59)",
+          "oklch(37.86% 0.02400 251.59)",
+          "oklch(49.29% 0.02400 251.59)",
+          "oklch(60.71% 0.02400 251.59)",
+          "oklch(72.14% 0.02400 251.59)",
+          "oklch(83.57% 0.02400 251.59)",
+          "oklch(95.00% 0.02400 251.59)"
+        ]
+      },
+      "dark-border": {
+        "role": "neutral",
+        "displayName": "Night Boundary",
+        "tonalRamp": [
+          "oklch(15.00% 0.04457 251.28)",
+          "oklch(26.43% 0.04457 251.28)",
+          "oklch(37.86% 0.04457 251.28)",
+          "oklch(49.29% 0.04457 251.28)",
+          "oklch(60.71% 0.04457 251.28)",
+          "oklch(72.14% 0.04457 251.28)",
+          "oklch(83.57% 0.04457 251.28)",
+          "oklch(95.00% 0.04457 251.28)"
+        ]
+      },
+      "dark-danger": {
+        "role": "neutral",
+        "displayName": "Light Danger Red",
+        "tonalRamp": [
+          "oklch(15.00% 0.10162 25.42)",
+          "oklch(26.43% 0.10162 25.42)",
+          "oklch(37.86% 0.10162 25.42)",
+          "oklch(49.29% 0.10162 25.42)",
+          "oklch(60.71% 0.10162 25.42)",
+          "oklch(72.14% 0.10162 25.42)",
+          "oklch(83.57% 0.10162 25.42)",
+          "oklch(95.00% 0.10162 25.42)"
+        ]
+      },
+      "dark-success": {
+        "role": "neutral",
+        "displayName": "Light Success Green",
+        "tonalRamp": [
+          "oklch(15.00% 0.10066 155.06)",
+          "oklch(26.43% 0.10066 155.06)",
+          "oklch(37.86% 0.10066 155.06)",
+          "oklch(49.29% 0.10066 155.06)",
+          "oklch(60.71% 0.10066 155.06)",
+          "oklch(72.14% 0.10066 155.06)",
+          "oklch(83.57% 0.10066 155.06)",
+          "oklch(95.00% 0.10066 155.06)"
+        ]
+      },
+      "editorial-paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.01270 86.83)",
+          "oklch(26.43% 0.01270 86.83)",
+          "oklch(37.86% 0.01270 86.83)",
+          "oklch(49.29% 0.01270 86.83)",
+          "oklch(60.71% 0.01270 86.83)",
+          "oklch(72.14% 0.01270 86.83)",
+          "oklch(83.57% 0.01270 86.83)",
+          "oklch(95.00% 0.01270 86.83)"
+        ]
+      },
+      "editorial-accent": {
+        "role": "primary",
+        "displayName": "Deep Green",
+        "tonalRamp": [
+          "oklch(15.00% 0.06712 164.98)",
+          "oklch(26.43% 0.06712 164.98)",
+          "oklch(37.86% 0.06712 164.98)",
+          "oklch(49.29% 0.06712 164.98)",
+          "oklch(60.71% 0.06712 164.98)",
+          "oklch(72.14% 0.06712 164.98)",
+          "oklch(83.57% 0.06712 164.98)",
+          "oklch(95.00% 0.06712 164.98)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "First-level heading",
+        "purpose": "Highest semantic heading in Neutral; no marketing display role."
+      },
+      "title": {
+        "displayName": "Second-level heading",
+        "purpose": "Main section heading in Neutral."
+      },
+      "section-title": {
+        "displayName": "Third-level heading",
+        "purpose": "Subsection hierarchy in Neutral."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text and inherited control typography."
+      },
+      "label": {
+        "displayName": "Field label",
+        "purpose": "Visible names and units for inputs."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Preformatted content that scrolls rather than shrinks."
+      },
+      "editorial-title": {
+        "displayName": "Editorial second-level heading",
+        "purpose": "Warm-paper kit with serif hierarchy."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "control-feedback",
+        "value": "filter 140ms ease-out",
+        "purpose": "Short shared button feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition: none !important; animation: none !important;",
+        "purpose": "Disable renderer motion when reduced motion is requested."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mosaic-stack",
+        "value": "480px",
+        "purpose": "Container width: media mosaic becomes one column."
+      },
+      {
+        "name": "surface-stack",
+        "value": "560px",
+        "purpose": "Container width: rows and grids stack."
+      },
+      {
+        "name": "media-beside",
+        "value": "600px",
+        "purpose": "Container width: left/right media composition can sit beside text."
+      },
+      {
+        "name": "showcase-stack",
+        "value": "720px",
+        "purpose": "Showcase viewport width: visual and controls stack. Secondary display settings initially collapse below this width; example selection stays visible."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Shared host control",
+      "kind": "button",
+      "refersTo": "host-control",
+      "description": "Theme-aware default for a trusted host control; semantic action variants are separate.",
+      "html": "<button type=\"button\" class=\"ds-host-control\">Apply</button>",
+      "css": ".ds-host-control { font: inherit; min-height: 44px; min-width: 44px; border: 1px solid var(--ui-border, #dce2e8); border-radius: 8px; background: var(--ui-surface, #ffffff); color: var(--ui-foreground, #192638); padding: 6px 12px; cursor: pointer; } .ds-host-control:hover:not(:disabled) { background: var(--ui-background, #ffffff); } .ds-host-control:focus-visible { outline: 2px solid var(--ui-accent, #245aca); outline-offset: 3px; } .ds-host-control:disabled { opacity: .5; cursor: default; }"
+    },
+    {
+      "name": "Labeled field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Visible label, quiet field surface and a primary input target.",
+      "html": "<label class=\"ds-field\"><span>Voltage (V)</span><input type=\"number\" value=\"12\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 8px; color: var(--ui-foreground, #192638); } .ds-field > span { font-size: 14px; font-weight: 550; } .ds-field input { font: inherit; width: 100%; min-height: 44px; border: 1px solid var(--ui-border, #dce2e8); border-radius: 6px; background: var(--ui-surface, #ffffff); color: var(--ui-foreground, #192638); padding: 10px 12px; } .ds-field input:focus-visible { outline: 2px solid var(--ui-accent, #245aca); outline-offset: 3px; } .ds-field input:disabled { opacity: .55; cursor: not-allowed; }"
+    },
+    {
+      "name": "Tab navigation",
+      "kind": "nav",
+      "description": "Scrollable tabs show selection with an accent underline.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\" aria-label=\"View\"><button type=\"button\" role=\"tab\" aria-selected=\"true\">Diagram</button><button type=\"button\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Values</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--ui-border, #dce2e8); margin-bottom: 20px; overflow: auto; } .ds-tabs button { min-height: 44px; border: 0; border-bottom: 2px solid transparent; background: none; padding: 12px 16px; color: var(--ui-muted, #526277); font: inherit; white-space: nowrap; cursor: pointer; } .ds-tabs button[aria-selected=\"true\"] { color: var(--ui-accent, #245aca); border-bottom-color: var(--ui-accent, #245aca); } .ds-tabs button:hover { background: var(--ui-background, #ffffff); } .ds-tabs button:focus-visible { outline: 2px solid var(--ui-accent, #245aca); outline-offset: 3px; }"
+    },
+    {
+      "name": "Status badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Compact supporting status; no implied action.",
+      "html": "<span class=\"ds-badge\">Ready</span>",
+      "css": ".ds-badge { display: inline-flex; align-self: flex-start; gap: 4px; border: 1px solid var(--ui-border, #dce2e8); border-radius: 99px; padding: 3px 10px; font-size: 13px; color: var(--ui-foreground, #192638); }"
+    },
+    {
+      "name": "Independent tool card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "A fine boundary identifies an independent tool without adding a shadow.",
+      "html": "<section class=\"ds-card\"><h2>Energy estimate</h2><p>Use the current settings to compare consumption.</p></section>",
+      "css": ".ds-card { background: var(--ui-surface, #ffffff); color: var(--ui-foreground, #192638); border: 1px solid var(--ui-border, #dce2e8); border-radius: var(--ui-radius, 12px); padding: 24px; min-width: 0; } .ds-card h2 { margin: 0 0 16px; font-family: var(--ui-heading, system-ui, sans-serif); font-size: 20px; } .ds-card p { margin: 0; max-width: 72ch; white-space: pre-wrap; }"
+    },
+    {
+      "name": "Open control panel",
+      "kind": "custom",
+      "refersTo": "control-panel",
+      "description": "Related controls stay together in a plain column beside or below the visual.",
+      "html": "<section class=\"ds-panel\"><h3>Rotation</h3><label for=\"ds-rotation\">Angle (degrees)</label><div class=\"ds-slider\"><input id=\"ds-rotation\" type=\"range\" min=\"0\" max=\"360\" value=\"30\"><output for=\"ds-rotation\">30°</output></div></section>",
+      "css": ".ds-panel { display: flex; flex-direction: column; gap: 16px; color: var(--ui-foreground, #192638); } .ds-panel h3 { margin: 0; } .ds-slider { display: flex; align-items: center; gap: 16px; min-height: 44px; } .ds-slider input { flex: 1; min-width: 0; min-height: 44px; margin: 0; touch-action: pan-y; accent-color: var(--ui-accent, #245aca); } .ds-slider output { min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; } .ds-slider input:focus-visible { outline: 2px solid var(--ui-accent, #245aca); outline-offset: 3px; }"
+    },
+    {
+      "name": "Interactive scene",
+      "kind": "custom",
+      "refersTo": "scene",
+      "description": "Responsive typed SVG with description, selection and visible keyboard focus.",
+      "html": "<figure class=\"ds-scene\"><svg viewBox=\"0 0 400 240\" role=\"img\" aria-labelledby=\"ds-scene-title ds-scene-description\"><title id=\"ds-scene-title\">Selectable part</title><desc id=\"ds-scene-description\">A circular part, selected in blue.</desc><g role=\"button\" tabindex=\"0\" aria-label=\"Select circular part\" aria-pressed=\"true\"><circle cx=\"200\" cy=\"120\" r=\"64\" fill=\"none\" stroke-width=\"2\" /></g></svg></figure>",
+      "css": ".ds-scene { position: relative; margin: 0; } .ds-scene svg { width: 100%; height: auto; display: block; min-height: 240px; } .ds-scene circle { stroke: var(--ui-border, #dce2e8); } .ds-scene g[role=\"button\"] { cursor: pointer; } .ds-scene g[aria-pressed=\"true\"] > circle { stroke: var(--ui-accent, #245aca); stroke-width: 4; } .ds-scene g:focus-visible { outline: 2px solid var(--ui-accent, #245aca); outline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Workspace",
+    "overview": "Engine's reference lab is a quiet workspace for making, inspecting and comparing an interface. Embedded MeldUI answers follow the same restrained character: the useful diagram, media or tool carries the composition, with concise text and controls supporting it. The SDK is a reference surface rather than a separately branded marketing page.\n\nNeutral supplies cool white paper, dark ink and restrained blue. Editorial retains warm paper, deep green and serif headings. Both support light and dark modes without changing the answer's data or controls. Hosts can replace typography, tokens and trusted component views so an answer fits its surrounding service.",
+    "keyCharacteristics": [
+      "Subject-specific visuals with subordinate controls.",
+      "Open, responsive composition and restrained borders.",
+      "Host typography, media and component ownership.",
+      "Local interaction state preserved across kit changes.",
+      "Keyboard, text alternatives and reduced-motion support."
+    ],
+    "rules": [
+      {
+        "name": "The Active Kit Rule",
+        "body": "Resolve every shared foreground, surface, boundary and interaction color from the active kit; keep host components in that same theme contract.",
+        "section": "colors"
+      },
+      {
+        "name": "The Host Type Rule",
+        "body": "Embedded answers may inherit the host's body and heading families; kit changes preserve component meaning and state.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Surface Rule",
+        "body": "Use open layout for related content and a bordered container only when it identifies an independent tool, field or content boundary.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** lead with the smallest useful representation of the requested task and one subject-specific visual when it helps.",
+      "**Do** place useful controls beside or below the visual as the available container allows.",
+      "**Do** keep input labels, units, formatted numbers and text alternatives explicit.",
+      "**Do** resolve styling from the active kit or host theme while preserving local state.",
+      "**Do** retain visible focus, keyboard access, accessible chart alternatives and reduced-motion behavior."
+    ],
+    "donts": [
+      "**Don't** force a quiz, callout, repeated heading or decorative metric into every answer.",
+      "**Don't** nest cards to group content that already belongs together in an open layout.",
+      "**Don't** impose a fixed content height without the host's explicit height policy.",
+      "**Don't** make the reference frame or demo navigation mandatory in a host embedding.",
+      "**Don't** promote a host-specific override into a shared kit rule."
+    ]
+  }
+}

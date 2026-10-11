@@ -17,6 +17,7 @@ import hybridFixtures from "../../../fixtures/hybrid/cases.json";
 import mediaFixtures from "../../../fixtures/media/cases.json";
 import { sampleContent } from "../../../fixtures/media/host";
 import "@engine/renderer-react/styles.css";
+import { loadAppResources } from "./app-resources";
 import { brandComponents } from "./brand";
 import "./styles.css";
 
@@ -44,8 +45,19 @@ function App() {
     "agy/gemini-3.7-flash-medium",
   ]);
   const [model, setModel] = useState(models[0]);
+  const [allowApps, setAllowApps] = useState(false);
   const [policyMode, setPolicyMode] = useState<HostPolicy["mode"]>("auto");
   const [session, setSession] = useState<AnswerSession>(() => new AnswerSession(createUIRuntime()));
+  const live = useMemo(
+    () => ({
+      kind: "live" as const,
+      assurance: "browser" as const,
+      loadResources: loadAppResources,
+      onSnapshot: (id: string, state: Record<string, unknown>) =>
+        session.saveArtifactState(id, state),
+    }),
+    [session],
+  );
   const runtime: UIRuntime = session.runtime;
   const content = useMemo(
     () => sampleContent(runtime.attachments, location.origin, (id) => setStatus(id)),
@@ -59,7 +71,7 @@ function App() {
   const sessionRef = useRef(session);
   sessionRef.current = session;
   const policyRef = useRef<Partial<HostPolicy>>({});
-  policyRef.current = { mode: policyMode };
+  policyRef.current = { mode: policyMode, allowSandbox: allowApps };
   const onAction = useRef<(action: UserAction) => void>(() => {});
   const activate = (value: AnswerSession) => {
     sessionRef.current.runtime.dispose();
@@ -266,6 +278,14 @@ function App() {
               <option value="engine-only">화면만</option>
             </select>
           </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={allowApps}
+              onChange={(e) => setAllowApps(e.target.checked)}
+            />
+            웹 코드 위젯 허용
+          </label>
           <button
             type="button"
             className="plain-button"
@@ -342,6 +362,7 @@ function App() {
               content={content}
             >
               <AnswerView
+                appRuntime={allowApps ? live : undefined}
                 session={session}
                 labels={{
                   surface: "인터랙티브 콘텐츠",

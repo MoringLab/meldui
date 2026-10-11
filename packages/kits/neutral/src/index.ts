@@ -14,13 +14,13 @@ export const neutral = defineKit({
   catalogId: CATALOG_ID,
   tokens: {
     light: {
-      background: "#f4f6fa",
+      background: "#ffffff",
       surface: "#ffffff",
       foreground: "#192638",
       muted: "#526277",
       accent: "#245aca",
       onAccent: "#ffffff",
-      border: "#cbd4e0",
+      border: "#dce2e8",
       danger: "#b42318",
       success: "#236540",
     },
@@ -41,6 +41,10 @@ export const neutral = defineKit({
     motionMs: 140,
   },
   components: Object.fromEntries(COMPONENT_NAMES.map((name) => [name, { implementation: name }])),
+  generation: {
+    designSkill:
+      "Make the requested task usable immediately. Use one large, subject-specific visual, meaningful controls and a restrained reading column. Prefer open layout over nested cards. Use real component semantics, units and formatted numbers. Avoid repeated headings, filler quizzes, generic instructional prose and decorative metrics. Adapt to the available container and preserve local state.",
+  },
   guide:
     "Build clear, compact tools. Lead with one heading and a short explanation. Group related controls; give every input a label. Use bound input values and computed values for local calculations. Choose a table for exact comparisons and a chart for trends. Avoid nested cards. Fit narrow mobile screens. Show explicit units and useful empty states.",
   examples: ["calculator", "comparison", "form", "planner", "dashboard", "explanation", "game"],

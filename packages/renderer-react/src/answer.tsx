@@ -8,6 +8,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
+import { type AppRuntimeProvider, LiveAppView } from "./app-runtime.js";
 import { ContentProvider, MediaContent, useContentHost } from "./content.js";
 import { SafeMarkdown } from "./markdown.js";
 import { UISurface } from "./renderer.js";
@@ -16,6 +17,7 @@ import { SandboxView, type SandboxViewerRuntime } from "./sandbox.js";
 export type MarkdownRendererProps = { text: string; streaming: boolean };
 /** Hosts replace this to reuse their own Markdown pipeline (it must sanitize; see docs/hybrid). */
 export type MarkdownRenderer = (props: MarkdownRendererProps) => ReactNode;
+export type SurfaceBlockView = Extract<AnswerBlock, { kind: "surface" }>;
 export type MediaBlockView = Extract<AnswerBlock, { kind: "media" }>;
 export type AnswerLabels = {
   surface: string;
@@ -64,15 +66,20 @@ export const PlainMarkdown: MarkdownRenderer = ({ text }) => {
 export type AnswerViewProps = {
   session: AnswerSession;
   sandbox?: SandboxViewerRuntime;
+  appRuntime?: AppRuntimeProvider;
   markdown?: MarkdownRenderer;
   /** Render a media block. Default: a plain list of attachment ids until the media components land. */
   renderMedia?: (block: MediaBlockView) => ReactNode;
+  renderSurface?: (block: SurfaceBlockView, session: AnswerSession) => ReactNode;
+  renderLayout?: (children: ReactNode) => ReactNode;
   /** Host handler for the `expand` chrome action. Without it a modal dialog is used. */
   onExpand?: (surfaceId: string) => void;
   /** Cap the surface height with internal scroll; undefined grows with content. */
   maxSurfaceHeight?: number;
   /** Show the title / reset / expand / view-as-text bar. */
   chrome?: boolean;
+  displayMode?: "inline" | "fullscreen" | "pip";
+  onDisplayModeChange?: (mode: "inline" | "fullscreen" | "pip") => void;
   labels?: Partial<AnswerLabels>;
 };
 
@@ -80,11 +87,16 @@ export type AnswerViewProps = {
 export function AnswerView({
   session,
   sandbox,
+  appRuntime,
   markdown = SafeMarkdown,
   renderMedia,
+  renderSurface,
+  renderLayout,
   onExpand,
   maxSurfaceHeight,
   chrome = true,
+  displayMode = "inline",
+  onDisplayModeChange,
   labels: custom,
 }: AnswerViewProps) {
   const contentHost = useContentHost();
@@ -92,9 +104,18 @@ export function AnswerView({
   const Markdown = markdown;
   const labels = { ...defaultAnswerLabels, ...custom };
   const height = maxSurfaceHeight ?? session.policy.maxSurfaceHeight;
-  return (
+  const rendered = (
     <ContentProvider host={session.policy.allowMedia ? contentHost : undefined}>
-      <div className="ui-answer">
+      <div className={`ui-answer ui-answer-${displayMode}`} data-display-mode={displayMode}>
+        {displayMode !== "inline" && onDisplayModeChange && (
+          <button
+            className="ui-display-close"
+            type="button"
+            onClick={() => onDisplayModeChange("inline")}
+          >
+            Close
+          </button>
+        )}
         {state.blocks.map((block) => {
           switch (block.kind) {
             case "markdown":
@@ -104,6 +125,10 @@ export function AnswerView({
                 </div>
               );
             case "surface":
+              if (renderSurface)
+                return (
+                  <React.Fragment key={block.id}>{renderSurface(block, session)}</React.Fragment>
+                );
               return (
                 <SurfaceFrame
                   key={block.id}
@@ -145,6 +170,25 @@ export function AnswerView({
                 </div>
               );
             case "sandbox":
+              if (
+                appRuntime &&
+                session.policy.allowSandbox &&
+                block.status !== "blocked" &&
+                block.source
+              )
+                return (
+                  <LiveAppView
+                    key={block.id}
+                    id={block.id}
+                    source={block.source}
+                    fallbackText={block.fallbackText}
+                    provider={appRuntime}
+                    phase={(block as any).phase ?? "complete"}
+                    initialState={(block as any).state}
+                    libraries={(block as any).libraries}
+                    mode={block.mode}
+                  />
+                );
               if (sandbox?.verified && block.status !== "blocked")
                 return <SandboxView key={block.id} block={block} provider={sandbox} />;
               return (
@@ -158,6 +202,7 @@ export function AnswerView({
       </div>
     </ContentProvider>
   );
+  return <>{renderLayout ? renderLayout(rendered) : rendered}</>;
 }
 
 function SurfaceFrame({
@@ -201,7 +246,27 @@ function SurfaceFrame({
       aria-pressed={pressed}
       onClick={onClick}
     >
-      <span aria-hidden="true">{glyph}</span>
+      <svg
+        aria-hidden="true"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path
+          d={
+            glyph === "↺"
+              ? "M4 8a8 8 0 1 1 0 8 M4 3v5h5"
+              : glyph === "⤢"
+                ? "M8 3H3v5 M16 3h5v5 M3 16v5h5 M16 21h5v-5"
+                : "M4 5h16 M12 5v15 M8 20h8"
+          }
+        />
+      </svg>
     </button>
   );
   return (

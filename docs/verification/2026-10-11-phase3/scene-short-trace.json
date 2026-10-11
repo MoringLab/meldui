@@ -1,0 +1,53 @@
+{
+  "scope": "One bounded interaction trace, includes automation and two animation frames. Not a render-latency benchmark or M4 replacement.",
+  "rows": [
+    {
+      "id": "01",
+      "driverToTwoFramesMs": 150.58941800000002
+    },
+    {
+      "id": "01",
+      "driverToTwoFramesMs": 96.24935099999993
+    },
+    {
+      "id": "01",
+      "driverToTwoFramesMs": 88.84811200000013
+    },
+    {
+      "id": "03",
+      "driverToTwoFramesMs": 54.52911999999969
+    },
+    {
+      "id": "03",
+      "driverToTwoFramesMs": 297.5420089999998
+    },
+    {
+      "id": "03",
+      "driverToTwoFramesMs": 245.3359470000005
+    },
+    {
+      "id": "08",
+      "driverToTwoFramesMs": 60.43720499999927
+    },
+    {
+      "id": "08",
+      "driverToTwoFramesMs": 48.56697299999996
+    },
+    {
+      "id": "08",
+      "driverToTwoFramesMs": 26.14154899999994
+    },
+    {
+      "id": "09",
+      "driverToTwoFramesMs": 116.91467099999954
+    },
+    {
+      "id": "09",
+      "driverToTwoFramesMs": 80.87365799999952
+    },
+    {
+      "id": "09",
+      "driverToTwoFramesMs": 61.41964400000052
+    }
+  ]
+}

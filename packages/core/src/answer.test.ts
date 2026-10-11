@@ -1,3 +1,4 @@
+import { CATALOG_ID } from "@engine/protocol";
 import { describe, expect, it } from "vitest";
 import fixtures from "../../../fixtures/cases.json" with { type: "json" };
 import { AnswerDecoder, AnswerSession, migrateSnapshot } from "./answer.js";
@@ -240,4 +241,56 @@ it("cancelled model streams retain the last received content without completing 
   expect(session.asText()).not.toContain("Late output");
   expect(session.blocks.some((b) => b.status === "complete")).toBe(false);
   runtime.dispose();
+});
+
+it("artifact updates use revisions, validate first and keep user input", () => {
+  const r = createUIRuntime();
+  const s = new AnswerSession(r);
+  s.push(
+    JSON.stringify({ version: "v0.9", createSurface: { surfaceId: "m", catalogId: CATALOG_ID } }) +
+      "\n",
+  );
+  s.push(
+    JSON.stringify({
+      version: "v0.9",
+      updateDataModel: { surfaceId: "m", path: "/", value: { name: "model" } },
+    }) + "\n",
+  );
+  s.push(
+    JSON.stringify({
+      version: "v0.9",
+      updateComponents: {
+        surfaceId: "m",
+        components: [{ id: "root", component: "Text", text: { path: "/name" } }],
+      },
+    }) + "\n",
+  );
+  s.end();
+  const id = s.blocks.find((b) => b.kind === "surface")!.id;
+  r.setValue("m", "/name", "user");
+  expect(() =>
+    s.updateArtifact(id, 0, {
+      messages: [
+        {
+          version: "v0.9",
+          updateComponents: { surfaceId: "m", components: [{ id: "root", component: "Unknown" }] },
+        },
+      ],
+    }),
+  ).toThrow();
+  expect(r.read("m", "/name")).toBe("user");
+  s.updateArtifact(id, 0, {
+    messages: [
+      {
+        version: "v0.9",
+        updateComponents: {
+          surfaceId: "m",
+          components: [{ id: "root", component: "Text", text: "Updated" }],
+        },
+      },
+    ],
+  });
+  expect(() => s.updateArtifact(id, 0, { messages: [] })).toThrow("ARTIFACT_REVISION");
+  expect(r.read("m", "/name")).toBe("user");
+  r.dispose();
 });

@@ -1,0 +1,32 @@
+{
+  "name": "@engine/adapter-mcp-apps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --clean"
+  },
+  "dependencies": {
+    "@engine/core": "workspace:*",
+    "@engine/protocol": "workspace:*",
+    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "zod": "4.6.5"
+  },
+  "peerDependencies": {}
+}

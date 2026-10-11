@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:engine_flutter/engine_flutter.dart';
 import 'brand.dart';
+import 'custom_components.dart';
 
 const server = String.fromEnvironment(
   'ENGINE_SERVER_URL',
@@ -58,8 +59,18 @@ class EngineLabState extends State<EngineLab> {
         jsonDecode(await rootBundle.loadString('assets/advanced.json')) as List;
     final showcase =
         jsonDecode(await rootBundle.loadString('assets/showcase.json')) as List;
-    fixtures = [...fixtures, ...mediaFixtures, ...advanced];
-    hybridFixtures = [...hybridFixtures, ...showcase];
+    fixtures = [
+      ...fixtures,
+      ...mediaFixtures,
+      ...advanced,
+      jsonDecode(await rootBundle.loadString('assets/custom.json')),
+    ];
+    hybridFixtures = [
+      ...hybridFixtures,
+      ...showcase,
+      ...(jsonDecode(await rootBundle.loadString('assets/service.json'))
+          as List),
+    ];
     kits['neutral'] = await UIKit.load('neutral');
     kits['editorial'] = await UIKit.load('editorial');
     kits['brand'] = await UIKit.load('brand');
@@ -112,8 +123,19 @@ class EngineLabState extends State<EngineLab> {
     );
   }
 
-  Future<AnswerSession> fresh({bool display = true}) async {
+  Future<AnswerSession> fresh({
+    bool display = true,
+    bool custom = false,
+  }) async {
     final created = await UIRuntime.create(
+      schema: custom
+          ? Map<String, dynamic>.from(
+              jsonDecode(
+                    await rootBundle.loadString('assets/custom-catalog.json'),
+                  )
+                  as Map,
+            )
+          : null,
       onAction: (action) {
         generate(
           '사용자가 ${action['name']} 작업을 요청했습니다. 현재 화면에 결과를 반영하세요.',
@@ -144,7 +166,7 @@ class EngineLabState extends State<EngineLab> {
   Future<void> replay(String id, {bool animate = true}) async {
     client?.close(force: true);
     final run = ++generation;
-    final next = await fresh();
+    final next = await fresh(custom: id == 'custom-kit');
     if (!mounted || run != generation) return;
     setState(() {
       selected = id;
@@ -417,7 +439,10 @@ class EngineLabState extends State<EngineLab> {
                               runtime: runtime!,
                               kit: kit,
                               dark: dark,
-                              components: brandComponents(kit, dark),
+                              components: {
+                                ...brandComponents(kit, dark),
+                                ...customComponents(),
+                              },
                               content: content,
                               onGestureLock: (locked) {
                                 if (mounted) {

@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import source from "../eval/showcase.json" with { type: "json" };
 import { CATALOG_ID } from "../packages/protocol/src/index.js";
+import { sceneNames, upgradedScene } from "./showcase-scenes.js";
 
 const o = (op: string, ...args: any[]) => ({ op, args }),
   r = (ref: string) => ({ ref }),
@@ -25,7 +26,12 @@ const action = (path: string, expr: any) => ({
 const button = (id: string, label: string, path: string, expr: any) =>
   n(id, "Button", { label, action: action(path, expr) });
 const stat = (id: string, label: string, expr: any, unit = "") =>
-  n(id, "Stat", { label, value: c(expr), unit });
+  n(id, "Stat", {
+    label,
+    value: c(expr),
+    unit,
+    precision: ["probability", "stay", "switch"].includes(id) ? 4 : 2,
+  });
 const scene = (title: string, nodes: any[], description: string) =>
   n("visual", "SvgScene", { title, description, viewBox: [0, 0, 500, 300], nodes });
 const circle = (cx: any, cy: any, radius: any = 8, fill = "accent", extra = {}) => ({
@@ -364,16 +370,41 @@ for (const item of source) {
       extra = [stat("conservation", "S+I+R", sum(o("get", states, 100)), "人")];
       break;
     }
-    case "16":
+    case "16": {
       data.a = 5;
-      controls = [slider("a", "연이율 %", "/a", 0, 20, 5)];
-      goal = "이율을 바꾸고 20년 후 금액을 단리와 비교하세요.";
-      formula = "FV=P(1+r)^n";
-      visual = plot(title, o("scan", 1000, o("mul", acc, o("add", 1, o("div", a, 100))), 20));
-      extra = [
-        stat("future", "20년 후", o("mul", 1000, o("pow", o("add", 1, o("div", a, 100)), 20)), ""),
-      ].filter(Boolean);
+      data.principal = 1000;
+      data.years = 20;
+      data.payment = 0;
+      const rate = o("add", 1, o("div", a, 100));
+      const future = o(
+        "add",
+        o("mul", r("/principal"), o("pow", rate, r("/years"))),
+        o(
+          "mul",
+          r("/payment"),
+          o(
+            "if",
+            o("eq", a, 0),
+            r("/years"),
+            o("div", o("sub", o("pow", rate, r("/years")), 1), o("div", a, 100)),
+          ),
+        ),
+      );
+      controls = [
+        slider("principal", "원금 · 원", "/principal", 0, 100000, 1000, 1000),
+        slider("a", "연이율 · %", "/a", 0, 20, 5, 0.5),
+        slider("years", "기간 · 년", "/years", 1, 30, 20),
+        slider("payment", "연말 납입 · 원", "/payment", 0, 10000, 0, 100),
+      ];
+      goal = "연말에 같은 금액을 납입합니다. 세금·수수료·물가 변동은 포함하지 않습니다.";
+      formula = "FV=P(1+r)^n+A\\frac{(1+r)^n-1}{r}";
+      visual = plot(
+        title,
+        o("scan", r("/principal"), o("add", o("mul", acc, rate), r("/payment")), r("/years")),
+      );
+      extra = [stat("future", "만기 금액", future, "원")];
       break;
+    }
     case "17": {
       data.a = 600;
       controls = [
@@ -460,17 +491,25 @@ for (const item of source) {
     }
     case "18": {
       data.a = 1;
-      controls = [slider("a", "표준편차 σ", "/a", 0.5, 3, 1, 0.1)];
+      data.mean = 0;
+      controls = [
+        slider("mean", "평균 μ", "/mean", -3, 3, 0, 0.1),
+        slider("a", "표준편차 σ", "/a", 0.5, 3, 1, 0.1),
+      ];
       goal = "표준편차를 바꾸면서 밀도 곡선과 ±1σ 구간의 면적을 비교하세요.";
       formula = "f(x)=exp(-x²/(2σ²))/(σ√(2π))";
       const pdf = (x: any) =>
         o(
           "div",
-          o("exp", o("mul", -0.5, o("pow", o("div", x, a), 2))),
+          o("exp", o("mul", -0.5, o("pow", o("div", o("sub", x, r("/mean")), a), 2))),
           o("mul", a, Math.sqrt(2 * Math.PI)),
         );
       visual = plot(title, o("series", 121, pdf(o("sub", o("div", idx, 10), 6))), "area");
-      const midpoint = o("mul", a, o("add", -1, o("mul", 0.02, o("add", idx, 0.5))));
+      const midpoint = o(
+        "add",
+        r("/mean"),
+        o("mul", a, o("add", -1, o("mul", 0.02, o("add", idx, 0.5)))),
+      );
       extra = [
         stat(
           "probability",
@@ -570,6 +609,69 @@ for (const item of source) {
       formula = "\\mathrm{share}=T/n";
       break;
   }
+  const upgraded = upgradedScene(id, data);
+  if (upgraded) {
+    visual = upgraded;
+    extra.push(n("selected-part", "Text", { text: { path: "/selectedPart" }, tone: "muted" }));
+    if (id === "06") {
+      controls = [n("solar-clock", "Playback", { path: "/clock" })];
+      goal =
+        "원 궤도 개략 모형입니다. 거리와 천체 크기는 보기 좋게 서로 다른 척도로 표시합니다. 천체를 선택하고 시간에 따른 위치를 비교하세요.";
+      formula = "";
+    }
+    if (id === "09") {
+      extra = extra.filter((x) => x.component !== "Playback");
+      controls = [
+        slider("a", "분해", "/a", 0, 100, data.a),
+        slider("rpm", "회전수 · RPM", "/rpm", 60, 3000, 1200, 60),
+        n("engine-clock", "Playback", { path: "/clock" }),
+      ];
+    }
+  }
+  if (id === "03") {
+    visual.viewBox = [120, 0, 260, 300];
+    for (const shape of visual.nodes) if (shape.type === "circle") shape.attrs.r = 5;
+    for (let i = 0; i < 20; i += 3) {
+      const phase = o("add", i * 0.6, o("mul", r("/rotation"), Math.PI * 2));
+      visual.nodes.push({
+        type: "text",
+        attrs: {
+          x: c(o("add", 250, o("mul", o("add", 50, a), o("sin", phase)))),
+          y: 24 + i * 12,
+          fontSize: 10,
+          fill: "foreground",
+        },
+        text: i % 2 ? "C" : "A",
+      });
+      visual.nodes.push({
+        type: "text",
+        attrs: {
+          x: c(o("sub", 250, o("mul", o("add", 50, a), o("sin", phase)))),
+          y: 24 + i * 12,
+          fontSize: 10,
+          fill: "accent",
+        },
+        text: i % 2 ? "G" : "T",
+      });
+    }
+    extra.push(
+      n("base-legend", "Text", {
+        text: "A–T · C–G 염기쌍. 회전하면 뒤쪽 가닥이 앞쪽으로 이동합니다.",
+        tone: "muted",
+      }),
+    );
+  }
+  if (id === "18") {
+    visual.domain = [-6, 6];
+    visual.xUnit = "x";
+    visual.yUnit = "확률 밀도";
+    visual.highlight = { from: c(o("sub", r("/mean"), a)), to: c(o("add", r("/mean"), a)) };
+  }
+  if (id === "16") {
+    visual.domain = [0, c(r("/years"))];
+    visual.xUnit = "년";
+    visual.yUnit = "원";
+  }
   if (typeof extra[0] === "string") extra = [];
   const questions: Record<string, [string, string[], number]> = {
     "08": ["전압을 두 배로, 저항은 그대로 두면 전류는?", ["두 배", "절반"], 0],
@@ -597,24 +699,29 @@ for (const item of source) {
     value: { path: "/selected" },
   });
   const body = [
-    n("heading", "Heading", { text: title }),
+    n("heading", "Heading", {
+      text: sceneNames[id] ?? item.prompts.ko.split(/[.?!]/)[0].slice(0, 55),
+    }),
     n("goal", "Text", { text: goal }),
     ...(controls.length
       ? [n("workspace", "Grid", { columns: 2, children: [visual.id, "controls"] })]
       : [visual]),
     ...extra.filter((component) => !visual.children?.includes(component.id)),
-    n("observe", "Callout", { tone: "observe", title: "관찰할 점", text: goal }),
-    ...(formula ? [n("formula", "Formula", { latex: formula, meaning: goal })] : []),
-    n("note", "Callout", {
-      tone: "model-note",
-      title: "모형의 가정",
-      text: "교육용 단순화입니다. 외부 데이터·전문 판단·실제 물리 예측을 대신하지 않습니다.",
-    }),
-    quiz,
+
+    ...(formula ? [n("formula", "Formula", { latex: formula })] : []),
+    ...(questions[id]
+      ? [
+          n("learning-details", "Accordion", {
+            value: "",
+            items: [{ id: "question", label: "이해 확인", child: "quiz" }],
+          }),
+        ]
+      : []),
   ];
   const components = [
     n("root", "Column", { children: body.map((x) => x.id) }),
     ...body,
+    ...(questions[id] ? [quiz] : []),
     ...(controls.length
       ? [
           visual,
@@ -628,7 +735,13 @@ for (const item of source) {
     ...controls,
   ];
   let wire: any[] = [
-    { engine: "v1", block: "surface", surfaceId: "main", fallbackText: `${title}: ${goal}`, title },
+    {
+      engine: "v1",
+      block: "surface",
+      surfaceId: "main",
+      fallbackText: `${title}: ${goal}`,
+      title: sceneNames[id] ?? title,
+    },
     { version: "v0.9", createSurface: { surfaceId: "main", catalogId: CATALOG_ID } },
     { version: "v0.9", updateDataModel: { surfaceId: "main", value: data } },
     { version: "v0.9", updateComponents: { surfaceId: "main", components } },
@@ -732,7 +845,9 @@ function sandboxSource(id: string, title: string) {
   if (id === "02")
     return (
       start +
-      `<label>Mass<input id="mass" type="range" min="1" max="10" value="3"></label><label>Spin<input id="spin" type="range" min="0" max="99" value="30"></label><output id="out"></output><canvas id="c" width="480" height="240"></canvas><script>function render(){const m=+mass.value,s=+spin.value/100,r=m*(1+Math.sqrt(1-s*s));out.textContent='Horizon radius (GM/c²) '+r.toFixed(3);const x=c.getContext('2d');x.clearRect(0,0,480,240);x.fillStyle='#17212b';x.fillRect(0,0,480,240);x.strokeStyle='#ffa448';for(let i=0;i<7;i++){x.beginPath();x.ellipse(240,120,40+r*5+i*9,15+i*5,s,0,7);x.stroke();}x.fillStyle='#000';x.beginPath();x.arc(240,120,r*5,0,7);x.fill();}mass.oninput=spin.oninput=render;render();</script>`
+      `<style>label{display:inline-flex;align-items:center;gap:10px;margin:0 20px 14px 0}canvas{display:block;border-radius:14px;width:100%;background:#090d18}output{display:block;margin:12px 0;font-variant-numeric:tabular-nums}</style><label>질량<input aria-label="질량" id="mass" type="range" min="1" max="10" value="3"></label><label>회전<input aria-label="회전" id="spin" type="range" min="0" max="99" value="30"></label><output id="out"></output><canvas id="c" width="760" height="440" aria-label="블랙홀의 사건 지평선과 강착 원반"></canvas><script>
+const mass=document.getElementById('mass'),spin=document.getElementById('spin'),c=document.getElementById('c'),out=document.getElementById('out');const saved=window.meld?.getState()??{};mass.value=saved.mass??3;spin.value=saved.spin??30;const ctx=c.getContext('2d');
+function render(){const m=+mass.value,s=+spin.value/100,r=m*(1+Math.sqrt(1-s*s));out.textContent='사건 지평선 · '+r.toFixed(3)+' GM/c²';ctx.fillStyle='#090d18';ctx.fillRect(0,0,760,440);for(let i=0;i<95;i++){const x=(i*251)%760,y=(i*137)%440;ctx.fillStyle='rgba(214,225,255,'+(0.15+(i%7)/10)+')';ctx.fillRect(x,y,1.2,1.2)}ctx.save();ctx.translate(380,220);ctx.rotate(s*.22);const radius=32+r*6;for(let i=65;i>=0;i--){ctx.strokeStyle='rgba(255,'+(100+i*2)+','+(35+i)+','+(0.01+i*.004)+')';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(0,0,radius+i*2,radius*.33+i*.65,0,0,Math.PI*2);ctx.stroke()}const glow=ctx.createRadialGradient(0,0,radius*.5,0,0,radius*1.9);glow.addColorStop(0,'#02030a');glow.addColorStop(.54,'#000');glow.addColorStop(.6,'#f8c77b');glow.addColorStop(.65,'rgba(247,175,98,.25)');glow.addColorStop(1,'rgba(240,156,77,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(0,0,radius*1.9,0,Math.PI*2);ctx.fill();ctx.restore();window.meld?.saveState({mass:+mass.value,spin:+spin.value})}mass.oninput=spin.oninput=render;render();</script>`
     );
   if (id === "05" || id === "12")
     return (

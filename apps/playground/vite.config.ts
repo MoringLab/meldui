@@ -20,6 +20,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
+        studio: resolve(__dirname, "studio.html"),
+        service: resolve(__dirname, "service.html"),
         eval: resolve(__dirname, "eval.html"),
         reservation: resolve(__dirname, "reservation.html"),
         showcase: resolve(__dirname, "showcase.html"),

@@ -27,6 +27,7 @@ export const MEDIA_LAYOUTS = [
   "compare",
   "grid",
   "carousel",
+  "mosaic",
   "player",
   "files",
 ] as const;
@@ -49,6 +50,16 @@ export const SandboxDeclarationSchema = z
     engine: z.literal(ANSWER_WIRE_VERSION),
     block: z.literal("sandbox"),
     mode: z.enum(["html", "app"]),
+    artifactId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{1,128}$/)
+      .optional(),
+    phase: z.enum(["preview", "complete"]).optional(),
+    libraries: z
+      .array(z.string().regex(/^[a-z][a-z0-9-]{0,63}$/))
+      .max(10)
+      .optional(),
+    state: z.record(z.unknown()).optional(),
     source: z.string().max(131072).optional(),
     fallbackText: z.string().min(1).max(4000),
   })
@@ -108,6 +119,10 @@ export type AnswerBlock =
       id: string;
       kind: "sandbox";
       mode: "html" | "app";
+      phase?: "preview" | "complete";
+      libraries?: string[];
+      state?: Record<string, unknown>;
+      revision?: number;
       source?: string;
       fallbackText: string;
       status: "blocked" | "complete";

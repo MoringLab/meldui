@@ -2,6 +2,9 @@ import { AnswerSession, NDJSONDecoder, readBytes, type UIModelEvent } from "@eng
 import { brand } from "@engine/kit-brand";
 import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
+import { extendKit, referenceComponents } from "@engine/kit-spec";
+import customFixture from "../../fixtures/custom/case.json";
+import {customComponents} from "./custom-components";
 import type { UserAction } from "@engine/protocol";
 import { AnswerView, createUIRuntime, UIProvider } from "@engine/renderer-react-native";
 import { Picker } from "@react-native-picker/picker";
@@ -24,14 +27,15 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import advancedFixtures from "../../fixtures/advanced/cases.json";
 import fixtures from "../../fixtures/cases.json";
 import baseHybridFixtures from "../../fixtures/hybrid/cases.json";
+import serviceFixtures from "../../fixtures/service/cases.json";
 import showcaseFixtures from "../../fixtures/showcase/cases.json";
-
-const hybridFixtures = [...baseHybridFixtures, ...showcaseFixtures];
 
 import mediaFixtures from "../../fixtures/media/cases.json";
 import { sampleContent } from "../../fixtures/media/host";
 import { brandComponents } from "./brand";
 import { Verification } from "./Verification";
+
+const hybridFixtures = [...baseHybridFixtures, ...showcaseFixtures, ...serviceFixtures];
 
 const server = process.env.EXPO_PUBLIC_ENGINE_URL ?? "http://127.0.0.1:8787";
 export default function App() {
@@ -61,22 +65,23 @@ function Lab() {
     [runtime],
   );
   const sessionRef = useRef(session);
-  sessionRef.current = session;
   const [scrollLocked, setScrollLocked] = useState(false);
   const actionRef = useRef<(action: UserAction) => void>(() => {});
   const abortRef = useRef<AbortController | null>(null);
   const sessionId = useRef<string | undefined>(undefined);
   const runId = useRef(0);
   const surfaceScroll = useRef<ScrollView>(null);
-  const kit = kitId === "editorial" ? editorial : kitId === "brand" ? brand : neutral;
+  const baseKit = kitId === "editorial" ? editorial : kitId === "brand" ? brand : neutral;
+  const kit = runtime.options.catalogId === "urn:meldui:studio:1" ? extendKit(baseKit, referenceComponents, "urn:meldui:studio:1") : baseKit;
   const colors = kit.tokens[mode];
   const activate = (next: AnswerSession) => {
     sessionRef.current.runtime.dispose();
     sessionRef.current = next;
     setSession(next);
   };
-  const fresh = (display = true) => {
+  const fresh = (display = true, custom = false) => {
     const runtime = createUIRuntime({
+      ...(custom ? {catalogId:"urn:meldui:studio:1",customComponents:referenceComponents} : {}),
       onAction: (action) => actionRef.current(action),
       onDiagnostic: (diagnostic) => setDiagnostics((d) => [...d.slice(-39), diagnostic.code]),
       clientActions: {
@@ -105,12 +110,12 @@ function Lab() {
     const run = ++runId.current;
     setBusy(false);
     setSelected(id);
-    const next = fresh();
+    const next = fresh(true,id === "custom-kit");
     const hybrid = hybridFixtures.find((f) => f.id === id);
-    sampleContent(runtime.attachments, server);
+    sampleContent(next.runtime.attachments, server);
     const fixture =
       [...mediaFixtures, ...advancedFixtures].find((f) => f.id === id) ??
-      fixtures.find((f) => f.id === id) ??
+      [...fixtures,customFixture].find((f) => f.id === id) ??
       fixtures[0];
     const lines = hybrid
       ? hybrid.wire.split("\n")
@@ -119,7 +124,7 @@ function Lab() {
             engine: "v1",
             block: "surface",
             surfaceId: "main",
-            fallbackText: `${fixture.title}. ${"prompt" in fixture ? fixture.prompt : fixture.fallbackText}`,
+            fallbackText: `${fixture.title}. ${"prompt" in fixture ? fixture.prompt : "fallbackText" in fixture ? fixture.fallbackText : fixture.title}`,
           }),
           ...fixture.messages.map((m) => JSON.stringify(m)),
         ];
@@ -208,13 +213,16 @@ function Lab() {
       if (abortRef.current === controller) setBusy(false);
     }
   }
-  actionRef.current = (action) => {
-    void generate(`사용자가 ${action.name} 작업을 요청했습니다. 결과를 화면에 반영하세요.`, action);
-  };
+  useEffect(() => {
+    actionRef.current = (action) => {
+      void generate(`사용자가 ${action.name} 작업을 요청했습니다. 결과를 화면에 반영하세요.`, action);
+    };
+  });
   // biome-ignore lint/correctness/useExhaustiveDependencies: Initialize once; replay creates a new runtime and must not rerun on each render.
   useEffect(() => {
-    void replay("calculator");
+    const initial = setTimeout(() => void replay("calculator"), 0);
     return () => {
+      clearTimeout(initial);
       ++runId.current;
       abortRef.current?.abort();
       sessionRef.current.runtime.dispose();
@@ -285,7 +293,7 @@ function Lab() {
             style={{ color: colors.foreground }}
           >
             {!selected && <Picker.Item label="생성된 인터페이스" value="" />}
-            {[...fixtures, ...mediaFixtures, ...advancedFixtures].map((fixture) => (
+            {[...fixtures, ...mediaFixtures, ...advancedFixtures, customFixture].map((fixture) => (
               <Picker.Item key={fixture.id} label={fixture.title} value={fixture.id} />
             ))}
             {hybridFixtures.map((fixture) => (
@@ -307,7 +315,7 @@ function Lab() {
             runtime={runtime}
             kit={kit}
             mode={mode}
-            components={brandComponents}
+            components={{...brandComponents,...customComponents}}
             content={content}
             onGestureLock={setScrollLocked}
           >

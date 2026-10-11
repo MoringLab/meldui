@@ -1,0 +1,1140 @@
+{
+ "timestamp": "2026-10-11T10:10:05.666Z",
+ "set": "showcase",
+ "split": "all",
+ "scope": "Structural validity and resolvable expressions; semantic quality is scored by the separate layers.",
+ "routes": [
+  {
+   "model": "cx/gpt-5.6-sol-medium",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791712704112
+  },
+  {
+   "model": "cfp/zai-org/glm-5.2",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791712704112
+  }
+ ],
+ "results": [
+  {
+   "id": "01:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 111102.673612,
+   "outputBytes": 811,
+   "inputTokens": 11547,
+   "outputTokens": 3694,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "SVG_ATTRIBUTE",
+    "SVG_ATTRIBUTE"
+   ],
+   "finalErrors": [],
+   "failureClass": "component-error",
+   "infra": false
+  },
+  {
+   "id": "01:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 71472.516856,
+   "outputBytes": 864,
+   "inputTokens": 11492,
+   "outputTokens": 2807,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "SVG_ATTRIBUTE",
+    "SVG_ATTRIBUTE"
+   ],
+   "finalErrors": [],
+   "failureClass": "component-error",
+   "infra": false
+  },
+  {
+   "id": "02:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 120003.753857,
+   "outputBytes": 731,
+   "inputTokens": 11437,
+   "outputTokens": 3252,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "SVG_ATTRIBUTE",
+    "GATEWAY_TIMEOUT"
+   ],
+   "finalErrors": [],
+   "failureClass": "infra",
+   "infra": true
+  },
+  {
+   "id": "02:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 107645.106821,
+   "outputBytes": 864,
+   "inputTokens": 11520,
+   "outputTokens": 3241,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 4994,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "SVG_ATTRIBUTE",
+    "SVG_ATTRIBUTE"
+   ],
+   "finalErrors": [],
+   "failureClass": "component-error",
+   "infra": false
+  },
+  {
+   "id": "03:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 115137.30494200002,
+   "outputBytes": 811,
+   "inputTokens": 11544,
+   "outputTokens": 4099,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "SVG_ATTRIBUTE",
+    "SVG_ATTRIBUTE"
+   ],
+   "finalErrors": [],
+   "failureClass": "component-error",
+   "infra": false
+  },
+  {
+   "id": "03:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 56149.62515999994,
+   "outputBytes": 864,
+   "inputTokens": 11484,
+   "outputTokens": 2158,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "SVG_ATTRIBUTE",
+    "SVG_ATTRIBUTE"
+   ],
+   "finalErrors": [],
+   "failureClass": "component-error",
+   "infra": false
+  },
+  {
+   "id": "04:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": false,
+   "status": "failed",
+   "repairs": 1,
+   "elapsedMs": 120002.39138400008,
+   "outputBytes": 737,
+   "inputTokens": 22252,
+   "outputTokens": 5679,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [
+    "RENDER_TOOL_INVALID",
+    "GATEWAY_TIMEOUT"
+   ],
+   "finalErrors": [],
+   "failureClass": "infra",
+   "infra": true
+  },
+  {
+   "id": "04:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "05:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "05:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "06:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "06:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "07:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "07:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "08:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "08:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "09:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "09:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "10:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "10:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "11:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "11:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "12:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "12:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "13:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "13:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "14:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "14:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "15:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "15:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "16:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "16:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "17:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "17:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "18:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "18:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "19:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "19:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "20:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "20:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "21:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "21:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "22:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "22:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-01:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-01:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-02:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-02:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-03:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-03:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-04:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-04:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-05:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-05:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-06:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-06:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-07:ko",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-07:en",
+   "set": "showcase",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-08:ko",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  },
+  {
+   "id": "H-08:en",
+   "set": "showcase",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": null,
+   "initialValid": false,
+   "valid": false,
+   "status": "unavailable",
+   "repairs": 0,
+   "errors": [
+    "BOUNDED_STOP_INFRA"
+   ],
+   "finalErrors": [],
+   "infra": true
+  }
+ ]
+}

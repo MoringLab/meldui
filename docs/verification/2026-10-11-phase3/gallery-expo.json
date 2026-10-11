@@ -1,0 +1,12 @@
+{
+  "platform": "expo",
+  "physicalSwipe": true,
+  "imageBounds": [
+    20,
+    286,
+    364,
+    544
+  ],
+  "modelCalls": 0,
+  "preferencesChanged": false
+}

@@ -1,0 +1,3 @@
+# Web finish review — 2026-10-11
+
+A fresh Impeccable reviewer inspected 24 standalone captures (ten flagship examples, Studio and service at 320/960) plus dark-route captures. Five material findings were fixed: user-authorized composition seed recorded, active Kit propagated to live widgets, duplicate engine clock removed, dark map labels colored by Kit, and secondary mobile settings disclosed. The second verdict scored all five fixes resolved and returned **ship for the scored fixes only**. It did not review model quality or native surfaces. DESIGN.md, PRODUCT.md and the token sidecar were reconciled with code. Raw captures remain in artifacts/phase3/final-captures/.

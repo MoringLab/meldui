@@ -1,0 +1,19 @@
+{
+  "device": "MTK0000903071707360",
+  "preferencesChanged": false,
+  "results": [
+    {
+      "platform": "expo",
+      "fixture": "custom-kit",
+      "displayed": "Fork",
+      "passed": true
+    },
+    {
+      "platform": "flutter",
+      "fixture": "custom-kit",
+      "displayed": "Fork",
+      "passed": true
+    }
+  ],
+  "scope": "Physical installation and display; host action semantics covered by web and runtime tests, not by these display flows."
+}

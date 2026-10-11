@@ -1,5 +1,5 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: bounded stateless SVG vertices and fixed semantic entries use ordinal positions
-import { routePoints, sceneShapes, Ticker } from "@engine/core";
+import { formatStat, routePoints, sceneShapes, Ticker } from "@engine/core";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -115,7 +115,7 @@ export function LearningView({ node, children, runtime, surfaceId }: NativeViewP
               fontVariant: ["tabular-nums"],
             }}
           >
-            {`${p.value ?? ""}${p.unit ? ` ${p.unit}` : ""}`}
+            {`${formatStat(p.value, p.precision)}${p.unit ? ` ${p.unit}` : ""}`}
           </Text>
         </View>
       );
@@ -221,7 +221,15 @@ export function LearningView({ node, children, runtime, surfaceId }: NativeViewP
           if (typeof attrs[key] === "string" && attrs[key] in t)
             attrs[key] = (t as any)[attrs[key]];
         if (s.type === "group") {
-          stack.push({ attrs, children: [] });
+          stack.push({
+            attrs: {
+              ...attrs,
+              onPress: s.action
+                ? () => void runtime.dispatch(surfaceId, node.id, s.action as any, node.scope)
+                : undefined,
+            },
+            children: [],
+          });
         } else if (s.type === "group-end") {
           const x = stack.pop()!;
           stack.at(-1)!.children.push(
@@ -287,7 +295,12 @@ export function LearningView({ node, children, runtime, surfaceId }: NativeViewP
     }
     case "Plot": {
       const points = (p.values ?? []).map((v: any, i: number) => ({
-        x: typeof v === "number" ? i : v[p.xKey],
+        x:
+          typeof v === "number"
+            ? p.domain
+              ? p.domain[0] + (i * (p.domain[1] - p.domain[0])) / Math.max(1, p.values.length - 1)
+              : i
+            : v[p.xKey],
         y: typeof v === "number" ? v : v[p.yKey],
       }));
       const xs = points.map((v: any) => v.x),

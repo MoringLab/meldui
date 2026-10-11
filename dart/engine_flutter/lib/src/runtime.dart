@@ -119,6 +119,7 @@ class UIRuntime extends ChangeNotifier {
   final AttachmentRegistry attachments = AttachmentRegistry();
   final a2ui.MessageProcessor<a2ui.ComponentApi> processor;
   final String catalogIdentifier;
+  final JsonMap? catalogSchema;
   final void Function(JsonMap)? onAction;
   final Map<String, FutureOr<void> Function(JsonMap)> clientActions;
   final List<JsonMap> diagnostics = [];
@@ -135,6 +136,7 @@ class UIRuntime extends ChangeNotifier {
   UIRuntime._(
     this.processor,
     this.catalogIdentifier, {
+    this.catalogSchema,
     this.onAction,
     this.clientActions = const {},
   });
@@ -177,6 +179,9 @@ class UIRuntime extends ChangeNotifier {
     final runtime = UIRuntime._(
       processor,
       catalog.id,
+      catalogSchema: schema == null
+          ? null
+          : jsonDecode(jsonEncode(schema)) as JsonMap,
       onAction: onAction,
       clientActions: clientActions,
     );
@@ -444,24 +449,40 @@ class UIRuntime extends ChangeNotifier {
       };
     }
     try {
+      final props = <String, dynamic>{
+        for (final entry in model.properties.entries)
+          entry.key:
+              [
+                'action',
+                'nodes',
+                'onSubmit',
+                'children',
+                'tabs',
+                'items',
+              ].contains(entry.key)
+              ? entry.value
+              : resolve(sid, entry.value, scope),
+      };
+      if (model.type == 'Quiz') {
+        final choices = props['choices'];
+        final correct = props['correctIndex'];
+        if (choices is! List ||
+            choices.length < 2 ||
+            choices.length > 10 ||
+            choices.any((v) => v is! String) ||
+            correct is! num ||
+            !correct.isFinite ||
+            correct % 1 != 0 ||
+            correct < 0 ||
+            correct >= choices.length) {
+          throw StateError('INVALID_COMPONENT');
+        }
+      }
       return {
         'id': id,
         'component': model.type,
         'raw': model.toJson(),
-        'props': {
-          for (final entry in model.properties.entries)
-            entry.key:
-                [
-                  'action',
-                  'nodes',
-                  'onSubmit',
-                  'children',
-                  'tabs',
-                  'items',
-                ].contains(entry.key)
-                ? entry.value
-                : resolve(sid, entry.value, scope),
-        },
+        'props': props,
       };
     } catch (error) {
       return {

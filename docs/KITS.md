@@ -1,6 +1,6 @@
 # Kits: design language and implementations
 
-A **kit** is the third of three levels of freedom: *catalog* (validated components), *kit* (how they look and which code renders them), *sandbox* (isolated free-form code, later). A kit never changes what a component means: props, data bindings, actions and expression operators come from the catalog and the host's capabilities.
+A **kit** is the third of three levels of freedom: *catalog* (validated components), *kit* (how they look and which code renders them), *code widgets* (host-approved live or strict providers). A kit never changes what a component means: props, data bindings, actions and expression operators come from the catalog and the host's capabilities.
 
 ## What a kit controls
 
@@ -14,7 +14,7 @@ A **kit** is the third of three levels of freedom: *catalog* (validated componen
 | What the model is told about design | `guide`, `examples` | prompt |
 | Host-only implementations | `hostImplementations` | each host |
 
-A kit cannot add components to the catalog, change protocol versions, add expression operators or grant client actions. Those are catalog and host-policy changes.
+A Kit can now add custom components through `defineComponent()` and `extendKit()`. Register the same definitions with the runtime and their compiled implementations with each platform provider. Protocol versions, expression operators and client permissions remain host contracts. See [custom components and artifacts](PHASE3.md).
 
 ## Typography tokens
 

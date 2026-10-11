@@ -7,7 +7,7 @@ for (const fixture of cases) {
     await page.setViewportSize({ width: 320, height: 900 });
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(`/showcase.html?id=${fixture.id}`);
-    await expect(page.getByRole("heading", { name: "Engine Showcase" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "MeldUI Showcase" })).toBeVisible();
     await expect(page.locator(".ui-answer")).toBeVisible();
     if (fixture.path === "C")
       await expect(

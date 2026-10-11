@@ -19,6 +19,8 @@ const expressions: any[] = [
   op("rng", 42, 1),
   op("rng", -7, 100),
   op("range", 5),
+  op("sort", op("array", 3, 1, 2, 1)),
+  op("sort", op("array", op("array", "A", 2), op("array", "B", 1)), 1, false),
   op("map", op("array", 1, 2, 3), op("mul", ref("$item"), 2)),
   op("filter", op("array", 1, 2, 3), op("gt", ref("$item"), 1)),
   op("reduce", op("array", 1, 2, 3), op("add", ref("$acc"), ref("$item")), 0),

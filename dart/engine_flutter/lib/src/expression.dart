@@ -138,6 +138,40 @@ dynamic evaluateExpression(dynamic expression, dynamic Function(String) read) {
         );
       case 'rng':
         return seededRandom(_number(at(0)), _number(at(1)));
+      case 'sort':
+        final source = at(0);
+        if (source is! List) {
+          throw StateError('EXPECTED_ARRAY');
+        }
+        loop(source.length);
+        final field = args.length > 1 ? at(1) : null;
+        final descending = args.length > 2 ? at(2) == true : false;
+        if (field != null &&
+            (field is! num || field < 0 || field != field.round())) {
+          throw StateError('EXPECTED_ARRAY_INDEX');
+        }
+        final column = field == null ? null : (field as num).toInt();
+        dynamic key(dynamic item) => column == null
+            ? item
+            : (item is List && column < item.length ? item[column] : null);
+        final sorted = source.asMap().entries.toList()
+          ..sort((a, b) {
+            final x = key(a.value), y = key(b.value);
+            if ((x is! num && x is! String) ||
+                (x is num) != (y is num) ||
+                (x is String && y is! String)) {
+              throw StateError('SORT_TYPE');
+            }
+            final order = x is num
+                ? x.compareTo(y as num)
+                : (x as String).compareTo(y as String);
+            return order == 0
+                ? a.key.compareTo(b.key)
+                : descending
+                ? -order
+                : order;
+          });
+        return sorted.map((entry) => entry.value).toList();
       case 'get':
         final target = at(0);
         final key = at(1);
@@ -150,7 +184,14 @@ dynamic evaluateExpression(dynamic expression, dynamic Function(String) read) {
         if (digits != digits.round() || digits < 0 || digits > 8) {
           throw StateError('ROUND_LIMIT');
         }
-        return _number(at(0)).toStringAsFixed(digits.toInt());
+        final fixed = _number(at(0)).toStringAsFixed(digits.toInt());
+        if (args.length < 3 || at(2) != true) return fixed;
+        final pieces = fixed.split('.');
+        final grouped = pieces[0].replaceAllMapped(
+          RegExp(r'\B(?=(\d{3})+(?!\d))'),
+          (_) => ',',
+        );
+        return pieces.length == 1 ? grouped : '$grouped.${pieces[1]}';
       case 'range':
         return List.generate(loop(at(0)), (i) => i);
       case 'map':

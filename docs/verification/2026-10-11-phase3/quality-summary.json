@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-11",
+  "scope": "Structural readability only, not semantic success. Baseline classification errors hid infrastructure causes; corrected taxonomy is retained in follow-up probes. Requested denominators are preserved.",
+  "sets": [
+    {
+      "set": "routing",
+      "requested": 40,
+      "initialValid": 14,
+      "validAfterRepair": 16,
+      "infraReported": 22,
+      "notAttemptedBoundedStop": 0
+    },
+    {
+      "set": "media",
+      "requested": 20,
+      "initialValid": 0,
+      "validAfterRepair": 0,
+      "infraReported": 1,
+      "notAttemptedBoundedStop": 0
+    },
+    {
+      "set": "showcase-live",
+      "requested": 60,
+      "initialValid": 0,
+      "validAfterRepair": 0,
+      "infraReported": 55,
+      "notAttemptedBoundedStop": 53
+    },
+    {
+      "set": "secondary-heldout",
+      "requested": 13,
+      "initialValid": 0,
+      "validAfterRepair": 0,
+      "infraReported": 0,
+      "notAttemptedBoundedStop": 0
+    },
+    {
+      "set": "repair-smoke",
+      "requested": 2,
+      "initialValid": 2,
+      "validAfterRepair": 2,
+      "infraReported": 0,
+      "notAttemptedBoundedStop": 0
+    },
+    {
+      "set": "scene-after-diagnostics",
+      "requested": 1,
+      "initialValid": 0,
+      "validAfterRepair": 1,
+      "infraReported": 0,
+      "notAttemptedBoundedStop": 0
+    },
+    {
+      "set": "media-after-diagnostics",
+      "requested": 2,
+      "initialValid": 1,
+      "validAfterRepair": 2,
+      "infraReported": 0,
+      "notAttemptedBoundedStop": 0
+    }
+  ]
+}

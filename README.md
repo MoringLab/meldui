@@ -69,3 +69,5 @@ Ordinary CI/device checks are replay/functional checks and **do not start perfor
 Sandbox is a separate experimental web provider, off by default. It requires a fingerprint-matched attack-test attestation and runs generated code in networkless resource-limited Docker/Chromium, with a screenshot/input replay bridge. Mobile uses fallback text. [Provider limits](packages/sandbox/README.md).
 
 See [current status/report](docs/STATUS.md), [generation experiments](docs/quality/experiments.md), [release preparation](docs/RELEASING.md) and [security](SECURITY.md). Feature implementation is distinct from model task success: routing/semantic quality, RN tail latency, human calibration, iOS and unresolved transitive advisories remain gates. Packages stay private; no public deployment or registry publication occurred. Apache-2.0.
+
+See [custom components, SVG compilation and code artifacts](docs/PHASE3.md) and [Phase 3 verification](docs/verification/2026-10-11-phase3/REPORT.md).

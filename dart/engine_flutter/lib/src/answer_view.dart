@@ -74,6 +74,9 @@ class AnswerView extends StatelessWidget {
   final AnswerSession session;
   final MarkdownBuilder markdown;
   final MediaBuilder? mediaBuilder;
+  final Widget Function(BuildContext, SurfaceBlock, AnswerSession)?
+  surfaceBuilder;
+  final Widget Function(BuildContext, Widget)? layoutBuilder;
   final void Function(String surfaceId)? onExpand;
   final double? maxSurfaceHeight;
   final bool chrome;
@@ -83,6 +86,8 @@ class AnswerView extends StatelessWidget {
     required this.session,
     this.markdown = safeMarkdown,
     this.mediaBuilder,
+    this.surfaceBuilder,
+    this.layoutBuilder,
     this.onExpand,
     this.maxSurfaceHeight,
     this.chrome = true,
@@ -92,7 +97,7 @@ class AnswerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final host = UIProvider.of(context);
-    return UIProvider(
+    final rendered = UIProvider(
       runtime: host.runtime,
       kit: host.kit,
       dark: host.dark,
@@ -112,16 +117,19 @@ class AnswerView extends StatelessWidget {
                     key: ValueKey('md-${block.id}'),
                     child: markdown(context, block.text, block.streaming),
                   ),
-                  SurfaceBlock() => _SurfaceFrame(
-                    key: ValueKey('surface-${block.id}'),
-                    block: block,
-                    session: session,
-                    chrome: chrome,
-                    labels: labels,
-                    maxHeight:
-                        maxSurfaceHeight ?? session.policy.maxSurfaceHeight,
-                    onExpand: onExpand,
-                  ),
+                  SurfaceBlock() =>
+                    surfaceBuilder?.call(context, block, session) ??
+                        _SurfaceFrame(
+                          key: ValueKey('surface-${block.id}'),
+                          block: block,
+                          session: session,
+                          chrome: chrome,
+                          labels: labels,
+                          maxHeight:
+                              maxSurfaceHeight ??
+                              session.policy.maxSurfaceHeight,
+                          onExpand: onExpand,
+                        ),
                   MediaBlock() => _MediaComposition(
                     block: block,
                     markdown: markdown,
@@ -139,6 +147,7 @@ class AnswerView extends StatelessWidget {
         ),
       ),
     );
+    return layoutBuilder?.call(context, rendered) ?? rendered;
   }
 }
 

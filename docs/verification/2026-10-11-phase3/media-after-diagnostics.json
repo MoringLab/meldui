@@ -1,0 +1,98 @@
+{
+ "timestamp": "2026-10-11T10:36:03.554Z",
+ "set": "media",
+ "split": "all",
+ "scope": "Structural validity and resolvable expressions; semantic quality is scored by the separate layers.",
+ "routes": [
+  {
+   "model": "cx/gpt-5.6-sol-medium",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791714948285
+  },
+  {
+   "model": "cfp/zai-org/glm-5.2",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791714948285
+  }
+ ],
+ "results": [
+  {
+   "id": "m01",
+   "set": "media",
+   "split": "heldout",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": false,
+   "valid": true,
+   "status": "completed",
+   "repairs": 1,
+   "firstMessageMs": 9593.280955,
+   "elapsedMs": 14911.517445000001,
+   "outputBytes": 8364,
+   "inputTokens": 8588,
+   "outputTokens": 138,
+   "messageCount": 0,
+   "wire": "{\"engine\":\"v1\",\"block\":\"media\",\"attachments\":[\"att-photo-1\"],\"layout\":\"hero\",\"markdown\":\"노을이 항구를 따뜻하게 감싸는 **고요하고 낭만적인 분위기**입니다. 해 질 무렵의 부드러운 빛과 잔잔한 항구 풍경이 하루가 천천히 마무리되는 듯한 평온함을 전하며, 한편으로는 살짝 아련하고 사색적인 느낌도 줍니다.\",\"placement\":\"above\",\"mediaFraction\":0.7,\"caption\":\"해 질 무렵 노을이 내려앉은 항구 풍경\"}{\"engine\":\"v1\",\"block\":\"media\",\"attachments\":[\"att-photo-1\"],\"layout\":\"hero\",\"markdown\":\"노을이 항구를 따뜻하게 감싸는 **고요하고 낭만적인 분위기**입니다. 해 질 무렵의 부드러운 빛과 잔잔한 항구 풍경이 하루가 천천히 마무리되는 듯한 평온함을 전하며, 한편으로는 살짝 아련하고 사색적인 느낌도 줍니다.\",\"placement\":\"above\",\"mediaFraction\":0.65,\"caption\":\"해 질 무렵 노을이 내려앉은 항구 풍경\"}",
+   "surfaces": 0,
+   "blocks": [
+    "media"
+   ],
+   "markdownChars": 0,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [
+    [
+     "att-photo-1"
+    ]
+   ],
+   "errors": [
+    "INVALID_ENVELOPE"
+   ],
+   "finalErrors": [],
+   "failureClass": "invalid-envelope",
+   "infra": false
+  },
+  {
+   "id": "m05",
+   "set": "media",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": true,
+   "valid": true,
+   "status": "completed",
+   "repairs": 0,
+   "firstMessageMs": 15222.912941000002,
+   "elapsedMs": 15241.315518,
+   "outputBytes": 1668,
+   "inputTokens": 22555,
+   "outputTokens": 524,
+   "messageCount": 0,
+   "wire": "Browse all five room photos in a swipeable gallery; select any image to view it larger.\n{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"Room photo gallery with five images: living room in the morning, living room in the evening, bedroom, kitchen, and balcony view. Browse the carousel and select a photo to view it larger.\"}\n{\"version\":\"v0.9\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"urn:engine:catalog:core:1\"}}\n{\"version\":\"v0.9\",\"updateDataModel\":{\"surfaceId\":\"main\",\"path\":\"/\",\"value\":{\"photos\":[\"att-photo-1\",\"att-photo-2\",\"att-photo-3\",\"att-photo-4\",\"att-photo-5\"]}}}\n{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"heading\",\"intro\",\"gallery\"],\"gap\":\"md\",\"align\":\"stretch\"},{\"id\":\"heading\",\"component\":\"Heading\",\"text\":\"Room photo gallery\",\"level\":1},{\"id\":\"intro\",\"component\":\"Text\",\"text\":\"Swipe or use the gallery controls to browse 5 photos. Select a photo to view it at a larger size.\",\"tone\":\"muted\"},{\"id\":\"gallery\",\"component\":\"Gallery\",\"attachmentIds\":[\"att-photo-1\",\"att-photo-2\",\"att-photo-3\",\"att-photo-4\",\"att-photo-5\"],\"layout\":\"carousel\",\"caption\":\"Living room (morning and evening), bedroom, kitchen, and balcony view.\"}]}}\n",
+   "surfaces": 1,
+   "blocks": [
+    "markdown",
+    "surface"
+   ],
+   "markdownChars": 87,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [
+    {
+     "source": "model",
+     "text": "Room photo gallery with five images: living room in the morning, living room in the evening, bedroom, kitchen, and balcony view. Browse the carousel and select a photo to view it larger."
+    }
+   ],
+   "media": [],
+   "errors": [],
+   "finalErrors": [],
+   "failureClass": null,
+   "infra": false
+  }
+ ]
+}

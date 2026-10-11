@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-11T10:01:58.974Z",
+  "fingerprint": "34b6a1e29129b3102159e61a96cc5f19bbf6daa4aa348d50a23b8b58823c9878",
+  "passed": true,
+  "rows": [
+    {
+      "id": "namespaced-data-csp-bridge",
+      "pass": true,
+      "detail": "test-context:7"
+    },
+    {
+      "id": "static-html-script-off",
+      "pass": true,
+      "detail": "STATIC_OK"
+    },
+    {
+      "id": "app-input",
+      "pass": true,
+      "detail": "StepCLICK_OK"
+    },
+    {
+      "id": "parent-storage-cookie",
+      "pass": true,
+      "detail": "BLOCKED_3"
+    },
+    {
+      "id": "network-fetch",
+      "pass": true,
+      "detail": "BLOCKED_2"
+    },
+    {
+      "id": "action-allowlist",
+      "pass": true,
+      "detail": "BRIDGE"
+    },
+    {
+      "id": "navigation-popup-form",
+      "pass": true,
+      "detail": "NAVIGATION_BLOCKED\n\nSend"
+    },
+    {
+      "id": "webrtc-network",
+      "pass": true,
+      "detail": "NETWORKLESS_PEER"
+    },
+    {
+      "id": "infinite-loop",
+      "pass": true,
+      "detail": "Error: SANDBOX_PROCESS_2: page.screenshot: Timeout 2000ms exceeded.\nCall log:\n  - taking page screenshot\n"
+    },
+    {
+      "id": "memory-bomb",
+      "pass": true,
+      "detail": "Error: SANDBOX_WATCHDOG"
+    },
+    {
+      "id": "message-flood",
+      "pass": true,
+      "detail": "Error: SANDBOX_PROCESS_2: page.screenshot: Timeout 2000ms exceeded.\nCall log:\n  - taking page screenshot\n"
+    }
+  ]
+}

@@ -42,6 +42,14 @@ describe("Showcase replay and independent domain checks", () => {
     }
     runtime.dispose();
   });
+  it("year-end contributions match an independently iterated compound calculation", () => {
+    const { runtime, node } = load("16");
+    runtime.setValue("main", "/payment", 100);
+    let expected = 1000;
+    for (let year = 0; year < 20; year++) expected = expected * 1.05 + 100;
+    expect(node("future").props.value).toBeCloseTo(expected, 8);
+    runtime.dispose();
+  });
   it("weighted integer shares conserve every currency unit", () => {
     const { runtime, node } = load("20");
     for (const total of [1, 10001, 63001]) {

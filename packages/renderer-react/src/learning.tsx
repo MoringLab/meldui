@@ -1,5 +1,5 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: bounded stateless SVG vertices and fixed semantic entries use ordinal positions
-import { createSimulation, routePoints, sceneShapes, Ticker } from "@engine/core";
+import { createSimulation, formatStat, routePoints, sceneShapes, Ticker } from "@engine/core";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeMarkdown } from "./markdown.js";
 import type { ComponentViewProps } from "./renderer.js";
@@ -58,7 +58,7 @@ export function LearningView({ node, children, runtime, surfaceId }: ComponentVi
         <p className="ui-stat" role="status" aria-live="polite">
           <span>{p.label}</span>
           <strong>
-            {String(p.value)} {p.unit}
+            {formatStat(p.value, p.precision)} {p.unit}
           </strong>
         </p>
       );
@@ -162,7 +162,7 @@ export function LearningView({ node, children, runtime, surfaceId }: ComponentVi
             {points.map((x) => (
               <g key={x.label}>
                 <circle cx={x.x} cy={x.y} r="5" fill="var(--ui-accent)" />
-                <text x={x.x + 8} y={x.y}>
+                <text x={x.x + 8} y={x.y} fill="var(--ui-foreground)">
                   {x.label}
                 </text>
               </g>
@@ -191,7 +191,12 @@ export function LearningView({ node, children, runtime, surfaceId }: ComponentVi
   }
 }
 function color(value?: string) {
-  return value && /^(#|none|currentColor)/.test(value) ? value : `var(--ui-${value ?? "accent"})`;
+  return value &&
+    /^(#|none$|currentColor$|black$|white$|transparent$|red$|blue$|green$|gray$|orange$|purple$|yellow$|pink$|cyan$|magenta$|teal$|navy$)/.test(
+      value,
+    )
+    ? value
+    : `var(--ui-${value ?? "accent"})`;
 }
 function Scene({
   node,
@@ -199,19 +204,46 @@ function Scene({
   surfaceId,
 }: Pick<ComponentViewProps, "node" | "runtime" | "surfaceId">) {
   const p = node.props;
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragging = useRef<{ x: number; y: number; origin: { x: number; y: number } } | null>(null);
   const prefix = `scene-${surfaceId.replace(/[^A-Za-z0-9_-]/g, "_")}-${node.id.replace(/[^A-Za-z0-9_-]/g, "_")}`;
   const shapes = sceneShapes(p.nodes, runtime, surfaceId, node.scope);
   const elements: React.ReactNode[] = [];
-  const stack: { attrs: any; children: React.ReactNode[] }[] = [{ attrs: {}, children: elements }];
+  const stack: { attrs: any; action?: any; label?: string; children: React.ReactNode[] }[] = [
+    { attrs: {}, children: elements },
+  ];
   shapes.forEach((shape, i) => {
     if (shape.type === "group") {
-      stack.push({ attrs: shape.attrs, children: [] });
+      stack.push({ attrs: shape.attrs, action: shape.action, label: shape.label, children: [] });
       return;
     }
     if (shape.type === "group-end") {
       const g = stack.pop()!;
       stack.at(-1)!.children.push(
-        <g key={i} {...g.attrs}>
+        // biome-ignore lint/a11y/noStaticElementInteractions: SVG parts are focusable keyboard buttons when an action exists.
+        // biome-ignore lint/a11y/useAriaPropsSupportedByRole: aria-pressed is emitted only for the dynamic button role.
+        <g
+          key={i}
+          {...g.attrs}
+          data-part={shape.id}
+          aria-label={shape.label}
+          role={g.action ? "button" : undefined}
+          tabIndex={g.action ? 0 : undefined}
+          aria-pressed={
+            g.action?.functionCall?.call === "setValue"
+              ? runtime.read(surfaceId, g.action.functionCall.args.path, node.scope) ===
+                g.action.functionCall.args.value
+              : undefined
+          }
+          onClick={() => g.action && runtime.dispatch(surfaceId, node.id, g.action, node.scope)}
+          onKeyDown={(event) => {
+            if (g.action && ["Enter", " "].includes(event.key)) {
+              event.preventDefault();
+              void runtime.dispatch(surfaceId, node.id, g.action, node.scope);
+            }
+          }}
+        >
           {g.children}
         </g>,
       );
@@ -245,7 +277,7 @@ function Scene({
           "aria-valuenow": shape.dragPath
             ? Number(runtime.read(surfaceId, shape.dragPath, node.scope) ?? 0)
             : undefined,
-          "aria-label": shape.text ?? p.description,
+          "aria-label": shape.label ?? shape.text ?? p.description,
           onClick: click,
           onPointerEnter: () => {
             if (shape.onHover)
@@ -303,10 +335,64 @@ function Scene({
     );
   });
   return (
-    <figure>
+    <figure className="ui-scene">
       <figcaption>{p.title}</figcaption>
+      <div className="ui-scene-tools">
+        <button
+          type="button"
+          aria-label="Zoom out"
+          disabled={zoom <= 1}
+          onClick={() => setZoom(Math.max(1, zoom - 0.25))}
+        >
+          −
+        </button>
+        <button
+          type="button"
+          aria-label="Zoom in"
+          disabled={zoom >= 2}
+          onClick={() => setZoom(Math.min(2, zoom + 0.25))}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setZoom(1);
+            setPan({ x: 0, y: 0 });
+          }}
+        >
+          Fit
+        </button>
+      </div>
       <svg
-        viewBox={p.viewBox.join(" ")}
+        onPointerDown={(event) => {
+          if (zoom <= 1 || (event.target !== event.currentTarget && !event.shiftKey)) return;
+          event.preventDefault();
+          event.currentTarget.setPointerCapture(event.pointerId);
+          dragging.current = { x: event.clientX, y: event.clientY, origin: pan };
+        }}
+        onPointerMove={(event) => {
+          const d = dragging.current;
+          if (!d) return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          setPan({
+            x: d.origin.x - ((event.clientX - d.x) * p.viewBox[2]) / rect.width / zoom,
+            y: d.origin.y - ((event.clientY - d.y) * p.viewBox[3]) / rect.height / zoom,
+          });
+        }}
+        onPointerUp={() => {
+          dragging.current = null;
+        }}
+        onPointerCancel={() => {
+          dragging.current = null;
+        }}
+        viewBox={p.viewBox
+          .map((v: number, i: number) =>
+            i < 2
+              ? v + (p.viewBox[i + 2] * (1 - 1 / zoom)) / 2 + (i === 0 ? pan.x : pan.y)
+              : v / zoom,
+          )
+          .join(" ")}
         role={shapes.some((s) => s.action || s.dragPath) ? "group" : "img"}
         aria-label={p.title}
       >
@@ -336,14 +422,19 @@ function Plot({ p }: { p: any }) {
   const points = (p.values ?? [])
     .slice(0, 1000)
     .map((v: any, i: number) => ({
-      x: typeof v === "number" ? i : v[p.xKey],
+      x:
+        typeof v === "number"
+          ? p.domain
+            ? p.domain[0] + (i * (p.domain[1] - p.domain[0])) / Math.max(1, p.values.length - 1)
+            : i
+          : v[p.xKey],
       y: typeof v === "number" ? v : v[p.yKey],
     }))
     .filter((v: any) => Number.isFinite(v.x) && Number.isFinite(v.y));
   const ys = points.map((v: any) => v.y),
     xs = points.map((v: any) => v.x);
   const min = Math.min(0, ...ys),
-    max = Math.max(1, ...ys),
+    max = Math.max(1e-9, ...ys) * 1.08,
     xmin = Math.min(0, ...xs),
     xmax = Math.max(1, ...xs);
   const x = (v: number) => 40 + ((v - xmin) / (xmax - xmin)) * 460,
@@ -353,6 +444,40 @@ function Plot({ p }: { p: any }) {
       <figcaption>{p.title}</figcaption>
       <svg viewBox="0 0 540 240" role="img" aria-label={p.title}>
         <line x1="40" x2="500" y1="200" y2="200" stroke="var(--ui-border)" />
+        {Array.from({ length: 5 }, (_, i) => xmin + ((xmax - xmin) * i) / 4).map((v) => (
+          <g key={v}>
+            <line x1={x(v)} x2={x(v)} y1="200" y2="205" stroke="var(--ui-border)" />
+            <text x={x(v)} y="221" textAnchor="middle" fill="var(--ui-muted)" fontSize="11">
+              {Number(v.toPrecision(3))}
+            </text>
+          </g>
+        ))}
+        {Array.from({ length: 4 }, (_, i) => min + ((max - min) * i) / 3).map((v) => (
+          <g key={v}>
+            <line
+              x1="40"
+              x2="500"
+              y1={y(v)}
+              y2={y(v)}
+              stroke="var(--ui-border)"
+              strokeDasharray="2 4"
+            />
+            <text x="34" y={y(v) + 4} textAnchor="end" fill="var(--ui-muted)" fontSize="11">
+              {Number(v.toPrecision(3))}
+            </text>
+          </g>
+        ))}
+        {p.highlight && (
+          <polygon
+            data-highlight="probability"
+            points={`${x(p.highlight.from)},200 ${points
+              .filter((v: any) => v.x >= p.highlight.from && v.x <= p.highlight.to)
+              .map((v: any) => `${x(v.x)},${y(v.y)}`)
+              .join(" ")} ${x(p.highlight.to)},200`}
+            fill="var(--ui-accent)"
+            opacity=".18"
+          />
+        )}
         {p.references?.map((v: number) => (
           <line
             key={v}
@@ -386,7 +511,7 @@ function Plot({ p }: { p: any }) {
             stroke="var(--ui-accent)"
           />
         )}
-        <text x="40" y="228">
+        <text x="40" y="238">
           {p.xUnit} / {p.yUnit}
         </text>
       </svg>
@@ -749,7 +874,7 @@ function AdvancedChart({ p }: { p: any }) {
             </g>
           );
         })}
-        <text x="40" y="228">
+        <text x="40" y="238">
           {p.xUnit ?? p.xKey} / {p.yUnit ?? p.yKey} ({p.scale})
         </text>
       </svg>

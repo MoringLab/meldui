@@ -1,0 +1,369 @@
+{
+  "at": "2026-10-11T10:06:08.090Z",
+  "model": "cx/gpt-5.6-sol-medium",
+  "rows": [
+    {
+      "id": "t01",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": false,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 8931.814372,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t02",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 16039.795368999998,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t03",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "requests": 0,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "not-run",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 15.007983999999851,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t04",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 21003.360788,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t05",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": false,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 21209.702102000003,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t06",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": false,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 8381.389296999987,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t07",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": false,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 13790.677957000007,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t08",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": false,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 12296.254339000006,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t09",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 8466.373202000002,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t10",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 1,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": false,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [
+        "INVALID_JSON",
+        "INVALID_JSON",
+        "INVALID_COMPONENT"
+      ],
+      "elapsedMs": 43395.195894000004,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t11",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 11784.811198999989,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t12",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 9914.35501900001,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t13",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": false,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 8658.545394999994,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t14",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": false,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 9834.944229999994,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t15",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 1,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [
+        "INVALID_SCHEMA"
+      ],
+      "elapsedMs": 33303.56870700003,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t16",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 28800.946931000013,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t17",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "requests": 0,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 27.673808999999892,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t18",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "requests": 0,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 12.664346000005025,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t19",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "pass",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": true
+      },
+      "diagnostics": [],
+      "elapsedMs": 17924.999244000006,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    },
+    {
+      "id": "t20",
+      "requestedModel": "cx/gpt-5.6-sol-medium",
+      "actualModel": "gpt-5.6-sol-medium",
+      "requests": 1,
+      "repaired": 0,
+      "complete": "completed",
+      "status": "fail",
+      "checks": {
+        "preserved": true,
+        "added": true,
+        "changed": true,
+        "deleted": false
+      },
+      "diagnostics": [],
+      "elapsedMs": 7446.71052100003,
+      "scope": "seeded prior UI + edited input + real follow-up; exact changed properties and newly added nodes. Host kit/modal UI is verified separately in browser/device tests."
+    }
+  ]
+}

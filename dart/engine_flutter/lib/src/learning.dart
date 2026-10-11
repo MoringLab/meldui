@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -96,7 +97,12 @@ class _LearningViewState extends State<LearningView> {
           liveRegion: true,
           child: column([
             text(p['label']),
-            text('${p['value']} ${p['unit'] ?? ''}'),
+            text(
+              '${p['value'] is num ? evaluateExpression({
+                      'op': 'numberFormat',
+                      'args': [p['value'], p['precision'] ?? 2, true],
+                    }, (_) => null) : p['value']} ${p['unit'] ?? ''}',
+            ),
           ]),
         );
       case 'Legend':
@@ -222,7 +228,9 @@ class _LearningViewState extends State<LearningView> {
             if (sceneAction is Map) {
               sceneActions.add(
                 button(
-                  n['text'] is String
+                  n['label'] is String
+                      ? n['label']
+                      : n['text'] is String
                       ? n['text']
                       : 'Scene action ${sceneActions.length + 1}',
                   () => runtime.dispatch(
@@ -250,7 +258,32 @@ class _LearningViewState extends State<LearningView> {
                   .join();
             }
             final tag = type == 'group' ? 'g' : type;
-            final attrs = (n['attrs'] as Map? ?? {}).entries
+            final rawAttrs = Map<String, dynamic>.from(
+              n['attrs'] as Map? ?? {},
+            );
+            if (n['transforms'] is List) {
+              num finite(dynamic v, num fallback) {
+                final result = v == null ? fallback : value(v);
+                if (result is! num ||
+                    !result.isFinite ||
+                    result.abs() > 100000) {
+                  throw StateError('SCENE_TRANSFORM');
+                }
+                return result;
+              }
+
+              rawAttrs['transform'] = [
+                rawAttrs['transform'] ?? '',
+                ...(n['transforms'] as List).map(
+                  (t) => t['kind'] == 'translate'
+                      ? 'translate(${finite(t['x'], 0)},${finite(t['y'], 0)})'
+                      : t['kind'] == 'rotate'
+                      ? 'rotate(${finite(t['angle'], 0)},${finite(t['cx'], 0)},${finite(t['cy'], 0)})'
+                      : 'scale(${finite(t['x'], 1)},${finite(t['y'], 1)})',
+                ),
+              ].join(' ').trim();
+            }
+            final attrs = rawAttrs.entries
                 .map((e) {
                   var resolved = value(e.value);
                   if (['fill', 'stroke'].contains(e.key) &&
@@ -263,7 +296,7 @@ class _LearningViewState extends State<LearningView> {
                   if (e.key == 'clipId') {
                     return 'clip-path="url(#$prefix-clip-${escape(resolved)})"';
                   }
-                  return '${e.key == 'strokeWidth' ? 'stroke-width' : e.key}="${escape(resolved)}"';
+                  return '${const {'strokeWidth': 'stroke-width', 'strokeDasharray': 'stroke-dasharray', 'strokeDashoffset': 'stroke-dashoffset', 'strokeLinecap': 'stroke-linecap', 'strokeLinejoin': 'stroke-linejoin', 'fontSize': 'font-size', 'fontWeight': 'font-weight', 'fillOpacity': 'fill-opacity', 'strokeOpacity': 'stroke-opacity', 'fillRule': 'fill-rule', 'textAnchor': 'text-anchor'}[e.key] ?? e.key}="${escape(resolved)}"';
                 })
                 .join(' ');
             return '<$tag $attrs>${type == 'text' ? escape(value(n['text'])) : scene(n['children'] ?? [], depth + 1, locals)}</$tag>';
@@ -275,7 +308,18 @@ class _LearningViewState extends State<LearningView> {
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="${(p['viewBox'] as List).join(' ')}">$defs${scene(p['nodes'], 0)}</svg>';
         return column([
           text(p['title']),
-          SvgPicture.string(svg, height: 280, semanticsLabel: p['description']),
+          SizedBox(
+            height: 320,
+            child: InteractiveViewer(
+              minScale: 1,
+              maxScale: 3,
+              child: SvgPicture.string(
+                svg,
+                height: 320,
+                semanticsLabel: p['description'],
+              ),
+            ),
+          ),
           ...sceneActions,
           text(p['description']),
         ]);
@@ -307,7 +351,14 @@ class _LearningViewState extends State<LearningView> {
         final points = [
           for (var i = 0; i < values.length; i++)
             {
-              'x': values[i] is num ? i : values[i][p['xKey']],
+              'x': values[i] is num
+                  ? (p['domain'] is List
+                        ? p['domain'][0] +
+                              i *
+                                  (p['domain'][1] - p['domain'][0]) /
+                                  math.max(1, values.length - 1)
+                        : i)
+                  : values[i][p['xKey']],
               'y': values[i] is num ? values[i] : values[i][p['yKey']],
             },
         ];

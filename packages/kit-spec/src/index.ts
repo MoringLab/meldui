@@ -1,4 +1,4 @@
-import { CATALOG_ID, COMPONENT_NAMES } from "@engine/protocol";
+import { CATALOG_ID, COMPONENT_NAMES, ComponentDefinitionSchema } from "@engine/protocol";
 import { z } from "zod";
 
 const colors = z
@@ -60,6 +60,8 @@ export const KitSchema = z.object({
   components: z.record(z.object({ implementation: z.string(), fallback: z.string().optional() })),
   /** Implementation names the host must register itself; each needs a fallback so an unregistered host still renders. */
   hostImplementations: z.array(z.string()).default([]),
+  customComponents: z.array(ComponentDefinitionSchema).max(100).default([]),
+  generation: z.object({ designSkill: z.string().max(12000).default("") }).default({}),
   guide: z.string().min(20),
   examples: z.array(z.string()),
 });
@@ -162,5 +164,30 @@ export const KitExampleSchema = z.object({
 });
 export type KitExample = z.infer<typeof KitExampleSchema>;
 
+export { componentProps, defineComponent } from "@engine/protocol";
 export * from "./conformance.js";
 export * from "./patterns.js";
+export * from "./reference-components.js";
+/** Add or replace semantic definitions while implementation code stays in platform registries. */
+export function extendKit(
+  kit: UIKitInput,
+  definitions: { name: string; definition: import("@engine/protocol").ComponentDefinition }[],
+  catalogId: string,
+): UIKit {
+  const resolved = validateKit(kit);
+  const custom = new Map(resolved.customComponents.map((c) => [c.name, c]));
+  const mapping = { ...resolved.components };
+  for (const component of definitions) {
+    custom.set(component.name, component.definition);
+    mapping[component.name] = {
+      implementation: component.name,
+      fallback: component.definition.fallback,
+    };
+  }
+  return validateKit({
+    ...resolved,
+    catalogId,
+    components: mapping,
+    customComponents: [...custom.values()],
+  });
+}

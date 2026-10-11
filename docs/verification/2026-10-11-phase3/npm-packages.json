@@ -1,0 +1,36 @@
+{
+  "files": [
+    "engine-adapter-copilotkit-0.1.0.tgz",
+    "engine-adapter-gateway-0.1.0.tgz",
+    "engine-adapter-mcp-apps-0.1.0.tgz",
+    "engine-adapter-replay-0.1.0.tgz",
+    "engine-core-0.1.0.tgz",
+    "engine-kit-spec-0.1.0.tgz",
+    "engine-protocol-0.1.0.tgz",
+    "engine-renderer-react-0.1.0.tgz",
+    "engine-renderer-react-native-0.1.0.tgz",
+    "engine-sandbox-0.1.0.tgz",
+    "engine-transport-agui-0.1.0.tgz",
+    "engine-kit-neutral-0.1.0.tgz",
+    "engine-kit-editorial-0.1.0.tgz",
+    "engine-kit-brand-0.1.0.tgz"
+  ],
+  "consumer": "Packed React and custom catalog consumer PASS; server adapter function\n",
+  "dryRuns": [
+    "@engine/adapter-copilotkit",
+    "@engine/adapter-gateway",
+    "@engine/adapter-mcp-apps",
+    "@engine/adapter-replay",
+    "@engine/core",
+    "@engine/kit-spec",
+    "@engine/protocol",
+    "@engine/renderer-react",
+    "@engine/renderer-react-native",
+    "@engine/sandbox",
+    "@engine/transport-agui",
+    "@engine/kit-neutral",
+    "@engine/kit-editorial",
+    "@engine/kit-brand"
+  ],
+  "private": true
+}

@@ -7,6 +7,7 @@
     "@engine/kit-brand": "workspace:*",
     "@engine/kit-editorial": "workspace:*",
     "@engine/kit-neutral": "workspace:*",
+    "@engine/kit-spec": "workspace:*",
     "@engine/protocol": "workspace:*",
     "@engine/renderer-react-native": "workspace:*",
     "@react-native-community/datetimepicker": "9.1.0",
@@ -24,6 +25,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.2",
     "typescript": "5.9.3"
   },
   "scripts": {
@@ -32,7 +35,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "android:build": "expo run:android --variant release --no-install",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint"
   },
   "private": true
 }

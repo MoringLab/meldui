@@ -1,0 +1,23 @@
+[
+  {
+    "model": "cx/gpt-5.6-sol-medium",
+    "actual": "gpt-5.6-sol-medium",
+    "tools": [
+      {
+        "id": "call_1ad6a50f5c214d43a3a4986435be933f",
+        "type": "function",
+        "function": {
+          "name": "ready",
+          "arguments": "{\"message\":\"ready\"}"
+        }
+      }
+    ],
+    "finish": "tool_calls"
+  },
+  {
+    "model": "cfp/zai-org/glm-5.2",
+    "actual": "zai-org/glm-5.2",
+    "tools": null,
+    "finish": "stop"
+  }
+]

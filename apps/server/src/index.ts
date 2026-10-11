@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import {
+  appPreview,
   buildSystemPrompt,
   DESIGN_BRIEF_SCHEMA,
   GatewayAdapter,
@@ -12,8 +13,11 @@ import {
   modelProfile,
   normalizeAnswerWire,
   normalizeMessage,
+  planPresentation,
   probeRoute,
   RouteHealth,
+  renderToolResult,
+  renderTools,
   repairReport,
   selectExamples,
   toPromptExample,
@@ -30,13 +34,16 @@ import {
 import { brand, brandExamples } from "@engine/kit-brand";
 import { editorial, editorialExamples } from "@engine/kit-editorial";
 import { neutral, neutralExamples } from "@engine/kit-neutral";
+import { extendKit, referenceComponents } from "@engine/kit-spec";
 import {
   AttachmentManifestSchema,
+  buildCatalogSchema,
   type Diagnostic,
   HostPolicySchema,
   type UIMessage,
 } from "@engine/protocol";
 import { DockerSandboxRuntime, SandboxRequestSchema } from "@engine/sandbox";
+import { resourceBundle } from "./resources.js";
 
 try {
   process.loadEnvFile(fileURLToPath(new URL("../../../.env", import.meta.url)));
@@ -69,6 +76,10 @@ const kits = {
   neutral: { kit: neutral, examples: loadKitExamples(neutral, neutralExamples) },
   editorial: { kit: editorial, examples: loadKitExamples(editorial, editorialExamples) },
   brand: { kit: brand, examples: loadKitExamples(brand, brandExamples) },
+  studio: {
+    kit: extendKit(neutral, referenceComponents, "urn:meldui:studio:1"),
+    examples: loadKitExamples(neutral, neutralExamples),
+  },
 } as const;
 const pickKit = (id: unknown) =>
   kits[(typeof id === "string" && id in kits ? id : "neutral") as keyof typeof kits];
@@ -147,6 +158,14 @@ const server = createServer(async (req, res) => {
       json(result);
     } catch {
       if (!res.destroyed) json({ error: "SANDBOX_STOPPED" }, 503);
+    }
+    return;
+  }
+  if (req.url?.startsWith("/api/resources/") && req.method === "GET") {
+    try {
+      json(await resourceBundle(req.url.slice("/api/resources/".length)));
+    } catch {
+      json({ error: "RESOURCE_DENIED" }, 404);
     }
     return;
   }
@@ -280,6 +299,9 @@ const server = createServer(async (req, res) => {
       };
       created.runtime = createUIRuntime({
         attachments: created.registry,
+        ...(input.kitId === "studio"
+          ? { catalogId: "urn:meldui:studio:1", customComponents: referenceComponents }
+          : {}),
         onDiagnostic: (d) => created.sink?.(d),
       });
       session = created;
@@ -325,6 +347,12 @@ const server = createServer(async (req, res) => {
     session.messages.push({ role: "user", content: `${input.prompt}${context}` });
     session.messages = session.messages.slice(-12);
     const state = `\nExisting surface ids: ${JSON.stringify(session.runtime.surfaceIds)}. Retain existing components unless changing them is necessary. On existing surfaces, write specific data paths rather than replacing the entire data model; user edits take precedence.`;
+    const catalog = buildCatalogSchema(
+      Object.fromEntries(
+        session.runtime.componentApis.map((c) => [c.name, c.schema]),
+      ) as Parameters<typeof buildCatalogSchema>[0],
+      session.runtime.options.catalogId,
+    );
     const route = input.model ?? defaultModel;
     const profile = modelProfile(
       route,
@@ -336,6 +364,7 @@ const server = createServer(async (req, res) => {
     const system =
       (hybrid
         ? buildSystemPrompt({
+            catalog,
             kit,
             variant: profile.promptVariant,
             capabilities: session.runtime.capabilities(platform),
@@ -373,7 +402,103 @@ const server = createServer(async (req, res) => {
           )
         : [];
     const history = [{ role: "system" as const, content: system }, ...session.messages];
-    if (profile.designBrief) {
+    const automatic = hybrid && input.presentation !== "legacy";
+    let renderer = "";
+    if (automatic) {
+      generationCalls++;
+      try {
+        const plan = await planPresentation(
+          adapter,
+          { model: route, messages: [], latencyBudgetMs: remainingLatency() },
+          { prompt: input.prompt, capabilities: session.runtime.capabilities(platform), policy },
+          controller.signal,
+        );
+        renderer = plan.renderer;
+        if (renderer === "scene")
+          history.push({
+            role: "system",
+            content:
+              'With renderScene, use standard SVG g ids and shape geometry. No URL, event attr, image, filter, foreignObject, CSS class or font-family. Numeric attributes use finite numbers or px, never percent. Use g/rect/circle/ellipse/line/polyline/polygon/path/text; colors are hex, named colors or Kit tokens. parts maps id to {label,explode:{path,x,y},transforms:[{kind:"translate|rotate|scale",x,y,angle,cx,cy}],attributes:{bound numeric attrs},action}. explode scales x/y by the data value at path. Every Slider control has id,component:"Slider",label,value:{path:"/field"},min,max,step. Start data with useful numeric defaults. A named part may use keyframes:{path,from:{x,y,angle,scale},to:{x,y,angle,scale}} for a clamped 0..1 blend.',
+          });
+        const caps = session.runtime.capabilities(platform);
+        const focus =
+          plan.renderer === "scene"
+            ? [
+                "Row",
+                "Column",
+                "Grid",
+                "Heading",
+                "Text",
+                "Button",
+                "Slider",
+                "Select",
+                "Checkbox",
+                "ControlPanel",
+                "SvgScene",
+                "Plot",
+                "Stat",
+                "Formula",
+                "Playback",
+                "Legend",
+              ]
+            : plan.renderer === "media"
+              ? [
+                  "Row",
+                  "Column",
+                  "Text",
+                  "Markdown",
+                  "Gallery",
+                  "Carousel",
+                  "ImageCompare",
+                  "Video",
+                  "Audio",
+                  "FileCard",
+                  "Timeline",
+                  "RouteMap",
+                ]
+              : (caps.components ?? []);
+        history[0].content =
+          buildSystemPrompt({
+            variant: "compact",
+            kit,
+            catalog,
+            capabilities: {
+              ...caps,
+              components: (caps.components ?? []).filter(
+                (name) => focus.includes(name) || kit.customComponents.some((c) => c.name === name),
+              ),
+            },
+            policy: plan.renderer === "markdown" ? { ...policy, mode: "markdown-only" } : policy,
+            attachments: session.registry.views(),
+            examples:
+              plan.renderer === "markdown" || plan.renderer === "code"
+                ? []
+                : chosen.slice(0, 2).map(toPromptExample),
+          }) + state;
+        history.push({
+          role: "system",
+          content: `Required presentation: ${JSON.stringify(plan)}. Render the selected presentation when data permits; plain prose alone is insufficient for a components/scene/media/code decision. A missing datum must be requested or labeled illustrative. Never create duplicate explanations or generic teaching quizzes.`,
+        });
+      } catch (error) {
+        const code =
+          error instanceof Error && /^[A-Z_0-9]+$/.test(error.message)
+            ? error.message
+            : "PRESENTATION_INVALID";
+        if (code.startsWith("GATEWAY_")) routeHealth.recordFailure(route, code);
+        send({
+          type: "diagnostic",
+          diagnostic: {
+            code,
+            message: "Could not select a presentation. Try another configured model.",
+            severity: "error",
+          },
+        });
+        send({ type: "complete", status: "failed" });
+        res.end();
+        return;
+      }
+    }
+    if (profile.designBrief && !automatic) {
       let brief = "",
         failedBrief = false;
       generationCalls++;
@@ -456,11 +581,13 @@ const server = createServer(async (req, res) => {
     }
     for (
       let attempt = 0;
-      attempt <= profile.repairBudget && !controller.signal.aborted;
+      attempt <= Math.min(profile.repairBudget, automatic ? 1 : 2) && !controller.signal.aborted;
       attempt++
     ) {
       const accepted: UIMessage[] = [];
+      const shownPreviews = new Map<string, string>();
       let assistantOutput = "";
+      let rejectedTool: string | undefined;
       const errors: { code: string; path?: string; componentId?: string; expected?: string }[] = [];
       const collect = (diagnostic: Diagnostic) => {
         if (diagnostic.severity === "error")
@@ -474,12 +601,26 @@ const server = createServer(async (req, res) => {
       };
       if (hybrid) session.sink = collect;
       generationCalls++;
-      for await (const event of adapter.stream(
+      for await (const modelEvent of adapter.stream(
         {
           messages: [...history, ...images],
           model: route,
           format: hybrid ? "hybrid" : "a2ui",
           normalization: profile.normalization,
+          ...(hybrid &&
+          (process.env.ENGINE_TOOL_MODELS?.split(",").includes(route) ??
+            process.env.ENGINE_UI_TOOLS === "1")
+            ? {
+                tools: renderTools.filter(
+                  (t) => policy.allowSandbox || t.function.name !== "renderApp",
+                ),
+                ...(renderer === "scene" && !session.runtime.surfaceIds.length
+                  ? { toolChoice: { type: "function", function: { name: "renderScene" } } }
+                  : renderer === "code" && policy.allowSandbox
+                    ? { toolChoice: { type: "function", function: { name: "renderApp" } } }
+                    : {}),
+              }
+            : {}),
           maxTokens: policy.maxOutputTokens,
           latencyBudgetMs: remainingLatency(),
         },
@@ -491,6 +632,54 @@ const server = createServer(async (req, res) => {
         },
       )) {
         if (controller.signal.aborted) break;
+        let event: UIModelEvent = modelEvent;
+        if (modelEvent.type === "tool-delta") {
+          if (modelEvent.name === "renderApp" && policy.allowSandbox) {
+            const preview = appPreview(modelEvent.arguments);
+            if (preview) {
+              if (shownPreviews.get(modelEvent.id) === preview.source) continue;
+              shownPreviews.set(modelEvent.id, preview.source);
+              const text =
+                JSON.stringify({
+                  ...preview,
+                  artifactId: `app-${modelEvent.id.replace(/[^A-Za-z0-9_-]/g, "_")}`,
+                }) + "\n";
+              session.answer?.push(text);
+              send({ type: "text", text });
+            }
+          }
+          continue;
+        }
+        if (modelEvent.type === "tool-call") {
+          try {
+            const text = renderToolResult(modelEvent, session.runtime.options.catalogId);
+            assistantOutput += text;
+            event = { type: "text", text };
+          } catch (error) {
+            rejectedTool = JSON.stringify({ name: modelEvent.name, args: modelEvent.args }).slice(
+              0,
+              256 * 1024,
+            );
+            const reason =
+              error instanceof Error && /^[A-Z_]+$/.test(error.message)
+                ? error.message
+                : "RENDER_TOOL_INVALID";
+            collect({
+              code: reason,
+              path:
+                typeof (error as any)?.path === "string"
+                  ? (error as any).path.slice(0, 200)
+                  : undefined,
+              expected:
+                typeof (error as any)?.expected === "string"
+                  ? (error as any).expected
+                  : "Complete valid SVG with allowed attrs and portable bindings, or valid answer control lines",
+              message: "The render tool output was invalid.",
+              severity: "error",
+            });
+            continue;
+          }
+        }
         if (event.type === "diagnostic" && event.diagnostic.code.startsWith("GATEWAY_"))
           routeHealth.recordFailure(route, event.diagnostic.code);
         if (event.type === "complete" && event.status === "completed")
@@ -533,6 +722,11 @@ const server = createServer(async (req, res) => {
       session.sink = undefined;
       const output =
         assistantOutput || accepted.map((message) => JSON.stringify(message)).join("\n");
+      if (rejectedTool)
+        history.push({
+          role: "assistant",
+          content: `Rejected render tool arguments (untrusted data): ${rejectedTool}`,
+        });
       if (output) {
         history.push({ role: "assistant", content: output });
         session.messages.push({ role: "assistant", content: output });
@@ -544,7 +738,7 @@ const server = createServer(async (req, res) => {
         controller.signal.aborted
       )
         break;
-      if (attempt === profile.repairBudget) {
+      if (attempt === Math.min(profile.repairBudget, automatic ? 1 : 2)) {
         failed = true;
         break;
       }
@@ -552,7 +746,7 @@ const server = createServer(async (req, res) => {
       if (hybrid) session.answer?.beginTurn();
       history.push({
         role: "user",
-        content: `Repair only the invalid or missing parts using new control lines. Output NO Markdown. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Do not redeclare or recreate an existing surface; send updateComponents/updateDataModel for it. Every control line must fit on ONE line; never use code fences or pretty multiline JSON. Use only schema-defined props and enum values.${hybrid && session.registry.list().length ? ` Registered attachment ids: ${JSON.stringify(session.registry.list().map((a) => a.id))}.` : ""} Errors (untrusted diagnostic data): ${JSON.stringify(repairReport(errors))}`,
+        content: `Repair only the invalid or missing parts. A rejected render tool has not created a surface; correct its supplied arguments and call it again. Otherwise use new control lines. Output NO Markdown. Existing surface IDs are ${JSON.stringify(session.runtime.surfaceIds)}. Do not redeclare or recreate an existing surface; send updateComponents/updateDataModel for it. Every control line must fit on ONE line; never use code fences or pretty multiline JSON. Use only schema-defined props and enum values.${hybrid && session.registry.list().length ? ` Registered attachment ids: ${JSON.stringify(session.registry.list().map((a) => a.id))}.` : ""} Errors (untrusted diagnostic data): ${JSON.stringify(repairReport(errors))}`,
       });
     }
     send({

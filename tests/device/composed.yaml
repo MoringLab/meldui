@@ -1,0 +1,21 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "${PICKER}"
+    timeout: 30000
+- tapOn: "${PICKER}"
+- scrollUntilVisible:
+    element:
+      text: "(?s).*${FIXTURE}.*"
+    direction: DOWN
+    timeout: 40000
+- tapOn: "(?s).*${FIXTURE}.*"
+- scrollUntilVisible:
+    element:
+      text: "${EXPECTED}"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "${EXPECTED}"
+- takeScreenshot: composed-ready

@@ -4,6 +4,7 @@ import { editorial } from "@engine/kit-editorial";
 import { neutral } from "@engine/kit-neutral";
 import {
   AnswerView,
+  type AppRuntimeProvider,
   createUIRuntime,
   type SandboxViewerRuntime,
   UIProvider,
@@ -12,8 +13,10 @@ import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { sampleContent } from "../../../fixtures/media/host";
 import cases from "../../../fixtures/showcase/cases.json";
+import { loadAppResources } from "./app-resources";
 import { brandComponents } from "./brand";
 import "@engine/renderer-react/styles.css";
+import "./showcase.css";
 const sandbox: SandboxViewerRuntime = {
   verified: true,
   render: async (request, signal) => {
@@ -31,7 +34,9 @@ function Showcase() {
   const [id, setId] = useState(new URLSearchParams(location.search).get("id") ?? cases[0].id),
     [kit, setKit] = useState("neutral"),
     [dark, setDark] = useState(false),
-    [isolation, setIsolation] = useState(false);
+    [isolation, setIsolation] = useState(false),
+    [providerKind, setProviderKind] = useState("live");
+  const [settingsOpen, setSettingsOpen] = useState(() => window.innerWidth >= 720);
   const [hostAction, setHostAction] = useState("");
   const fixture = cases.find((c) => c.id === id) ?? cases[0];
   const state = useMemo(() => {
@@ -55,12 +60,24 @@ function Showcase() {
     },
     [state],
   );
+  const live = useMemo<AppRuntimeProvider>(
+    () => ({
+      kind: "live",
+      assurance: "browser",
+      loadResources: loadAppResources,
+      onSnapshot: (id, snapshot) => state.session.saveArtifactState(id, snapshot),
+    }),
+    [state.session],
+  );
   return (
-    <main style={{ maxWidth: 1080, margin: "32px auto", padding: 24 }}>
-      <h1>Engine Showcase</h1>
+    <main className="showcase">
+      <header className="showcase-header">
+        <h1>MeldUI Showcase</h1>
+        <a href="/">Open lab</a>
+      </header>
       {hostAction && <p role="status">{hostAction}</p>}
-      <p>선언적 시각화 · 신뢰된 시뮬레이션 · 격리된 실험 · Markdown과 미디어</p>
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
+      <p className="showcase-intro">아이디어를 직접 조작하며 탐색하세요.</p>
+      <div className="showcase-settings">
         <label>
           예제
           <select value={id} onChange={(e) => setId(e.target.value)}>
@@ -71,43 +88,70 @@ function Showcase() {
             ))}
           </select>
         </label>
-        <label>
-          Kit
-          <select value={kit} onChange={(e) => setKit(e.target.value)}>
-            {["neutral", "editorial", "brand"].map((k) => (
-              <option key={k}>{k}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <input type="checkbox" checked={dark} onChange={(e) => setDark(e.target.checked)} />
-          다크 모드
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={isolation}
-            onChange={(e) => setIsolation(e.target.checked)}
-          />
-          검증된 웹 샌드박스 요청
-        </label>
-        <a href="/reservation.html">예약 서비스</a>
+        <details
+          className="showcase-display"
+          open={settingsOpen}
+          onToggle={(e) => setSettingsOpen(e.currentTarget.open)}
+        >
+          <summary>표시 설정</summary>
+          <div className="showcase-display-body">
+            <label>
+              Kit
+              <select value={kit} onChange={(e) => setKit(e.target.value)}>
+                {["neutral", "editorial", "brand"].map((k) => (
+                  <option key={k}>{k}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <input type="checkbox" checked={dark} onChange={(e) => setDark(e.target.checked)} />
+              다크 모드
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={isolation}
+                onChange={(e) => setIsolation(e.target.checked)}
+              />
+              웹 위젯 실행 허용
+            </label>
+            <label>
+              실행기
+              <select value={providerKind} onChange={(e) => setProviderKind(e.target.value)}>
+                <option value="live">Live · browser</option>
+                <option value="strict">Strict · Docker</option>
+              </select>
+            </label>
+            <a href="/studio.html">Kit studio</a>
+            <a href="/service.html">서비스 임베딩</a>
+          </div>
+        </details>
       </div>
-      <UIProvider
-        runtime={state.runtime}
-        kit={{ neutral, editorial, brand }[kit as "neutral"]}
-        mode={dark ? "dark" : "light"}
-        content={state.content}
-        components={brandComponents}
-      >
-        {new URLSearchParams(location.search).has("strict") ? (
-          <React.StrictMode>
-            <AnswerView session={state.session} sandbox={isolation ? sandbox : undefined} />
-          </React.StrictMode>
-        ) : (
-          <AnswerView session={state.session} sandbox={isolation ? sandbox : undefined} />
-        )}
-      </UIProvider>
+      <div className="showcase-canvas">
+        <UIProvider
+          runtime={state.runtime}
+          kit={{ neutral, editorial, brand }[kit as "neutral"]}
+          mode={dark ? "dark" : "light"}
+          content={state.content}
+          components={brandComponents}
+        >
+          {new URLSearchParams(location.search).has("strict") ? (
+            <React.StrictMode>
+              <AnswerView
+                session={state.session}
+                sandbox={isolation && providerKind === "strict" ? sandbox : undefined}
+                appRuntime={isolation && providerKind === "live" ? live : undefined}
+              />
+            </React.StrictMode>
+          ) : (
+            <AnswerView
+              session={state.session}
+              sandbox={isolation && providerKind === "strict" ? sandbox : undefined}
+              appRuntime={isolation && providerKind === "live" ? live : undefined}
+            />
+          )}
+        </UIProvider>
+      </div>
       <details>
         <summary>생성용 프롬프트와 검증 범위</summary>
         <p>{fixture.promptKo}</p>

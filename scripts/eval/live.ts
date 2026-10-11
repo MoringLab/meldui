@@ -84,6 +84,7 @@ const { models: served } = (await fetch(`${base}/api/models`).then((r) => r.json
   models: string[];
 };
 const models = opt("models")?.split(",") ?? served;
+const infraCounts = new Map<string, number>();
 const unavailable = new Map(
   health.routes
     .filter((r) => r.status === "unavailable")
@@ -148,6 +149,7 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
   let repairs = 0;
   let status = "failed";
   let outputBytes = 0;
+  let recordedWire = "";
   let actualModel: string | undefined;
   let inputTokens: number | undefined;
   let outputTokens: number | undefined;
@@ -219,6 +221,7 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
         } else if (event.type === "text") {
           firstMessageMs ??= performance.now() - start;
           answer?.push(event.text);
+          if (flag("record-wire")) recordedWire += event.text;
         } else if (event.type === "diagnostic") {
           errors.push(event.diagnostic.code);
           if (!repairs && event.diagnostic.severity === "error") initialValid = false;
@@ -272,6 +275,7 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
     inputTokens,
     outputTokens,
     messageCount,
+    ...(flag("record-wire") ? { wire: recordedWire } : {}),
     surfaces,
     blocks,
     markdownChars,
@@ -286,6 +290,12 @@ async function one({ model, kitId, job }: (typeof queue)[number]) {
   };
   row.failureClass = classifyRow(row);
   row.infra = row.failureClass === "infra";
+  if (row.infra) {
+    const count = (infraCounts.get(model) ?? 0) + 1;
+    infraCounts.set(model, count);
+    if (count >= Number(opt("stop-after-infra", "1000")))
+      unavailable.set(model, "BOUNDED_STOP_INFRA");
+  }
   rows.push(row);
   runtime.dispose();
   if (sessionId)

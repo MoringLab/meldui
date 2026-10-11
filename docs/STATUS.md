@@ -1,6 +1,9 @@
 # Status — 2026-10-11
 
-Source hosting: the project is named **MeldUI** and its private repository is [MoringLab/meldui](https://github.com/MoringLab/meldui). Existing `@engine/*`, `engine_flutter`, application and protocol identifiers remain compatible. GitHub repository ownership is established; registry ownership/names and the private security reporting contact remain release inputs.
+Phase 3 adds custom catalog/Kit registration, full host answer/surface replacement, standard SVG compilation with typed part transforms, an intent-based tool/NDJSON generator, revisioned artifact edits, opt-in live code/resource providers and optional CopilotKit/MCP Apps adapters. The service embedding demo covers the user-provided purchase, dashboard, quiz, settings, ecology, SVG progress and media composition patterns. See [Phase 3 contracts](PHASE3.md) and [the new dated report](verification/2026-10-11-phase3/REPORT.md). The Phase 2 results below remain a preserved historical baseline; they are not current test totals.
+
+
+Source hosting: the project is named **MeldUI** and its source repository is [MoringLab/meldui](https://github.com/MoringLab/meldui). The existing repository is public as observed via the GitHub API on 2026-10-11; Phase 3 changes are prepared locally and are not automatically pushed under the separate-publication gate. Existing `@engine/*`, `engine_flutter`, application and protocol identifiers remain compatible. GitHub repository ownership is established; registry ownership/names and the private security reporting contact remain release inputs.
 
 Engine's Phase 2 feature implementation is available as a **private preview** for React, React Native/Expo and Flutter. The catalog has 50 components; the original 30 A2UI fixtures remain unchanged. Ordered Markdown/surface/media answers, policy/capability negotiation, history, three kits, safe content display and host-owned attachment resolution remain compatible with the earlier SDK.
 

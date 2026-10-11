@@ -29,13 +29,17 @@ export * from "./stream.js";
 
 export type UIModelEvent =
   | { type: "message"; message: UIMessage }
+  | { type: "tool-delta"; id: string; name: string; arguments: string }
+  | { type: "tool-call"; id: string; name: string; args: Record<string, unknown> }
   /** Raw model text in hybrid format; feed an AnswerSession. */
   | { type: "text"; text: string }
   | { type: "diagnostic"; diagnostic: Diagnostic }
   | { type: "usage"; inputTokens?: number; outputTokens?: number; model?: string }
   | { type: "complete"; status: "completed" | "cancelled" | "failed" };
 export type ModelMessage = {
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "tool";
+  tool_call_id?: string;
+  tool_calls?: { id: string; type: "function"; function: { name: string; arguments: string } }[];
   content:
     | string
     | (
@@ -46,6 +50,11 @@ export type ModelMessage = {
 export type ModelRequest = {
   messages: ModelMessage[];
   model: string;
+  tools?: {
+    type: "function";
+    function: { name: string; description: string; parameters: Record<string, unknown> };
+  }[];
+  toolChoice?: "auto" | "none" | { type: "function"; function: { name: string } };
   maxTokens?: number;
   latencyBudgetMs?: number;
   responseFormat?: Record<string, unknown>;
@@ -71,6 +80,8 @@ export type RuntimeOptions = {
   attachments?: AttachmentRegistry;
   catalogId?: string;
   components?: ComponentApi[];
+  /** Additive host schemas: the built-in catalog remains available. */
+  customComponents?: ComponentApi[];
   onAction?: (action: UserAction) => void | Promise<void>;
   clientActions?: Record<string, (args: Record<string, unknown>) => void | Promise<void>>;
   onDiagnostic?: (diagnostic: Diagnostic) => void;
@@ -110,6 +121,7 @@ export class UIRuntime {
     return this.attachments.attach(input);
   }
   readonly processor: MessageProcessor<any>;
+  readonly componentApis: ComponentApi[];
   readonly diagnostics: Diagnostic[] = [];
   readonly limits;
   private listeners = new Set<() => void>();
@@ -129,11 +141,15 @@ export class UIRuntime {
   constructor(readonly options: RuntimeOptions = {}) {
     this.attachments = options.attachments ?? new AttachmentRegistry();
     this.limits = { ...defaultLimits, ...options.limits };
-    const components =
-      options.components ??
-      Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema }));
+    const components = options.components ?? [
+      ...Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema })),
+      ...(options.customComponents ?? []),
+    ];
+    if (new Set(components.map((c) => c.name)).size !== components.length)
+      throw Error("DUPLICATE_COMPONENT_NAME");
+    this.componentApis = components;
     let catalog: Catalog<any>;
-    if (!options.components && !options.catalogId) {
+    if (!options.components && !options.customComponents?.length && !options.catalogId) {
       defaultCatalog ??= new Catalog(CATALOG_ID, PROTOCOL_VERSION, components, functions);
       catalog = defaultCatalog;
     } else
@@ -170,10 +186,20 @@ export class UIRuntime {
     return this.processor.getSurface(id);
   }
   capabilities(platform: Capabilities["platform"]): Capabilities {
-    return capabilitiesFor(platform, {
+    const base = capabilitiesFor(platform, {
       catalogIds: [this.options.catalogId ?? CATALOG_ID],
       clientActions: Object.keys(this.options.clientActions ?? {}),
     });
+    return {
+      ...base,
+      components: this.componentApis
+        .filter(
+          (api) =>
+            (base.components?.includes(api.name) || !Object.hasOwn(componentSchemas, api.name)) &&
+            (!(api as any).definition || (api as any).definition.platforms.includes(platform)),
+        )
+        .map((api) => api.name),
+    };
   }
   private changed() {
     this.revision++;
@@ -227,9 +253,9 @@ export class UIRuntime {
           if (key.startsWith(`${surfaceId}\0`)) tracked.add(key.slice(surfaceId.length + 1));
         const added = [...ids].filter((id) => !tracked.has(id)).length;
         if (tracked.size + added > this.limits.components) throw new Error("COMPONENT_LIMIT");
-        const schemas = this.options.components
-          ? Object.fromEntries(this.options.components.map((entry) => [entry.name, entry.schema]))
-          : componentSchemas;
+        const schemas = Object.fromEntries(
+          this.componentApis.map((entry) => [entry.name, entry.schema]),
+        );
         // The pinned upstream validates a candidate graph before any mutation.
         // Valid batches need one graph check; rejected batches retain isolation.
         let applied = false;
@@ -514,6 +540,17 @@ export class UIRuntime {
               : this.resolve(surfaceId, v, scope),
           ]),
         );
+        if (
+          component.type === "Quiz" &&
+          (!Array.isArray(props.choices) ||
+            props.choices.length < 2 ||
+            props.choices.length > 10 ||
+            props.choices.some((c) => typeof c !== "string") ||
+            !Number.isInteger(props.correctIndex) ||
+            Number(props.correctIndex) < 0 ||
+            Number(props.correctIndex) >= props.choices.length)
+        )
+          throw Error("QUIZ_VALUES");
         snapshot = { id, component: component.type, raw, props, scope };
       } catch (error) {
         snapshot = {
@@ -664,7 +701,10 @@ export class UIRuntime {
 export function createUIRuntime(options?: RuntimeOptions) {
   return new UIRuntime(options);
 }
+
+export * from "./host-bridge.js";
 export * from "./markdown.js";
 export * from "./simulations.js";
+export * from "./svg.js";
 export * from "./ticker.js";
 export * from "./visuals.js";

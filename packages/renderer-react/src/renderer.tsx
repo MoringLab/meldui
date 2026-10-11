@@ -48,9 +48,10 @@ export function useUI() {
 
 /** Create a core runtime with the upstream React implementations attached. */
 export function createUIRuntime(options: RuntimeOptions = {}) {
-  const apis =
-    options.components ??
-    Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema }));
+  const apis = options.components ?? [
+    ...Object.entries(componentSchemas).map(([name, schema]) => ({ name, schema })),
+    ...(options.customComponents ?? []),
+  ];
   const components = apis.map((api) =>
     createBinderlessComponentImplementation(api, ({ context }) => (
       <EngineNode
@@ -116,7 +117,15 @@ export function UIProvider({
 
 /** Render one surface, or all active surfaces if no id is supplied. */
 const clientSubscribe = () => () => {};
-export function UISurface({ surfaceId }: { surfaceId?: string }) {
+export function UISurface({
+  surfaceId,
+  renderLoading,
+  renderError,
+}: {
+  surfaceId?: string;
+  renderLoading?: () => ReactNode;
+  renderError?: () => ReactNode;
+}) {
   const clientReady = useSyncExternalStore(
     clientSubscribe,
     () => true,
@@ -130,20 +139,26 @@ export function UISurface({ surfaceId }: { surfaceId?: string }) {
       {ids.map((id) => {
         const surface = runtime.getSurface(id);
         return surface ? (
-          <SurfaceBoundary key={id}>
+          <SurfaceBoundary key={id} fallback={renderError?.()}>
             <section className="ui-surface" aria-label="생성된 인터페이스" data-surface={id}>
-              {clientReady ? <A2uiSurface surface={surface} /> : <Loading />}
+              {clientReady ? <A2uiSurface surface={surface} /> : (renderLoading?.() ?? <Loading />)}
             </section>
           </SurfaceBoundary>
         ) : (
-          <Loading key={id} />
+          <React.Fragment key={id}>{renderLoading?.() ?? <Loading />}</React.Fragment>
         );
       })}
     </>
   );
 }
 class SurfaceBoundary extends ReactComponent<
-  { children: ReactNode; resetKey?: unknown; kitKey?: unknown; onError?: () => void },
+  {
+    children: ReactNode;
+    resetKey?: unknown;
+    kitKey?: unknown;
+    onError?: () => void;
+    fallback?: ReactNode;
+  },
   { failed: boolean }
 > {
   state = { failed: false };
@@ -168,13 +183,13 @@ class SurfaceBoundary extends ReactComponent<
       this.setState({ failed: false });
   }
   render() {
-    return this.state.failed ? (
-      <div role="alert" className="ui-error">
-        이 영역을 표시할 수 없습니다.
-      </div>
-    ) : (
-      this.props.children
-    );
+    return this.state.failed
+      ? (this.props.fallback ?? (
+          <div role="alert" className="ui-error">
+            이 영역을 표시할 수 없습니다.
+          </div>
+        ))
+      : this.props.children;
   }
 }
 function Loading() {

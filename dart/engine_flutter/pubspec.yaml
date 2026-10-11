@@ -1,5 +1,6 @@
 name: engine_flutter
-description: Native Flutter renderer and kit runtime for Engine's A2UI catalog.
+description: Native Flutter renderer and customizable kit runtime for MeldUI's A2UI catalog.
+repository: https://github.com/MoringLab/meldui
 version: 0.1.0
 publish_to: none
 environment:

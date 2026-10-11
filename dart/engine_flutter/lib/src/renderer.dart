@@ -65,6 +65,19 @@ class UIProvider extends InheritedWidget {
 }
 
 /// Display one or every active A2UI surface with native Flutter widgets.
+class UIComponent extends StatelessWidget {
+  final String surfaceId, componentId, scope;
+  const UIComponent({
+    super.key,
+    required this.surfaceId,
+    required this.componentId,
+    this.scope = '/',
+  });
+  @override
+  Widget build(BuildContext context) =>
+      _Node(sid: surfaceId, id: componentId, scope: scope);
+}
+
 class UISurface extends StatelessWidget {
   final String? surfaceId;
   const UISurface({super.key, this.surfaceId});
@@ -676,12 +689,15 @@ class _ComponentState extends State<_Component> {
           ),
         );
       case 'Checkbox':
-        return CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(label),
-          value: value == true,
-          controlAffinity: ListTileControlAffinity.leading,
-          onChanged: disabled ? null : write,
+        return Material(
+          color: Colors.transparent,
+          child: CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(label),
+            value: value == true,
+            controlAffinity: ListTileControlAffinity.leading,
+            onChanged: disabled ? null : write,
+          ),
         );
       case 'Slider':
         final min = (p['min'] as num? ?? 0).toDouble();
@@ -915,6 +931,15 @@ class _BoundTextFieldState extends State<_BoundTextField> {
   );
 }
 
+dynamic _tableValue(dynamic row, String key) {
+  if (row is Map) return row[key];
+  final index = int.tryParse(key);
+  if (row is List && index != null && index >= 0 && index < row.length) {
+    return row[index];
+  }
+  return null;
+}
+
 class _DataTable extends StatelessWidget {
   final String caption;
   final List columns;
@@ -939,7 +964,13 @@ class _DataTable extends StatelessWidget {
               .map(
                 (row) => DataRow(
                   cells: columns
-                      .map((c) => DataCell(Text(displayValue(row[c['key']]))))
+                      .map(
+                        (c) => DataCell(
+                          Text(
+                            displayValue(_tableValue(row, c['key'] as String)),
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               )

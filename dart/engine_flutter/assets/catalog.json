@@ -71,6 +71,7 @@
                 "range",
                 "map",
                 "filter",
+                "sort",
                 "reduce",
                 "scan",
                 "series",
@@ -525,6 +526,11 @@
           "$ref": "#/components/Stat/properties/label",
           "description": "REF:#/$defs/DynamicString"
         },
+        "precision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
         "component": {
           "type": "string",
           "const": "Stat"
@@ -759,7 +765,7 @@
               },
               "color": {
                 "type": "string",
-                "pattern": "^(#[0-9a-fA-F]{3,8}|none|currentColor|accent|foreground|muted|border|surface|success|danger|gradient:[A-Za-z0-9_-]{1,64})$"
+                "pattern": "^(#[0-9a-fA-F]{3,8}|none|currentColor|black|white|transparent|red|blue|green|gray|orange|purple|yellow|pink|cyan|magenta|teal|navy|accent|foreground|muted|border|surface|background|success|danger|gradient:[A-Za-z0-9_-]{1,64})$"
               }
             },
             "required": [
@@ -1187,22 +1193,34 @@
           "description": "REF:#/$defs/DynamicString"
         },
         "choices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/Quiz/properties/prompt"
-          },
-          "minItems": 2,
-          "maxItems": 10
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/Quiz/properties/prompt"
+              },
+              "minItems": 2,
+              "maxItems": 10
+            },
+            {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {},
+                  "maxItems": 1000
+                },
+                {
+                  "$ref": "#/components/Quiz/properties/visible/anyOf/1"
+                },
+                {
+                  "$ref": "#/components/Quiz/properties/visible/anyOf/2"
+                }
+              ],
+              "description": "REF:#/$defs/DynamicValue"
+            }
+          ]
         },
         "correctIndex": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9
-        },
-        "explanation": {
-          "$ref": "#/components/Quiz/properties/prompt"
-        },
-        "value": {
           "anyOf": [
             {
               "type": "number"
@@ -1215,6 +1233,12 @@
             }
           ],
           "description": "REF:#/$defs/DynamicNumber"
+        },
+        "explanation": {
+          "$ref": "#/components/Quiz/properties/prompt"
+        },
+        "value": {
+          "$ref": "#/components/Quiz/properties/correctIndex"
         },
         "component": {
           "type": "string",
@@ -1794,13 +1818,88 @@
                     "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                     "description": "REF:#/$defs/DynamicNumber"
                   },
+                  "strokeDasharray": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 256,
+                        "pattern": "^[0-9., eE+-]+$"
+                      }
+                    ]
+                  },
+                  "fillOpacity": {
+                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                    "description": "REF:#/$defs/DynamicNumber"
+                  },
+                  "strokeOpacity": {
+                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                    "description": "REF:#/$defs/DynamicNumber"
+                  },
+                  "fillRule": {
+                    "type": "string",
+                    "enum": [
+                      "nonzero",
+                      "evenodd"
+                    ]
+                  },
+                  "fontWeight": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 900
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "normal",
+                          "bold"
+                        ]
+                      }
+                    ]
+                  },
+                  "strokeDashoffset": {
+                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                    "description": "REF:#/$defs/DynamicNumber"
+                  },
+                  "strokeLinecap": {
+                    "type": "string",
+                    "enum": [
+                      "round",
+                      "butt",
+                      "square"
+                    ]
+                  },
+                  "strokeLinejoin": {
+                    "type": "string",
+                    "enum": [
+                      "round",
+                      "miter",
+                      "bevel"
+                    ]
+                  },
+                  "fontSize": {
+                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                    "description": "REF:#/$defs/DynamicNumber"
+                  },
+                  "textAnchor": {
+                    "type": "string",
+                    "enum": [
+                      "start",
+                      "middle",
+                      "end"
+                    ]
+                  },
                   "clipId": {
                     "type": "string",
                     "pattern": "^[A-Za-z0-9_-]{1,64}$"
                   },
                   "fill": {
                     "type": "string",
-                    "pattern": "^(#[0-9a-fA-F]{3,8}|none|currentColor|accent|foreground|muted|border|surface|success|danger|gradient:[A-Za-z0-9_-]{1,64})$"
+                    "pattern": "^(#[0-9a-fA-F]{3,8}|none|currentColor|black|white|transparent|red|blue|green|gray|orange|purple|yellow|pink|cyan|magenta|teal|navy|accent|foreground|muted|border|surface|background|success|danger|gradient:[A-Za-z0-9_-]{1,64})$"
                   },
                   "stroke": {
                     "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/fill"
@@ -1813,12 +1912,12 @@
                   "points": {
                     "type": "string",
                     "maxLength": 8192,
-                    "pattern": "^[0-9., +-]*$"
+                    "pattern": "^[0-9., eE+-]*$"
                   },
                   "transform": {
                     "type": "string",
                     "maxLength": 256,
-                    "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                    "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                   }
                 },
                 "additionalProperties": false
@@ -1826,6 +1925,51 @@
               "text": {
                 "$ref": "#/components/SvgScene/properties/title",
                 "description": "REF:#/$defs/DynamicString"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "transforms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "translate",
+                        "rotate",
+                        "scale"
+                      ]
+                    },
+                    "x": {
+                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                      "description": "REF:#/$defs/DynamicNumber"
+                    },
+                    "y": {
+                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                      "description": "REF:#/$defs/DynamicNumber"
+                    },
+                    "angle": {
+                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                      "description": "REF:#/$defs/DynamicNumber"
+                    },
+                    "cx": {
+                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                      "description": "REF:#/$defs/DynamicNumber"
+                    },
+                    "cy": {
+                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                      "description": "REF:#/$defs/DynamicNumber"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 8
               },
               "children": {
                 "type": "array",
@@ -1914,6 +2058,81 @@
                           "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                           "description": "REF:#/$defs/DynamicNumber"
                         },
+                        "strokeDasharray": {
+                          "anyOf": [
+                            {
+                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 256,
+                              "pattern": "^[0-9., eE+-]+$"
+                            }
+                          ]
+                        },
+                        "fillOpacity": {
+                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                          "description": "REF:#/$defs/DynamicNumber"
+                        },
+                        "strokeOpacity": {
+                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                          "description": "REF:#/$defs/DynamicNumber"
+                        },
+                        "fillRule": {
+                          "type": "string",
+                          "enum": [
+                            "nonzero",
+                            "evenodd"
+                          ]
+                        },
+                        "fontWeight": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 100,
+                              "maximum": 900
+                            },
+                            {
+                              "type": "string",
+                              "enum": [
+                                "normal",
+                                "bold"
+                              ]
+                            }
+                          ]
+                        },
+                        "strokeDashoffset": {
+                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                          "description": "REF:#/$defs/DynamicNumber"
+                        },
+                        "strokeLinecap": {
+                          "type": "string",
+                          "enum": [
+                            "round",
+                            "butt",
+                            "square"
+                          ]
+                        },
+                        "strokeLinejoin": {
+                          "type": "string",
+                          "enum": [
+                            "round",
+                            "miter",
+                            "bevel"
+                          ]
+                        },
+                        "fontSize": {
+                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                          "description": "REF:#/$defs/DynamicNumber"
+                        },
+                        "textAnchor": {
+                          "type": "string",
+                          "enum": [
+                            "start",
+                            "middle",
+                            "end"
+                          ]
+                        },
                         "clipId": {
                           "type": "string",
                           "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -1932,12 +2151,12 @@
                         "points": {
                           "type": "string",
                           "maxLength": 8192,
-                          "pattern": "^[0-9., +-]*$"
+                          "pattern": "^[0-9., eE+-]*$"
                         },
                         "transform": {
                           "type": "string",
                           "maxLength": 256,
-                          "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                          "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                         }
                       },
                       "additionalProperties": false
@@ -1945,6 +2164,51 @@
                     "text": {
                       "$ref": "#/components/SvgScene/properties/title",
                       "description": "REF:#/$defs/DynamicString"
+                    },
+                    "label": {
+                      "type": "string",
+                      "maxLength": 256
+                    },
+                    "transforms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "translate",
+                              "rotate",
+                              "scale"
+                            ]
+                          },
+                          "x": {
+                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                            "description": "REF:#/$defs/DynamicNumber"
+                          },
+                          "y": {
+                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                            "description": "REF:#/$defs/DynamicNumber"
+                          },
+                          "angle": {
+                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                            "description": "REF:#/$defs/DynamicNumber"
+                          },
+                          "cx": {
+                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                            "description": "REF:#/$defs/DynamicNumber"
+                          },
+                          "cy": {
+                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                            "description": "REF:#/$defs/DynamicNumber"
+                          }
+                        },
+                        "required": [
+                          "kind"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 8
                     },
                     "children": {
                       "type": "array",
@@ -2033,6 +2297,81 @@
                                 "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                 "description": "REF:#/$defs/DynamicNumber"
                               },
+                              "strokeDasharray": {
+                                "anyOf": [
+                                  {
+                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "maxLength": 256,
+                                    "pattern": "^[0-9., eE+-]+$"
+                                  }
+                                ]
+                              },
+                              "fillOpacity": {
+                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                "description": "REF:#/$defs/DynamicNumber"
+                              },
+                              "strokeOpacity": {
+                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                "description": "REF:#/$defs/DynamicNumber"
+                              },
+                              "fillRule": {
+                                "type": "string",
+                                "enum": [
+                                  "nonzero",
+                                  "evenodd"
+                                ]
+                              },
+                              "fontWeight": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 100,
+                                    "maximum": 900
+                                  },
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "normal",
+                                      "bold"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "strokeDashoffset": {
+                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                "description": "REF:#/$defs/DynamicNumber"
+                              },
+                              "strokeLinecap": {
+                                "type": "string",
+                                "enum": [
+                                  "round",
+                                  "butt",
+                                  "square"
+                                ]
+                              },
+                              "strokeLinejoin": {
+                                "type": "string",
+                                "enum": [
+                                  "round",
+                                  "miter",
+                                  "bevel"
+                                ]
+                              },
+                              "fontSize": {
+                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                "description": "REF:#/$defs/DynamicNumber"
+                              },
+                              "textAnchor": {
+                                "type": "string",
+                                "enum": [
+                                  "start",
+                                  "middle",
+                                  "end"
+                                ]
+                              },
                               "clipId": {
                                 "type": "string",
                                 "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2051,12 +2390,12 @@
                               "points": {
                                 "type": "string",
                                 "maxLength": 8192,
-                                "pattern": "^[0-9., +-]*$"
+                                "pattern": "^[0-9., eE+-]*$"
                               },
                               "transform": {
                                 "type": "string",
                                 "maxLength": 256,
-                                "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                               }
                             },
                             "additionalProperties": false
@@ -2064,6 +2403,51 @@
                           "text": {
                             "$ref": "#/components/SvgScene/properties/title",
                             "description": "REF:#/$defs/DynamicString"
+                          },
+                          "label": {
+                            "type": "string",
+                            "maxLength": 256
+                          },
+                          "transforms": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "translate",
+                                    "rotate",
+                                    "scale"
+                                  ]
+                                },
+                                "x": {
+                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                  "description": "REF:#/$defs/DynamicNumber"
+                                },
+                                "y": {
+                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                  "description": "REF:#/$defs/DynamicNumber"
+                                },
+                                "angle": {
+                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                  "description": "REF:#/$defs/DynamicNumber"
+                                },
+                                "cx": {
+                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                  "description": "REF:#/$defs/DynamicNumber"
+                                },
+                                "cy": {
+                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                  "description": "REF:#/$defs/DynamicNumber"
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "maxItems": 8
                           },
                           "children": {
                             "type": "array",
@@ -2152,6 +2536,81 @@
                                       "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                       "description": "REF:#/$defs/DynamicNumber"
                                     },
+                                    "strokeDasharray": {
+                                      "anyOf": [
+                                        {
+                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                        },
+                                        {
+                                          "type": "string",
+                                          "maxLength": 256,
+                                          "pattern": "^[0-9., eE+-]+$"
+                                        }
+                                      ]
+                                    },
+                                    "fillOpacity": {
+                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                      "description": "REF:#/$defs/DynamicNumber"
+                                    },
+                                    "strokeOpacity": {
+                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                      "description": "REF:#/$defs/DynamicNumber"
+                                    },
+                                    "fillRule": {
+                                      "type": "string",
+                                      "enum": [
+                                        "nonzero",
+                                        "evenodd"
+                                      ]
+                                    },
+                                    "fontWeight": {
+                                      "anyOf": [
+                                        {
+                                          "type": "integer",
+                                          "minimum": 100,
+                                          "maximum": 900
+                                        },
+                                        {
+                                          "type": "string",
+                                          "enum": [
+                                            "normal",
+                                            "bold"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "strokeDashoffset": {
+                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                      "description": "REF:#/$defs/DynamicNumber"
+                                    },
+                                    "strokeLinecap": {
+                                      "type": "string",
+                                      "enum": [
+                                        "round",
+                                        "butt",
+                                        "square"
+                                      ]
+                                    },
+                                    "strokeLinejoin": {
+                                      "type": "string",
+                                      "enum": [
+                                        "round",
+                                        "miter",
+                                        "bevel"
+                                      ]
+                                    },
+                                    "fontSize": {
+                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                      "description": "REF:#/$defs/DynamicNumber"
+                                    },
+                                    "textAnchor": {
+                                      "type": "string",
+                                      "enum": [
+                                        "start",
+                                        "middle",
+                                        "end"
+                                      ]
+                                    },
                                     "clipId": {
                                       "type": "string",
                                       "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2170,12 +2629,12 @@
                                     "points": {
                                       "type": "string",
                                       "maxLength": 8192,
-                                      "pattern": "^[0-9., +-]*$"
+                                      "pattern": "^[0-9., eE+-]*$"
                                     },
                                     "transform": {
                                       "type": "string",
                                       "maxLength": 256,
-                                      "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                      "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                     }
                                   },
                                   "additionalProperties": false
@@ -2183,6 +2642,51 @@
                                 "text": {
                                   "$ref": "#/components/SvgScene/properties/title",
                                   "description": "REF:#/$defs/DynamicString"
+                                },
+                                "label": {
+                                  "type": "string",
+                                  "maxLength": 256
+                                },
+                                "transforms": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                          "translate",
+                                          "rotate",
+                                          "scale"
+                                        ]
+                                      },
+                                      "x": {
+                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                        "description": "REF:#/$defs/DynamicNumber"
+                                      },
+                                      "y": {
+                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                        "description": "REF:#/$defs/DynamicNumber"
+                                      },
+                                      "angle": {
+                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                        "description": "REF:#/$defs/DynamicNumber"
+                                      },
+                                      "cx": {
+                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                        "description": "REF:#/$defs/DynamicNumber"
+                                      },
+                                      "cy": {
+                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                        "description": "REF:#/$defs/DynamicNumber"
+                                      }
+                                    },
+                                    "required": [
+                                      "kind"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "maxItems": 8
                                 },
                                 "children": {
                                   "type": "array",
@@ -2271,6 +2775,81 @@
                                             "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                             "description": "REF:#/$defs/DynamicNumber"
                                           },
+                                          "strokeDasharray": {
+                                            "anyOf": [
+                                              {
+                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                              },
+                                              {
+                                                "type": "string",
+                                                "maxLength": 256,
+                                                "pattern": "^[0-9., eE+-]+$"
+                                              }
+                                            ]
+                                          },
+                                          "fillOpacity": {
+                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                            "description": "REF:#/$defs/DynamicNumber"
+                                          },
+                                          "strokeOpacity": {
+                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                            "description": "REF:#/$defs/DynamicNumber"
+                                          },
+                                          "fillRule": {
+                                            "type": "string",
+                                            "enum": [
+                                              "nonzero",
+                                              "evenodd"
+                                            ]
+                                          },
+                                          "fontWeight": {
+                                            "anyOf": [
+                                              {
+                                                "type": "integer",
+                                                "minimum": 100,
+                                                "maximum": 900
+                                              },
+                                              {
+                                                "type": "string",
+                                                "enum": [
+                                                  "normal",
+                                                  "bold"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "strokeDashoffset": {
+                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                            "description": "REF:#/$defs/DynamicNumber"
+                                          },
+                                          "strokeLinecap": {
+                                            "type": "string",
+                                            "enum": [
+                                              "round",
+                                              "butt",
+                                              "square"
+                                            ]
+                                          },
+                                          "strokeLinejoin": {
+                                            "type": "string",
+                                            "enum": [
+                                              "round",
+                                              "miter",
+                                              "bevel"
+                                            ]
+                                          },
+                                          "fontSize": {
+                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                            "description": "REF:#/$defs/DynamicNumber"
+                                          },
+                                          "textAnchor": {
+                                            "type": "string",
+                                            "enum": [
+                                              "start",
+                                              "middle",
+                                              "end"
+                                            ]
+                                          },
                                           "clipId": {
                                             "type": "string",
                                             "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2289,12 +2868,12 @@
                                           "points": {
                                             "type": "string",
                                             "maxLength": 8192,
-                                            "pattern": "^[0-9., +-]*$"
+                                            "pattern": "^[0-9., eE+-]*$"
                                           },
                                           "transform": {
                                             "type": "string",
                                             "maxLength": 256,
-                                            "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                            "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                           }
                                         },
                                         "additionalProperties": false
@@ -2302,6 +2881,51 @@
                                       "text": {
                                         "$ref": "#/components/SvgScene/properties/title",
                                         "description": "REF:#/$defs/DynamicString"
+                                      },
+                                      "label": {
+                                        "type": "string",
+                                        "maxLength": 256
+                                      },
+                                      "transforms": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "kind": {
+                                              "type": "string",
+                                              "enum": [
+                                                "translate",
+                                                "rotate",
+                                                "scale"
+                                              ]
+                                            },
+                                            "x": {
+                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                              "description": "REF:#/$defs/DynamicNumber"
+                                            },
+                                            "y": {
+                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                              "description": "REF:#/$defs/DynamicNumber"
+                                            },
+                                            "angle": {
+                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                              "description": "REF:#/$defs/DynamicNumber"
+                                            },
+                                            "cx": {
+                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                              "description": "REF:#/$defs/DynamicNumber"
+                                            },
+                                            "cy": {
+                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                              "description": "REF:#/$defs/DynamicNumber"
+                                            }
+                                          },
+                                          "required": [
+                                            "kind"
+                                          ],
+                                          "additionalProperties": false
+                                        },
+                                        "maxItems": 8
                                       },
                                       "children": {
                                         "type": "array",
@@ -2390,6 +3014,81 @@
                                                   "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                   "description": "REF:#/$defs/DynamicNumber"
                                                 },
+                                                "strokeDasharray": {
+                                                  "anyOf": [
+                                                    {
+                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                    },
+                                                    {
+                                                      "type": "string",
+                                                      "maxLength": 256,
+                                                      "pattern": "^[0-9., eE+-]+$"
+                                                    }
+                                                  ]
+                                                },
+                                                "fillOpacity": {
+                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                },
+                                                "strokeOpacity": {
+                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                },
+                                                "fillRule": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "nonzero",
+                                                    "evenodd"
+                                                  ]
+                                                },
+                                                "fontWeight": {
+                                                  "anyOf": [
+                                                    {
+                                                      "type": "integer",
+                                                      "minimum": 100,
+                                                      "maximum": 900
+                                                    },
+                                                    {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "normal",
+                                                        "bold"
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                "strokeDashoffset": {
+                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                },
+                                                "strokeLinecap": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "round",
+                                                    "butt",
+                                                    "square"
+                                                  ]
+                                                },
+                                                "strokeLinejoin": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "round",
+                                                    "miter",
+                                                    "bevel"
+                                                  ]
+                                                },
+                                                "fontSize": {
+                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                },
+                                                "textAnchor": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "start",
+                                                    "middle",
+                                                    "end"
+                                                  ]
+                                                },
                                                 "clipId": {
                                                   "type": "string",
                                                   "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2408,12 +3107,12 @@
                                                 "points": {
                                                   "type": "string",
                                                   "maxLength": 8192,
-                                                  "pattern": "^[0-9., +-]*$"
+                                                  "pattern": "^[0-9., eE+-]*$"
                                                 },
                                                 "transform": {
                                                   "type": "string",
                                                   "maxLength": 256,
-                                                  "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                  "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                 }
                                               },
                                               "additionalProperties": false
@@ -2421,6 +3120,51 @@
                                             "text": {
                                               "$ref": "#/components/SvgScene/properties/title",
                                               "description": "REF:#/$defs/DynamicString"
+                                            },
+                                            "label": {
+                                              "type": "string",
+                                              "maxLength": 256
+                                            },
+                                            "transforms": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "kind": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "translate",
+                                                      "rotate",
+                                                      "scale"
+                                                    ]
+                                                  },
+                                                  "x": {
+                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                  },
+                                                  "y": {
+                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                  },
+                                                  "angle": {
+                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                  },
+                                                  "cx": {
+                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                  },
+                                                  "cy": {
+                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "kind"
+                                                ],
+                                                "additionalProperties": false
+                                              },
+                                              "maxItems": 8
                                             },
                                             "children": {
                                               "type": "array",
@@ -2509,6 +3253,81 @@
                                                         "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                         "description": "REF:#/$defs/DynamicNumber"
                                                       },
+                                                      "strokeDasharray": {
+                                                        "anyOf": [
+                                                          {
+                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                          },
+                                                          {
+                                                            "type": "string",
+                                                            "maxLength": 256,
+                                                            "pattern": "^[0-9., eE+-]+$"
+                                                          }
+                                                        ]
+                                                      },
+                                                      "fillOpacity": {
+                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                      },
+                                                      "strokeOpacity": {
+                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                      },
+                                                      "fillRule": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                          "nonzero",
+                                                          "evenodd"
+                                                        ]
+                                                      },
+                                                      "fontWeight": {
+                                                        "anyOf": [
+                                                          {
+                                                            "type": "integer",
+                                                            "minimum": 100,
+                                                            "maximum": 900
+                                                          },
+                                                          {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "normal",
+                                                              "bold"
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      "strokeDashoffset": {
+                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                      },
+                                                      "strokeLinecap": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                          "round",
+                                                          "butt",
+                                                          "square"
+                                                        ]
+                                                      },
+                                                      "strokeLinejoin": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                          "round",
+                                                          "miter",
+                                                          "bevel"
+                                                        ]
+                                                      },
+                                                      "fontSize": {
+                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                      },
+                                                      "textAnchor": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                          "start",
+                                                          "middle",
+                                                          "end"
+                                                        ]
+                                                      },
                                                       "clipId": {
                                                         "type": "string",
                                                         "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2527,12 +3346,12 @@
                                                       "points": {
                                                         "type": "string",
                                                         "maxLength": 8192,
-                                                        "pattern": "^[0-9., +-]*$"
+                                                        "pattern": "^[0-9., eE+-]*$"
                                                       },
                                                       "transform": {
                                                         "type": "string",
                                                         "maxLength": 256,
-                                                        "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                        "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                       }
                                                     },
                                                     "additionalProperties": false
@@ -2540,6 +3359,51 @@
                                                   "text": {
                                                     "$ref": "#/components/SvgScene/properties/title",
                                                     "description": "REF:#/$defs/DynamicString"
+                                                  },
+                                                  "label": {
+                                                    "type": "string",
+                                                    "maxLength": 256
+                                                  },
+                                                  "transforms": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "object",
+                                                      "properties": {
+                                                        "kind": {
+                                                          "type": "string",
+                                                          "enum": [
+                                                            "translate",
+                                                            "rotate",
+                                                            "scale"
+                                                          ]
+                                                        },
+                                                        "x": {
+                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                        },
+                                                        "y": {
+                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                        },
+                                                        "angle": {
+                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                        },
+                                                        "cx": {
+                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                        },
+                                                        "cy": {
+                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "kind"
+                                                      ],
+                                                      "additionalProperties": false
+                                                    },
+                                                    "maxItems": 8
                                                   },
                                                   "children": {
                                                     "type": "array",
@@ -2628,6 +3492,81 @@
                                                               "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                               "description": "REF:#/$defs/DynamicNumber"
                                                             },
+                                                            "strokeDasharray": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                                },
+                                                                {
+                                                                  "type": "string",
+                                                                  "maxLength": 256,
+                                                                  "pattern": "^[0-9., eE+-]+$"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "fillOpacity": {
+                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                            },
+                                                            "strokeOpacity": {
+                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                            },
+                                                            "fillRule": {
+                                                              "type": "string",
+                                                              "enum": [
+                                                                "nonzero",
+                                                                "evenodd"
+                                                              ]
+                                                            },
+                                                            "fontWeight": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "integer",
+                                                                  "minimum": 100,
+                                                                  "maximum": 900
+                                                                },
+                                                                {
+                                                                  "type": "string",
+                                                                  "enum": [
+                                                                    "normal",
+                                                                    "bold"
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            "strokeDashoffset": {
+                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                            },
+                                                            "strokeLinecap": {
+                                                              "type": "string",
+                                                              "enum": [
+                                                                "round",
+                                                                "butt",
+                                                                "square"
+                                                              ]
+                                                            },
+                                                            "strokeLinejoin": {
+                                                              "type": "string",
+                                                              "enum": [
+                                                                "round",
+                                                                "miter",
+                                                                "bevel"
+                                                              ]
+                                                            },
+                                                            "fontSize": {
+                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                            },
+                                                            "textAnchor": {
+                                                              "type": "string",
+                                                              "enum": [
+                                                                "start",
+                                                                "middle",
+                                                                "end"
+                                                              ]
+                                                            },
                                                             "clipId": {
                                                               "type": "string",
                                                               "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2646,12 +3585,12 @@
                                                             "points": {
                                                               "type": "string",
                                                               "maxLength": 8192,
-                                                              "pattern": "^[0-9., +-]*$"
+                                                              "pattern": "^[0-9., eE+-]*$"
                                                             },
                                                             "transform": {
                                                               "type": "string",
                                                               "maxLength": 256,
-                                                              "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                              "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                             }
                                                           },
                                                           "additionalProperties": false
@@ -2659,6 +3598,51 @@
                                                         "text": {
                                                           "$ref": "#/components/SvgScene/properties/title",
                                                           "description": "REF:#/$defs/DynamicString"
+                                                        },
+                                                        "label": {
+                                                          "type": "string",
+                                                          "maxLength": 256
+                                                        },
+                                                        "transforms": {
+                                                          "type": "array",
+                                                          "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                              "kind": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                  "translate",
+                                                                  "rotate",
+                                                                  "scale"
+                                                                ]
+                                                              },
+                                                              "x": {
+                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                              },
+                                                              "y": {
+                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                              },
+                                                              "angle": {
+                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                              },
+                                                              "cx": {
+                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                              },
+                                                              "cy": {
+                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                              }
+                                                            },
+                                                            "required": [
+                                                              "kind"
+                                                            ],
+                                                            "additionalProperties": false
+                                                          },
+                                                          "maxItems": 8
                                                         },
                                                         "children": {
                                                           "type": "array",
@@ -2747,6 +3731,81 @@
                                                                     "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                                     "description": "REF:#/$defs/DynamicNumber"
                                                                   },
+                                                                  "strokeDasharray": {
+                                                                    "anyOf": [
+                                                                      {
+                                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                                      },
+                                                                      {
+                                                                        "type": "string",
+                                                                        "maxLength": 256,
+                                                                        "pattern": "^[0-9., eE+-]+$"
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  "fillOpacity": {
+                                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                                  },
+                                                                  "strokeOpacity": {
+                                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                                  },
+                                                                  "fillRule": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                      "nonzero",
+                                                                      "evenodd"
+                                                                    ]
+                                                                  },
+                                                                  "fontWeight": {
+                                                                    "anyOf": [
+                                                                      {
+                                                                        "type": "integer",
+                                                                        "minimum": 100,
+                                                                        "maximum": 900
+                                                                      },
+                                                                      {
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                          "normal",
+                                                                          "bold"
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  "strokeDashoffset": {
+                                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                                  },
+                                                                  "strokeLinecap": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                      "round",
+                                                                      "butt",
+                                                                      "square"
+                                                                    ]
+                                                                  },
+                                                                  "strokeLinejoin": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                      "round",
+                                                                      "miter",
+                                                                      "bevel"
+                                                                    ]
+                                                                  },
+                                                                  "fontSize": {
+                                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                    "description": "REF:#/$defs/DynamicNumber"
+                                                                  },
+                                                                  "textAnchor": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                      "start",
+                                                                      "middle",
+                                                                      "end"
+                                                                    ]
+                                                                  },
                                                                   "clipId": {
                                                                     "type": "string",
                                                                     "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2765,12 +3824,12 @@
                                                                   "points": {
                                                                     "type": "string",
                                                                     "maxLength": 8192,
-                                                                    "pattern": "^[0-9., +-]*$"
+                                                                    "pattern": "^[0-9., eE+-]*$"
                                                                   },
                                                                   "transform": {
                                                                     "type": "string",
                                                                     "maxLength": 256,
-                                                                    "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                                    "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                                   }
                                                                 },
                                                                 "additionalProperties": false
@@ -2778,6 +3837,51 @@
                                                               "text": {
                                                                 "$ref": "#/components/SvgScene/properties/title",
                                                                 "description": "REF:#/$defs/DynamicString"
+                                                              },
+                                                              "label": {
+                                                                "type": "string",
+                                                                "maxLength": 256
+                                                              },
+                                                              "transforms": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                  "type": "object",
+                                                                  "properties": {
+                                                                    "kind": {
+                                                                      "type": "string",
+                                                                      "enum": [
+                                                                        "translate",
+                                                                        "rotate",
+                                                                        "scale"
+                                                                      ]
+                                                                    },
+                                                                    "x": {
+                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                    },
+                                                                    "y": {
+                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                    },
+                                                                    "angle": {
+                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                    },
+                                                                    "cx": {
+                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                    },
+                                                                    "cy": {
+                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "kind"
+                                                                  ],
+                                                                  "additionalProperties": false
+                                                                },
+                                                                "maxItems": 8
                                                               },
                                                               "children": {
                                                                 "type": "array",
@@ -2866,6 +3970,81 @@
                                                                           "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                                           "description": "REF:#/$defs/DynamicNumber"
                                                                         },
+                                                                        "strokeDasharray": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                                            },
+                                                                            {
+                                                                              "type": "string",
+                                                                              "maxLength": 256,
+                                                                              "pattern": "^[0-9., eE+-]+$"
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "fillOpacity": {
+                                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                                        },
+                                                                        "strokeOpacity": {
+                                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                                        },
+                                                                        "fillRule": {
+                                                                          "type": "string",
+                                                                          "enum": [
+                                                                            "nonzero",
+                                                                            "evenodd"
+                                                                          ]
+                                                                        },
+                                                                        "fontWeight": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "integer",
+                                                                              "minimum": 100,
+                                                                              "maximum": 900
+                                                                            },
+                                                                            {
+                                                                              "type": "string",
+                                                                              "enum": [
+                                                                                "normal",
+                                                                                "bold"
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        "strokeDashoffset": {
+                                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                                        },
+                                                                        "strokeLinecap": {
+                                                                          "type": "string",
+                                                                          "enum": [
+                                                                            "round",
+                                                                            "butt",
+                                                                            "square"
+                                                                          ]
+                                                                        },
+                                                                        "strokeLinejoin": {
+                                                                          "type": "string",
+                                                                          "enum": [
+                                                                            "round",
+                                                                            "miter",
+                                                                            "bevel"
+                                                                          ]
+                                                                        },
+                                                                        "fontSize": {
+                                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                          "description": "REF:#/$defs/DynamicNumber"
+                                                                        },
+                                                                        "textAnchor": {
+                                                                          "type": "string",
+                                                                          "enum": [
+                                                                            "start",
+                                                                            "middle",
+                                                                            "end"
+                                                                          ]
+                                                                        },
                                                                         "clipId": {
                                                                           "type": "string",
                                                                           "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -2884,12 +4063,12 @@
                                                                         "points": {
                                                                           "type": "string",
                                                                           "maxLength": 8192,
-                                                                          "pattern": "^[0-9., +-]*$"
+                                                                          "pattern": "^[0-9., eE+-]*$"
                                                                         },
                                                                         "transform": {
                                                                           "type": "string",
                                                                           "maxLength": 256,
-                                                                          "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                                          "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                                         }
                                                                       },
                                                                       "additionalProperties": false
@@ -2897,6 +4076,51 @@
                                                                     "text": {
                                                                       "$ref": "#/components/SvgScene/properties/title",
                                                                       "description": "REF:#/$defs/DynamicString"
+                                                                    },
+                                                                    "label": {
+                                                                      "type": "string",
+                                                                      "maxLength": 256
+                                                                    },
+                                                                    "transforms": {
+                                                                      "type": "array",
+                                                                      "items": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                          "kind": {
+                                                                            "type": "string",
+                                                                            "enum": [
+                                                                              "translate",
+                                                                              "rotate",
+                                                                              "scale"
+                                                                            ]
+                                                                          },
+                                                                          "x": {
+                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                          },
+                                                                          "y": {
+                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                          },
+                                                                          "angle": {
+                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                          },
+                                                                          "cx": {
+                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                          },
+                                                                          "cy": {
+                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                          }
+                                                                        },
+                                                                        "required": [
+                                                                          "kind"
+                                                                        ],
+                                                                        "additionalProperties": false
+                                                                      },
+                                                                      "maxItems": 8
                                                                     },
                                                                     "children": {
                                                                       "type": "array",
@@ -2985,6 +4209,81 @@
                                                                                 "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                                                 "description": "REF:#/$defs/DynamicNumber"
                                                                               },
+                                                                              "strokeDasharray": {
+                                                                                "anyOf": [
+                                                                                  {
+                                                                                    "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                                                  },
+                                                                                  {
+                                                                                    "type": "string",
+                                                                                    "maxLength": 256,
+                                                                                    "pattern": "^[0-9., eE+-]+$"
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              "fillOpacity": {
+                                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                                              },
+                                                                              "strokeOpacity": {
+                                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                                              },
+                                                                              "fillRule": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                  "nonzero",
+                                                                                  "evenodd"
+                                                                                ]
+                                                                              },
+                                                                              "fontWeight": {
+                                                                                "anyOf": [
+                                                                                  {
+                                                                                    "type": "integer",
+                                                                                    "minimum": 100,
+                                                                                    "maximum": 900
+                                                                                  },
+                                                                                  {
+                                                                                    "type": "string",
+                                                                                    "enum": [
+                                                                                      "normal",
+                                                                                      "bold"
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              "strokeDashoffset": {
+                                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                                              },
+                                                                              "strokeLinecap": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                  "round",
+                                                                                  "butt",
+                                                                                  "square"
+                                                                                ]
+                                                                              },
+                                                                              "strokeLinejoin": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                  "round",
+                                                                                  "miter",
+                                                                                  "bevel"
+                                                                                ]
+                                                                              },
+                                                                              "fontSize": {
+                                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                "description": "REF:#/$defs/DynamicNumber"
+                                                                              },
+                                                                              "textAnchor": {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                  "start",
+                                                                                  "middle",
+                                                                                  "end"
+                                                                                ]
+                                                                              },
                                                                               "clipId": {
                                                                                 "type": "string",
                                                                                 "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -3003,12 +4302,12 @@
                                                                               "points": {
                                                                                 "type": "string",
                                                                                 "maxLength": 8192,
-                                                                                "pattern": "^[0-9., +-]*$"
+                                                                                "pattern": "^[0-9., eE+-]*$"
                                                                               },
                                                                               "transform": {
                                                                                 "type": "string",
                                                                                 "maxLength": 256,
-                                                                                "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                                                "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                                               }
                                                                             },
                                                                             "additionalProperties": false
@@ -3016,6 +4315,51 @@
                                                                           "text": {
                                                                             "$ref": "#/components/SvgScene/properties/title",
                                                                             "description": "REF:#/$defs/DynamicString"
+                                                                          },
+                                                                          "label": {
+                                                                            "type": "string",
+                                                                            "maxLength": 256
+                                                                          },
+                                                                          "transforms": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                              "type": "object",
+                                                                              "properties": {
+                                                                                "kind": {
+                                                                                  "type": "string",
+                                                                                  "enum": [
+                                                                                    "translate",
+                                                                                    "rotate",
+                                                                                    "scale"
+                                                                                  ]
+                                                                                },
+                                                                                "x": {
+                                                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                                                },
+                                                                                "y": {
+                                                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                                                },
+                                                                                "angle": {
+                                                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                                                },
+                                                                                "cx": {
+                                                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                                                },
+                                                                                "cy": {
+                                                                                  "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                  "description": "REF:#/$defs/DynamicNumber"
+                                                                                }
+                                                                              },
+                                                                              "required": [
+                                                                                "kind"
+                                                                              ],
+                                                                              "additionalProperties": false
+                                                                            },
+                                                                            "maxItems": 8
                                                                           },
                                                                           "children": {
                                                                             "type": "array",
@@ -3104,6 +4448,81 @@
                                                                                       "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                                                       "description": "REF:#/$defs/DynamicNumber"
                                                                                     },
+                                                                                    "strokeDasharray": {
+                                                                                      "anyOf": [
+                                                                                        {
+                                                                                          "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                                                        },
+                                                                                        {
+                                                                                          "type": "string",
+                                                                                          "maxLength": 256,
+                                                                                          "pattern": "^[0-9., eE+-]+$"
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    "fillOpacity": {
+                                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                                    },
+                                                                                    "strokeOpacity": {
+                                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                                    },
+                                                                                    "fillRule": {
+                                                                                      "type": "string",
+                                                                                      "enum": [
+                                                                                        "nonzero",
+                                                                                        "evenodd"
+                                                                                      ]
+                                                                                    },
+                                                                                    "fontWeight": {
+                                                                                      "anyOf": [
+                                                                                        {
+                                                                                          "type": "integer",
+                                                                                          "minimum": 100,
+                                                                                          "maximum": 900
+                                                                                        },
+                                                                                        {
+                                                                                          "type": "string",
+                                                                                          "enum": [
+                                                                                            "normal",
+                                                                                            "bold"
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    },
+                                                                                    "strokeDashoffset": {
+                                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                                    },
+                                                                                    "strokeLinecap": {
+                                                                                      "type": "string",
+                                                                                      "enum": [
+                                                                                        "round",
+                                                                                        "butt",
+                                                                                        "square"
+                                                                                      ]
+                                                                                    },
+                                                                                    "strokeLinejoin": {
+                                                                                      "type": "string",
+                                                                                      "enum": [
+                                                                                        "round",
+                                                                                        "miter",
+                                                                                        "bevel"
+                                                                                      ]
+                                                                                    },
+                                                                                    "fontSize": {
+                                                                                      "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                      "description": "REF:#/$defs/DynamicNumber"
+                                                                                    },
+                                                                                    "textAnchor": {
+                                                                                      "type": "string",
+                                                                                      "enum": [
+                                                                                        "start",
+                                                                                        "middle",
+                                                                                        "end"
+                                                                                      ]
+                                                                                    },
                                                                                     "clipId": {
                                                                                       "type": "string",
                                                                                       "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -3122,12 +4541,12 @@
                                                                                     "points": {
                                                                                       "type": "string",
                                                                                       "maxLength": 8192,
-                                                                                      "pattern": "^[0-9., +-]*$"
+                                                                                      "pattern": "^[0-9., eE+-]*$"
                                                                                     },
                                                                                     "transform": {
                                                                                       "type": "string",
                                                                                       "maxLength": 256,
-                                                                                      "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                                                      "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                                                     }
                                                                                   },
                                                                                   "additionalProperties": false
@@ -3135,6 +4554,51 @@
                                                                                 "text": {
                                                                                   "$ref": "#/components/SvgScene/properties/title",
                                                                                   "description": "REF:#/$defs/DynamicString"
+                                                                                },
+                                                                                "label": {
+                                                                                  "type": "string",
+                                                                                  "maxLength": 256
+                                                                                },
+                                                                                "transforms": {
+                                                                                  "type": "array",
+                                                                                  "items": {
+                                                                                    "type": "object",
+                                                                                    "properties": {
+                                                                                      "kind": {
+                                                                                        "type": "string",
+                                                                                        "enum": [
+                                                                                          "translate",
+                                                                                          "rotate",
+                                                                                          "scale"
+                                                                                        ]
+                                                                                      },
+                                                                                      "x": {
+                                                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                                                      },
+                                                                                      "y": {
+                                                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                                                      },
+                                                                                      "angle": {
+                                                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                                                      },
+                                                                                      "cx": {
+                                                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                                                      },
+                                                                                      "cy": {
+                                                                                        "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                        "description": "REF:#/$defs/DynamicNumber"
+                                                                                      }
+                                                                                    },
+                                                                                    "required": [
+                                                                                      "kind"
+                                                                                    ],
+                                                                                    "additionalProperties": false
+                                                                                  },
+                                                                                  "maxItems": 8
                                                                                 },
                                                                                 "children": {
                                                                                   "type": "array",
@@ -3223,6 +4687,81 @@
                                                                                             "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
                                                                                             "description": "REF:#/$defs/DynamicNumber"
                                                                                           },
+                                                                                          "strokeDasharray": {
+                                                                                            "anyOf": [
+                                                                                              {
+                                                                                                "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x"
+                                                                                              },
+                                                                                              {
+                                                                                                "type": "string",
+                                                                                                "maxLength": 256,
+                                                                                                "pattern": "^[0-9., eE+-]+$"
+                                                                                              }
+                                                                                            ]
+                                                                                          },
+                                                                                          "fillOpacity": {
+                                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                                          },
+                                                                                          "strokeOpacity": {
+                                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                                          },
+                                                                                          "fillRule": {
+                                                                                            "type": "string",
+                                                                                            "enum": [
+                                                                                              "nonzero",
+                                                                                              "evenodd"
+                                                                                            ]
+                                                                                          },
+                                                                                          "fontWeight": {
+                                                                                            "anyOf": [
+                                                                                              {
+                                                                                                "type": "integer",
+                                                                                                "minimum": 100,
+                                                                                                "maximum": 900
+                                                                                              },
+                                                                                              {
+                                                                                                "type": "string",
+                                                                                                "enum": [
+                                                                                                  "normal",
+                                                                                                  "bold"
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          },
+                                                                                          "strokeDashoffset": {
+                                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                                          },
+                                                                                          "strokeLinecap": {
+                                                                                            "type": "string",
+                                                                                            "enum": [
+                                                                                              "round",
+                                                                                              "butt",
+                                                                                              "square"
+                                                                                            ]
+                                                                                          },
+                                                                                          "strokeLinejoin": {
+                                                                                            "type": "string",
+                                                                                            "enum": [
+                                                                                              "round",
+                                                                                              "miter",
+                                                                                              "bevel"
+                                                                                            ]
+                                                                                          },
+                                                                                          "fontSize": {
+                                                                                            "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                            "description": "REF:#/$defs/DynamicNumber"
+                                                                                          },
+                                                                                          "textAnchor": {
+                                                                                            "type": "string",
+                                                                                            "enum": [
+                                                                                              "start",
+                                                                                              "middle",
+                                                                                              "end"
+                                                                                            ]
+                                                                                          },
                                                                                           "clipId": {
                                                                                             "type": "string",
                                                                                             "pattern": "^[A-Za-z0-9_-]{1,64}$"
@@ -3241,12 +4780,12 @@
                                                                                           "points": {
                                                                                             "type": "string",
                                                                                             "maxLength": 8192,
-                                                                                            "pattern": "^[0-9., +-]*$"
+                                                                                            "pattern": "^[0-9., eE+-]*$"
                                                                                           },
                                                                                           "transform": {
                                                                                             "type": "string",
                                                                                             "maxLength": 256,
-                                                                                            "pattern": "^(?:(?:translate|rotate|scale)\\([0-9., +-]+\\)\\s*)*$"
+                                                                                            "pattern": "^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\\([0-9., eE+-]+\\)\\s*)*$"
                                                                                           }
                                                                                         },
                                                                                         "additionalProperties": false
@@ -3254,6 +4793,51 @@
                                                                                       "text": {
                                                                                         "$ref": "#/components/SvgScene/properties/title",
                                                                                         "description": "REF:#/$defs/DynamicString"
+                                                                                      },
+                                                                                      "label": {
+                                                                                        "type": "string",
+                                                                                        "maxLength": 256
+                                                                                      },
+                                                                                      "transforms": {
+                                                                                        "type": "array",
+                                                                                        "items": {
+                                                                                          "type": "object",
+                                                                                          "properties": {
+                                                                                            "kind": {
+                                                                                              "type": "string",
+                                                                                              "enum": [
+                                                                                                "translate",
+                                                                                                "rotate",
+                                                                                                "scale"
+                                                                                              ]
+                                                                                            },
+                                                                                            "x": {
+                                                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                                                            },
+                                                                                            "y": {
+                                                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                                                            },
+                                                                                            "angle": {
+                                                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                                                            },
+                                                                                            "cx": {
+                                                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                                                            },
+                                                                                            "cy": {
+                                                                                              "$ref": "#/components/SvgScene/properties/nodes/items/properties/attrs/properties/x",
+                                                                                              "description": "REF:#/$defs/DynamicNumber"
+                                                                                            }
+                                                                                          },
+                                                                                          "required": [
+                                                                                            "kind"
+                                                                                          ],
+                                                                                          "additionalProperties": false
+                                                                                        },
+                                                                                        "maxItems": 8
                                                                                       },
                                                                                       "children": {
                                                                                         "type": "array",
@@ -3667,65 +5251,106 @@
     "Plot": {
       "type": "object",
       "properties": {
+        "domain": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false,
+          "prefixItems": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:#/$defs/DataBinding"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "enum": [
+                        "computeNumber",
+                        "computeString",
+                        "computeBoolean",
+                        "computeArray"
+                      ]
+                    },
+                    "args": {
+                      "type": "object",
+                      "properties": {
+                        "expr": {
+                          "$ref": "#/$defs/Expr"
+                        }
+                      },
+                      "required": [
+                        "expr"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "enum": [
+                        "number",
+                        "string",
+                        "boolean",
+                        "array"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args",
+                    "returnType"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "REF:#/$defs/DynamicNumber"
+            },
+            {
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0"
+            }
+          ]
+        },
+        "highlight": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0"
+            },
+            "to": {
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0"
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
         "visible": {
           "anyOf": [
             {
               "type": "boolean"
             },
             {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "maxLength": 1024
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "additionalProperties": false,
-              "description": "REF:#/$defs/DataBinding"
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0/anyOf/1"
             },
             {
-              "type": "object",
-              "properties": {
-                "call": {
-                  "type": "string",
-                  "enum": [
-                    "computeNumber",
-                    "computeString",
-                    "computeBoolean",
-                    "computeArray"
-                  ]
-                },
-                "args": {
-                  "type": "object",
-                  "properties": {
-                    "expr": {
-                      "$ref": "#/$defs/Expr"
-                    }
-                  },
-                  "required": [
-                    "expr"
-                  ],
-                  "additionalProperties": false
-                },
-                "returnType": {
-                  "type": "string",
-                  "enum": [
-                    "number",
-                    "string",
-                    "boolean",
-                    "array"
-                  ]
-                }
-              },
-              "required": [
-                "call",
-                "args",
-                "returnType"
-              ],
-              "additionalProperties": false
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0/anyOf/2"
             }
           ],
           "description": "REF:#/$defs/DynamicBoolean"
@@ -3741,10 +5366,10 @@
               "maxLength": 32768
             },
             {
-              "$ref": "#/components/Plot/properties/visible/anyOf/1"
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0/anyOf/1"
             },
             {
-              "$ref": "#/components/Plot/properties/visible/anyOf/2"
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0/anyOf/2"
             }
           ],
           "description": "REF:#/$defs/DynamicString"
@@ -3768,10 +5393,10 @@
               "maxItems": 1000
             },
             {
-              "$ref": "#/components/Plot/properties/visible/anyOf/1"
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0/anyOf/1"
             },
             {
-              "$ref": "#/components/Plot/properties/visible/anyOf/2"
+              "$ref": "#/components/Plot/properties/domain/prefixItems/0/anyOf/2"
             }
           ],
           "description": "REF:#/$defs/DynamicValue"
@@ -5699,7 +7324,8 @@
           "enum": [
             "auto",
             "grid",
-            "carousel"
+            "carousel",
+            "mosaic"
           ],
           "default": "auto"
         },
@@ -8222,7 +9848,7 @@
               },
               "color": {
                 "type": "string",
-                "pattern": "^(#[0-9a-fA-F]{3,8}|none|currentColor|accent|foreground|muted|border|surface|success|danger|gradient:[A-Za-z0-9_-]{1,64})$"
+                "pattern": "^(#[0-9a-fA-F]{3,8}|none|currentColor|black|white|transparent|red|blue|green|gray|orange|purple|yellow|pink|cyan|magenta|teal|navy|accent|foreground|muted|border|surface|background|success|danger|gradient:[A-Za-z0-9_-]{1,64})$"
               }
             },
             "required": [

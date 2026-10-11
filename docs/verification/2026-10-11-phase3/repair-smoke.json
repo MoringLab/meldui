@@ -1,0 +1,91 @@
+{
+ "timestamp": "2026-10-11T10:20:47.003Z",
+ "set": "routing",
+ "split": "all",
+ "scope": "Structural validity and resolvable expressions; semantic quality is scored by the separate layers.",
+ "routes": [
+  {
+   "model": "cx/gpt-5.6-sol-medium",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791714014530
+  },
+  {
+   "model": "cfp/zai-org/glm-5.2",
+   "status": "available",
+   "consecutiveFailures": 0,
+   "checkedAt": 1791714014530
+  }
+ ],
+ "results": [
+  {
+   "id": "r01",
+   "set": "routing",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": true,
+   "valid": true,
+   "status": "completed",
+   "repairs": 0,
+   "firstMessageMs": 3996.461569,
+   "elapsedMs": 4443.390646999999,
+   "outputBytes": 756,
+   "inputTokens": 403,
+   "outputTokens": 23,
+   "messageCount": 0,
+   "surfaces": 0,
+   "blocks": [
+    "markdown"
+   ],
+   "markdownChars": 35,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [],
+   "media": [],
+   "errors": [],
+   "finalErrors": [],
+   "failureClass": null,
+   "infra": false
+  },
+  {
+   "id": "r13",
+   "set": "routing",
+   "split": "dev",
+   "model": "cx/gpt-5.6-sol-medium",
+   "kitId": "neutral",
+   "actualModel": "gpt-5.6-sol-medium",
+   "initialValid": true,
+   "valid": true,
+   "status": "completed",
+   "repairs": 0,
+   "firstMessageMs": 32409.602776,
+   "elapsedMs": 32457.751512000003,
+   "outputBytes": 4438,
+   "inputTokens": 22033,
+   "outputTokens": 1482,
+   "messageCount": 0,
+   "surfaces": 1,
+   "blocks": [
+    "markdown",
+    "surface",
+    "markdown"
+   ],
+   "markdownChars": 61,
+   "waitedMs": 0,
+   "format": "hybrid",
+   "fallbackText": [
+    {
+     "source": "model",
+     "text": "월 저축률 계산기입니다. 기본 예시는 월 소득 4,500,000원, 월 지출 3,000,000원이며 저축액은 1,500,000원, 저축률은 33.3%입니다. 소득과 지출을 조정하면 결과가 즉시 갱신됩니다."
+    }
+   ],
+   "media": [],
+   "errors": [],
+   "finalErrors": [],
+   "failureClass": null,
+   "infra": false
+  }
+ ]
+}

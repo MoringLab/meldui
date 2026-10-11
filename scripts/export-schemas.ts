@@ -48,3 +48,14 @@ await copyFile("fixtures/showcase/cases.json", "dart/engine_flutter/test/fixture
 await mkdir("apps/playground/public/api/attachments", { recursive: true });
 for (const file of ["coast.png", "mountain.png", "sample.mp4", "sample.wav", "report.pdf"])
   await copyFile(`fixtures/media/assets/${file}`, `apps/playground/public/api/attachments/${file}`);
+
+await copyFile("fixtures/custom/catalog.json", "apps/flutter/assets/custom-catalog.json");
+await copyFile("fixtures/custom/case.json", "apps/flutter/assets/custom.json");
+await copyFile(
+  "fixtures/custom/catalog.json",
+  "dart/engine_flutter/test/fixtures/custom-catalog.json",
+);
+await copyFile("fixtures/custom/case.json", "dart/engine_flutter/test/fixtures/custom.json");
+
+await copyFile("fixtures/service/cases.json", "apps/flutter/assets/service.json");
+await copyFile("fixtures/service/cases.json", "dart/engine_flutter/test/fixtures/service.json");

@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "@engine/core": "workspace:*",
+    "@engine/kit-spec": "workspace:*",
     "@engine/protocol": "workspace:*",
-    "@engine/kit-spec": "workspace:*"
+    "zod": "3.25.76"
   }
 }

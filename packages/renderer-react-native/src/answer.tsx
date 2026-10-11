@@ -42,6 +42,7 @@ export type AnswerViewProps = {
    * provide reset and the text view. Without it the built-in frame is used.
    */
   renderSurface?: (block: SurfaceBlockView, session: AnswerSession) => ReactNode;
+  renderLayout?: (children: ReactNode) => ReactNode;
   /** Host handler for `expand`; without it a full-screen Modal is shown. */
   onExpand?: (surfaceId: string) => void;
   maxSurfaceHeight?: number;
@@ -55,6 +56,7 @@ export function AnswerView({
   markdown = SafeMarkdown,
   renderMedia,
   renderSurface,
+  renderLayout,
   onExpand,
   maxSurfaceHeight,
   chrome = true,
@@ -68,7 +70,7 @@ export function AnswerView({
   const labels = { ...defaultAnswerLabels, ...custom };
   const height = maxSurfaceHeight ?? session.policy.maxSurfaceHeight;
   const Markdown = markdown;
-  return (
+  const rendered = (
     <ContentProvider host={session.policy.allowMedia ? contentHost : undefined}>
       <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={{ gap: 16 }}>
         {state.blocks.map((block) => {
@@ -157,6 +159,7 @@ export function AnswerView({
       </View>
     </ContentProvider>
   );
+  return <>{renderLayout ? renderLayout(rendered) : rendered}</>;
 }
 
 function SurfaceFrame({

@@ -51,6 +51,7 @@ export const EXPRESSION_OPS = [
   "range",
   "map",
   "filter",
+  "sort",
   "reduce",
   "scan",
   "series",
@@ -167,7 +168,7 @@ const item = z.object({ id: z.string().min(1), label: text, child }).strict();
 const sceneColor = z
   .string()
   .regex(
-    /^(#[0-9a-fA-F]{3,8}|none|currentColor|accent|foreground|muted|border|surface|success|danger|gradient:[A-Za-z0-9_-]{1,64})$/,
+    /^(#[0-9a-fA-F]{3,8}|none|currentColor|black|white|transparent|red|blue|green|gray|orange|purple|yellow|pink|cyan|magenta|teal|navy|accent|foreground|muted|border|surface|background|success|danger|gradient:[A-Za-z0-9_-]{1,64})$/,
   );
 function sceneNodeSchema(depth: number): z.ZodType<any> {
   return z
@@ -202,6 +203,26 @@ function sceneNodeSchema(depth: number): z.ZodType<any> {
           height: number.optional(),
           opacity: number.optional(),
           strokeWidth: number.optional(),
+          strokeDasharray: z
+            .union([
+              number,
+              z
+                .string()
+                .max(256)
+                .regex(/^[0-9., eE+-]+$/),
+            ])
+            .optional(),
+          fillOpacity: number.optional(),
+          strokeOpacity: number.optional(),
+          fillRule: z.enum(["nonzero", "evenodd"]).optional(),
+          fontWeight: z
+            .union([z.number().int().min(100).max(900), z.enum(["normal", "bold"])])
+            .optional(),
+          strokeDashoffset: number.optional(),
+          strokeLinecap: z.enum(["round", "butt", "square"]).optional(),
+          strokeLinejoin: z.enum(["round", "miter", "bevel"]).optional(),
+          fontSize: number.optional(),
+          textAnchor: z.enum(["start", "middle", "end"]).optional(),
           clipId: z
             .string()
             .regex(/^[A-Za-z0-9_-]{1,64}$/)
@@ -216,17 +237,33 @@ function sceneNodeSchema(depth: number): z.ZodType<any> {
           points: z
             .string()
             .max(8192)
-            .regex(/^[0-9., +-]*$/)
+            .regex(/^[0-9., eE+-]*$/)
             .optional(),
           transform: z
             .string()
             .max(256)
-            .regex(/^(?:(?:translate|rotate|scale)\([0-9., +-]+\)\s*)*$/)
+            .regex(/^(?:(?:translate|rotate|scale|matrix|skewX|skewY)\([0-9., eE+-]+\)\s*)*$/)
             .optional(),
         })
         .strict()
         .optional(),
       text: text.optional(),
+      label: z.string().max(256).optional(),
+      transforms: z
+        .array(
+          z
+            .object({
+              kind: z.enum(["translate", "rotate", "scale"]),
+              x: number.optional(),
+              y: number.optional(),
+              angle: number.optional(),
+              cx: number.optional(),
+              cy: number.optional(),
+            })
+            .strict(),
+        )
+        .max(8)
+        .optional(),
       children:
         depth === 0
           ? z.array(z.never()).max(0).optional()
@@ -256,7 +293,13 @@ export const componentSchemas = {
     action: ActionSchema,
   }),
   ControlPanel: z.object({ ...common, ...layout, title: text.optional() }),
-  Stat: z.object({ ...common, label: text, value: z.union([text, number]), unit: text.optional() }),
+  Stat: z.object({
+    ...common,
+    label: text,
+    value: z.union([text, number]),
+    unit: text.optional(),
+    precision: z.number().int().min(0).max(8).optional(),
+  }),
   StatGroup: z.object({ ...common, ...layout }),
   Legend: z.object({
     ...common,
@@ -275,8 +318,8 @@ export const componentSchemas = {
   Quiz: z.object({
     ...common,
     prompt: text,
-    choices: z.array(text).min(2).max(10),
-    correctIndex: z.number().int().min(0).max(9),
+    choices: z.union([z.array(text).min(2).max(10), array]),
+    correctIndex: number,
     explanation: text,
     value: number,
   }),
@@ -341,6 +384,8 @@ export const componentSchemas = {
     nodes: z.array(SceneNodeSchema).max(300).describe("REF:#/$defs/DynamicValue"),
   }),
   Plot: z.object({
+    domain: z.tuple([number, number]).optional(),
+    highlight: z.object({ from: number, to: number }).strict().optional(),
     ...common,
     title: text,
     kind: z.enum(["line", "scatter", "histogram", "area", "parametric"]).default("line"),
@@ -413,7 +458,7 @@ export const componentSchemas = {
       .array(z.string().regex(/^[A-Za-z0-9._:-]{1,128}$/))
       .min(1)
       .max(40),
-    layout: z.enum(["auto", "grid", "carousel"]).default("auto"),
+    layout: z.enum(["auto", "grid", "carousel", "mosaic"]).default("auto"),
     caption: text.optional(),
   }),
   Carousel: z.object({
@@ -658,11 +703,14 @@ export function parseComponent(
 }
 
 /** Generate a portable, self-contained catalog from the authored Zod schemas. */
-export function buildCatalogSchema() {
+export function buildCatalogSchema(
+  schemas: Record<string, z.AnyZodObject> = componentSchemas,
+  catalogId: string = CATALOG_ID,
+) {
   const components: Record<string, unknown> = {};
   const functions: Record<string, unknown> = {};
   let definitions: Record<string, unknown> = {};
-  for (const [name, schema] of Object.entries(componentSchemas)) {
+  for (const [name, schema] of Object.entries(schemas)) {
     const generated = zodToJsonSchema(schema.extend({ component: z.literal(name) }), {
       definitions: { Expr: ExprSchema },
       definitionPath: "$defs",
@@ -673,6 +721,8 @@ export function buildCatalogSchema() {
       if (!value || typeof value !== "object") return;
       if (typeof value.$ref === "string" && value.$ref.startsWith("#/properties/"))
         value.$ref = value.$ref.replace("#/properties/", `#/components/${name}/properties/`);
+      if (typeof value.$ref === "string")
+        value.$ref = value.$ref.replace(/\/items\/(\d+)(?=\/|$)/g, "/prefixItems/$1");
       // zod-to-json-schema emits draft-7 tuples; the portable catalog declares 2020-12.
       if (Array.isArray(value.items)) {
         value.prefixItems = value.items;
@@ -716,12 +766,78 @@ export function buildCatalogSchema() {
   }
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: CATALOG_ID,
-    catalogId: CATALOG_ID,
+    $id: catalogId,
+    catalogId,
     protocolVersion: PROTOCOL_VERSION,
     $defs: definitions,
     components,
     functions,
     instructions: "Use only this catalog. Prefer local bindings for interactive state.",
   };
+}
+
+/** Portable authoring helpers retain A2UI binding and child-reference semantics. */
+export const componentProps = {
+  text,
+  number,
+  boolean,
+  array,
+  child,
+  children: ChildListSchema,
+  action: ActionSchema,
+};
+export const ComponentDefinitionSchema = z.object({
+  name: z.string().regex(/^[A-Z][A-Za-z0-9]{0,63}$/),
+  description: z.string().min(10).max(2000),
+  inputSchema: z.record(z.unknown()),
+  platforms: z.array(z.enum(["web", "react-native", "flutter"])).min(1),
+  fallback: z.string().min(1).optional(),
+  examples: z.array(z.record(z.unknown())).max(8).default([]),
+  actions: z
+    .array(z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{0,63}$/))
+    .max(20)
+    .default([]),
+  slots: z
+    .array(z.string().regex(/^[A-Za-z][A-Za-z0-9_]{0,63}$/))
+    .max(16)
+    .default([]),
+});
+export type ComponentDefinition = z.infer<typeof ComponentDefinitionSchema>;
+/** Implementation functions stay in the host registry; only this definition reaches a model. */
+export function defineComponent(input: {
+  name: string;
+  description: string;
+  schema: z.AnyZodObject;
+  platforms?: ComponentDefinition["platforms"];
+  fallback?: string;
+  examples?: Record<string, unknown>[];
+  actions?: string[];
+  slots?: string[];
+}) {
+  const schema = input.schema.strict();
+  for (const slot of input.slots ?? [])
+    if (!Object.hasOwn(schema.shape, slot)) throw Error("COMPONENT_SLOT_SCHEMA");
+  const inputSchema = zodToJsonSchema(schema, {
+    definitions: { Expr: ExprSchema },
+    definitionPath: "$defs",
+    $refStrategy: "root",
+  }) as Record<string, any>;
+  const normalize = (value: any) => {
+    if (!value || typeof value !== "object") return;
+    if (typeof value.$ref === "string")
+      value.$ref = value.$ref.replace(/\/items\/(\d+)(?=\/|$)/g, "/prefixItems/$1");
+    if (Array.isArray(value.items)) {
+      value.prefixItems = value.items;
+      value.items = false;
+    }
+    for (const child of Object.values(value)) normalize(child);
+  };
+  normalize(inputSchema);
+  const definition = ComponentDefinitionSchema.parse({
+    ...input,
+    inputSchema,
+    platforms: input.platforms ?? ["web", "react-native", "flutter"],
+  });
+  for (const example of definition.examples) schema.parse(example);
+  return { name: definition.name, schema, definition };
 }

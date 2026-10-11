@@ -14,7 +14,8 @@ import {
   type SurfaceDeclaration,
   type UIMessage,
 } from "@engine/protocol";
-import type { UIModelEvent, UIRuntime } from "./index.js";
+import { assertSafeJson } from "./expression.js";
+import { createUIRuntime, type UIModelEvent, type UIRuntime } from "./index.js";
 
 export type AnswerItem =
   | { kind: "text"; text: string }
@@ -476,11 +477,21 @@ export class AnswerSession {
       id: this.newId(),
       kind: "sandbox",
       mode: decl.mode,
+      phase: decl.phase,
+      libraries: decl.libraries,
+      state: decl.state,
       source: this.policy.allowSandbox ? decl.source : undefined,
       fallbackText: decl.fallbackText,
       status: this.policy.allowSandbox ? "complete" : "blocked",
     };
-    this._blocks.push(block);
+    if (decl.artifactId) {
+      block.id = decl.artifactId;
+      const index = this._blocks.findIndex((b) => b.id === block.id);
+      if (index >= 0) {
+        if (this._blocks[index].kind !== "sandbox") throw Error("ARTIFACT_KIND");
+        this._blocks[index] = block;
+      } else this._blocks.push(block);
+    } else this._blocks.push(block);
     this.touch();
     events.push(this.emit({ type: "block", block }));
     return events;
@@ -652,6 +663,87 @@ export class AnswerSession {
     this.touch();
   }
 
+  saveArtifactState(id: string, state: Record<string, unknown>) {
+    assertSafeJson(state);
+    if (JSON.stringify(state).length > 65536) throw Error("ARTIFACT_STATE_LIMIT");
+    const index = this._blocks.findIndex((b) => b.id === id);
+    if (index < 0 || this._blocks[index].kind !== "sandbox") throw Error("ARTIFACT_KIND");
+    this._blocks[index] = { ...this._blocks[index], state: structuredClone(state) } as AnswerBlock;
+    this.touch();
+  }
+  /** Compare-and-set a focused artifact; validation completes before the visible state changes. */
+  updateArtifact(
+    id: string,
+    expectedRevision: number,
+    update: { text?: string; source?: string; messages?: unknown[] },
+  ) {
+    assertSafeJson(update);
+    const index = this._blocks.findIndex((b) => b.id === id);
+    const block = this._blocks[index];
+    if (
+      !block ||
+      !Number.isInteger(expectedRevision) ||
+      expectedRevision !== ((block as any).revision ?? 0)
+    )
+      throw Error("ARTIFACT_REVISION");
+    if (
+      block.kind === "markdown" &&
+      typeof update.text === "string" &&
+      update.text.length <= 65536
+    ) {
+      this._blocks[index] = {
+        ...block,
+        text: update.text,
+        revision: expectedRevision + 1,
+      } as AnswerBlock;
+    } else if (
+      block.kind === "sandbox" &&
+      this.policy.allowSandbox &&
+      typeof update.source === "string" &&
+      update.source.length <= 131072
+    ) {
+      this._blocks[index] = {
+        ...block,
+        source: update.source,
+        revision: expectedRevision + 1,
+      } as AnswerBlock;
+    } else if (
+      block.kind === "surface" &&
+      Array.isArray(update.messages) &&
+      update.messages.length <= 100
+    ) {
+      const validation = createUIRuntime(this.runtime.options);
+      const log = this.surfaceLog.get(block.surfaceId)!;
+      try {
+        for (const message of log.messages) validation.accept(structuredClone(message));
+        validation.accept({
+          version: "v0.9",
+          updateDataModel: {
+            surfaceId: block.surfaceId,
+            path: "/",
+            value: structuredClone(this.runtime.read(block.surfaceId, "/")),
+          },
+        });
+        for (const raw of update.messages) {
+          const body = (raw as any)?.updateComponents ?? (raw as any)?.updateDataModel;
+          if (!body || body.surfaceId !== block.surfaceId) throw Error("ARTIFACT_SCOPE");
+          if (validation.accept(raw).some((d) => d.severity === "error"))
+            throw Error("ARTIFACT_INVALID");
+        }
+        if (validation.finish().some((d) => d.severity === "error"))
+          throw Error("ARTIFACT_INVALID");
+      } finally {
+        validation.dispose();
+      }
+      for (const raw of update.messages) this.pushMessage(raw);
+      this._blocks[index] = {
+        ...this._blocks[index],
+        revision: expectedRevision + 1,
+      } as AnswerBlock;
+    } else throw Error("ARTIFACT_UPDATE");
+    this.touch();
+  }
+
   // ── history ──────────────────────────────────────────────────────────────────────────────
   serialize(): AnswerSnapshot {
     const surfaces: AnswerSnapshot["surfaces"] = {};
@@ -680,6 +772,10 @@ export class AnswerSession {
     const session = new AnswerSession(runtime, options);
     for (const raw of snapshot.blocks) {
       const block = raw as unknown as AnswerBlock;
+      if (block.kind === "sandbox" && !session.policy.allowSandbox) {
+        session._blocks.push({ ...block, status: "blocked", source: undefined });
+        continue;
+      }
       session._blocks.push(block);
       session.nextBlock = Math.max(session.nextBlock, Number(block.id.replace(/\D/g, "")) + 1 || 1);
       if (block.kind === "surface") {

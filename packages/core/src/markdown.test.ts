@@ -45,7 +45,8 @@ describe("splitMarkdownBlocks", () => {
     for (let i = 1; i <= full.length; i++) {
       const blocks = splitMarkdownBlocks(full.slice(0, i));
       // Every block except the last one is final and must not change afterwards.
-      for (const [index, block] of previous.slice(0, -1).entries()) expect(blocks[index]).toBe(block);
+      for (const [index, block] of previous.slice(0, -1).entries())
+        expect(blocks[index]).toBe(block);
       previous = blocks;
     }
   });

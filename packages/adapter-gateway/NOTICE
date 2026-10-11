@@ -18,3 +18,11 @@ and distributed under Engine's Apache-2.0 license. No external media assets
 or network-loaded fonts are included.
 
 flutter_svg is used under MIT; see its upstream LICENSE.
+
+Phase 3 optional integrations and approved code resources:
+- saxes: ISC; Three.js and Chart.js: MIT; D3: ISC.
+- @modelcontextprotocol/ext-apps: MIT; its SDK notices apply.
+- GSAP 3.13.0: Standard No Charge License, copyright Webflow.
+  https://gsap.com/community/standard-license/ (effective 2025-04-30).
+  This is a separate upstream license, not Apache-2.0 or MIT.
+Approved resource bundles preserve upstream copyright/legal comments.

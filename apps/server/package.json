@@ -8,12 +8,19 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "@engine/core": "workspace:*",
-    "@engine/protocol": "workspace:*",
-    "@engine/kit-neutral": "workspace:*",
-    "@engine/kit-editorial": "workspace:*",
     "@engine/adapter-gateway": "workspace:*",
+    "@engine/core": "workspace:*",
     "@engine/kit-brand": "workspace:*",
-    "@engine/sandbox": "workspace:*"
+    "@engine/kit-editorial": "workspace:*",
+    "@engine/kit-neutral": "workspace:*",
+    "@engine/protocol": "workspace:*",
+    "@engine/sandbox": "workspace:*",
+    "chart.js": "4.5.1",
+    "d3": "7.9.0",
+    "esbuild": "0.25.12",
+    "gsap": "3.13.0",
+    "katex": "0.18.2",
+    "three": "0.180.0",
+    "@engine/kit-spec": "workspace:*"
   }
 }

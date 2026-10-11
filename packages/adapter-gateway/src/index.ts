@@ -1,4 +1,5 @@
 import {
+  assertSafeJson,
   type ModelRequest,
   NDJSONDecoder,
   readBytes,
@@ -45,6 +46,13 @@ export class GatewayAdapter implements UIModelAdapter {
             ...(request.responseFormat ? { response_format: request.responseFormat } : {}),
             messages: request.messages,
             stream: true,
+            ...(request.tools?.length
+              ? {
+                  tools: request.tools,
+                  tool_choice: request.toolChoice ?? "auto",
+                  parallel_tool_calls: false,
+                }
+              : {}),
             max_tokens: request.maxTokens ?? 4096,
           }),
         },
@@ -54,6 +62,7 @@ export class GatewayAdapter implements UIModelAdapter {
         throw new Error("GATEWAY_NOT_STREAMING");
       const textDecoder = new TextDecoder();
       let buffer = "";
+      const tools = new Map<number, { id: string; name: string; json: string }>();
       let finish: string | undefined;
       let done = false;
       let bytes = 0;
@@ -85,6 +94,24 @@ export class GatewayAdapter implements UIModelAdapter {
                 };
               for (const choice of chunk.choices ?? []) {
                 if (choice.finish_reason) finish = choice.finish_reason;
+                for (const part of choice.delta?.tool_calls ?? []) {
+                  if (!Number.isInteger(part.index) || part.index < 0 || part.index >= 8)
+                    throw Error("GATEWAY_TOOL_LIMIT");
+                  const tool = tools.get(part.index) ?? { id: "", name: "", json: "" };
+                  tool.id += part.id ?? "";
+                  tool.name += part.function?.name ?? "";
+                  tool.json += part.function?.arguments ?? "";
+                  if (tool.json.length > 131072 || tool.name.length > 64 || tool.id.length > 128)
+                    throw Error("GATEWAY_TOOL_LIMIT");
+                  tools.set(part.index, tool);
+                  if (tool.id && tool.name)
+                    yield {
+                      type: "tool-delta",
+                      id: tool.id,
+                      name: tool.name,
+                      arguments: tool.json,
+                    };
+                }
                 const content = choice.delta?.content;
                 if (typeof content === "string") onOutput?.(content);
                 if (typeof content === "string" && request.format === "hybrid")
@@ -118,6 +145,16 @@ export class GatewayAdapter implements UIModelAdapter {
         if (buffer.length > 1024 * 1024) throw new Error("GATEWAY_EVENT_LIMIT");
       }
       if (!activeSignal.aborted) {
+        if (tools.size && finish !== "tool_calls") throw Error("GATEWAY_TOOL_INCOMPLETE");
+        for (const tool of tools.values()) {
+          if (!tool.id || !request.tools?.some((t) => t.function.name === tool.name))
+            throw Error("GATEWAY_TOOL_UNKNOWN");
+          const args = JSON.parse(tool.json);
+          assertSafeJson(args);
+          if (!args || typeof args !== "object" || Array.isArray(args))
+            throw Error("GATEWAY_TOOL_ARGUMENTS");
+          yield { type: "tool-call", id: tool.id, name: tool.name, args };
+        }
         for (const message of request.format === "hybrid" ? [] : decoder.finish()) {
           const normalized = normalizeMessage(message, request.normalization === "safe");
           for (const fix of normalized.fixes)
@@ -170,7 +207,7 @@ export class GatewayAdapter implements UIModelAdapter {
 
 export * from "./examples.js";
 export * from "./health.js";
+export * from "./presentation.js";
 export * from "./prompt.js";
 export * from "./quality.js";
-
 export * from "./vision.js";

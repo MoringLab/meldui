@@ -389,7 +389,7 @@ export function MediaContent({
   const items = ids.flatMap((id) => (host?.attachments.get(id) ? [host.attachments.get(id)!] : []));
   const chosen = layout === "auto" ? mediaLayout(items) : layout;
   const carousel = chosen === "carousel";
-  const columns = width >= 480 && ["grid", "compare"].includes(chosen) ? 2 : 1;
+  const columns = width >= 480 && ["grid", "compare", "mosaic"].includes(chosen) ? 2 : 1;
   useEffect(() => {
     setPage((old) => Math.min(old, Math.max(0, ids.length - 1)));
   }, [ids.length]);

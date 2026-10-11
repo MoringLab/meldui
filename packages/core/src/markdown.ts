@@ -138,3 +138,43 @@ export function prepareMarkdown(
   flush();
   return parts;
 }
+
+const FENCE = /^\s{0,3}(`{3,}|~{3,})/;
+const MATH = /^\s{0,3}\$\$/;
+const REFERENCE = /^\s{0,3}\[[^\]]+\]:\s*\S/m;
+
+/**
+ * Splits Markdown into top-level blocks at blank lines, never inside code fences or $$ math,
+ * and never before an indented continuation line. While a long answer streams, finished
+ * blocks keep identical text, so renderers can memoise them and only re-parse the last one.
+ * Text with reference-style link definitions stays whole (definitions apply document-wide).
+ */
+export function splitMarkdownBlocks(text: string): string[] {
+  if (REFERENCE.test(text)) return text.trim() ? [text] : [];
+  const lines = text.split("\n");
+  const blocks: string[] = [];
+  let current: string[] = [];
+  let fence: string | null = null;
+  let math = false;
+  const flush = () => {
+    const block = current.join("\n").replace(/\n+$/, "");
+    if (block.trim()) blocks.push(block);
+    current = [];
+  };
+  lines.forEach((line, index) => {
+    const opener = FENCE.exec(line)?.[1];
+    if (fence) {
+      if (opener && opener[0] === fence[0] && opener.length >= fence.length) fence = null;
+    } else if (opener) fence = opener;
+    else if (MATH.test(line)) math = !math;
+    const next = lines[index + 1];
+    const blank = !line.trim();
+    if (blank && !fence && !math && current.length && next !== undefined && !/^\s/.test(next)) {
+      flush();
+      return;
+    }
+    current.push(line);
+  });
+  flush();
+  return blocks;
+}

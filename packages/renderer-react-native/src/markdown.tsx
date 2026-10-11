@@ -1,13 +1,39 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: append-only Markdown segments retain their order during streaming
-import { prepareMarkdown } from "@engine/core";
+import { prepareMarkdown, splitMarkdownBlocks } from "@engine/core";
 import { resolveTypography } from "@engine/kit-spec";
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { Platform, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
 import { useMotion, useUI } from "./renderer.js";
-/** The mdast boundary removes every image URL and raw HTML before native parsing. */
+/**
+ * The mdast boundary removes every image URL and raw HTML before native parsing. Text is
+ * split into top-level blocks; finished blocks are memoised, so a streaming answer re-parses
+ * and re-lays-out only its last block instead of the whole text on every update.
+ */
 export function SafeMarkdown({ text, streaming = false }: { text: string; streaming?: boolean }) {
+  const blocks = useMemo(() => splitMarkdownBlocks(text), [text]);
+  if (blocks.length <= 1) return <MarkdownBlock text={text} streaming={streaming} />;
+  return (
+    <View style={{ gap: 12 }}>
+      {blocks.map((block, i) => (
+        <MarkdownBlock
+          key={`block-${i}`}
+          text={block}
+          streaming={streaming && i === blocks.length - 1}
+        />
+      ))}
+    </View>
+  );
+}
+
+const MarkdownBlock = memo(function MarkdownBlock({
+  text,
+  streaming,
+}: {
+  text: string;
+  streaming: boolean;
+}) {
   const host = useContentHost();
   const { kit, mode } = useUI();
   const { reduced } = useMotion();
@@ -102,4 +128,4 @@ export function SafeMarkdown({ text, streaming = false }: { text: string; stream
       )}
     </View>
   );
-}
+});

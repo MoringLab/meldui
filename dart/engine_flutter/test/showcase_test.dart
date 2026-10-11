@@ -52,4 +52,53 @@ void main() {
       });
     }
   }
+  testWidgets(
+    'part controls disclose actions and preserve independent input semantics',
+    (tester) async {
+      final runtime = await UIRuntime.create(
+        schema:
+            jsonDecode(File('assets/catalog.json').readAsStringSync())
+                as JsonMap,
+      );
+      final kit = UIKit(
+        jsonDecode(File('assets/kit-neutral.json').readAsStringSync())
+            as JsonMap,
+      );
+      final answer = AnswerSession(runtime)
+        ..push(fixtures.firstWhere((f) => f['id'] == '01')['wire'])
+        ..end();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UIProvider(
+            runtime: runtime,
+            kit: kit,
+            child: Scaffold(
+              body: SingleChildScrollView(child: AnswerView(session: answer)),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('앞바퀴'), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Semantics &&
+              w.container &&
+              w.explicitChildNodes &&
+              w.properties.label == '자전거를 이루는 부품',
+        ),
+        findsWidgets,
+      );
+      await tester.ensureVisible(find.text('부품 선택'));
+      await tester.tap(find.text('부품 선택'));
+      await tester.pumpAndSettle();
+      expect(find.text('앞바퀴'), findsOneWidget);
+      tester.widget<Slider>(find.byType(Slider).first).onChanged!(80);
+      await tester.pump();
+      expect(runtime.read('main', '/a'), 80);
+      await tester.pumpWidget(const SizedBox());
+      runtime.dispose();
+    },
+  );
 }

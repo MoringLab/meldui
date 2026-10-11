@@ -48,6 +48,12 @@ class _LearningViewState extends State<LearningView> {
     final host = UIProvider.of(context), runtime = host.runtime;
     final p = widget.node['props'] as Map;
     final colors = host.kit.colors(host.dark);
+    Color kitColor(String role) => Color(
+      int.parse((colors[role] as String).replaceFirst('#', 'ff'), radix: 16),
+    );
+    final motion = (MediaQuery.maybeOf(context)?.disableAnimations ?? false)
+        ? 0
+        : host.kit.motionMs;
     Widget text(dynamic v) => Text('${v ?? ''}');
     Widget column(List<Widget> c) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -56,8 +62,15 @@ class _LearningViewState extends State<LearningView> {
           Padding(padding: const EdgeInsets.only(bottom: 12), child: x),
       ],
     );
-    Widget button(String label, VoidCallback? call) =>
-        OutlinedButton(onPressed: call, child: Text(label));
+    Widget button(String label, VoidCallback? call) => OutlinedButton(
+      onPressed: call,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: kitColor('foreground'),
+        side: BorderSide(color: kitColor('border')),
+        minimumSize: const Size(48, 48),
+      ),
+      child: Text(label),
+    );
     void choose(int v) {
       setState(() => selected = v);
       final raw = widget.node['raw']['value'];
@@ -320,7 +333,25 @@ class _LearningViewState extends State<LearningView> {
               ),
             ),
           ),
-          ...sceneActions,
+          if (sceneActions.isNotEmpty)
+            Material(
+              color: Colors.transparent,
+              child: ExpansionTile(
+                title: Text(
+                  "부품 선택",
+                  style: TextStyle(color: kitColor("foreground")),
+                ),
+                iconColor: kitColor("foreground"),
+                collapsedIconColor: kitColor("foreground"),
+                expansionAnimationStyle: AnimationStyle(
+                  duration: Duration(milliseconds: motion),
+                  reverseDuration: Duration(milliseconds: motion),
+                ),
+                children: [
+                  Wrap(spacing: 8, runSpacing: 8, children: sceneActions),
+                ],
+              ),
+            ),
           text(p['description']),
         ]);
       case 'RouteMap':

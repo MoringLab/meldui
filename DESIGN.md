@@ -1,5 +1,5 @@
 ---
-name: Engine
+name: MeldUI
 description: Quiet, host-themed interactive answers and their reference workspace.
 colors:
   background: "#ffffff"

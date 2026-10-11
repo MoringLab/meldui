@@ -247,6 +247,7 @@ class _SurfaceFrameState extends State<_SurfaceFrame> {
     );
     return Semantics(
       container: true,
+      explicitChildNodes: true,
       label: block.title ?? labels.surface,
       hint: block.fallbackText,
       child: Container(

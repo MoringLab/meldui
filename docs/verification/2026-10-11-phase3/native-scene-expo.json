@@ -1,0 +1,12 @@
+{
+  "platform": "expo",
+  "physicalSliderChanged": true,
+  "before": [
+    "10"
+  ],
+  "after": [
+    "84"
+  ],
+  "preferencesChanged": false,
+  "scope": "One physical bound input change; not a timing benchmark"
+}

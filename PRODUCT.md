@@ -1,4 +1,4 @@
-# Engine
+# MeldUI
 
 <!-- impeccable:product-schema 1 -->
 
@@ -23,7 +23,7 @@ Typed semantic components, interactive SVG scenes, Markdown, KaTeX and host-reso
 Generated HTML/CSS/JavaScript is a separate, explicitly opted-in web capability, disabled by default. Live widgets use host-approved resources and a host bridge with explicit readable and writable state paths. Host actions, data and media stay under host control. API credentials remain on the server. Native React Native and Flutter renderers accompany the web renderer; desktop implementations are later work.
 
 ## Brand Commitments
-Approved working name: Engine. Neutral and editorial kits. Interface language is Korean with English technical documentation.
+Approved name: MeldUI. Existing Engine package/wire identifiers stay compatible. Neutral and editorial kits. Interface language is Korean with English technical documentation.
 
 ## Accessibility & Inclusion
 Keyboard access, screen reader semantics, dynamic text sizes, reduced motion, and accessible alternatives for charts.

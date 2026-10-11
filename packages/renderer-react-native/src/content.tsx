@@ -220,7 +220,10 @@ export function AttachmentMedia({
   seek,
   muted = true,
   regionIds = [],
+  ratio: fixedRatio,
 }: {
+  /** Uniform frame ratio (grids); the picture is cropped to fill it. Default: its own ratio. */
+  ratio?: number;
   id: string;
   alt?: string;
   caption?: string;
@@ -284,7 +287,7 @@ export function AttachmentMedia({
   }, [id]);
   if (file || !manifest || manifest.kind === "file") return <FileCard id={id} caption={caption} />;
   const declared = manifest.width && manifest.height ? manifest.width / manifest.height : undefined;
-  const ratio = Math.min(2.4, Math.max(0.56, declared ?? natural ?? 4 / 3));
+  const ratio = fixedRatio ?? Math.min(2.4, Math.max(0.56, declared ?? natural ?? 4 / 3));
   const label = alt || manifest.alt || manifest.name;
   const frame = {
     width: "100%" as const,
@@ -535,7 +538,12 @@ export function MediaContent({
           {ids.map((id, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
             <View key={`${id}-${i}`} style={{ width: columns === 2 ? (width - 8) / 2 : undefined }}>
-              <AttachmentMedia id={id} alt={alt?.[i]} file={chosen === "files"} />
+              <AttachmentMedia
+                id={id}
+                alt={alt?.[i]}
+                file={chosen === "files"}
+                ratio={columns === 2 ? 1 : undefined}
+              />
             </View>
           ))}
         </View>

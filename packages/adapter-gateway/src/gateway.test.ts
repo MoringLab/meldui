@@ -86,7 +86,7 @@ describe("gateway boundaries", () => {
       capabilities: capabilitiesFor("react-native"),
       policy: { allowedComponents: ["Column", "Text", "Table", "Stat"] },
     });
-    expect(prompt).toContain("Use Stat for explorable learning.");
+    expect(prompt).not.toContain("explorable learning");
     for (const name of ["ControlPanel", "Formula", "Quiz", "SvgScene", "RouteMap", "Playback"])
       expect(prompt).not.toMatch(new RegExp(`\\b${name}\\b`));
     expect(prompt).toContain("numberFormat takes value, decimal places and an optional true");

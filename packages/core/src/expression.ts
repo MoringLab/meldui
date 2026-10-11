@@ -85,7 +85,13 @@ export function evaluateExpression(expression: Expr, read: (path: string) => unk
       case "numberFormat": {
         const digits = item.args.length > 1 ? num(at(1)) : 2;
         if (!Number.isInteger(digits) || digits < 0 || digits > 8) throw new Error("ROUND_LIMIT");
-        return num(at(0)).toFixed(digits);
+        const fixed = num(at(0)).toFixed(digits);
+        if (item.args.length < 3 || !at(2)) return fixed;
+        // Optional third argument: group thousands with "," (locale-independent, so every
+        // renderer and the history text agree).
+        const [whole, fraction] = fixed.split(".");
+        const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return fraction === undefined ? grouped : `${grouped}.${fraction}`;
       }
       case "range": {
         const length = num(at(0));

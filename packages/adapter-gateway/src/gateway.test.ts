@@ -80,6 +80,23 @@ describe("gateway boundaries", () => {
     expect(prompt).toContain('"placement":"left|right|above|below"');
     expect(prompt).not.toContain('kind:"line"|"bar"|"scatter"|"area"');
   });
+  it("never advertises components outside allowedComponents", () => {
+    const prompt = buildSystemPrompt({
+      kit: neutral,
+      capabilities: capabilitiesFor("react-native"),
+      policy: { allowedComponents: ["Column", "Text", "Table", "Stat"] },
+    });
+    expect(prompt).toContain("Use Stat for explorable learning.");
+    for (const name of ["ControlPanel", "Formula", "Quiz", "SvgScene", "RouteMap", "Playback"])
+      expect(prompt).not.toMatch(new RegExp(`\\b${name}\\b`));
+    expect(prompt).toContain("numberFormat takes value, decimal places and an optional true");
+    const markdownOnly = buildSystemPrompt({
+      kit: neutral,
+      capabilities: capabilitiesFor("react-native"),
+      policy: { mode: "markdown-only" },
+    });
+    expect(markdownOnly).not.toContain("primary visual");
+  });
   it("uses a host catalog and rejects mismatched capabilities", () => {
     const catalog = { catalogId: "urn:host:custom", components: { HostText: { type: "object" } } };
     const kit = { ...neutral, catalogId: catalog.catalogId };

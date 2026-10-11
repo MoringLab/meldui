@@ -190,3 +190,14 @@ it("deferred scene expressions refresh only their referenced data subscriptions"
   stop();
   runtime.dispose();
 });
+
+describe("numberFormat grouping", () => {
+  const run = (args: unknown[]) =>
+    evaluateExpression({ op: "numberFormat", args } as never, () => undefined);
+  it("groups thousands only when asked", () => {
+    expect(run([308400, 0])).toBe("308400");
+    expect(run([308400, 0, true])).toBe("308,400");
+    expect(run([-1234567.5, 1, true])).toBe("-1,234,567.5");
+    expect(run([999, 2, true])).toBe("999.00");
+  });
+});

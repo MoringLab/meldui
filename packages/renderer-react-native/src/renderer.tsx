@@ -11,6 +11,7 @@ import React, {
   type ReactNode,
   useCallback,
   useContext,
+  useMemo,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -48,7 +49,15 @@ type NativeContext = {
   mode: "light" | "dark";
   assets: Record<string, ImageSourcePropType>;
   components: Record<string, React.ComponentType<NativeViewProps>>;
+  icons?: IconRenderer;
 };
+/** Host icon set: draws a kit icon name, or returns null to use the built-in drawing. */
+export type IconRenderer = (props: {
+  name: string;
+  size: number;
+  color: string;
+  label?: string;
+}) => ReactNode;
 const Context = createContext<NativeContext | null>(null);
 /** Width of the surface's own container (a chat column), measured with onLayout. */
 const ContainerWidth = createContext(0);
@@ -109,6 +118,7 @@ export function UIProvider({
   components = {},
   onGestureLock,
   content,
+  icons,
   children,
 }: {
   runtime: UIRuntime;
@@ -116,14 +126,21 @@ export function UIProvider({
   mode?: "light" | "dark";
   assets?: NativeContext["assets"];
   components?: NativeContext["components"];
+  /** Draws the kit's icon names (kit.icons); unknown names use the built-in set. */
+  icons?: IconRenderer;
   /** Called with true while a control (slider) is being dragged and false when it ends. */
   onGestureLock?: (locked: boolean) => void;
   children: ReactNode;
   content?: ContentHost;
 }) {
   validateKit(kit);
+  // A stable value: every node reads this context, so a new object would re-render them all.
+  const value = useMemo(
+    () => ({ runtime, kit, mode, assets, components, icons }),
+    [runtime, kit, mode, assets, components, icons],
+  );
   return (
-    <Context.Provider value={{ runtime, kit, mode, assets, components }}>
+    <Context.Provider value={value}>
       <ContentProvider host={content}>
         <GestureLock.Provider value={onGestureLock ?? (() => {})}>
           <View style={{ backgroundColor: kit.tokens[mode].background }}>{children}</View>
@@ -547,12 +564,15 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </View>
       );
     case "Icon":
-      return <NativeIcon name={p.name} label={p.label} color={t.foreground} />;
+      return <NativeIcon name={p.name} label={p.label} color={toneColor(t, p.tone)} />;
     case "Badge":
       return (
         <View
           style={{
             alignSelf: "flex-start",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
             paddingHorizontal: 12,
             paddingVertical: 5,
             borderWidth: 1,
@@ -560,6 +580,13 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             borderRadius: 20,
           }}
         >
+          {p.icon ? (
+            <NativeIcon
+              name={p.icon}
+              size={14}
+              color={p.tone === "success" ? t.success : t.muted}
+            />
+          ) : null}
           <Text style={{ color: p.tone === "success" ? t.success : t.foreground, fontSize: 13 }}>
             {String(p.text ?? "")}
           </Text>
@@ -577,7 +604,14 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             gap: 6,
           }}
         >
-          <Text style={{ ...body, fontWeight: "600" }}>{String(p.title)}</Text>
+          {p.icon || p.title ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              {p.icon ? <NativeIcon name={p.icon} size={18} color={t.accent} /> : null}
+              {p.title ? (
+                <Text style={{ ...body, fontWeight: "600", flexShrink: 1 }}>{String(p.title)}</Text>
+              ) : null}
+            </View>
+          ) : null}
           <Text style={body}>{String(p.text)}</Text>
         </View>
       );
@@ -839,25 +873,49 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       );
   }
 }
-function NativeIcon({ name, label, color }: { name: string; label?: string; color: string }) {
-  const paths: Record<string, string> = {
-    check: "m5 12 4 4L19 6",
-    info: "M12 10v7m0-10v.1",
-    arrow: "M4 12h15m-6-6 6 6-6 6",
-    plus: "M12 5v14M5 12h14",
-    star: "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z",
-    close: "m6 6 12 12M6 18 18 6",
-  };
+const BUILTIN_PATHS: Record<string, string> = {
+  check: "m5 12 4 4L19 6",
+  info: "M12 10v7m0-10v.1",
+  arrow: "M4 12h15m-6-6 6 6-6 6",
+  plus: "M12 5v14M5 12h14",
+  star: "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z",
+  close: "m6 6 12 12M6 18 18 6",
+  "chevron-left": "m15 18-6-6 6-6",
+  "chevron-right": "m9 18 6-6-6-6",
+  "image-off":
+    "M3 3l18 18M10.4 5H19a2 2 0 0 1 2 2v8.6M19 21H5a2 2 0 0 1-2-2V7c0-.8.5-1.5 1.1-1.8M3 16l4.5-4.5 3 3M14 14l1.5-1.5L21 18",
+};
+export function toneColor(t: UIKit["tokens"]["light"], tone?: string) {
+  if (tone === "muted") return t.muted;
+  if (tone === "accent") return t.accent;
+  if (tone === "success") return t.success;
+  if (tone === "danger") return t.danger;
+  return t.foreground;
+}
+/** An icon by name: the host icon set first, then the built-in strokes (unknown names: info). */
+export function NativeIcon({
+  name,
+  label,
+  color,
+  size = 20,
+}: {
+  name: string;
+  label?: string;
+  color: string;
+  size?: number;
+}) {
+  const host = useContext(Context)?.icons?.({ name, size, color, label });
+  if (host) return <>{host}</>;
   return (
     <Svg
-      width={22}
-      height={22}
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       accessible={Boolean(label)}
       accessibilityLabel={label}
     >
       <Path
-        d={paths[name] ?? paths.info}
+        d={BUILTIN_PATHS[name] ?? BUILTIN_PATHS.info}
         fill="none"
         stroke={color}
         strokeWidth={1.6}

@@ -1,5 +1,6 @@
 import { availablePatterns, type UIKit } from "@engine/kit-spec";
 import {
+  BUILTIN_ICONS,
   buildCatalogSchema,
   CATALOG_ID,
   type Capabilities,
@@ -26,7 +27,8 @@ export type PromptOptions = {
   examples?: (PromptExample | unknown[])[];
   /** Extra per-model guidance appended last (model profiles, M6). */
   extra?: string[];
-  variant?: "standard" | "compact";
+  /** standard: full JSON schema; compact: without annotations; signatures: one line per component. */
+  variant?: "standard" | "compact" | "signatures";
 };
 
 const ROUTING = [
@@ -130,7 +132,12 @@ export function buildSystemPrompt({
       `Capabilities: ${JSON.stringify({ platform: capabilities.platform, components: names, clientActions: capabilities.clientActions, features: capabilities.features })}. ${fallbackNote} Client actions are limited to the listed names. Never request full data model synchronization.`,
       `Design guide: ${kit.guide}`,
     );
-    parts.push(`Authoring patterns: ${JSON.stringify(availablePatterns(names))}`);
+    if (["Icon", "Callout", "Stat", "Badge"].some((name) => names.includes(name)))
+      parts.push(
+        `Icon names (Icon.name and the icon prop of Callout, Stat and Badge): ${(kit.icons?.length ? kit.icons : BUILTIN_ICONS).join(",")}. Use an icon only where it helps scanning, never on every row.`,
+      );
+    if (variant !== "signatures")
+      parts.push(`Authoring patterns: ${JSON.stringify(availablePatterns(names))}`);
     const filtered = resolved.components
       ? filterCatalog(structuredClone(resolved) as { components: Record<string, unknown> }, names)
       : resolved;
@@ -141,14 +148,18 @@ export function buildSystemPrompt({
         delete chart.properties[property];
     }
     parts.push(
-      `Catalog: ${JSON.stringify(variant === "compact" ? compactCatalog(filtered) : filtered)}`,
+      variant === "signatures"
+        ? `Components:\n${catalogSignatures(filtered)}`
+        : `Catalog: ${JSON.stringify(variant === "compact" ? compactCatalog(filtered) : filtered)}`,
     );
   }
 
   if (surfaces) {
     parts.push(surfaceGuidance(names));
     const custom = kit.customComponents?.filter((d) => names.includes(d.name)) ?? [];
-    if (custom.length) parts.push(`Host custom components: ${quote(custom)}`);
+    // The signature list already describes custom components.
+    if (custom.length && variant !== "signatures")
+      parts.push(`Host custom components: ${quote(custom)}`);
   }
   if (policy.allowSandbox && capabilities.platform === "web")
     parts.push(
@@ -206,4 +217,93 @@ export function compactCatalog(value: unknown, depth = 0): unknown {
       .filter(([key]) => !["description", "title", "default", "$schema"].includes(key))
       .map(([key, v]) => [key, compactCatalog(v, depth + 1)]),
   );
+}
+
+type Schema = Record<string, unknown>;
+const OMIT = new Set(["component", "visible", "accessibilityLabel"]);
+
+function resolveRef(root: unknown, schema: Schema): Schema {
+  const ref = schema.$ref;
+  if (typeof ref !== "string" || !ref.startsWith("#/")) return schema;
+  let node: unknown = root;
+  for (const key of ref.slice(2).split("/"))
+    node = node && typeof node === "object" ? (node as Schema)[key] : undefined;
+  return node && typeof node === "object" ? resolveRef(root, node as Schema) : {};
+}
+
+const isBinding = (s: Schema) =>
+  s.type === "object" &&
+  !!s.properties &&
+  Object.keys(s.properties as Schema).length === 1 &&
+  "path" in (s.properties as Schema);
+const isCompute = (s: Schema) =>
+  s.type === "object" && !!s.properties && "call" in (s.properties as Schema);
+
+/** One schema as a short type: T/N/B are dynamic text/number/boolean (literal, {path} or compute). */
+function typeOf(root: unknown, input: Schema, depth: number): string {
+  const s = resolveRef(root, input);
+  if (Array.isArray(s.anyOf) || Array.isArray(s.oneOf)) {
+    const options = ((s.anyOf ?? s.oneOf) as Schema[]).map((o) => resolveRef(root, o));
+    const plain = options.filter((o) => !isBinding(o) && !isCompute(o));
+    const dynamic = plain.length < options.length;
+    const isChildren = (o: Schema) =>
+      (o.type === "array" && resolveRef(root, (o.items as Schema) ?? {}).type === "string") ||
+      (o.type === "object" && !!o.properties && "componentId" in (o.properties as Schema));
+    if (options.length === 2 && options.every(isChildren)) return "ids";
+    if (dynamic && plain.length === 1) {
+      const base = plain[0];
+      if (base.type === "array") return "A";
+      if (base.type === "string" && !base.enum) return "T";
+      if (base.type === "number" || base.type === "integer") return "N";
+      if (base.type === "boolean") return "B";
+    }
+    const parts = [...new Set(options.map((o) => typeOf(root, o, depth)))];
+    return parts.length > 3 ? "any" : parts.join("|");
+  }
+  if (Array.isArray(s.enum)) return s.enum.map((v) => String(v)).join("|");
+  if (s.const !== undefined) return JSON.stringify(s.const);
+  if (isBinding(s)) return "{path}";
+  if (s.type === "array") return `${typeOf(root, (s.items as Schema) ?? {}, depth)}[]`;
+  if (s.type === "object" || s.properties) {
+    const props = (s.properties ?? {}) as Record<string, Schema>;
+    if ("event" in props || "functionCall" in props) return "Action";
+    if (depth >= 2 || !Object.keys(props).length) return "obj";
+    return objectOf(root, s, depth + 1);
+  }
+  if (s.type === "integer") return "int";
+  if (s.type === "number") return "num";
+  if (s.type === "boolean") return "bool";
+  if (s.type === "string") return "str";
+  return "any";
+}
+
+function objectOf(root: unknown, s: Schema, depth: number, omit = new Set<string>()): string {
+  const props = (s.properties ?? {}) as Record<string, Schema>;
+  const required = new Set((s.required as string[] | undefined) ?? []);
+  const fields = Object.entries(props)
+    .filter(([key]) => !omit.has(key))
+    .map(([key, value]) => `${key}${required.has(key) ? "" : "?"}:${typeOf(root, value, depth)}`);
+  return `{${fields.join(",")}}`;
+}
+
+/**
+ * The catalog as one line per component, e.g. `Slider{label:T,value:N,min?:num}`, about a tenth
+ * of the JSON schema. Runtime validation is unchanged; this only shortens the prompt.
+ */
+export function catalogSignatures(catalog: {
+  components?: Record<string, unknown>;
+  [key: string]: unknown;
+}): string {
+  const lines = Object.entries(catalog.components ?? {}).map(([name, schema]) => {
+    const s = schema as Schema;
+    const description =
+      typeof s.description === "string"
+        ? ` — ${s.description.split(/(?<=\.)\s/)[0].slice(0, 100)}`
+        : "";
+    return `${name}${objectOf(catalog, s, 0, OMIT)}${description}`;
+  });
+  return [
+    "Types: T = text or {path} or compute; N = number or {path} or compute; B = boolean or {path} or compute; A = array or {path} or compute; ids = child component ids, or {componentId,path} to repeat a template per array item; Action = {event:{name,context}} or {functionCall:{call,args}}; ? = optional. Every component also accepts visible:B.",
+    ...lines,
+  ].join("\n");
 }

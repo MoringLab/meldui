@@ -61,6 +61,11 @@ export const KitSchema = z.object({
   /** Implementation names the host must register itself; each needs a fallback so an unregistered host still renders. */
   hostImplementations: z.array(z.string()).default([]),
   customComponents: z.array(ComponentDefinitionSchema).max(100).default([]),
+  /** Icon names this kit's hosts draw (Icon.name, Callout/Stat/Badge icon). Empty: built-in icons. */
+  icons: z
+    .array(z.string().regex(/^[a-z][a-z0-9-]{0,39}$/))
+    .max(120)
+    .default([]),
   generation: z.object({ designSkill: z.string().max(12000).default("") }).default({}),
   guide: z.string().min(20),
   examples: z.array(z.string()),

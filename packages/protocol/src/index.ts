@@ -151,6 +151,10 @@ export const functionDefinitions = [
   { name: "openUrl", returnType: "void", schema: z.object({ url: text }).strict(), pure: false },
 ];
 const gap = z.enum(["xs", "sm", "md", "lg", "xl"]).optional();
+/** Icon names are open: the kit lists the names its hosts draw (kit.icons); unknown names fall back. */
+export const iconName = z.string().regex(/^[a-z][a-z0-9-]{0,39}$/);
+/** Built-in icons every renderer draws without a host icon set. */
+export const BUILTIN_ICONS = ["check", "info", "arrow", "plus", "star", "close"] as const;
 const common = { visible: boolean.optional(), accessibilityLabel: z.string().max(256).optional() };
 const layout = {
   children: ChildListSchema,
@@ -296,6 +300,7 @@ export const componentSchemas = {
   Stat: z.object({
     ...common,
     label: text,
+    icon: iconName.optional(),
     value: z.union([text, number]),
     unit: text.optional(),
     precision: z.number().int().min(0).max(8).optional(),
@@ -513,13 +518,20 @@ export const componentSchemas = {
   }),
   Icon: z.object({
     ...common,
-    name: z.enum(["check", "info", "arrow", "plus", "star", "close"]),
+    name: iconName,
     label: z.string().optional(),
+    tone: z.enum(["default", "muted", "accent", "success", "danger"]).optional(),
   }),
-  Badge: z.object({ ...common, text, tone: z.enum(["default", "success", "warning"]).optional() }),
+  Badge: z.object({
+    ...common,
+    text,
+    tone: z.enum(["default", "success", "warning"]).optional(),
+    icon: iconName.optional(),
+  }),
   Callout: z.object({
     ...common,
-    title: text,
+    icon: iconName.optional(),
+    title: text.optional(),
     text,
     tone: z
       .enum([

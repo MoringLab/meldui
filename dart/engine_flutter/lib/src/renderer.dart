@@ -568,10 +568,11 @@ class _ComponentState extends State<_Component> {
             borderRadius: BorderRadius.circular(host.kit.radius),
           ),
           child: column([
-            Text(
-              displayValue(p['title']),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+            if (p['title'] != null)
+              Text(
+                displayValue(p['title']),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             Text(displayValue(p['text'])),
           ], 6),
         );

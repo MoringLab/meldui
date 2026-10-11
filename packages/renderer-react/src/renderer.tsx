@@ -455,7 +455,7 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
     case "Callout":
       return (
         <aside className={`ui-callout tone-${p.tone}`}>
-          <strong>{text(p.title)}</strong>
+          {p.title ? <strong>{text(p.title)}</strong> : null}
           <p>{text(p.text)}</p>
         </aside>
       );

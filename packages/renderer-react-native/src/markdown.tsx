@@ -1,11 +1,66 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: append-only Markdown segments retain their order during streaming
-import { prepareMarkdown, splitMarkdownBlocks } from "@engine/core";
+import {
+  type CitationSource,
+  type CitationView,
+  extractCitations,
+  prepareMarkdown,
+  splitMarkdownBlocks,
+} from "@engine/core";
 import { resolveTypography } from "@engine/kit-spec";
-import React, { memo, useMemo } from "react";
+import React, { createContext, memo, type ReactNode, useContext, useMemo } from "react";
 import { Platform, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
 import { useMotion, useUI } from "./renderer.js";
+export type CitationOptions = {
+  /** Resolves cited ids; without it citation markers stay ordinary text. */
+  source?: CitationSource;
+  /** Host presentation of one block's cited sources (default: small pills). */
+  render?: (views: CitationView[]) => ReactNode;
+};
+const CitationContext = createContext<CitationOptions>({});
+/** Citations for Markdown rendered below it (AnswerView sets this from its props). */
+export function CitationProvider({
+  value,
+  children,
+}: {
+  value: CitationOptions;
+  children: ReactNode;
+}) {
+  return <CitationContext.Provider value={value}>{children}</CitationContext.Provider>;
+}
+
+function DefaultCitations({ views }: { views: CitationView[] }) {
+  const { kit, mode } = useUI();
+  const t = kit.tokens[mode];
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+      {views.map((v) => (
+        <View
+          key={v.id}
+          accessibilityLabel={`${v.site ?? ""} ${v.title}`.trim()}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+            maxWidth: 200,
+            paddingVertical: 4,
+            paddingHorizontal: 10,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: t.border,
+            backgroundColor: t.surface,
+          }}
+        >
+          <Text numberOfLines={1} style={{ color: t.muted, fontSize: 12, flexShrink: 1 }}>
+            {v.site ? `${v.site} · ${v.title}` : v.title}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 /**
  * The mdast boundary removes every image URL and raw HTML before native parsing. Text is
  * split into top-level blocks; finished blocks are memoised, so a streaming answer re-parses
@@ -28,12 +83,22 @@ export function SafeMarkdown({ text, streaming = false }: { text: string; stream
 }
 
 const MarkdownBlock = memo(function MarkdownBlock({
-  text,
+  text: raw,
   streaming,
 }: {
   text: string;
   streaming: boolean;
 }) {
+  const citations = useContext(CitationContext);
+  const cited = useMemo(
+    () =>
+      citations.source ? extractCitations(raw, streaming) : { text: raw, ids: [] as string[] },
+    [raw, streaming, citations.source],
+  );
+  const text = cited.text;
+  const views = cited.ids
+    .map((id) => citations.source?.resolve(id))
+    .filter((v): v is CitationView => !!v);
   const host = useContentHost();
   const { kit, mode } = useUI();
   const { reduced } = useMotion();
@@ -57,7 +122,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
   } catch {
     return <Text accessibilityRole="alert">Markdown is too large to display.</Text>;
   }
-  return (
+  const content = (
     <View style={{ gap: 12 }}>
       {parts.map((part, i) =>
         "attachmentId" in part ? (
@@ -126,6 +191,13 @@ const MarkdownBlock = memo(function MarkdownBlock({
           />
         ),
       )}
+    </View>
+  );
+  if (!views.length) return content;
+  return (
+    <View style={{ gap: 8 }}>
+      {content}
+      {citations.render ? citations.render(views) : <DefaultCitations views={views} />}
     </View>
   );
 });

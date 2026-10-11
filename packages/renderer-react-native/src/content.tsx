@@ -3,6 +3,7 @@
 import {
   attachmentIdFrom,
   type ContentHost,
+  DEFAULT_MEDIA_LABELS,
   markdownDestination,
   mediaLayout,
   type ResolvedAttachment,
@@ -31,7 +32,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { useUI } from "./renderer.js";
+import { NativeIcon, useUI } from "./renderer.js";
 
 function Text({ style, ...props }: TextProps) {
   const { kit, mode } = useUI();
@@ -57,6 +58,13 @@ export function ContentProvider({ host, children }: { host?: ContentHost; childr
   return <NativeContentContext.Provider value={host}>{children}</NativeContentContext.Provider>;
 }
 export const useContentHost = () => useContext(NativeContentContext);
+const useLabels = () => ({ ...DEFAULT_MEDIA_LABELS, ...useContentHost()?.labels });
+const iconButton = {
+  minHeight: 48,
+  minWidth: 48,
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+};
 const buttonStyle = {
   minHeight: 48,
   minWidth: 48,
@@ -78,6 +86,7 @@ export async function openContentLink(host: ContentHost | undefined, url: string
 export function FileCard({ id, caption }: { id: string; caption?: string }) {
   const host = useContentHost();
   const manifest = host?.attachments.get(id);
+  const labels = useLabels();
   const [error, setError] = useState(false);
   const action = async (kind: "open" | "download") => {
     try {
@@ -94,7 +103,7 @@ export function FileCard({ id, caption }: { id: string; caption?: string }) {
       style={{ padding: 16, gap: 8, borderWidth: 1, borderColor: "#7b8490", borderRadius: 12 }}
       accessible={false}
     >
-      <Text>{manifest?.name ?? "Unknown attachment"}</Text>
+      <Text>{manifest?.name ?? labels.unavailable}</Text>
       {manifest && (
         <Text>
           {manifest.mime}
@@ -109,7 +118,7 @@ export function FileCard({ id, caption }: { id: string; caption?: string }) {
             onPress={() => void action("open")}
             style={buttonStyle}
           >
-            <Text>Open</Text>
+            <Text>{labels.open}</Text>
           </Pressable>
         )}
         {host?.resolver.download && manifest && (
@@ -118,11 +127,11 @@ export function FileCard({ id, caption }: { id: string; caption?: string }) {
             onPress={() => void action("download")}
             style={buttonStyle}
           >
-            <Text>Download</Text>
+            <Text>{labels.download}</Text>
           </Pressable>
         )}
       </View>
-      {(error || !manifest) && <Text accessibilityRole="alert">Attachment unavailable</Text>}
+      {error && manifest && <Text accessibilityRole="alert">{labels.unavailable}</Text>}
     </View>
   );
 }
@@ -132,12 +141,16 @@ function Video({
   muted,
   label,
   transcript,
+  ratio = 16 / 9,
+  radius = 0,
 }: {
   transcript?: string | { t: number; text: string }[];
   url: string;
   seek?: number;
   muted: boolean;
   label: string;
+  ratio?: number;
+  radius?: number;
 }) {
   const player = useVideoPlayer(url, (p) => {
     p.muted = muted;
@@ -160,7 +173,7 @@ function Video({
         player={player}
         nativeControls
         accessibilityLabel={label}
-        style={{ width: "100%", aspectRatio: 16 / 9 }}
+        style={{ width: "100%", aspectRatio: ratio, borderRadius: radius, overflow: "hidden" }}
       />
       {line && <Text accessibilityLiveRegion="polite">{line}</Text>}
       {Array.isArray(transcript) &&
@@ -258,11 +271,50 @@ export function AttachmentMedia({
     };
   }, [id, host, generation]);
   const manifest = host?.attachments.get(id);
-  if (file || !manifest || state.error || manifest.kind === "file")
-    return <FileCard id={id} caption={caption} />;
-  if (state.id !== id || !state.value)
-    return <Text accessibilityRole="text">Loading {manifest.name}…</Text>;
+  const { kit, mode } = useUI();
+  const t = kit.tokens[mode];
+  const labels = useLabels();
+  // The frame keeps the media's ratio from the first frame on: the manifest's size, then the
+  // decoded image's own size, so nothing below it moves when the image arrives.
+  const [natural, setNatural] = useState<number | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    setNatural(undefined);
+    setLoaded(false);
+  }, [id]);
+  if (file || !manifest || manifest.kind === "file") return <FileCard id={id} caption={caption} />;
+  const declared = manifest.width && manifest.height ? manifest.width / manifest.height : undefined;
+  const ratio = Math.min(2.4, Math.max(0.56, declared ?? natural ?? 4 / 3));
   const label = alt || manifest.alt || manifest.name;
+  const frame = {
+    width: "100%" as const,
+    aspectRatio: manifest.kind === "audio" ? undefined : ratio,
+    borderRadius: kit.tokens.radius,
+    overflow: "hidden" as const,
+    backgroundColor: t.surface,
+  };
+  if (state.error)
+    return (
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={`${labels.unavailable}: ${label}`}
+        style={[frame, { alignItems: "center", justifyContent: "center", padding: 16, gap: 6 }]}
+      >
+        <NativeIcon name="image-off" size={22} color={t.muted} />
+        <Text numberOfLines={2} style={{ color: t.muted, fontSize: 13, textAlign: "center" }}>
+          {labels.unavailable}
+        </Text>
+      </View>
+    );
+  if (state.id !== id || !state.value)
+    return (
+      <View
+        accessible
+        accessibilityLabel={`${labels.loading}: ${label}`}
+        style={[frame, manifest.kind === "audio" && { height: 56 }]}
+      />
+    );
   const failed = () => {
     if (retries.current++ === 0) setGeneration((g) => g + 1);
     else {
@@ -274,14 +326,28 @@ export function AttachmentMedia({
     <View style={{ gap: 8 }}>
       {manifest.kind === "image" ? (
         <View>
-          <Image
-            source={{ uri: state.value.url }}
+          <Pressable
+            accessibilityRole="imagebutton"
             accessibilityLabel={label}
-            accessible
-            resizeMode="contain"
-            style={{ width: "100%", aspectRatio: (manifest.width ?? 4) / (manifest.height ?? 3) }}
-            onError={failed}
-          />
+            accessibilityHint={labels.enlarge}
+            onPress={() => {
+              setZoom(1);
+              setZoomed(true);
+            }}
+            style={frame}
+          >
+            <Image
+              source={{ uri: state.value.url }}
+              resizeMode="cover"
+              style={{ width: "100%", height: "100%", opacity: loaded ? 1 : 0 }}
+              onLoad={(e) => {
+                const size = e.nativeEvent.source;
+                if (!declared && size?.width && size?.height) setNatural(size.width / size.height);
+                setLoaded(true);
+              }}
+              onError={failed}
+            />
+          </Pressable>
           {manifest.regions
             ?.filter((r) => regionIds.includes(r.id))
             .map((r) => (
@@ -289,59 +355,60 @@ export function AttachmentMedia({
                 {r.label} ({r.x}, {r.y})
               </Text>
             ))}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Enlarge ${label}`}
-            style={buttonStyle}
-            onPress={() => {
-              setZoom(1);
-              setZoomed(true);
-            }}
+          <Modal
+            visible={zoomed}
+            animationType="fade"
+            statusBarTranslucent
+            onRequestClose={() => setZoomed(false)}
           >
-            <Text>Enlarge image</Text>
-          </Pressable>
-          <Modal visible={zoomed} onRequestClose={() => setZoomed(false)}>
-            <View style={{ flex: 1, backgroundColor: "#17212b" }}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setZoomed(false)}
-                style={buttonStyle}
-              >
-                <NativeText style={{ color: "#fff" }}>Close image</NativeText>
-              </Pressable>
-              {Platform.OS === "android" && (
-                <View style={{ flexDirection: "row", gap: 8 }}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Zoom out"
-                    style={buttonStyle}
-                    disabled={zoom <= 1}
-                    onPress={() => setZoom(Math.max(1, zoom - 1))}
-                  >
-                    <NativeText style={{ color: "#fff" }}>−</NativeText>
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Zoom in"
-                    style={buttonStyle}
-                    disabled={zoom >= 4}
-                    onPress={() => setZoom(Math.min(4, zoom + 1))}
-                  >
-                    <NativeText style={{ color: "#fff" }}>+</NativeText>
-                  </Pressable>
-                </View>
-              )}
+            <View style={{ flex: 1, backgroundColor: "#000" }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 8 }}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={labels.close}
+                  onPress={() => setZoomed(false)}
+                  style={iconButton}
+                >
+                  <NativeIcon name="close" color="#fff" />
+                </Pressable>
+                {Platform.OS === "android" && (
+                  <View style={{ flexDirection: "row", gap: 4 }}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={labels.zoomOut}
+                      style={[iconButton, { opacity: zoom <= 1 ? 0.4 : 1 }]}
+                      disabled={zoom <= 1}
+                      onPress={() => setZoom(Math.max(1, zoom - 1))}
+                    >
+                      <NativeText style={{ color: "#fff", fontSize: 22 }}>−</NativeText>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={labels.zoomIn}
+                      style={[iconButton, { opacity: zoom >= 4 ? 0.4 : 1 }]}
+                      disabled={zoom >= 4}
+                      onPress={() => setZoom(Math.min(4, zoom + 1))}
+                    >
+                      <NativeIcon name="plus" color="#fff" />
+                    </Pressable>
+                  </View>
+                )}
+              </View>
               <ScrollView
                 maximumZoomScale={4}
                 minimumZoomScale={1}
-                contentContainerStyle={{ flexGrow: 1 }}
+                centerContent
+                contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
               >
-                <ScrollView horizontal contentContainerStyle={{ flexGrow: 1 }}>
+                <ScrollView
+                  horizontal
+                  contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+                >
                   <Image
                     source={{ uri: state.value.url }}
                     accessibilityLabel={label}
                     resizeMode="contain"
-                    style={{ width: screen.width * zoom, height: 600 * zoom }}
+                    style={{ width: screen.width * zoom, height: (screen.width * zoom) / ratio }}
                   />
                 </ScrollView>
               </ScrollView>
@@ -355,19 +422,16 @@ export function AttachmentMedia({
             seek={seek}
             muted={muted}
             label={label}
+            ratio={ratio}
+            radius={kit.tokens.radius}
             transcript={manifest.transcript}
           />
-          <Text>
-            {typeof manifest.transcript === "string"
-              ? manifest.transcript
-              : (manifest.transcript?.map((t) => t.text).join("\n") ??
-                "Transcript not supplied by host.")}
-          </Text>
+          {typeof manifest.transcript === "string" && <Text>{manifest.transcript}</Text>}
         </>
       ) : (
         <Audio url={state.value.url} label={label} />
       )}
-      {caption && <Text>{caption}</Text>}
+      {caption && <Text style={{ color: t.muted, fontSize: 13 }}>{caption}</Text>}
     </View>
   );
 }
@@ -383,13 +447,21 @@ export function MediaContent({
   alt?: string[];
 }) {
   const host = useContentHost();
+  const { kit, mode } = useUI();
+  const t = kit.tokens[mode];
+  const labels = useLabels();
   const [width, setWidth] = useState(0);
   const [page, setPage] = useState(0);
   const track = useRef<React.ElementRef<typeof ScrollView>>(null);
   const items = ids.flatMap((id) => (host?.attachments.get(id) ? [host.attachments.get(id)!] : []));
   const chosen = layout === "auto" ? mediaLayout(items) : layout;
   const carousel = chosen === "carousel";
-  const columns = width >= 480 && ["grid", "compare", "mosaic"].includes(chosen) ? 2 : 1;
+  const go = (next: number) => {
+    setPage(next);
+    track.current?.scrollTo({ x: next * width, animated: true });
+  };
+  const columns =
+    width >= 280 && ids.length > 1 && ["grid", "compare", "mosaic"].includes(chosen) ? 2 : 1;
   useEffect(() => {
     setPage((old) => Math.min(old, Math.max(0, ids.length - 1)));
   }, [ids.length]);
@@ -397,7 +469,7 @@ export function MediaContent({
     if (carousel && width > 0) track.current?.scrollTo({ x: page * width, animated: false });
   }, [width, carousel]);
   return (
-    <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ gap: 16 }}>
+    <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ gap: 12 }}>
       {caption && <Text>{caption}</Text>}
       {carousel ? (
         <>
@@ -419,53 +491,50 @@ export function MediaContent({
               </View>
             ))}
           </ScrollView>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
+          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Previous image"
+              accessibilityLabel={labels.previous}
               disabled={page === 0}
-              style={buttonStyle}
-              onPress={() => {
-                setPage(page - 1);
-                track.current?.scrollTo({ x: (page - 1) * width, animated: false });
-              }}
+              style={[iconButton, { opacity: page === 0 ? 0.3 : 1 }]}
+              onPress={() => go(page - 1)}
             >
-              <Text>Previous</Text>
+              <NativeIcon name="chevron-left" color={t.foreground} />
             </Pressable>
-            <Text accessibilityLiveRegion="polite">
-              {page + 1} / {ids.length}
-            </Text>
+            <View
+              accessible
+              accessibilityLiveRegion="polite"
+              accessibilityLabel={`${page + 1} / ${ids.length}`}
+              style={{ flexDirection: "row", gap: 6 }}
+            >
+              {ids.map((id, i) => (
+                <View
+                  key={`${id}-${i}`}
+                  style={{
+                    width: i === page ? 16 : 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: i === page ? t.foreground : t.border,
+                  }}
+                />
+              ))}
+            </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Next image"
+              accessibilityLabel={labels.next}
               disabled={page >= ids.length - 1}
-              style={buttonStyle}
-              onPress={() => {
-                setPage(page + 1);
-                track.current?.scrollTo({ x: (page + 1) * width, animated: false });
-              }}
+              style={[iconButton, { opacity: page >= ids.length - 1 ? 0.3 : 1 }]}
+              onPress={() => go(page + 1)}
             >
-              <Text>Next</Text>
+              <NativeIcon name="chevron-right" color={t.foreground} />
             </Pressable>
           </View>
         </>
       ) : (
-        <View
-          style={{ flexDirection: columns === 2 ? "row" : "column", flexWrap: "wrap", gap: 16 }}
-        >
+        <View style={{ flexDirection: columns === 2 ? "row" : "column", flexWrap: "wrap", gap: 8 }}>
           {ids.map((id, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
-            <View
-              key={`${id}-${i}`}
-              style={{ width: columns === 2 ? (width - 16) / 2 : undefined }}
-            >
+            <View key={`${id}-${i}`} style={{ width: columns === 2 ? (width - 8) / 2 : undefined }}>
               <AttachmentMedia id={id} alt={alt?.[i]} file={chosen === "files"} />
             </View>
           ))}

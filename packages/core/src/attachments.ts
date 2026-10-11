@@ -140,6 +140,32 @@ export type ContentHost = {
   /** Host decides whether to open/confirm a permitted external link. No built-in navigation. */
   openLink?: (url: string) => Promise<void> | void;
   onDiagnostic?: (code: string, attachmentId: string) => void;
+  /** Words renderers show or announce around media, in the host's language. */
+  labels?: Partial<MediaLabels>;
+};
+export type MediaLabels = {
+  loading: string;
+  unavailable: string;
+  enlarge: string;
+  close: string;
+  previous: string;
+  next: string;
+  zoomIn: string;
+  zoomOut: string;
+  open: string;
+  download: string;
+};
+export const DEFAULT_MEDIA_LABELS: MediaLabels = {
+  loading: "Loading",
+  unavailable: "Media unavailable",
+  enlarge: "Enlarge",
+  close: "Close",
+  previous: "Previous",
+  next: "Next",
+  zoomIn: "Zoom in",
+  zoomOut: "Zoom out",
+  open: "Open",
+  download: "Download",
 };
 export function checkResolvedAttachment(
   result: ResolvedAttachment,

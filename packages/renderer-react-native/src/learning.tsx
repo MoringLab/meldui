@@ -20,7 +20,7 @@ import Svg, {
 } from "react-native-svg";
 import { SafeMarkdown } from "./markdown.js";
 import type { NativeViewProps } from "./renderer.js";
-import { useUI } from "./renderer.js";
+import { NativeIcon, useUI } from "./renderer.js";
 export const learningNames = [
   "Confirmation",
   "ControlPanel",
@@ -104,9 +104,12 @@ export function LearningView({ node, children, runtime, surfaceId }: NativeViewP
       // A label above a prominent value: the value is what changes when controls move.
       return (
         <View accessibilityLiveRegion="polite" style={{ gap: 2 }}>
-          <Text style={{ color: t.muted, fontSize: kit.tokens.typography.baseSize * 0.87 }}>
-            {String(p.label ?? "")}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {p.icon ? <NativeIcon name={p.icon} size={16} color={t.muted} /> : null}
+            <Text style={{ color: t.muted, fontSize: kit.tokens.typography.baseSize * 0.87 }}>
+              {String(p.label ?? "")}
+            </Text>
+          </View>
           <Text
             style={{
               color: t.foreground,

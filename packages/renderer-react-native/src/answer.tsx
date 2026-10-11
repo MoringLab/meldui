@@ -1,9 +1,9 @@
-import type { AnswerSession } from "@engine/core";
+import type { AnswerSession, CitationSource, CitationView } from "@engine/core";
 import type { AnswerBlock } from "@engine/protocol";
-import React, { type ReactNode, useState, useSyncExternalStore } from "react";
+import React, { type ReactNode, useMemo, useState, useSyncExternalStore } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { ContentProvider, MediaContent, useContentHost } from "./content.js";
-import { SafeMarkdown } from "./markdown.js";
+import { CitationProvider, SafeMarkdown } from "./markdown.js";
 import { UISurface, useUI } from "./renderer.js";
 
 export type MarkdownRenderer = (props: { text: string; streaming: boolean }) => ReactNode;
@@ -43,6 +43,10 @@ export type AnswerViewProps = {
    */
   renderSurface?: (block: SurfaceBlockView, session: AnswerSession) => ReactNode;
   renderLayout?: (children: ReactNode) => ReactNode;
+  /** Resolves inline citation ids ("[w1]") in Markdown; unresolved ids are dropped. */
+  citations?: CitationSource;
+  /** Host presentation of the sources cited by one Markdown block. */
+  renderCitations?: (views: CitationView[]) => ReactNode;
   /** Host handler for `expand`; without it a full-screen Modal is shown. */
   onExpand?: (surfaceId: string) => void;
   maxSurfaceHeight?: number;
@@ -57,6 +61,8 @@ export function AnswerView({
   renderMedia,
   renderSurface,
   renderLayout,
+  citations,
+  renderCitations,
   onExpand,
   maxSurfaceHeight,
   chrome = true,
@@ -159,7 +165,15 @@ export function AnswerView({
       </View>
     </ContentProvider>
   );
-  return <>{renderLayout ? renderLayout(rendered) : rendered}</>;
+  const cited = useMemo(
+    () => ({ source: citations, render: renderCitations }),
+    [citations, renderCitations],
+  );
+  return (
+    <CitationProvider value={cited}>
+      {renderLayout ? renderLayout(rendered) : rendered}
+    </CitationProvider>
+  );
 }
 
 function SurfaceFrame({

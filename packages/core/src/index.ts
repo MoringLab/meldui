@@ -24,6 +24,7 @@ import { NDJSONDecoder } from "./stream.js";
 
 export * from "./answer.js";
 export * from "./attachments.js";
+export * from "./citations.js";
 export * from "./expression.js";
 export * from "./stream.js";
 

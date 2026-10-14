@@ -84,3 +84,17 @@ describe("sandbox wording", () => {
     expect(denied).not.toContain("Sandbox:");
   });
 });
+
+describe("routing", () => {
+  it("leaves the Markdown-or-surface choice to the host when asked", () => {
+    const base = {
+      capabilities: capabilitiesFor("react-native"),
+      kit: neutral,
+      variant: "signatures" as const,
+    };
+    expect(buildSystemPrompt(base)).toContain("Choose the format per request");
+    expect(buildSystemPrompt({ ...base, routing: false })).not.toContain(
+      "Choose the format per request",
+    );
+  });
+});

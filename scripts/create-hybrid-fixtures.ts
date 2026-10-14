@@ -119,6 +119,7 @@ const edgeTexts: Record<string, string> = {
   "korean-emoji": "안녕하세요 😀 **굵게**\n둘째 줄\n",
   "fenced-json-is-text": '```json\n{"version":"v0.9","createSurface":{}}\n```\n{x}\n{"a":1}\n',
   "broken-control-line": brokenLine,
+  "truncated-control-line": `${decl("main", "잘린 선언")}`.replace(/}\s*$/, "") + "\n",
   "blank-lines": "\n\n첫 문단\n\n\n둘째 문단\n",
   "no-trailing-newline": '문장 끝{"engine":"v1"}',
   "indented-control": `  ${decl("main", "들여쓴 선언")}\n`,

@@ -108,15 +108,63 @@ class AnswerDecoder {
       }
     } catch (_) {
       if (RegExp(r'^\s*\{\s*"(version|engine)"').hasMatch(line)) {
+        final repaired = closeTruncated(line);
+        if (repaired != null) {
+          out.add(AnswerItem.json(repaired));
+          return;
+        }
         out.add(
           AnswerItem.invalid(line.length > 120 ? line.substring(0, 120) : line),
         );
+        // Rather than a silent gap, say what the block was going to show when that survives.
+        final fallback = RegExp(
+          r'"fallbackText"\s*:\s*"((?:[^"\\]|\\.)*)"',
+        ).firstMatch(line)?.group(1);
+        if (fallback != null) {
+          try {
+            _emitText(out, '${jsonDecode('"$fallback"')}\n');
+          } catch (_) {}
+        }
         return;
       }
     }
     _emitText(out, raw);
     _endLine(line);
   }
+}
+
+/// A control line cut short after its last complete value: closes the objects and arrays it
+/// left open, outside strings (mirrors closeTruncated in @engine/core).
+Map<String, dynamic>? closeTruncated(String line) {
+  final stack = <String>[];
+  var inString = false;
+  for (var i = 0; i < line.length; i++) {
+    final c = line[i];
+    if (inString) {
+      if (c == '\\') {
+        i++;
+      } else if (c == '"') {
+        inString = false;
+      }
+    } else if (c == '"') {
+      inString = true;
+    } else if (c == '{') {
+      stack.add('}');
+    } else if (c == '[') {
+      stack.add(']');
+    } else if (c == '}' || c == ']') {
+      if (stack.isEmpty || stack.removeLast() != c) return null;
+    }
+  }
+  if (inString || stack.isEmpty || stack.length > 4) return null;
+  if (!RegExp(r'["\d\]}el]\s*$').hasMatch(line)) return null;
+  try {
+    final value = jsonDecode(line.trimRight() + stack.reversed.join());
+    if (value is Map && (value.containsKey('version') || value.containsKey('engine'))) {
+      return Map<String, dynamic>.from(value);
+    }
+  } catch (_) {}
+  return null;
 }
 
 /// Host policy for one answer. Defaults mirror the protocol package.

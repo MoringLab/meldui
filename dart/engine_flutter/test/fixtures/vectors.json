@@ -31,6 +31,21 @@
    ]
   },
   {
+   "name": "truncated-control-line",
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"잘린 선언\"\n",
+   "items": [
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "main",
+      "fallbackText": "잘린 선언"
+     }
+    }
+   ]
+  },
+  {
    "name": "blank-lines",
    "text": "\n\n첫 문단\n\n\n둘째 문단\n",
    "items": [
@@ -1279,6 +1294,56 @@
    "diagnosticCodes": [
     "INVALID_JSON"
    ]
+  },
+  {
+   "name": "truncated-control-line/auto",
+   "policy": {},
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"잘린 선언\"\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "truncated-control-line/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"잘린 선언\"\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "truncated-control-line/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"잘린 선언\"\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "MISSING_ANSWER"
+   ]
+  },
+  {
+   "name": "truncated-control-line/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"잘린 선언\"\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
   },
   {
    "name": "blank-lines/auto",

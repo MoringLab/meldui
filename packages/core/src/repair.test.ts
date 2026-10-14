@@ -18,6 +18,8 @@ describe("truncated control lines", () => {
     expect(closeTruncated('{"engine":"v1","block":"sandbox","source":"<p>unfinish')).toBeNull();
     expect(closeTruncated('{"title":"x"')).toBeNull();
     expect(closeTruncated('{"engine":"v1"}]')).toBeNull();
+    expect(closeTruncated('{"version":"v0.9","createSurface":{')).toBeNull();
+    expect(closeTruncated('{"engine":"v1","block":"media","attachments":["i1",')).toBeNull();
   });
 
   it("decodes a repaired line, and shows a broken one's fallback text instead of a gap", () => {

@@ -162,8 +162,10 @@ export function closeTruncated(line: string): Record<string, unknown> | null {
     }
   }
   if (inString || !stack.length || stack.length > 4) return null;
+  // Only after a complete value: a line ending in { [ , or : was cut before its content.
+  if (!/["\d\]}el]\s*$/.test(line)) return null;
   try {
-    const value = JSON.parse(line.trimEnd().replace(/,$/, "") + stack.reverse().join(""));
+    const value = JSON.parse(line.trimEnd() + stack.reverse().join(""));
     return value &&
       typeof value === "object" &&
       !Array.isArray(value) &&

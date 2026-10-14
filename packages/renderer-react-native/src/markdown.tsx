@@ -3,6 +3,7 @@ import {
   type CitationSource,
   type CitationView,
   extractCitations,
+  normalizeMathDelimiters,
   prepareMarkdown,
   splitMarkdownBlocks,
 } from "@engine/core";
@@ -67,7 +68,7 @@ function DefaultCitations({ views }: { views: CitationView[] }) {
  * and re-lays-out only its last block instead of the whole text on every update.
  */
 export function SafeMarkdown({ text, streaming = false }: { text: string; streaming?: boolean }) {
-  const blocks = useMemo(() => splitMarkdownBlocks(text), [text]);
+  const blocks = useMemo(() => splitMarkdownBlocks(normalizeMathDelimiters(text)), [text]);
   if (blocks.length <= 1) return <MarkdownBlock text={text} streaming={streaming} />;
   return (
     <View style={{ gap: 12 }}>

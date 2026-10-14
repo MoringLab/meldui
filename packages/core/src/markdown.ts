@@ -178,3 +178,35 @@ export function splitMarkdownBlocks(text: string): string[] {
   flush();
   return blocks;
 }
+
+/**
+ * Models often write LaTeX as \( … \) and \[ … \]; Markdown math only knows $ … $ and $$ … $$.
+ * Rewrites the former outside code fences and inline code, so the formula renders instead of
+ * showing its backslashes.
+ */
+export function normalizeMathDelimiters(text: string): string {
+  if (!text.includes("\\(") && !text.includes("\\[")) return text;
+  let fence = false;
+  return text
+    .split("\n")
+    .map((line) => {
+      if (FENCE.test(line)) {
+        fence = !fence;
+        return line;
+      }
+      if (fence) return line;
+      return line
+        .split(/(`+[^`]*`+)/)
+        .map((part, index) =>
+          index % 2
+            ? part
+            : part
+                .replace(/\\\[/g, "$$$$")
+                .replace(/\\\]/g, "$$$$")
+                .replace(/\\\(\s*/g, "$$")
+                .replace(/\s*\\\)/g, "$$"),
+        )
+        .join("");
+    })
+    .join("\n");
+}

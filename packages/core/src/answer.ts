@@ -117,13 +117,61 @@ export class AnswerDecoder {
       }
     } catch {
       if (/^\s*\{\s*"(version|engine)"/.test(line)) {
+        const repaired = closeTruncated(line);
+        if (repaired) {
+          out.push({ kind: "json", value: repaired });
+          return;
+        }
         out.push({ kind: "invalid", line: line.slice(0, 120) });
+        // Rather than a silent gap, say what the block was going to show when that survives.
+        const fallback = /"fallbackText"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(line)?.[1];
+        if (fallback) {
+          try {
+            this.emitText(out, `${JSON.parse(`"${fallback}"`)}\n`);
+          } catch {
+            /* an unreadable fallback stays a diagnostic only */
+          }
+        }
         return;
       }
     }
     // Any other brace-led line is ordinary Markdown text.
     this.emitText(out, raw);
     this.endLine(line);
+  }
+}
+
+/**
+ * A control line cut short after its last complete value (a model that stops before the closing
+ * braces): close the open objects and arrays it left, outside strings. Only a line whose strings
+ * are all closed is repaired, so a cut inside a value never becomes a different value.
+ */
+export function closeTruncated(line: string): Record<string, unknown> | null {
+  const stack: string[] = [];
+  let inString = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") stack.push("}");
+    else if (c === "[") stack.push("]");
+    else if (c === "}" || c === "]") {
+      if (stack.pop() !== c) return null;
+    }
+  }
+  if (inString || !stack.length || stack.length > 4) return null;
+  try {
+    const value = JSON.parse(line.trimEnd().replace(/,$/, "") + stack.reverse().join(""));
+    return value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      ("version" in value || "engine" in value)
+      ? value
+      : null;
+  } catch {
+    return null;
   }
 }
 

@@ -72,3 +72,15 @@ describe("kit icons", () => {
     expect(catalog.components.Callout.properties).toHaveProperty("icon");
   });
 });
+
+describe("sandbox wording", () => {
+  it("does not forbid the HTML it allows in sandbox blocks", () => {
+    const base = { capabilities: capabilitiesFor("react-native"), variant: "signatures" as const };
+    const allowed = buildSystemPrompt({ ...base, kit: neutral, policy: { allowSandbox: true } });
+    expect(allowed).toContain("Outside a sandbox block never emit HTML");
+    expect(allowed).not.toContain("Never emit HTML, JavaScript, CSS");
+    const denied = buildSystemPrompt({ ...base, kit: neutral, policy: { allowSandbox: false } });
+    expect(denied).toContain("Never emit HTML, JavaScript, CSS");
+    expect(denied).not.toContain("Sandbox:");
+  });
+});

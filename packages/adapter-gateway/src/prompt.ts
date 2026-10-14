@@ -27,9 +27,13 @@ export type PromptOptions = {
   examples?: (PromptExample | unknown[])[];
   /** Extra per-model guidance appended last (model profiles, M6). */
   extra?: string[];
+  /** Bundle ids a host inlines into sandboxes (exposed as meld.libraries). */
+  sandboxLibraries?: string[];
   /** standard: full JSON schema; compact: without annotations; signatures: one line per component. */
   variant?: "standard" | "compact" | "signatures";
 };
+
+const WEB_SANDBOX_LIBRARIES = ["three", "d3", "chart", "katex", "gsap"];
 
 const ROUTING = [
   "Choose the format per request:",
@@ -76,6 +80,7 @@ export function buildSystemPrompt({
   examples = [],
   extra = [],
   variant = "standard",
+  sandboxLibraries,
 }: PromptOptions) {
   const policy = defaultHostPolicy(input);
   const resolved = catalog ?? buildCatalogSchema();
@@ -133,7 +138,7 @@ export function buildSystemPrompt({
       signatures
         ? "Component properties are flat (never nested under props). Tabs.value is bound and matches one tab id. Chart values are rows such as [{x,y}] with xKey and yKey naming their fields."
         : standard
-          ? `Tabs uses tabs:[{id,label,child}] and a bound value matching one tab id. Accordion uses items with the same shape. Chart uses kind:${capabilities.features?.advancedCharts ? '"line"|"bar"|"scatter"|"area"|"histogram"|"stacked"' : '"line"|"bar"|"scatter"'}, title, values:[{x,y}], xKey and yKey. Table uses caption, columns:[{key,label}], rows. Use Heading.level and Text.text. A Form needs label, children and onSubmit. Never use props nesting: component properties are flat.`
+          ? `Tabs uses tabs:[{id,label,child}] and a bound value matching one tab id. Accordion uses items with the same shape. Chart uses kind:${capabilities.features?.advancedCharts ? '"line"|"bar"|"scatter"|"area"|"histogram"|"stacked"|"pie"' : '"line"|"bar"|"scatter"'}, title, values:[{x,y}], xKey and yKey. Table uses caption, columns:[{key,label}], rows. Use Heading.level and Text.text. A Form needs label, children and onSubmit. Never use props nesting: component properties are flat.`
           : "This host supplies a custom catalog. Use only the components, functions and properties declared in that catalog. Component properties are flat.",
       signatures
         ? `Platform: ${capabilities.platform}. Client actions: ${capabilities.clientActions.join(",") || "none"}. ${fallbackNote} Use only the components listed below. Never request full data model synchronization.`
@@ -169,10 +174,21 @@ export function buildSystemPrompt({
     if (custom.length && variant !== "signatures")
       parts.push(`Host custom components: ${quote(custom)}`);
   }
-  if (policy.allowSandbox && capabilities.platform === "web")
+  if (policy.allowSandbox) {
+    // The host decides it can isolate sandboxes (iframe, native web view) and which bundles it
+    // inlines; the default list is what the web playground ships.
+    const libraries =
+      sandboxLibraries ?? (capabilities.platform === "web" ? WEB_SANDBOX_LIBRARIES : []);
     parts.push(
-      'Sandbox is an experimental isolated host capability. Emit {"engine":"v1","block":"sandbox","mode":"html|app","source":"single self-contained HTML document","fallbackText":"readable alternative"}. html forbids scripts. app uses the host-selected runtime. A live browser iframe cannot guarantee hard CPU/memory/network isolation; the strict process provider declares its own assurance. No external URLs, imports or embeds. Host-approved bundles are exposed as meld.libraries (three,d3,chart,katex,gsap); host tools use meld.callTool, explicit shared state uses meld.readState/writeState, local artifact state uses meld.saveState/getState. Use CSS variables --ui-foreground/background/accent, readable controls >=44px, keyboard input and reduced motion. No eval or dynamic imports. Prefer declarative components first.',
+      'Sandbox: for an interactive visual the components cannot express (a simulation, an exploded or animated diagram, a custom chart or tool), write a self-contained HTML document: {"engine":"v1","block":"sandbox","mode":"app","source":"<style>…</style><div>…</div><script>…</script>","fallbackText":"readable alternative"} on ONE line (escape quotes and newlines in the JSON string). ' +
+        "It runs isolated: no network, no external URLs, imports, fonts or images (draw with canvas/SVG/CSS), no eval or dynamic imports. " +
+        (libraries.length
+          ? `Host bundles: meld.libraries (${libraries.join(",")}). `
+          : "No libraries: plain JavaScript only. ") +
+        "Style with the host's CSS variables --ui-foreground, --ui-muted, --ui-accent, --ui-border, --ui-surface on a transparent background, at most ~720px tall, touch-sized controls (≥44px), respect prefers-reduced-motion. mode html = no scripts. " +
+        "Prefer declarative components first; use a sandbox only when they cannot show it.",
     );
+  }
   if (media) {
     parts.push(
       [

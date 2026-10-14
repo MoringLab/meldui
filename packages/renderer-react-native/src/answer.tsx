@@ -9,6 +9,7 @@ import { UISurface, useUI } from "./renderer.js";
 export type MarkdownRenderer = (props: { text: string; streaming: boolean }) => ReactNode;
 export type MediaBlockView = Extract<AnswerBlock, { kind: "media" }>;
 export type SurfaceBlockView = Extract<AnswerBlock, { kind: "surface" }>;
+export type SandboxBlockView = Extract<AnswerBlock, { kind: "sandbox" }>;
 export type AnswerLabels = {
   surface: string;
   reset: string;
@@ -32,6 +33,9 @@ export const defaultAnswerLabels: AnswerLabels = {
 
 export { SafeMarkdown as PlainMarkdown } from "./markdown.js";
 
+/** Narrowest answer width (pt) at which a media block sits beside its Markdown. */
+const SIDE_BY_SIDE_MIN = 300;
+
 export type AnswerViewProps = {
   session: AnswerSession;
   markdown?: MarkdownRenderer;
@@ -43,6 +47,11 @@ export type AnswerViewProps = {
    */
   renderSurface?: (block: SurfaceBlockView, session: AnswerSession) => ReactNode;
   renderLayout?: (children: ReactNode) => ReactNode;
+  /**
+   * Host view for a sandbox (HTML/JS) block, e.g. an isolated web view built with
+   * `sandboxDocument` from @engine/core. Without it the block shows its fallback text.
+   */
+  renderSandbox?: (block: SandboxBlockView) => ReactNode;
   /** Resolves inline citation ids ("[w1]") in Markdown; unresolved ids are dropped. */
   citations?: CitationSource;
   /** Host presentation of the sources cited by one Markdown block. */
@@ -61,6 +70,7 @@ export function AnswerView({
   renderMedia,
   renderSurface,
   renderLayout,
+  renderSandbox,
   citations,
   renderCitations,
   onExpand,
@@ -105,29 +115,32 @@ export function AnswerView({
                   onExpand={onExpand}
                 />
               );
-            case "media":
+            case "media": {
+              // Beside the text from phone widths up: a picture next to a short explanation
+              // reads well at 0.35–0.45 of ~340 pt; narrower screens stack.
+              const beside =
+                !!block.markdown &&
+                width >= SIDE_BY_SIDE_MIN &&
+                ["left", "right"].includes(block.placement ?? "below");
               return (
                 <View
                   key={block.id}
                   style={{
-                    gap: 16,
-                    flexDirection:
-                      width >= 600 && ["left", "right"].includes(block.placement ?? "below")
-                        ? block.placement === "left"
-                          ? "row-reverse"
-                          : "row"
-                        : block.placement === "above" || block.placement === "left"
-                          ? "column-reverse"
-                          : "column",
+                    gap: beside ? 12 : 16,
+                    alignItems: beside ? "flex-start" : undefined,
+                    flexDirection: beside
+                      ? block.placement === "left"
+                        ? "row-reverse"
+                        : "row"
+                      : block.placement === "above" || block.placement === "left"
+                        ? "column-reverse"
+                        : "column",
                   }}
                 >
                   {block.markdown && (
                     <View
                       style={{
-                        flex:
-                          width >= 600 && ["left", "right"].includes(block.placement ?? "below")
-                            ? 1 - (block.mediaFraction ?? 0.4)
-                            : undefined,
+                        flex: beside ? 1 - (block.mediaFraction ?? 0.4) : undefined,
                         minWidth: 0,
                       }}
                     >
@@ -136,10 +149,7 @@ export function AnswerView({
                   )}
                   <View
                     style={{
-                      flex:
-                        width >= 600 && ["left", "right"].includes(block.placement ?? "below")
-                          ? (block.mediaFraction ?? 0.4)
-                          : undefined,
+                      flex: beside ? (block.mediaFraction ?? 0.4) : undefined,
                       minWidth: 0,
                     }}
                   >
@@ -154,7 +164,11 @@ export function AnswerView({
                   </View>
                 </View>
               );
+            }
             default:
+              // A sandbox (HTML/JS) block: drawn by the host's isolated web view when it has one.
+              if (block.status === "complete" && block.source && renderSandbox)
+                return <React.Fragment key={block.id}>{renderSandbox(block)}</React.Fragment>;
               return (
                 <Text key={block.id} accessibilityRole="alert" style={{ color: t.muted }}>
                   {labels.sandboxBlocked} {block.fallbackText}

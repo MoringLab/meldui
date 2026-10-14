@@ -705,6 +705,7 @@ export function createUIRuntime(options?: RuntimeOptions) {
 
 export * from "./host-bridge.js";
 export * from "./markdown.js";
+export * from "./sandbox.js";
 export * from "./simulations.js";
 export * from "./svg.js";
 export * from "./ticker.js";

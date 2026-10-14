@@ -605,7 +605,7 @@ export const componentSchemas = {
   Chart: z.object({
     ...common,
     title: text,
-    kind: z.enum(["line", "bar", "scatter", "histogram", "area", "stacked"]),
+    kind: z.enum(["line", "bar", "scatter", "histogram", "area", "stacked", "pie"]),
     series: z.array(seriesSchema).max(10).optional(),
     window: z.number().int().min(2).max(1000).optional(),
     xUnit: text.optional(),

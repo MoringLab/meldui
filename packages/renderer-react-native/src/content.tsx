@@ -438,6 +438,28 @@ export function AttachmentMedia({
     </View>
   );
 }
+/** A 40 pt circle centred on the carousel's edge: surface fill, hairline border, soft lift. */
+function roundArrow(t: Record<string, string>) {
+  return {
+    position: "absolute" as const,
+    top: "50%" as const,
+    marginTop: -20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: t.surface ?? t.background,
+    borderWidth: 1,
+    borderColor: t.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  };
+}
+
 export function MediaContent({
   ids,
   layout = "auto",
@@ -475,64 +497,69 @@ export function MediaContent({
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ gap: 12 }}>
       {caption && <Text>{caption}</Text>}
       {carousel ? (
-        <>
-          <ScrollView
-            ref={track}
-            horizontal
-            pagingEnabled
-            directionalLockEnabled
-            nestedScrollEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={(e) =>
-              setPage(Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)))
-            }
-          >
-            {ids.map((id, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
-              <View key={`${id}-${i}`} style={{ width: Math.max(1, width) }}>
-                <AttachmentMedia id={id} alt={alt?.[i]} />
-              </View>
-            ))}
-          </ScrollView>
-          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={labels.previous}
-              disabled={page === 0}
-              style={[iconButton, { opacity: page === 0 ? 0.3 : 1 }]}
-              onPress={() => go(page - 1)}
-            >
-              <NativeIcon name="chevron-left" color={t.foreground} />
-            </Pressable>
-            <View
-              accessible
-              accessibilityLiveRegion="polite"
-              accessibilityLabel={`${page + 1} / ${ids.length}`}
-              style={{ flexDirection: "row", gap: 6 }}
+        <View style={{ gap: 10 }}>
+          <View>
+            <ScrollView
+              ref={track}
+              horizontal
+              pagingEnabled
+              directionalLockEnabled
+              nestedScrollEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(e) =>
+                setPage(Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)))
+              }
             >
               {ids.map((id, i) => (
-                <View
-                  key={`${id}-${i}`}
-                  style={{
-                    width: i === page ? 16 : 6,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: i === page ? t.foreground : t.border,
-                  }}
-                />
+                // biome-ignore lint/suspicious/noArrayIndexKey: repeated attachment ids use an occurrence key
+                <View key={`${id}-${i}`} style={{ width: Math.max(1, width) }}>
+                  <AttachmentMedia id={id} alt={alt?.[i]} />
+                </View>
               ))}
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={labels.next}
-              disabled={page >= ids.length - 1}
-              style={[iconButton, { opacity: page >= ids.length - 1 ? 0.3 : 1 }]}
-              onPress={() => go(page + 1)}
-            >
-              <NativeIcon name="chevron-right" color={t.foreground} />
-            </Pressable>
+            </ScrollView>
+            {/* Round arrows float over the picture's sides; each hides at its end. */}
+            {page > 0 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={labels.previous}
+                hitSlop={8}
+                style={[roundArrow(t), { left: 10 }]}
+                onPress={() => go(page - 1)}
+              >
+                <NativeIcon name="chevron-left" color={t.foreground} />
+              </Pressable>
+            )}
+            {page < ids.length - 1 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={labels.next}
+                hitSlop={8}
+                style={[roundArrow(t), { right: 10 }]}
+                onPress={() => go(page + 1)}
+              >
+                <NativeIcon name="chevron-right" color={t.foreground} />
+              </Pressable>
+            )}
           </View>
-        </>
+          <View
+            accessible
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={`${page + 1} / ${ids.length}`}
+            style={{ flexDirection: "row", gap: 6, alignSelf: "center" }}
+          >
+            {ids.map((id, i) => (
+              <View
+                key={`${id}-${i}`}
+                style={{
+                  width: i === page ? 16 : 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: i === page ? t.foreground : t.border,
+                }}
+              />
+            ))}
+          </View>
+        </View>
       ) : (
         <View style={{ flexDirection: columns === 2 ? "row" : "column", flexWrap: "wrap", gap: 8 }}>
           {ids.map((id, i) => (

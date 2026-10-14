@@ -767,7 +767,49 @@ function Simulation({
   );
 }
 
+/** Parts of a whole: one slice per row (label = xKey, value = yKey), largest first. */
+function PieChart({ p }: { p: any }) {
+  const rows = (p.values ?? [])
+    .map((v: any) => ({ label: String(v[p.xKey ?? "x"]), value: Number(v[p.yKey ?? "y"]) }))
+    .filter((r: { value: number }) => Number.isFinite(r.value) && r.value > 0)
+    .slice(0, 12);
+  const total = rows.reduce((n: number, r: { value: number }) => n + r.value, 0) || 1;
+  const tints = ["var(--ui-accent)", "var(--ui-foreground)", "var(--ui-muted)", "var(--ui-border)"];
+  let start = -Math.PI / 2;
+  return (
+    <figure className="ui-chart">
+      <figcaption>{p.title}</figcaption>
+      <svg viewBox="0 0 240 240" role="img" aria-label={p.title}>
+        {rows.map((r: { label: string; value: number }, i: number) => {
+          const sweep = (r.value / total) * Math.PI * 2;
+          const end = start + sweep;
+          const large = sweep > Math.PI ? 1 : 0;
+          const d = `M120 120 L${120 + 100 * Math.cos(start)} ${120 + 100 * Math.sin(start)} A100 100 0 ${large} 1 ${120 + 100 * Math.cos(end)} ${120 + 100 * Math.sin(end)} Z`;
+          start = end;
+          return (
+            <path
+              key={r.label}
+              d={d}
+              fill={tints[i % tints.length]}
+              stroke="var(--ui-background)"
+              strokeWidth="2"
+            />
+          );
+        })}
+      </svg>
+      <ul>
+        {rows.map((r: { label: string; value: number }) => (
+          <li key={r.label}>
+            {r.label}: {Math.round((r.value / total) * 100)}%
+          </li>
+        ))}
+      </ul>
+    </figure>
+  );
+}
+
 function AdvancedChart({ p }: { p: any }) {
+  if (p.kind === "pie") return <PieChart p={p} />;
   const values = (p.values ?? []).slice(-(p.window ?? 1000));
   const series = p.series?.length ? p.series : [{ key: p.yKey, label: p.title, color: "accent" }];
   const numbers =

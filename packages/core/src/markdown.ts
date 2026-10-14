@@ -185,7 +185,7 @@ export function splitMarkdownBlocks(text: string): string[] {
  * showing its backslashes.
  */
 export function normalizeMathDelimiters(text: string): string {
-  if (!text.includes("\\(") && !text.includes("\\[")) return text;
+  if (!text.includes("\\(") && !text.includes("\\[") && !text.includes("$")) return text;
   let fence = false;
   return text
     .split("\n")
@@ -204,9 +204,26 @@ export function normalizeMathDelimiters(text: string): string {
                 .replace(/\\\[/g, "$$$$")
                 .replace(/\\\]/g, "$$$$")
                 .replace(/\\\(\s*/g, "$$")
-                .replace(/\s*\\\)/g, "$$"),
+                .replace(/\s*\\\)/g, "$$")
+                .replace(INLINE_MATH, spaced),
         )
         .join("");
     })
     .join("\n");
+}
+
+// Inline math whose content neither starts nor ends with a space (so "$5와 $10" is money, not math).
+const INLINE_MATH = /(?<!\$)\$(?!\$)(?=\S)([^$\n]*?\S)\$(?!\$)/g;
+const HAIR = "\u200A";
+const LETTER = /[\p{L}\p{N}]/u;
+
+/**
+ * Markdown math ($…$) only opens after whitespace or punctuation and only closes before it, so
+ * "질량 $M$을" stays raw text. A hair space (Unicode whitespace, nearly invisible) goes where the
+ * formula touches a letter.
+ */
+function spaced(match: string, _body: string, offset: number, line: string): string {
+  const before = offset > 0 && LETTER.test(line[offset - 1] ?? "") ? HAIR : "";
+  const after = LETTER.test(line[offset + match.length] ?? "") ? HAIR : "";
+  return before + match + after;
 }

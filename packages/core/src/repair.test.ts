@@ -52,12 +52,17 @@ describe("truncated control lines", () => {
 describe("math delimiters", () => {
   it("rewrites \\( \\) and \\[ \\] to dollar math outside code", () => {
     expect(normalizeMathDelimiters("반지름 \\(r_s=\\frac{2GM}{c^2}\\)이에요.")).toBe(
-      "반지름 $r_s=\\frac{2GM}{c^2}$이에요.",
+      "반지름 $r_s=\\frac{2GM}{c^2}$\u200A이에요.",
     );
     expect(normalizeMathDelimiters("\\[\nE=mc^2\n\\]")).toBe("$$\nE=mc^2\n$$");
     expect(normalizeMathDelimiters("`\\(x\\)` 그대로")).toBe("`\\(x\\)` 그대로");
     expect(normalizeMathDelimiters("```\n\\[a\\]\n```")).toBe("```\n\\[a\\]\n```");
     expect(normalizeMathDelimiters("no math here")).toBe("no math here");
+    // Markdown only closes $ before a space or punctuation: a Korean particle gets a hair space.
+    expect(normalizeMathDelimiters("질량 \\(M\\)을 키우면")).toBe("질량 $M$\u200A을 키우면");
+    expect(normalizeMathDelimiters("값$x$이")).toBe("값\u200A$x$\u200A이");
+    expect(normalizeMathDelimiters("$5와 $10")).toBe("$5와 $10");
+    expect(normalizeMathDelimiters("$$\nE=mc^2\n$$")).toBe("$$\nE=mc^2\n$$");
   });
 
   it("keeps display math in one block after rewriting", () => {

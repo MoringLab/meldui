@@ -37,9 +37,15 @@ export class AnswerDecoder {
   private utf8 = new TextDecoder("utf-8", { fatal: false });
   constructor(private maxLineBytes = 256 * 1024) {}
 
+  /** Control lines completed so far (identifies the line `pending()` belongs to). */
+  lines = 0;
   push(chunk: string | Uint8Array): AnswerItem[] {
     this.buffer += typeof chunk === "string" ? chunk : this.utf8.decode(chunk, { stream: true });
     return this.drain(false);
+  }
+  /** The control line still streaming (its newline not here yet), or "". */
+  pending(): string {
+    return this.mode === "json" ? this.buffer : "";
   }
   finish(): AnswerItem[] {
     this.buffer += this.utf8.decode();
@@ -104,6 +110,7 @@ export class AnswerDecoder {
     return out;
   }
   private classify(line: string, hadNewline: boolean, out: AnswerItem[]) {
+    this.lines++;
     const raw = hadNewline ? `${line}\n` : line;
     try {
       const value = JSON.parse(line);
@@ -194,6 +201,46 @@ export function salvageComponents(line: string): Record<string, unknown> | null 
     }
   }
   return components.length ? { version, updateComponents: { surfaceId, components } } : null;
+}
+
+/**
+ * The components of an updateComponents line that is still streaming, each as soon as its own
+ * object has closed (a later, still-open one is left for the next chunk).
+ */
+export function streamedComponents(
+  line: string,
+): { version: string; surfaceId: string; components: Record<string, unknown>[] } | null {
+  if (!line.includes('"updateComponents"')) return null;
+  const surfaceId = /"surfaceId"\s*:\s*"([^"\\]{1,128})"/.exec(line)?.[1];
+  const version = /"version"\s*:\s*"(v[0-9.]{1,8})"/.exec(line)?.[1] ?? "v0.9";
+  const start = line.indexOf('"components"');
+  if (!surfaceId || start < 0) return null;
+  const components: Record<string, unknown>[] = [];
+  const opener = /\{\s*"id"\s*:/g;
+  opener.lastIndex = start;
+  for (let match = opener.exec(line); match; match = opener.exec(line)) {
+    const end = closingBrace(line, match.index);
+    if (end < 0) break; // still streaming
+    try {
+      const value = JSON.parse(repairJsonSyntax(line.slice(match.index, end + 1)));
+      if (value && typeof value.id === "string" && typeof value.component === "string") {
+        components.push(value);
+        opener.lastIndex = end + 1;
+      }
+    } catch {
+      /* a broken one: the whole line's salvage handles it when it ends */
+    }
+  }
+  return { version, surfaceId, components };
+}
+
+/** How far a streaming sandbox source has got: styles, then the layout, then scripts. */
+function sandboxProgress(line: string): "layout" | "style" | "script" {
+  const at = line.indexOf('"source"');
+  const source = at < 0 ? "" : line.slice(at);
+  if (/<script/i.test(source)) return "script";
+  if (/<style/i.test(source) && !/<\/style/i.test(source)) return "style";
+  return "layout";
 }
 
 /** `text` with the closers its open brackets need, parsed; null if that does not parse. */
@@ -517,6 +564,10 @@ export class AnswerSession {
   private surfaceLog = new Map<string, { catalogId: string; messages: unknown[] }>();
   private nextBlock = 1;
   private warned = new Set<string>();
+  /** The streaming control line: which one, and how many of its components are applied. */
+  private draft?: { line: number; applied: number };
+  /** The placeholder block of a sandbox whose declaration is still streaming. */
+  private draftSandbox?: string;
   readonly policy: HostPolicy;
   private snapshotCache?: AnswerState;
   constructor(
@@ -565,7 +616,67 @@ export class AnswerSession {
 
   // ── single-channel input ─────────────────────────────────────────────────────────────────
   push(chunk: string | Uint8Array): AnswerEvent[] {
-    return this.apply(this.decoder.push(chunk));
+    const events = this.apply(this.decoder.push(chunk));
+    events.push(...this.preview());
+    return events;
+  }
+  /**
+   * Builds the UI as it streams: components of an updateComponents line are applied as each one
+   * closes (they are upserts, so the whole line, when it ends, confirms them); a sandbox shows a
+   * "building" placeholder that tracks how far its source has got.
+   */
+  private preview(): AnswerEvent[] {
+    const line = this.decoder.pending();
+    if (!line || this.ended) return [];
+    if (this.draft?.line !== this.decoder.lines)
+      this.draft = { line: this.decoder.lines, applied: 0 };
+    const draft = this.draft;
+    const streamed = streamedComponents(line);
+    if (streamed) {
+      // Only into a surface that exists and was not refused by policy.
+      if (!this.surfaceBlock.get(streamed.surfaceId) || streamed.components.length <= draft.applied)
+        return [];
+      const fresh = streamed.components.slice(draft.applied);
+      draft.applied = streamed.components.length;
+      return this.control({
+        version: streamed.version,
+        updateComponents: { surfaceId: streamed.surfaceId, components: fresh },
+      });
+    }
+    const head = line.slice(0, 400);
+    if (
+      !this.policy.allowSandbox ||
+      !/^\s*\{\s*"engine"/.test(head) ||
+      !/"block"\s*:\s*"sandbox"/.test(head)
+    )
+      return [];
+    const progress = sandboxProgress(line);
+    const title = /"title"\s*:\s*"([^"\\]{1,80})"/.exec(head)?.[1];
+    const events = this.closeMarkdown();
+    const index = this.draftSandbox
+      ? this._blocks.findIndex((b) => b.id === this.draftSandbox)
+      : -1;
+    if (index >= 0) {
+      const current = this._blocks[index] as Extract<AnswerBlock, { kind: "sandbox" }>;
+      if (current.progress === progress && current.title === title) return events;
+      this._blocks[index] = { ...current, progress, title };
+      this.touch();
+      return events;
+    }
+    const block: AnswerBlock = {
+      id: this.newId(),
+      kind: "sandbox",
+      mode: "html",
+      fallbackText: "",
+      status: "building",
+      progress,
+      title,
+    };
+    this.draftSandbox = block.id;
+    this._blocks.push(block);
+    this.touch();
+    events.push(this.emit({ type: "block", block }));
+    return events;
   }
   /** Start another assistant turn on the same answer: open text is closed, surfaces persist. */
   beginTurn() {
@@ -784,6 +895,18 @@ export class AnswerSession {
       fallbackText: decl.fallbackText,
       status: this.policy.allowSandbox ? "complete" : "blocked",
     };
+    // The placeholder shown while this declaration streamed becomes the block, in its place.
+    const draft = this.draftSandbox
+      ? this._blocks.findIndex((b) => b.id === this.draftSandbox)
+      : -1;
+    this.draftSandbox = undefined;
+    if (draft >= 0 && !decl.artifactId) {
+      this._blocks[draft] = { ...block, id: this._blocks[draft].id };
+      this.touch();
+      events.push(this.emit({ type: "block", block: this._blocks[draft] }));
+      return events;
+    }
+    if (draft >= 0) this._blocks.splice(draft, 1);
     if (decl.artifactId) {
       block.id = decl.artifactId;
       const index = this._blocks.findIndex((b) => b.id === block.id);
@@ -920,6 +1043,15 @@ export class AnswerSession {
         severity: "error",
       });
     let changed = false;
+    // A sandbox whose declaration never completed has nothing to show.
+    if (this.draftSandbox) {
+      const id = this.draftSandbox;
+      this.draftSandbox = undefined;
+      this._blocks = this._blocks.filter(
+        (b) => b.id !== id || b.kind !== "sandbox" || b.status !== "building",
+      );
+      changed = true;
+    }
     this._blocks = this._blocks.map((block) => {
       if (block.kind !== "surface") return block;
       const failed = !this.runtime.getSurface(block.surfaceId)?.componentsModel.has("root");

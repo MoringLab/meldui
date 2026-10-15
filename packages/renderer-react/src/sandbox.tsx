@@ -64,6 +64,12 @@ export function SandboxView({
       });
     return () => c.abort();
   }, [provider, block.source, block.mode, events, stopped, themeKey, block.id]);
+  if (block.status === "building")
+    return (
+      <p role="status" aria-live="polite" className="ui-muted">
+        Building interactive content…
+      </p>
+    );
   if (!provider?.verified || !block.source || block.status === "blocked")
     return <p role="note">{block.fallbackText} (isolated runtime unavailable)</p>;
   return (

@@ -19,6 +19,8 @@ export type AnswerLabels = {
   viewAsInterface: string;
   incomplete: string;
   sandboxBlocked: string;
+  /** A sandbox still streaming in ("building"). */
+  sandboxBuilding: string;
 };
 export const defaultAnswerLabels: AnswerLabels = {
   surface: "Interactive content",
@@ -29,6 +31,7 @@ export const defaultAnswerLabels: AnswerLabels = {
   viewAsInterface: "View interactive",
   incomplete: "Part of this content could not be shown.",
   sandboxBlocked: "Interactive content is not available here.",
+  sandboxBuilding: "Building interactive content…",
 };
 
 export { SafeMarkdown as PlainMarkdown } from "./markdown.js";
@@ -167,8 +170,18 @@ export function AnswerView({
             }
             default:
               // A sandbox (HTML/JS) block: drawn by the host's isolated web view when it has one.
-              if (block.status === "complete" && block.source && renderSandbox)
+              // While its declaration streams ("building") the host may draw its own placeholder.
+              if (
+                renderSandbox &&
+                (block.status === "building" || (block.status === "complete" && block.source))
+              )
                 return <React.Fragment key={block.id}>{renderSandbox(block)}</React.Fragment>;
+              if (block.status === "building")
+                return (
+                  <Text key={block.id} accessibilityLiveRegion="polite" style={{ color: t.muted }}>
+                    {labels.sandboxBuilding}
+                  </Text>
+                );
               return (
                 <Text key={block.id} accessibilityRole="alert" style={{ color: t.muted }}>
                   {labels.sandboxBlocked} {block.fallbackText}

@@ -125,7 +125,11 @@ export type AnswerBlock =
       revision?: number;
       source?: string;
       fallbackText: string;
-      status: "blocked" | "complete";
+      /** "building": the declaration is still streaming (source not here yet); see `progress`. */
+      status: "blocked" | "complete" | "building";
+      /** While building: what the streamed source has reached (styles, layout, behaviour). */
+      progress?: "layout" | "style" | "script";
+      title?: string;
     };
 
 export type AnswerEvent =

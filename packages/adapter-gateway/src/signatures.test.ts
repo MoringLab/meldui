@@ -24,7 +24,7 @@ describe("catalog signatures", () => {
     const lines = catalogSignatures(catalog).split("\n");
     expect(lines).toHaveLength(allowed.length + 1);
     expect(lines).toContain(
-      "Slider{label:T,value:N,disabled?:B,error?:T,min?:num,max?:num,step?:num}",
+      "Slider{label:T,value:N,disabled?:B,error?:T,min?:num,max?:num,step?:num,unit?:T}",
     );
     expect(lines.find((l) => l.startsWith("Column{"))).toMatch(/^Column\{children:ids,/);
     expect(lines.find((l) => l.startsWith("Table{"))).toContain("rows:A");

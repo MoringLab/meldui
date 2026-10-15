@@ -449,7 +449,10 @@ export const componentSchemas = {
   Text: z.object({
     ...common,
     text,
-    tone: z.enum(["default", "muted", "success", "danger"]).optional(),
+    tone: z.enum(["default", "muted", "accent", "success", "danger"]).optional(),
+    size: z.enum(["sm", "md", "lg", "xl", "display"]).optional(),
+    weight: z.enum(["regular", "medium", "bold"]).optional(),
+    align: z.enum(["start", "center", "end"]).optional(),
   }),
   Image: z.object({
     ...common,
@@ -570,6 +573,7 @@ export const componentSchemas = {
     label: text,
     value: number,
     max: z.number().positive().default(100),
+    variant: z.enum(["bar", "ring"]).optional(),
   }),
   Button: z.object({
     ...common,
@@ -577,6 +581,11 @@ export const componentSchemas = {
     action: ActionSchema,
     variant: z.enum(["primary", "secondary", "quiet"]).default("primary"),
     disabled: boolean.optional(),
+    icon: iconName.optional(),
+    /** Only the icon shows (the label stays the accessible name). */
+    iconOnly: z.boolean().optional(),
+    size: z.enum(["sm", "md"]).optional(),
+    fill: z.boolean().optional(),
   }),
   TextField: z.object({
     ...common,
@@ -593,8 +602,14 @@ export const componentSchemas = {
       .array(z.object({ label: z.string(), value: z.string() }).strict())
       .min(1)
       .max(100),
+    variant: z.enum(["dropdown", "segmented", "chips"]).optional(),
   }),
-  Checkbox: z.object({ ...common, ...input, value: boolean }),
+  Checkbox: z.object({
+    ...common,
+    ...input,
+    value: boolean,
+    variant: z.enum(["checkbox", "switch"]).optional(),
+  }),
   Slider: z.object({
     ...common,
     ...input,
@@ -602,6 +617,7 @@ export const componentSchemas = {
     min: z.number().default(0),
     max: z.number().default(100),
     step: z.number().positive().default(1),
+    unit: text.optional(),
   }),
   DatePicker: z.object({
     ...common,
@@ -609,6 +625,107 @@ export const componentSchemas = {
     value: text,
     min: z.string().optional(),
     max: z.string().optional(),
+  }),
+  /**
+   * The general container: any layout (direction, alignment, wrap), a semantic surface (tone,
+   * radius, border, padding), a size (width fraction, flex, height, aspect ratio) and an optional
+   * tap action. Cards, list rows, chips, toolbars, phone screens and grids are all Boxes.
+   */
+  Box: z.object({
+    ...common,
+    children: ChildListSchema,
+    direction: z.enum(["column", "row"]).optional(),
+    gap: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
+    align: z.enum(["start", "center", "end", "stretch"]).optional(),
+    justify: z.enum(["start", "center", "end", "between", "around"]).optional(),
+    wrap: z.boolean().optional(),
+    padding: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
+    tone: z
+      .enum([
+        "plain",
+        "subtle",
+        "raised",
+        "accent",
+        "accentSoft",
+        "inverse",
+        "success",
+        "warning",
+        "danger",
+      ])
+      .optional(),
+    radius: z.enum(["none", "sm", "md", "lg", "full"]).optional(),
+    border: z.boolean().optional(),
+    width: z.union([z.enum(["fill", "hug"]), z.number().min(0.1).max(1)]).optional(),
+    flex: z.number().min(0).max(12).optional(),
+    height: z.number().int().min(8).max(800).optional(),
+    aspectRatio: z.number().positive().max(10).optional(),
+    scroll: z.enum(["horizontal"]).optional(),
+    action: ActionSchema.optional(),
+    selected: boolean.optional(),
+  }),
+  /** One child at a time (value = index), with round ← → buttons and dots, and swipe. */
+  Pager: z.object({
+    ...common,
+    children: ChildListSchema,
+    value: number,
+    controls: z.enum(["arrows", "dots", "both", "none"]).optional(),
+    loop: z.boolean().optional(),
+  }),
+  /** A card with two faces; tapping turns it (value = showing the back). */
+  Flip: z.object({
+    ...common,
+    front: child,
+    back: child,
+    value: boolean,
+    height: z.number().int().min(80).max(600).optional(),
+  }),
+  /** A button (⋯ by default) that opens a list of actions. */
+  Menu: z.object({
+    ...common,
+    label: text.optional(),
+    icon: iconName.optional(),
+    items: z
+      .array(
+        z
+          .object({
+            label: text,
+            icon: iconName.optional(),
+            action: ActionSchema,
+            tone: z.enum(["default", "danger"]).optional(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(12),
+  }),
+  /** A device frame for interface mockups: its children are the screen. */
+  Device: z.object({
+    ...common,
+    children: ChildListSchema,
+    kind: z.enum(["phone", "tablet", "browser"]).optional(),
+    title: text.optional(),
+  }),
+  /**
+   * Several multiple-choice questions answered in place: one question at a time, ← → between
+   * them, each graded when chosen, a score at the end and a retry. value = chosen indexes.
+   */
+  QuizSet: z.object({
+    ...common,
+    title: text.optional(),
+    questions: z
+      .array(
+        z
+          .object({
+            prompt: text,
+            choices: z.array(text).min(2).max(8),
+            correctIndex: z.number().int().min(0).max(7),
+            explanation: text.optional(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(30),
+    value: array.optional(),
   }),
   Chart: z.object({
     ...common,

@@ -21,6 +21,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
+import { WebBox, WebDevice, WebFlip, WebMenu, WebPager, WebQuizSet } from "./interactive.js";
 import { LearningView, learningNames } from "./learning.js";
 import { SafeMarkdown } from "./markdown.js";
 
@@ -331,6 +332,18 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
           </button>
         </form>
       );
+    case "Box":
+      return <WebBox {...{ node, runtime, surfaceId, renderChild }}>{children}</WebBox>;
+    case "Pager":
+      return <WebPager {...{ node, runtime, surfaceId, renderChild }}>{children}</WebPager>;
+    case "Flip":
+      return <WebFlip {...{ node, runtime, surfaceId, renderChild }}>{children}</WebFlip>;
+    case "Menu":
+      return <WebMenu {...{ node, runtime, surfaceId, renderChild }}>{children}</WebMenu>;
+    case "Device":
+      return <WebDevice {...{ node, runtime, surfaceId, renderChild }}>{children}</WebDevice>;
+    case "QuizSet":
+      return <WebQuizSet {...{ node, runtime, surfaceId, renderChild }}>{children}</WebQuizSet>;
     case "Row":
     case "Column":
       return (
@@ -386,7 +399,20 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
       );
     case "Text":
       return (
-        <p className={`ui-text tone-${p.tone ?? "default"}`} data-node={node.id}>
+        <p
+          className={`ui-text tone-${p.tone ?? "default"}`}
+          data-node={node.id}
+          style={{
+            fontSize: { sm: "0.87em", lg: "1.2em", xl: "1.47em", display: "2.1em" }[
+              p.size as string
+            ],
+            fontWeight: { medium: 600, bold: 700 }[p.weight as string],
+            textAlign: ({ center: "center", end: "right" } as Record<string, "center" | "right">)[
+              p.align as string
+            ],
+            color: p.tone === "accent" ? "var(--ui-accent)" : undefined,
+          }}
+        >
           {text(p.text)}
         </p>
       );
@@ -486,7 +512,31 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
               {text(p.value)} / {p.max}
             </span>
           </label>
-          <progress id={inputId} value={Number(p.value) || 0} max={p.max} />
+          {p.variant === "ring" ? (
+            <svg width="96" height="96" viewBox="0 0 96 96" role="img" aria-label={label}>
+              <circle
+                cx="48"
+                cy="48"
+                r="43"
+                fill="none"
+                stroke="var(--ui-border)"
+                strokeWidth="9"
+              />
+              <circle
+                cx="48"
+                cy="48"
+                r="43"
+                fill="none"
+                stroke="var(--ui-accent)"
+                strokeWidth="9"
+                strokeLinecap="round"
+                transform="rotate(-90 48 48)"
+                strokeDasharray={`${2 * Math.PI * 43 * Math.min(1, Math.max(0, Number(p.value) / p.max))} 999`}
+              />
+            </svg>
+          ) : (
+            <progress id={inputId} value={Number(p.value) || 0} max={p.max} />
+          )}
         </div>
       );
     case "Button":
@@ -523,6 +573,33 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
         ),
       );
     case "Select":
+      if (p.variant === "segmented" || p.variant === "chips")
+        return (
+          <div className="ui-field" data-node={node.id}>
+            {label && <span className="ui-label">{label}</span>}
+            <div
+              role="radiogroup"
+              aria-label={label}
+              className={`ui-choices ${p.variant}`}
+              style={{ display: "flex", flexWrap: "wrap", gap: 6 }}
+            >
+              {p.options.map((option: { value: string; label: string }) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={option.value === value}
+                  disabled={disabled}
+                  onClick={() => write(option.value)}
+                  className={`ui-button ${option.value === value ? "primary" : "secondary"}`}
+                  style={{ borderRadius: 999, flex: p.variant === "segmented" ? 1 : undefined }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
       return field(
         <select {...inputProps} value={text(value)} onChange={(e) => write(e.target.value)}>
           {p.options.map((option: { value: string; label: string }) => (
@@ -534,9 +611,10 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
       );
     case "Checkbox":
       return (
-        <label className="ui-check">
+        <label className={`ui-check ${p.variant === "switch" ? "ui-switch" : ""}`}>
           <input
             type="checkbox"
+            role={p.variant === "switch" ? "switch" : undefined}
             checked={Boolean(value)}
             disabled={disabled}
             onChange={(e) => write(e.target.checked)}
@@ -556,7 +634,10 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
             step={p.step}
             onChange={(e) => write(Number(e.target.value))}
           />
-          <output htmlFor={inputId}>{text(value)}</output>
+          <output htmlFor={inputId}>
+            {text(value)}
+            {p.unit ? ` ${text(p.unit)}` : ""}
+          </output>
         </div>,
       );
     case "DatePicker":

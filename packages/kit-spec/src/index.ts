@@ -12,6 +12,8 @@ const colors = z
     border: z.string(),
     danger: z.string(),
     success: z.string(),
+    /** Optional: warning tints (a Box tone); renderers use an amber when absent. */
+    warning: z.string().optional(),
   })
   .strict();
 /**

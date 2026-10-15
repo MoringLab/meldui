@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import advanced from "../fixtures/advanced/cases.json";
 import fixtures from "../fixtures/cases.json";
+import interactive from "../fixtures/interactive/cases.json";
 import media from "../fixtures/media/cases.json";
 import { createUIRuntime } from "../packages/core/src/index.js";
 import { validateKit } from "../packages/kit-spec/src/index.js";
@@ -9,7 +10,7 @@ import { neutral } from "../packages/kits/neutral/src/index.js";
 import { buildCatalogSchema, COMPONENT_NAMES } from "../packages/protocol/src/index.js";
 
 describe("portable fixtures", () => {
-  for (const fixture of fixtures)
+  for (const fixture of [...fixtures, ...interactive])
     it(`${fixture.id}: renders and evaluates local interactions`, () => {
       const runtime = createUIRuntime();
       for (const message of fixture.messages) runtime.accept(message);
@@ -25,7 +26,7 @@ describe("portable fixtures", () => {
     });
   it("covers every catalog component and both complete kits", () => {
     const names = new Set(
-      [...fixtures, ...media, ...advanced].flatMap((f) =>
+      [...fixtures, ...interactive, ...media, ...advanced].flatMap((f) =>
         f.messages.flatMap((m) => m.updateComponents?.components.map((c) => c.component) ?? []),
       ),
     );

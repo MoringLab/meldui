@@ -18,8 +18,18 @@ export const PLATFORM_SUPPORT: Record<
     unsupportedOps: [],
   },
   flutter: {
-    unsupported: ["Audio", "Simulation"],
-    fallbacks: { Simulation: "Text", Audio: "FileCard", DocumentPreview: "FileCard" },
+    unsupported: ["Audio", "Simulation", "Box", "Pager", "Flip", "Menu", "Device", "QuizSet"],
+    fallbacks: {
+      Simulation: "Text",
+      Audio: "FileCard",
+      DocumentPreview: "FileCard",
+      Box: "Column",
+      Pager: "Tabs",
+      Flip: "Accordion",
+      Menu: "Button",
+      Device: "Card",
+      QuizSet: "Quiz",
+    },
     // The Dart evaluator has not been ported these yet; prompts for Flutter do not offer them.
     unsupportedOps: ["concat", "set", "object", "slice", "join", "includes", "abs"],
   },

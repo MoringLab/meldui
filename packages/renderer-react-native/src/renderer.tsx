@@ -3,7 +3,6 @@ import { type NodeSnapshot, resolvePath, type UIRuntime } from "@engine/core";
 import { resolveTypography, type UIKit, validateKit } from "@engine/kit-spec";
 import type { ChildList } from "@engine/protocol";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Slider from "@react-native-community/slider";
 import { Picker } from "@react-native-picker/picker";
 import React, {
   createContext,
@@ -31,6 +30,22 @@ import {
 import Svg, { Circle, Line, Path, Polyline, Rect, Text as SvgText } from "react-native-svg";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
 import { localCalendarDate } from "./date.js";
+import {
+  ActionButton,
+  BoxView,
+  ChoiceRow,
+  DeviceView,
+  FlipView,
+  MenuView,
+  type NativeLabels,
+  PagerView,
+  ProgressRing,
+  QuizSetView,
+  SizedText,
+  SliderRow,
+  SwitchRow,
+  useInk,
+} from "./interactive.js";
 import { LearningView, learningNames } from "./learning.js";
 import { SafeMarkdown } from "./markdown.js";
 
@@ -50,6 +65,7 @@ type NativeContext = {
   assets: Record<string, ImageSourcePropType>;
   components: Record<string, React.ComponentType<NativeViewProps>>;
   icons?: IconRenderer;
+  labels?: Partial<NativeLabels>;
 };
 /** Host icon set: draws a kit icon name, or returns null to use the built-in drawing. */
 export type IconRenderer = (props: {
@@ -64,6 +80,7 @@ const ContainerWidth = createContext(0);
 export const useContainerWidth = () => useContext(ContainerWidth);
 /** Hosts with a scrolling list implement this to stop the list scrolling while a control is dragged. */
 const GestureLock = createContext<(locked: boolean) => void>(() => {});
+export const useGestureLock = () => useContext(GestureLock);
 /** Motion duration from the kit token; 0 when the OS asks for reduced motion. */
 export function useMotion() {
   const { kit } = useUI();
@@ -119,6 +136,7 @@ export function UIProvider({
   onGestureLock,
   content,
   icons,
+  labels,
   children,
 }: {
   runtime: UIRuntime;
@@ -128,6 +146,8 @@ export function UIProvider({
   components?: NativeContext["components"];
   /** Draws the kit's icon names (kit.icons); unknown names use the built-in set. */
   icons?: IconRenderer;
+  /** Words the native widgets show (Pager, QuizSet, Menu…), in the host's language. */
+  labels?: Partial<NativeLabels>;
   /** Called with true while a control (slider) is being dragged and false when it ends. */
   onGestureLock?: (locked: boolean) => void;
   children: ReactNode;
@@ -136,8 +156,8 @@ export function UIProvider({
   validateKit(kit);
   // A stable value: every node reads this context, so a new object would re-render them all.
   const value = useMemo(
-    () => ({ runtime, kit, mode, assets, components, icons }),
-    [runtime, kit, mode, assets, components, icons],
+    () => ({ runtime, kit, mode, assets, components, icons, labels }),
+    [runtime, kit, mode, assets, components, icons, labels],
   );
   return (
     <Context.Provider value={value}>
@@ -296,7 +316,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
   );
   const family = ty.body.nativeFamily ? { fontFamily: ty.body.nativeFamily } : {};
   const containerWidth = useContainerWidth();
-  const lockGesture = useContext(GestureLock);
+  const ink = useInk();
   const [dateOpen, setDateOpen] = useState(false);
   const [showData, setShowData] = useState(false);
   const bound = node.raw?.value as { path?: string } | undefined;
@@ -393,6 +413,18 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           })}
         </View>
       );
+    case "Box":
+      return <BoxView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Pager":
+      return <PagerView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Flip":
+      return <FlipView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Menu":
+      return <MenuView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Device":
+      return <DeviceView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "QuizSet":
+      return <QuizSetView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Column":
       return <View style={container}>{children}</View>;
     case "Row":
@@ -404,11 +436,12 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </View>
       );
     case "Grid": {
-      // Columns follow the container width: one column below 560dp, otherwise as many as fit in 220dp.
-      const columns =
-        containerWidth < 560
-          ? 1
-          : Math.max(1, Math.min(Number(p.columns) || 2, Math.floor(containerWidth / 220)));
+      // As many of the asked columns as fit at 150dp each: two controls or cards side by side on a
+      // phone, one column only when even two would be cramped.
+      const columns = Math.max(
+        1,
+        Math.min(Number(p.columns) || 2, Math.floor((containerWidth + 12) / 162)),
+      );
       const gap = container.gap;
       return columns === 1 ? (
         <View style={container}>{children}</View>
@@ -477,7 +510,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           lineBreakStrategyIOS="hangul-word"
           testID={`node-${node.id}`}
           style={{
-            color: t.foreground,
+            color: ink ?? t.foreground,
             fontSize: ty.heading.sizes[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
             lineHeight: ty.heading.lineHeights[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
             fontWeight: String(ty.heading.weight) as "600",
@@ -488,24 +521,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </Text>
       );
     case "Text":
-      return (
-        <Text
-          testID={`node-${node.id}`}
-          style={{
-            ...body,
-            color:
-              p.tone === "muted"
-                ? t.muted
-                : p.tone === "danger"
-                  ? t.danger
-                  : p.tone === "success"
-                    ? t.success
-                    : t.foreground,
-          }}
-        >
-          {String(p.text ?? "")}
-        </Text>
-      );
+      return <SizedText {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Markdown":
       return <SafeMarkdown text={String(p.text ?? "")} />;
     case "Gallery":
@@ -564,7 +580,13 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </View>
       );
     case "Icon":
-      return <NativeIcon name={p.name} label={p.label} color={toneColor(t, p.tone)} />;
+      return (
+        <NativeIcon
+          name={p.name}
+          label={p.label}
+          color={!p.tone || p.tone === "default" ? (ink ?? t.foreground) : toneColor(t, p.tone)}
+        />
+      );
     case "Badge":
       return (
         <View
@@ -654,6 +676,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
     case "Table":
       return <NativeTable title={String(p.caption)} columns={p.columns} rows={p.rows} />;
     case "Progress":
+      if (p.variant === "ring")
+        return <ProgressRing {...{ node, runtime, surfaceId, children, renderChild }} />;
       return (
         <View
           accessibilityRole="progressbar"
@@ -673,14 +697,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </View>
       );
     case "Button":
-      return button(
-        String(p.label),
-        () => {
-          void runtime.dispatch(surfaceId, node.id, p.action, node.scope);
-        },
-        p.variant !== "primary",
-        Boolean(p.disabled),
-      );
+      return <ActionButton {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "TextField":
       return field(
         <TextInput
@@ -701,6 +718,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         />,
       );
     case "Select":
+      if (p.variant === "segmented" || p.variant === "chips")
+        return <ChoiceRow {...{ node, runtime, surfaceId, children, renderChild }} />;
       return field(
         <View style={{ ...control, paddingHorizontal: 0 }}>
           <Picker
@@ -718,6 +737,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </View>,
       );
     case "Checkbox":
+      if (p.variant === "switch")
+        return <SwitchRow {...{ node, runtime, surfaceId, children, renderChild }} />;
       return (
         <Pressable
           accessibilityRole="checkbox"
@@ -743,32 +764,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </Pressable>
       );
     case "Slider":
-      return field(
-        <View>
-          <Slider
-            accessibilityLabel={label}
-            testID={`input-${node.id}`}
-            disabled={disabled}
-            value={Number(value) || 0}
-            minimumValue={p.min}
-            maximumValue={p.max}
-            step={p.step}
-            onValueChange={write}
-            onSlidingStart={() => lockGesture(true)}
-            onSlidingComplete={() => lockGesture(false)}
-            minimumTrackTintColor={t.accent}
-            maximumTrackTintColor={t.border}
-            thumbTintColor={t.accent}
-            style={{ height: 48, width: "100%" }}
-          />
-          <Text
-            testID={`value-${node.id}`}
-            style={{ ...body, textAlign: "right", fontVariant: ["tabular-nums"] }}
-          >
-            {String(value)}
-          </Text>
-        </View>,
-      );
+      return <SliderRow {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "DatePicker":
       return field(
         <View>
@@ -882,6 +878,7 @@ const BUILTIN_PATHS: Record<string, string> = {
   close: "m6 6 12 12M6 18 18 6",
   "chevron-left": "m15 18-6-6 6-6",
   "chevron-right": "m9 18 6-6-6-6",
+  more: "M5 12h.01M12 12h.01M19 12h.01",
   "image-off":
     "M3 3l18 18M10.4 5H19a2 2 0 0 1 2 2v8.6M19 21H5a2 2 0 0 1-2-2V7c0-.8.5-1.5 1.1-1.8M3 16l4.5-4.5 3 3M14 14l1.5-1.5L21 18",
 };
@@ -918,7 +915,7 @@ export function NativeIcon({
         d={BUILTIN_PATHS[name] ?? BUILTIN_PATHS.info}
         fill="none"
         stroke={color}
-        strokeWidth={1.6}
+        strokeWidth={name === "more" ? 3.4 : 1.6}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

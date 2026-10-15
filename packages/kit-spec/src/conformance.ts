@@ -42,7 +42,7 @@ export function checkKitConformance(
     for (const [name, value] of Object.entries(colors))
       if (!HEX.test(value)) add("token-format", `${mode}.${name} must be #rrggbb, got ${value}`);
     for (const [fg, bg, min] of PAIRS) {
-      const ratio = contrast(colors[fg], colors[bg]);
+      const ratio = contrast(colors[fg] ?? "#000000", colors[bg] ?? "#ffffff");
       if (ratio < min)
         add("contrast", `${mode} ${fg} on ${bg} is ${ratio.toFixed(2)}:1, needs ${min}:1`);
     }

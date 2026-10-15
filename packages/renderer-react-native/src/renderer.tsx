@@ -210,7 +210,23 @@ const NativeNode = memo(function NativeNode({
         이 항목을 표시할 수 없습니다. {node.error}
       </Text>
     );
-  if (!node.component)
+  if (!node.component) {
+    // A child id that is not a component but names a field of the row ("front", "price"):
+    // models write that for a template's text; draw the field.
+    const field = id === "root" ? undefined : runtime.read(surfaceId, id, scope);
+    if (typeof field === "string" || typeof field === "number")
+      return (
+        <Text
+          selectable
+          style={{
+            color: colors.foreground,
+            fontSize: kit.tokens.typography.baseSize,
+            textAlign: "center",
+          }}
+        >
+          {String(field)}
+        </Text>
+      );
     return (
       <View
         accessibilityLabel="콘텐츠 불러오는 중"
@@ -223,6 +239,7 @@ const NativeNode = memo(function NativeNode({
         }}
       />
     );
+  }
   if (node.props.visible === false) return null;
   const renderChild = (childId: string, childScope = scope) => (
     <NativeNode

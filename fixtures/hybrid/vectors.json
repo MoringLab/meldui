@@ -31,6 +31,37 @@
    ]
   },
   {
+   "name": "broken-component-batch",
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"x\"]}},{\"id\":\"c\",\"component\":\"Text\",\"text\":\"ok 2\"}]}}\n",
+   "items": [
+    {
+     "kind": "invalid",
+     "line": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\""
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "a",
+         "component": "Text",
+         "text": "ok"
+        },
+        {
+         "id": "c",
+         "component": "Text",
+         "text": "ok 2"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
    "name": "half-quoted-key",
    "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
    "items": [
@@ -1308,6 +1339,65 @@
    "fallbackSources": [],
    "diagnosticCodes": [
     "INVALID_JSON"
+   ]
+  },
+  {
+   "name": "broken-component-batch/auto",
+   "policy": {},
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"x\"]}},{\"id\":\"c\",\"component\":\"Text\",\"text\":\"ok 2\"}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "broken-component-batch/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"x\"]}},{\"id\":\"c\",\"component\":\"Text\",\"text\":\"ok 2\"}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "broken-component-batch/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"x\"]}},{\"id\":\"c\",\"component\":\"Text\",\"text\":\"ok 2\"}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "MISSING_ANSWER",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "broken-component-batch/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"x\"]}},{\"id\":\"c\",\"component\":\"Text\",\"text\":\"ok 2\"}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "UNKNOWN_SURFACE"
    ]
   },
   {

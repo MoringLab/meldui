@@ -119,6 +119,8 @@ const edgeTexts: Record<string, string> = {
   "korean-emoji": "안녕하세요 😀 **굵게**\n둘째 줄\n",
   "fenced-json-is-text": '```json\n{"version":"v0.9","createSurface":{}}\n```\n{x}\n{"a":1}\n',
   "broken-control-line": brokenLine,
+  "broken-component-batch":
+    '{"version":"v0.9","updateComponents":{"surfaceId":"main","components":[{"id":"a","component":"Text","text":"ok"},{"id":"b","component":"Text","text":{"call":"x"]}},{"id":"c","component":"Text","text":"ok 2"}]}}\n',
   "half-quoted-key": `${decl("main", "따옴표 빠진 키").replace('"surfaceId"', 'surfaceId"')}\n`,
   "truncated-control-line": `${decl("main", "잘린 선언")}`.replace(/}\s*$/, "") + "\n",
   "blank-lines": "\n\n첫 문단\n\n\n둘째 문단\n",

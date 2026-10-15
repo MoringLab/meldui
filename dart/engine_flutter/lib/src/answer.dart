@@ -124,6 +124,11 @@ class AnswerDecoder {
         out.add(
           AnswerItem.invalid(line.length > 120 ? line.substring(0, 120) : line),
         );
+        final salvaged = salvageComponents(fixed);
+        if (salvaged != null) {
+          out.add(AnswerItem.json(salvaged));
+          return;
+        }
         // Rather than a silent gap, say what the block was going to show when that survives.
         final fallback = RegExp(
           r'"fallbackText"\s*:\s*"((?:[^"\\]|\\.)*)"',
@@ -139,6 +144,63 @@ class AnswerDecoder {
     _emitText(out, raw);
     _endLine(line);
   }
+}
+
+/// The components of an updateComponents line that cannot be parsed as a whole: every
+/// `{"id":…,"component":…}` object that parses on its own is kept (mirrors @engine/core).
+Map<String, dynamic>? salvageComponents(String line) {
+  if (!line.contains('"updateComponents"')) return null;
+  final surfaceId = RegExp(r'"surfaceId"\s*:\s*"([^"\\]{1,128})"').firstMatch(line)?.group(1);
+  final version = RegExp(r'"version"\s*:\s*"(v[0-9.]{1,8})"').firstMatch(line)?.group(1) ?? 'v0.9';
+  final start = line.indexOf('"components"');
+  if (surfaceId == null || start < 0) return null;
+  final components = <Map<String, dynamic>>[];
+  final opener = RegExp(r'\{\s*"id"\s*:');
+  var from = start;
+  while (true) {
+    final match = opener.firstMatch(line.substring(from));
+    if (match == null) break;
+    final at = from + match.start;
+    final end = _closingBrace(line, at);
+    if (end < 0) break;
+    try {
+      final value = jsonDecode(repairJsonSyntax(line.substring(at, end + 1)));
+      if (value is Map && value['id'] is String && value['component'] is String) {
+        components.add(Map<String, dynamic>.from(value));
+        from = end + 1;
+        continue;
+      }
+    } catch (_) {}
+    from = at + 1;
+  }
+  if (components.isEmpty) return null;
+  return {
+    'version': version,
+    'updateComponents': {'surfaceId': surfaceId, 'components': components},
+  };
+}
+
+int _closingBrace(String text, int from) {
+  var depth = 0;
+  var inString = false;
+  for (var i = from; i < text.length; i++) {
+    final c = text[i];
+    if (inString) {
+      if (c == '\\') {
+        i++;
+      } else if (c == '"') {
+        inString = false;
+      }
+    } else if (c == '"') {
+      inString = true;
+    } else if (c == '{') {
+      depth++;
+    } else if (c == '}') {
+      depth--;
+      if (depth == 0) return i;
+    }
+  }
+  return -1;
 }
 
 /// JSON slips inside long lines: a key missing its opening quote, an unquoted key, a trailing

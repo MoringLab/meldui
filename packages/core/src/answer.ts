@@ -133,6 +133,12 @@ export class AnswerDecoder {
           return;
         }
         out.push({ kind: "invalid", line: line.slice(0, 120) });
+        // One broken component must not lose the others in a long batch.
+        const salvaged = salvageComponents(fixed);
+        if (salvaged) {
+          out.push({ kind: "json", value: salvaged });
+          return;
+        }
         // Rather than a silent gap, say what the block was going to show when that survives.
         const fallback = /"fallbackText"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(line)?.[1];
         if (fallback) {
@@ -149,6 +155,52 @@ export class AnswerDecoder {
     this.emitText(out, raw);
     this.endLine(line);
   }
+}
+
+/**
+ * The components of an updateComponents line that cannot be parsed as a whole (a bracket
+ * miscounted deep inside one of them): every `{"id":…,"component":…}` object that parses on its
+ * own is kept; the broken one is dropped. Null when nothing can be recovered.
+ */
+export function salvageComponents(line: string): Record<string, unknown> | null {
+  if (!line.includes('"updateComponents"')) return null;
+  const surfaceId = /"surfaceId"\s*:\s*"([^"\\]{1,128})"/.exec(line)?.[1];
+  const version = /"version"\s*:\s*"(v[0-9.]{1,8})"/.exec(line)?.[1] ?? "v0.9";
+  const start = line.indexOf('"components"');
+  if (!surfaceId || start < 0) return null;
+  const components: Record<string, unknown>[] = [];
+  const opener = /\{\s*"id"\s*:/g;
+  opener.lastIndex = start;
+  for (let match = opener.exec(line); match; match = opener.exec(line)) {
+    const end = closingBrace(line, match.index);
+    if (end < 0) break;
+    try {
+      const value = JSON.parse(repairJsonSyntax(line.slice(match.index, end + 1)));
+      if (value && typeof value.id === "string" && typeof value.component === "string") {
+        components.push(value);
+        opener.lastIndex = end + 1;
+      }
+    } catch {
+      /* this one is broken: look for the next component inside or after it */
+    }
+  }
+  return components.length ? { version, updateComponents: { surfaceId, components } } : null;
+}
+
+/** Index of the brace closing the object that opens at `from` (outside strings), or -1. */
+function closingBrace(text: string, from: number): number {
+  let depth = 0;
+  let inString = false;
+  for (let i = from; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") depth++;
+    else if (c === "}" && --depth === 0) return i;
+  }
+  return -1;
 }
 
 /**

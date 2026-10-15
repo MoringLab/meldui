@@ -101,3 +101,20 @@ describe("JSON slips", () => {
     ]);
   });
 });
+
+describe("component salvage", () => {
+  it("keeps every component that parses when one in the batch is broken", async () => {
+    const { salvageComponents } = await import("./answer.js");
+    const line =
+      '{"version":"v0.9","updateComponents":{"surfaceId":"main","components":[{"id":"root","component":"Column","children":["a","b","c"]},{"id":"a","component":"Text","text":"ok"},{"id":"b","component":"Chart","values":{"call":"computeArray","args":{"formula":"x"}}]}},{"id":"c","component":"Text","text":"also ok"}]}}';
+    expect(() => JSON.parse(line)).toThrow();
+    const value = salvageComponents(line) as {
+      updateComponents: { surfaceId: string; components: { id: string }[] };
+    };
+    expect(value.updateComponents.surfaceId).toBe("main");
+    expect(value.updateComponents.components.map((c) => c.id)).toEqual(["root", "a", "c"]);
+    const decoder = new AnswerDecoder();
+    const items = [...decoder.push(`${line}\n`), ...decoder.finish()];
+    expect(items.map((i) => i.kind)).toEqual(["invalid", "json"]);
+  });
+});

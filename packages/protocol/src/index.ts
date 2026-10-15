@@ -114,12 +114,24 @@ const array = z
   .union([z.array(z.unknown()).max(1000), BindingSchema, ComputedSchema])
   .describe("REF:#/$defs/DynamicValue");
 const child = z.string().min(1).max(128).describe("REF:#/$defs/ComponentId");
-export const ChildListSchema = z
+const childListValue = z
   .union([
     z.array(child).max(2000),
     z.object({ componentId: child, path: z.string().max(1024) }).strict(),
   ])
   .describe("REF:#/$defs/ChildList");
+/** A template wrapped in a list ([{componentId, path}]) — a common model slip — is the template. */
+export const ChildListSchema = z.preprocess(
+  (value) =>
+    Array.isArray(value) &&
+    value.length === 1 &&
+    value[0] &&
+    typeof value[0] === "object" &&
+    "componentId" in value[0]
+      ? value[0]
+      : value,
+  childListValue,
+);
 export type ChildList = z.infer<typeof ChildListSchema>;
 export const ActionSchema = z
   .union([

@@ -223,7 +223,13 @@ const EngineNode = memo(function EngineNode({
         이 항목을 표시할 수 없습니다. <small>{node.error}</small>
       </div>
     );
-  if (!node.component) return <Loading />;
+  if (!node.component) {
+    // A child id naming a field of the row ("front", "price") is drawn as that field.
+    const field = id === "root" ? undefined : runtime.read(surfaceId, id, scope);
+    if (typeof field === "string" || typeof field === "number")
+      return <p className="ui-text">{String(field)}</p>;
+    return <Loading />;
+  }
   if (node.props.visible === false) return null;
   const renderChild = (childId: string, childScope = scope) => (
     <EngineNode

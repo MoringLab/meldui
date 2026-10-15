@@ -14,7 +14,7 @@ import {
   type SurfaceDeclaration,
   type UIMessage,
 } from "@engine/protocol";
-import { assertSafeJson } from "./expression.js";
+import { assertSafeJson, resolvePath } from "./expression.js";
 import { createUIRuntime, type UIModelEvent, type UIRuntime } from "./index.js";
 
 export type AnswerItem =
@@ -231,6 +231,89 @@ export function describeSurface(runtime: UIRuntime, surfaceId: string, limit = 6
   return out.length > limit
     ? `${out.slice(0, limit - 1)}…`
     : out || `Interactive content (${surfaceId})`;
+}
+
+/**
+ * A surface as the model can read it back next turn: the component tree with the words and the
+ * current values on screen, then the data model. Without it a follow-up ("make the second slider
+ * finer", "what did I score?") has only the one-line fallback to go on.
+ */
+export function outlineSurface(runtime: UIRuntime, surfaceId: string, limit = 1600): string {
+  const surface = runtime.getSurface(surfaceId);
+  if (!surface) return "";
+  const lines: string[] = [];
+  const seen = new Set<string>();
+  const short = (v: unknown, max = 60) => {
+    const s =
+      typeof v === "string" ? v : typeof v === "number" || typeof v === "boolean" ? String(v) : "";
+    return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+  };
+  const KEYS = [
+    "title",
+    "label",
+    "text",
+    "prompt",
+    "caption",
+    "kind",
+    "variant",
+    "value",
+    "min",
+    "max",
+  ];
+  const visit = (id: string, depth: number, scope = "/") => {
+    if (seen.has(`${id}\0${scope}`) || lines.length > 60) return;
+    seen.add(`${id}\0${scope}`);
+    const node = runtime.getNodeSnapshot(surfaceId, id, scope);
+    const p = (node.props ?? {}) as Record<string, any>;
+    const fields = KEYS.filter((k) => short(p[k]) !== "").map(
+      (k) => `${k}=${JSON.stringify(short(p[k]))}`,
+    );
+    if (Array.isArray(p.tabs))
+      fields.push(
+        `tabs=${p.tabs.map((t: any) => short(runtime.resolve(surfaceId, t.label, scope), 20)).join("|")}`,
+      );
+    if (Array.isArray(p.values)) fields.push(`rows=${p.values.length}`);
+    if (Array.isArray(p.choices)) fields.push(`choices=${p.choices.length}`);
+    lines.push(
+      `${"  ".repeat(depth)}${node.component ?? "?"}#${id}${fields.length ? ` ${fields.join(" ")}` : ""}`,
+    );
+    const children = p.children;
+    if (Array.isArray(children))
+      for (const child of children) visit(String(child), depth + 1, scope);
+    else if (children && typeof children === "object" && typeof children.componentId === "string") {
+      const rows = runtime.read(surfaceId, children.path, scope);
+      lines.push(
+        `${"  ".repeat(depth + 1)}(each of ${children.path}, ${Array.isArray(rows) ? rows.length : 0} rows:)`,
+      );
+      visit(children.componentId, depth + 2, `${resolvePath(children.path, scope)}/0`);
+    }
+    for (const entry of Array.isArray(p.tabs) ? p.tabs : Array.isArray(p.items) ? p.items : [])
+      if (entry && typeof entry.child === "string") visit(entry.child, depth + 1, scope);
+    for (const key of ["front", "back"])
+      if (typeof p[key] === "string") visit(p[key], depth + 1, scope);
+  };
+  visit("root", 0);
+  let data = "";
+  try {
+    data = JSON.stringify(runtime.read(surfaceId, "/")) ?? "";
+  } catch {
+    data = "";
+  }
+  const tree = lines.join("\n");
+  const room = Math.max(200, limit - tree.length);
+  return `${tree}\ndata: ${data.length > room ? `${data.slice(0, room - 1)}…` : data}`;
+}
+
+/** Visible words of a sandbox document (no tags, scripts or styles), for the model's context. */
+function sandboxWords(source: string | undefined, limit = 400): string {
+  if (!source) return "";
+  const text = source
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;|&#\d+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;
 }
 
 type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
@@ -700,6 +783,24 @@ export class AnswerSession {
               ? `[media: ${b.attachmentIds.join(", ")}]`
               : "",
       )
+      .filter(Boolean)
+      .join("\n\n");
+  }
+  /**
+   * The answer as context for the next turn: Markdown as written, each surface as an outline of
+   * what it shows and holds now (<ui>…</ui>), each sandbox as its summary and visible words.
+   */
+  asContext(): string {
+    return this._blocks
+      .map((b) => {
+        if (b.kind === "markdown") return b.text;
+        if (b.kind === "surface")
+          return `<ui surface="${b.surfaceId}"${b.title ? ` title="${b.title}"` : ""}>\n${b.fallbackText ? `summary: ${b.fallbackText}\n` : ""}${outlineSurface(this.runtime, b.surfaceId)}\n</ui>`;
+        if (b.kind === "sandbox")
+          return `<ui sandbox="${b.mode}">\nsummary: ${b.fallbackText}\nshows: ${sandboxWords(b.source)}\n</ui>`;
+        if (b.kind === "media") return `[media: ${b.attachmentIds.join(", ")}]`;
+        return "";
+      })
       .filter(Boolean)
       .join("\n\n");
   }

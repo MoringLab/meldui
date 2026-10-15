@@ -58,6 +58,14 @@ export const EXPRESSION_OPS = [
   "rng",
   "get",
   "numberFormat",
+  // State building: lists and records that UI actions update locally (todos, scores, decks).
+  "concat",
+  "set",
+  "object",
+  "slice",
+  "join",
+  "includes",
+  "abs",
 ] as const;
 const ops = EXPRESSION_OPS;
 export const ExprSchema: z.ZodType<Expr> = z.lazy(() =>

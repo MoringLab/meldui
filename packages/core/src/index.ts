@@ -480,6 +480,16 @@ export class UIRuntime {
       .map((event) => event.diagnostic);
   }
   read(surfaceId: string, path: string, scope = "/"): any {
+    // Inside a template ({componentId, path}) $item/$row is the row and $index/$rowIndex its
+    // position, so a row's buttons can toggle or remove that row. Inside map/filter the loop's own
+    // $item/$index shadow them; $row/$rowIndex stay the template row
+    // (remove: filter(list, ne($index, $rowIndex))).
+    if (path === "$item" || path === "$row")
+      return this.getSurface(surfaceId)?.dataModel.get(scope);
+    if (path === "$index" || path === "$rowIndex") {
+      const last = scope.split("/").pop() ?? "";
+      return /^\d+$/.test(last) ? Number(last) : null;
+    }
     return this.getSurface(surfaceId)?.dataModel.get(resolvePath(path, scope));
   }
   getPendingWrites(surfaceId: string) {
@@ -583,9 +593,10 @@ export class UIRuntime {
       const walk = (v: unknown) => {
         if (!v || typeof v !== "object") return;
         for (const [k, val] of Object.entries(v)) {
-          if ((k === "path" || k === "ref") && typeof val === "string")
-            paths.add(resolvePath(val, scope));
-          else walk(val);
+          if ((k === "path" || k === "ref") && typeof val === "string") {
+            if (val === "$index" || val === "$rowIndex") continue;
+            paths.add(val === "$item" || val === "$row" ? scope : resolvePath(val, scope));
+          } else walk(val);
         }
       };
       if (component) {

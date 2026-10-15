@@ -20,7 +20,8 @@ export const PLATFORM_SUPPORT: Record<
   flutter: {
     unsupported: ["Audio", "Simulation"],
     fallbacks: { Simulation: "Text", Audio: "FileCard", DocumentPreview: "FileCard" },
-    unsupportedOps: [],
+    // The Dart evaluator has not been ported these yet; prompts for Flutter do not offer them.
+    unsupportedOps: ["concat", "set", "object", "slice", "join", "includes", "abs"],
   },
 };
 

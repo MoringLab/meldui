@@ -76,22 +76,108 @@ export function evaluateExpression(expression: Expr, read: (path: string) => unk
       case "rng":
         return seededRandom(num(at(0)), num(at(1)));
       case "get": {
+        // get(array, index) or get(record, "field"): rows of objects ({name, price}) are the
+        // natural shape for charts, tables and lists.
         const target = at(0);
         const key = at(1);
-        if (!Array.isArray(target) || !Number.isInteger(key))
-          throw new Error("EXPECTED_ARRAY_INDEX");
-        return target[key as number] ?? null;
+        if (Array.isArray(target)) {
+          if (!Number.isInteger(key)) throw new Error("EXPECTED_ARRAY_INDEX");
+          return target[key as number] ?? null;
+        }
+        if (isRecord(target) && typeof key === "string") {
+          safeKey(key);
+          return Object.hasOwn(target, key) ? target[key] : null;
+        }
+        throw new Error("EXPECTED_ARRAY_OR_OBJECT");
       }
+      case "concat": {
+        const parts = item.args.map((_, i) => at(i));
+        if (parts.every(Array.isArray)) {
+          const joined = (parts as unknown[][]).flat(1);
+          loop(joined.length);
+          return joined;
+        }
+        if (parts.some((part) => typeof part === "object" && part !== null))
+          throw new Error("EXPECTED_ARRAYS_OR_TEXT");
+        return limitText(parts.map(formatValue).join(""));
+      }
+      case "set": {
+        // set(array, index, value) / set(record, "field", value): a changed copy.
+        const target = at(0);
+        const key = at(1);
+        const value = at(2);
+        if (Array.isArray(target)) {
+          if (!Number.isInteger(key) || (key as number) < 0 || (key as number) > target.length)
+            throw new Error("EXPECTED_ARRAY_INDEX");
+          const copy = [...target];
+          copy[key as number] = value;
+          loop(copy.length);
+          return copy;
+        }
+        if (isRecord(target) && typeof key === "string")
+          return { ...target, [safeKey(key)]: value };
+        throw new Error("EXPECTED_ARRAY_OR_OBJECT");
+      }
+      case "object": {
+        // object("text", …, "done", false): a record from key/value pairs.
+        if (item.args.length % 2 || item.args.length > 64) throw new Error("EXPECTED_PAIRS");
+        const record: Record<string, unknown> = {};
+        for (let i = 0; i < item.args.length; i += 2) {
+          const key = at(i);
+          if (typeof key !== "string") throw new Error("EXPECTED_STRING");
+          record[safeKey(key)] = at(i + 1);
+        }
+        return record;
+      }
+      case "slice": {
+        const source = at(0);
+        const start = item.args.length > 1 ? num(at(1)) : 0;
+        const end = item.args.length > 2 ? num(at(2)) : undefined;
+        if (!Number.isInteger(start) || (end !== undefined && !Number.isInteger(end)))
+          throw new Error("EXPECTED_INTEGER");
+        if (Array.isArray(source) || typeof source === "string") return source.slice(start, end);
+        throw new Error("EXPECTED_ARRAY_OR_TEXT");
+      }
+      case "join": {
+        const values = at(0);
+        const separator = item.args.length > 1 ? at(1) : "";
+        if (!Array.isArray(values) || typeof separator !== "string")
+          throw new Error("EXPECTED_ARRAY");
+        loop(values.length);
+        return limitText(values.map(formatValue).join(separator));
+      }
+      case "includes": {
+        const source = at(0);
+        const value = at(1);
+        if (Array.isArray(source)) return source.some((entry) => entry === value);
+        if (typeof source === "string") return source.includes(formatValue(value));
+        throw new Error("EXPECTED_ARRAY_OR_TEXT");
+      }
+      case "abs":
+        return Math.abs(num(at(0)));
       case "sort": {
         const source = at(0);
         if (!Array.isArray(source)) throw Error("EXPECTED_ARRAY");
         loop(source.length);
         const field = item.args.length > 1 ? at(1) : null,
           descending = item.args.length > 2 ? Boolean(at(2)) : false;
-        if (field !== null && (!Number.isInteger(field) || Number(field) < 0))
+        if (
+          field !== null &&
+          typeof field !== "string" &&
+          (!Number.isInteger(field) || Number(field) < 0)
+        )
           throw Error("EXPECTED_ARRAY_INDEX");
+        // sort(rows, "price") orders records by a field; sort(rows, 1) tuples by a column.
         const key = (value: any) =>
-          field === null ? value : Array.isArray(value) ? value[Number(field)] : null;
+          field === null
+            ? value
+            : typeof field === "string"
+              ? isRecord(value) && Object.hasOwn(value, field)
+                ? value[field]
+                : null
+              : Array.isArray(value)
+                ? value[Number(field)]
+                : null;
         return source
           .map((value, index) => ({ value, index }))
           .sort((a, b) => {
@@ -217,6 +303,21 @@ export function evaluateExpression(expression: Expr, read: (path: string) => unk
     }
   };
   return evaluate(expr);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function safeKey(key: string): string {
+  if (["__proto__", "prototype", "constructor"].includes(key) || key.length > 128)
+    throw new Error("UNSAFE_KEY");
+  return key;
+}
+
+function limitText(text: string): string {
+  if (text.length > 20_000) throw new Error("TEXT_LIMIT");
+  return text;
 }
 
 function formatValue(value: unknown): string {

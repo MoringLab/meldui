@@ -82,11 +82,21 @@ export const BindingSchema = z
   .object({ path: z.string().max(1024) })
   .strict()
   .describe("REF:#/$defs/DataBinding");
+/**
+ * A formula string compiles to the same expression tree (no eval): "/price * /qty * (1 - /rate / 100)".
+ * Far shorter and less error-prone for a model than a nested AST.
+ */
+export const FormulaSchema = z.string().min(1).max(2000);
+const ComputedArgs = z.union([
+  z.object({ expr: ExprSchema }).strict(),
+  z.object({ formula: FormulaSchema }).strict(),
+]);
 const ComputedSchema = z
   .object({
     call: z.enum(["computeNumber", "computeString", "computeBoolean", "computeArray"]),
-    args: z.object({ expr: ExprSchema }).strict(),
-    returnType: z.enum(["number", "string", "boolean", "array"]),
+    args: ComputedArgs,
+    // Implied by `call`; optional so a missing one is not an error.
+    returnType: z.enum(["number", "string", "boolean", "array"]).optional(),
   })
   .strict();
 export type Binding = z.infer<typeof BindingSchema>;
@@ -139,13 +149,14 @@ const updateValue = z
     path: z.string().max(1024),
     value: z.unknown().optional(),
     expr: ExprSchema.optional(),
+    formula: FormulaSchema.optional(),
   })
   .strict();
 export const functionDefinitions = [
   ...(["Number", "String", "Boolean", "Array"] as const).map((type) => ({
     name: `compute${type}`,
     returnType: type.toLowerCase(),
-    schema: z.object({ expr: ExprSchema }).strict(),
+    schema: ComputedArgs,
     pure: true,
   })),
   { name: "setValue", returnType: "void", schema: updateValue, pure: false },
@@ -168,6 +179,12 @@ const layout = {
   children: ChildListSchema,
   gap,
   align: z.enum(["start", "center", "end", "stretch"]).optional(),
+  // The sizing a Box has: models reach for it on rows and columns too.
+  justify: z.enum(["start", "center", "end", "between", "around"]).optional(),
+  wrap: z.boolean().optional(),
+  padding: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
+  width: z.union([z.enum(["fill", "hug"]), z.number().min(0.1).max(1)]).optional(),
+  flex: z.number().min(0).max(12).optional(),
 };
 const input = {
   label: text,
@@ -633,7 +650,8 @@ export const componentSchemas = {
    */
   Box: z.object({
     ...common,
-    children: ChildListSchema,
+    // Optional: an empty Box is a spacer, a swatch or a placeholder.
+    children: ChildListSchema.optional(),
     direction: z.enum(["column", "row"]).optional(),
     gap: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
     align: z.enum(["start", "center", "end", "stretch"]).optional(),
@@ -824,6 +842,8 @@ export type Capabilities = {
     sceneHover?: boolean;
     isolatedSandbox: boolean;
     advancedCharts: boolean;
+    /** Formula strings in computed values and setValue (compiled to the expression tree). */
+    formulas?: boolean;
   };
 };
 

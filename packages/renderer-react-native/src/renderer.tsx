@@ -428,8 +428,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
     case "QuizSet":
       return <QuizSetView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Column":
-      return <View style={container}>{children}</View>;
+      return <BoxView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Row":
+      if (p.justify || p.flex || p.width || p.padding || p.wrap !== undefined)
+        return <BoxView {...{ node, runtime, surfaceId, children, renderChild }} />;
       return (
         <View style={{ ...container, flexDirection: "row", flexWrap: "wrap" }}>
           {React.Children.map(children, (child) => (

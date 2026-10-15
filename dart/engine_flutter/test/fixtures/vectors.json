@@ -31,6 +31,21 @@
    ]
   },
   {
+   "name": "half-quoted-key",
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
+   "items": [
+    {
+     "kind": "json",
+     "value": {
+      "engine": "v1",
+      "block": "surface",
+      "surfaceId": "main",
+      "fallbackText": "따옴표 빠진 키"
+     }
+    }
+   ]
+  },
+  {
    "name": "truncated-control-line",
    "text": "{\"engine\":\"v1\",\"block\":\"surface\",\"surfaceId\":\"main\",\"fallbackText\":\"잘린 선언\"\n",
    "items": [
@@ -1294,6 +1309,56 @@
    "diagnosticCodes": [
     "INVALID_JSON"
    ]
+  },
+  {
+   "name": "half-quoted-key/auto",
+   "policy": {},
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
+  },
+  {
+   "name": "half-quoted-key/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "POLICY_SURFACES_DISABLED"
+   ]
+  },
+  {
+   "name": "half-quoted-key/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "MISSING_ANSWER"
+   ]
+  },
+  {
+   "name": "half-quoted-key/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": []
   },
   {
    "name": "truncated-control-line/auto",

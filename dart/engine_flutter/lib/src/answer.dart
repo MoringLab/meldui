@@ -108,7 +108,15 @@ class AnswerDecoder {
       }
     } catch (_) {
       if (RegExp(r'^\s*\{\s*"(version|engine)"').hasMatch(line)) {
-        final repaired = closeTruncated(line);
+        final fixed = repairJsonSyntax(line);
+        try {
+          final value = jsonDecode(fixed);
+          if (value is Map && (value.containsKey('version') || value.containsKey('engine'))) {
+            out.add(AnswerItem.json(Map<String, dynamic>.from(value)));
+            return;
+          }
+        } catch (_) {}
+        final repaired = closeTruncated(fixed);
         if (repaired != null) {
           out.add(AnswerItem.json(repaired));
           return;
@@ -131,6 +139,81 @@ class AnswerDecoder {
     _emitText(out, raw);
     _endLine(line);
   }
+}
+
+/// JSON slips inside long lines: a key missing its opening quote, an unquoted key, a trailing
+/// comma. Only text outside strings changes (mirrors repairJsonSyntax in @engine/core).
+String repairJsonSyntax(String line) {
+  final out = StringBuffer();
+  var inString = false;
+  var expectKey = false;
+  final identStart = RegExp(r'[A-Za-z_$]');
+  final ident = RegExp(r'^[A-Za-z_$][\w$-]*');
+  for (var i = 0; i < line.length; i++) {
+    final c = line[i];
+    if (inString) {
+      out.write(c);
+      if (c == '\\') {
+        if (i + 1 < line.length) out.write(line[i + 1]);
+        i++;
+      } else if (c == '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (c == '"') {
+      inString = true;
+      expectKey = false;
+      out.write(c);
+      continue;
+    }
+    if (c == '{' || c == ',') {
+      if (c == ',') {
+        final rest = line.substring(i + 1).trimLeft();
+        if (rest.startsWith('}') || rest.startsWith(']')) continue;
+      }
+      final written = out.toString();
+      expectKey = c == '{' || _objectContext(written);
+      out.write(c);
+      continue;
+    }
+    if (expectKey && identStart.hasMatch(c)) {
+      final name = ident.firstMatch(line.substring(i))?.group(0) ?? c;
+      final after = line.substring(i + name.length);
+      final stray = RegExp(r'^"\s*:').hasMatch(after);
+      if (stray || RegExp(r'^\s*:').hasMatch(after)) {
+        out.write('"$name"');
+        i += name.length - 1 + (stray ? 1 : 0);
+        expectKey = false;
+        continue;
+      }
+    }
+    if (!RegExp(r'\s').hasMatch(c)) expectKey = false;
+    out.write(c);
+  }
+  return out.toString();
+}
+
+bool _objectContext(String prefix) {
+  final stack = <String>[];
+  var inString = false;
+  for (var i = 0; i < prefix.length; i++) {
+    final c = prefix[i];
+    if (inString) {
+      if (c == '\\') {
+        i++;
+      } else if (c == '"') {
+        inString = false;
+      }
+    } else if (c == '"') {
+      inString = true;
+    } else if (c == '{' || c == '[') {
+      stack.add(c);
+    } else if ((c == '}' || c == ']') && stack.isNotEmpty) {
+      stack.removeLast();
+    }
+  }
+  return stack.isNotEmpty && stack.last == '{';
 }
 
 /// A control line cut short after its last complete value: closes the objects and arrays it

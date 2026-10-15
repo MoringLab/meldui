@@ -117,7 +117,17 @@ export class AnswerDecoder {
       }
     } catch {
       if (/^\s*\{\s*"(version|engine)"/.test(line)) {
-        const repaired = closeTruncated(line);
+        const fixed = repairJsonSyntax(line);
+        try {
+          const value = JSON.parse(fixed);
+          if (value && typeof value === "object" && ("version" in value || "engine" in value)) {
+            out.push({ kind: "json", value });
+            return;
+          }
+        } catch {
+          /* not a key slip: try a cut line next */
+        }
+        const repaired = closeTruncated(fixed);
         if (repaired) {
           out.push({ kind: "json", value: repaired });
           return;
@@ -139,6 +149,74 @@ export class AnswerDecoder {
     this.emitText(out, raw);
     this.endLine(line);
   }
+}
+
+/**
+ * The JSON slips models make deep inside long lines: a key missing its opening quote
+ * (`{"op":"add",args":[…]` ), an unquoted key (`{op:"add"}`), a trailing comma. Only text outside
+ * strings changes, so a value is never rewritten.
+ */
+export function repairJsonSyntax(line: string): string {
+  let out = "";
+  let inString = false;
+  let expectKey = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i] as string;
+    if (inString) {
+      out += c;
+      if (c === "\\") {
+        out += line[i + 1] ?? "";
+        i++;
+      } else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') {
+      inString = true;
+      expectKey = false;
+      out += c;
+      continue;
+    }
+    if (c === "{" || c === ",") {
+      // A comma right before } or ] is dropped.
+      if (c === ",") {
+        const rest = line.slice(i + 1).trimStart();
+        if (rest.startsWith("}") || rest.startsWith("]")) continue;
+      }
+      expectKey = c === "{" || /[{,]\s*$/.test(out) || isObjectContext(out);
+      out += c;
+      continue;
+    }
+    if (expectKey && /[A-Za-z_$]/.test(c)) {
+      const ident = /^[A-Za-z_$][\w$-]*/.exec(line.slice(i))?.[0] ?? c;
+      const after = line.slice(i + ident.length);
+      const stray = /^"\s*:/.test(after);
+      if (stray || /^\s*:/.test(after)) {
+        out += `"${ident}"`;
+        i += ident.length - 1 + (stray ? 1 : 0);
+        expectKey = false;
+        continue;
+      }
+    }
+    if (!/\s/.test(c)) expectKey = false;
+    out += c;
+  }
+  return out;
+}
+
+/** Whether the innermost open bracket of `prefix` (outside strings) is an object. */
+function isObjectContext(prefix: string): boolean {
+  const stack: string[] = [];
+  let inString = false;
+  for (let i = 0; i < prefix.length; i++) {
+    const c = prefix[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{" || c === "[") stack.push(c);
+    else if (c === "}" || c === "]") stack.pop();
+  }
+  return stack.at(-1) === "{";
 }
 
 /**

@@ -53,6 +53,8 @@ export function capabilitiesFor(
       directSceneDrag: platform === "web",
       sceneHover: platform === "web",
       isolatedSandbox: platform === "web",
+      // Formula strings (args.formula / setValue formula); the Dart evaluator has no parser yet.
+      formulas: platform !== "flutter",
       advancedCharts: platform === "web",
     },
   };

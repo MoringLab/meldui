@@ -89,7 +89,11 @@ describe("gateway boundaries", () => {
     expect(prompt).not.toContain("explorable learning");
     for (const name of ["ControlPanel", "Formula", "Quiz", "SvgScene", "RouteMap", "Playback"])
       expect(prompt).not.toMatch(new RegExp(`\\b${name}\\b`));
-    expect(prompt).toContain("numberFormat takes value, decimal places and an optional true");
+    expect(prompt).toContain("numberFormat(x,0,true) groups thousands");
+    // Without formula support (Flutter) the expression tree is described instead.
+    const tree = buildSystemPrompt({ kit: neutral, capabilities: capabilitiesFor("flutter") });
+    expect(tree).toContain("numberFormat takes value, decimal places and an optional true");
+    expect(tree).not.toContain("args:{formula:");
     const markdownOnly = buildSystemPrompt({
       kit: neutral,
       capabilities: capabilitiesFor("react-native"),

@@ -20,12 +20,14 @@ import {
   type UserAction,
 } from "@engine/protocol";
 import { assertSafeJson, evaluateExpression, resolvePath } from "./expression.js";
+import { compileFormula } from "./formula.js";
 import { NDJSONDecoder } from "./stream.js";
 
 export * from "./answer.js";
 export * from "./attachments.js";
 export * from "./citations.js";
 export * from "./expression.js";
+export * from "./formula.js";
 export * from "./stream.js";
 
 export type UIModelEvent =
@@ -106,7 +108,7 @@ const functions = functionDefinitions.map((definition) => ({
   ...definition,
   execute: (args: Record<string, unknown>, context: any) => {
     if (!definition.pure) throw new Error("ACTION_DISPATCH_REQUIRED");
-    return evaluateExpression(args.expr as Expr, (path) =>
+    return evaluateExpression(exprOf(args), (path) =>
       getValue(context.dataModel.getSignal(resolvePath(path, context.path))),
     );
   },
@@ -519,7 +521,7 @@ export class UIRuntime {
         !["computeNumber", "computeString", "computeBoolean", "computeArray"].includes(value.call)
       )
         throw new Error("IMPURE_EXPRESSION");
-      const result = evaluateExpression(value.args.expr, (path) =>
+      const result = evaluateExpression(exprOf(value.args), (path) =>
         this.read(surfaceId, path, scope),
       );
       const expected = value.call.slice(7).toLowerCase();
@@ -593,6 +595,14 @@ export class UIRuntime {
       const walk = (v: unknown) => {
         if (!v || typeof v !== "object") return;
         for (const [k, val] of Object.entries(v)) {
+          if (k === "formula" && typeof val === "string") {
+            try {
+              walk(compiled(val));
+            } catch {
+              /* a bad formula reports when it is evaluated */
+            }
+            continue;
+          }
           if ((k === "path" || k === "ref") && typeof val === "string") {
             if (val === "$index" || val === "$rowIndex") continue;
             paths.add(val === "$item" || val === "$row" ? scope : resolvePath(val, scope));
@@ -661,8 +671,8 @@ export class UIRuntime {
         const resolved = updates.map((entry) => {
           if (!entry || typeof entry.path !== "string") throw new Error("INVALID_POINTER");
           const value =
-            entry.expr !== undefined
-              ? evaluateExpression(entry.expr as Expr, (path) => this.read(surfaceId, path, scope))
+            entry.expr !== undefined || typeof entry.formula === "string"
+              ? evaluateExpression(exprOf(entry), (path) => this.read(surfaceId, path, scope))
               : this.resolve(surfaceId, entry.value, scope);
           assertSafeJson(value);
           return { path: resolvePath(entry.path, scope), value };
@@ -721,3 +731,20 @@ export * from "./simulations.js";
 export * from "./svg.js";
 export * from "./ticker.js";
 export * from "./visuals.js";
+
+const formulas = new Map<string, Expr>();
+/** A formula string compiled once (bounded cache). */
+function compiled(formula: string): Expr {
+  let expr = formulas.get(formula);
+  if (!expr) {
+    expr = compileFormula(formula);
+    if (formulas.size > 500) formulas.clear();
+    formulas.set(formula, expr);
+  }
+  return expr;
+}
+
+/** The expression of computed args or a setValue entry: `expr`, or a compiled `formula`. */
+function exprOf(args: { expr?: unknown; formula?: unknown }): Expr {
+  return typeof args.formula === "string" ? compiled(args.formula) : (args.expr as Expr);
+}

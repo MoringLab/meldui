@@ -72,3 +72,32 @@ describe("math delimiters", () => {
     expect(blocks).toHaveLength(3);
   });
 });
+
+describe("JSON slips", () => {
+  it("quotes half-quoted and unquoted keys and drops trailing commas, outside strings only", async () => {
+    const { repairJsonSyntax } = await import("./answer.js");
+    expect(JSON.parse(repairJsonSyntax('{"op":"add",args":[1,2]}'))).toEqual({
+      op: "add",
+      args: [1, 2],
+    });
+    expect(JSON.parse(repairJsonSyntax('{op:"mul", "args":[1, true, null,],}'))).toEqual({
+      op: "mul",
+      args: [1, true, null],
+    });
+    const text = '{"text":"a,b: c, {x: 1}","k":[{"v":1}]}';
+    expect(repairJsonSyntax(text)).toBe(text);
+    const decoder = new AnswerDecoder();
+    const items = [
+      ...decoder.push(
+        '{"version":"v0.9","updateDataModel":{"surfaceId":"m",path":"/","value":{}}}\n',
+      ),
+      ...decoder.finish(),
+    ];
+    expect(items).toEqual([
+      {
+        kind: "json",
+        value: { version: "v0.9", updateDataModel: { surfaceId: "m", path: "/", value: {} } },
+      },
+    ]);
+  });
+});

@@ -65,7 +65,7 @@ function useBound<T>({ node, runtime, surfaceId }: Props, initial: T, key = "val
 
 export function WebBox({ node, runtime, surfaceId, children }: Props) {
   const p = node.props as Record<string, any>;
-  const row = p.direction === "row";
+  const row = p.direction === "row" || node.component === "Row";
   const tone = TONES[p.tone as string] ?? {};
   const radius =
     p.radius === "none"

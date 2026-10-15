@@ -349,6 +349,8 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
       return <WebQuizSet {...{ node, runtime, surfaceId, renderChild }}>{children}</WebQuizSet>;
     case "Row":
     case "Column":
+      if (p.justify || p.flex || p.width || p.padding || p.wrap !== undefined)
+        return <WebBox {...{ node, runtime, surfaceId, renderChild }}>{children}</WebBox>;
       return (
         <div
           className={node.component === "Row" ? "ui-row" : "ui-column"}

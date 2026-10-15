@@ -160,7 +160,8 @@ export function BoxView(props: NativeViewProps) {
   const p = node.props as Record<string, any>;
   const { t, space, radius } = useBase();
   const inRow = useContext(InRow);
-  const row = p.direction === "row";
+  // Row and Column with Box sizing (justify, flex, width, padding) are drawn as Boxes too.
+  const row = p.direction === "row" || node.component === "Row";
   const look = toneLook(p.tone, t);
   const selected = Boolean(p.selected);
   const [height, setHeight] = useState(0);

@@ -185,13 +185,8 @@ class SurfaceBoundary extends ReactComponent<
       this.setState({ failed: false });
   }
   render() {
-    return this.state.failed
-      ? (this.props.fallback ?? (
-          <div role="alert" className="ui-error">
-            이 영역을 표시할 수 없습니다.
-          </div>
-        ))
-      : this.props.children;
+    // The host's fallback, or nothing: a failed node is reported, never shown as an error.
+    return this.state.failed ? (this.props.fallback ?? null) : this.props.children;
   }
 }
 function Loading() {
@@ -217,12 +212,8 @@ const EngineNode = memo(function EngineNode({
     [runtime, surfaceId, id, scope],
   );
   const node = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  if (node.error)
-    return (
-      <div className="ui-error" role="alert" data-node={id}>
-        이 항목을 표시할 수 없습니다. <small>{node.error}</small>
-      </div>
-    );
+  // Reported through diagnostics; never an error card in the layout.
+  if (node.error) return null;
   if (!node.component) {
     // A child id naming a field of the row ("front", "price") is drawn as that field.
     const field = id === "root" ? undefined : runtime.read(surfaceId, id, scope);

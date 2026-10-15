@@ -9,6 +9,7 @@ import {
   defaultHostPolicy,
   type HostPolicy,
   type MediaDeclaration,
+  parseComponent,
   redactContent,
   SNAPSHOT_SCHEMA,
   type SurfaceDeclaration,
@@ -1044,6 +1045,9 @@ export class AnswerSession {
         for (const raw of update.messages) {
           const body = (raw as any)?.updateComponents ?? (raw as any)?.updateDataModel;
           if (!body || body.surfaceId !== block.surfaceId) throw Error("ARTIFACT_SCOPE");
+          // A host's edit is checked strictly (the model's stream is repaired instead).
+          for (const component of (raw as any)?.updateComponents?.components ?? [])
+            parseComponent(component);
           if (validation.accept(raw).some((d) => d.severity === "error"))
             throw Error("ARTIFACT_INVALID");
         }

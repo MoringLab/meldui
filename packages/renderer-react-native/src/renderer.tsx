@@ -204,12 +204,9 @@ const NativeNode = memo(function NativeNode({
     [runtime, surfaceId, id, scope],
   );
   const node = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  if (node.error)
-    return (
-      <Text accessibilityRole="alert" style={{ color: colors.danger, padding: 12 }}>
-        이 항목을 표시할 수 없습니다. {node.error}
-      </Text>
-    );
+  // A node the model got wrong is reported (diagnostics), never shown as an error card: the
+  // layout around it stays as it was.
+  if (node.error) return null;
   if (!node.component) {
     // A child id that is not a component but names a field of the row ("front", "price"):
     // models write that for a template's text; draw the field.
@@ -316,11 +313,8 @@ class NativeBoundary extends React.Component<
       this.setState({ failed: false });
   }
   render() {
-    return this.state.failed ? (
-      <Text accessibilityRole="alert">이 항목을 표시할 수 없습니다.</Text>
-    ) : (
-      this.props.children
-    );
+    // Reported through onError; the space stays empty rather than showing an error.
+    return this.state.failed ? null : this.props.children;
   }
 }
 function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeViewProps) {

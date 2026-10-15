@@ -15,7 +15,7 @@ import {
   functionDefinitions,
   MessageSchema,
   PROTOCOL_VERSION,
-  parseComponent,
+  repairComponent,
   type UIMessage,
   type UserAction,
 } from "@engine/protocol";
@@ -75,6 +75,8 @@ export type NodeSnapshot = {
   props: Record<string, any>;
   scope: string;
   error?: string;
+  /** Props left out because they could not be evaluated (the node still renders). */
+  issues?: string[];
   revision?: number;
 };
 
@@ -265,7 +267,7 @@ export class UIRuntime {
         try {
           const components = incoming.map((raw) => {
             this.validateMediaRefs(raw);
-            return parseComponent(raw, schemas as Parameters<typeof parseComponent>[1]);
+            return this.repaired(surfaceId, raw, schemas, false);
           });
           this.processor.processMessages({
             version: PROTOCOL_VERSION,
@@ -279,10 +281,7 @@ export class UIRuntime {
           try {
             if (!applied) {
               this.validateMediaRefs(raw);
-              const component = parseComponent(
-                raw,
-                schemas as Parameters<typeof parseComponent>[1],
-              );
+              const component = this.repaired(surfaceId, raw, schemas, false);
               this.processor.processMessages({
                 version: PROTOCOL_VERSION,
                 updateComponents: { surfaceId, components: [component] },
@@ -339,6 +338,30 @@ export class UIRuntime {
     return this.diagnosticEvents
       .filter((event) => event.sequence > before)
       .map((event) => event.diagnostic);
+  }
+  /**
+   * The component as the model meant it: repaired rather than rejected (see repairComponent).
+   * Repairs are reported once, as warnings, when the batch is applied per node.
+   */
+  private repaired(
+    surfaceId: string | undefined,
+    raw: Component,
+    schemas: Record<string, unknown>,
+    quiet = true,
+  ): Component {
+    const { component, repairs } = repairComponent(
+      raw,
+      schemas as Parameters<typeof repairComponent>[1],
+    );
+    if (repairs.length && !quiet)
+      this.report({
+        code: "COMPONENT_REPAIRED",
+        message: repairs.slice(0, 6).join("; ").slice(0, 400),
+        severity: "warning",
+        surfaceId,
+        componentId: component.id,
+      });
+    return component;
   }
   private validateMediaRefs(raw: Component) {
     const ids =
@@ -454,6 +477,15 @@ export class UIRuntime {
             componentId: node.id,
             severity: "error",
           });
+        // A prop that could not be evaluated was left out; the node still renders.
+        for (const issue of snapshot.issues ?? [])
+          this.report({
+            code: issue.split(": ").at(-1) || "EXPRESSION_ERROR",
+            message: `Left out ${issue.split(": ")[0]}: it could not be evaluated.`,
+            surfaceId,
+            componentId: node.id,
+            severity: "warning",
+          });
       }
     }
     for (const surfaceId of this.surfaceIds) {
@@ -544,35 +576,30 @@ export class UIRuntime {
     };
     if (component) {
       const raw = { id, component: component.type, ...component.properties } as Component;
-      try {
-        const props = Object.fromEntries(
-          Object.entries(component.properties).map(([k, v]) => [
-            k,
-            ["action", "onSubmit", "children", "tabs", "items", "nodes"].includes(k)
-              ? v
-              : this.resolve(surfaceId, v, scope),
-          ]),
-        );
-        if (
-          component.type === "Quiz" &&
-          (!Array.isArray(props.choices) ||
-            props.choices.length < 2 ||
-            props.choices.length > 10 ||
-            props.choices.some((c) => typeof c !== "string") ||
-            !Number.isInteger(props.correctIndex) ||
-            Number(props.correctIndex) < 0 ||
-            Number(props.correctIndex) >= props.choices.length)
-        )
-          throw Error("QUIZ_VALUES");
-        snapshot = { id, component: component.type, raw, props, scope };
-      } catch (error) {
-        snapshot = {
-          ...snapshot,
-          component: component.type,
-          raw,
-          error: error instanceof Error ? error.message : "EXPRESSION_ERROR",
-        };
+      // Each prop on its own: one that cannot be evaluated (a formula over missing data, a
+      // value of the wrong type) is left out and the widget draws without it — never an error
+      // card. What failed stays in `issues` for diagnostics.
+      const props: Record<string, unknown> = {};
+      const issues: string[] = [];
+      for (const [k, v] of Object.entries(component.properties)) {
+        if (["action", "onSubmit", "children", "tabs", "items", "nodes"].includes(k)) {
+          props[k] = v;
+          continue;
+        }
+        try {
+          props[k] = this.resolve(surfaceId, v, scope);
+        } catch (error) {
+          issues.push(`${k}: ${error instanceof Error ? error.message : "EXPRESSION_ERROR"}`);
+        }
       }
+      snapshot = {
+        id,
+        component: component.type,
+        raw,
+        props,
+        scope,
+        ...(issues.length ? { issues } : {}),
+      };
     }
     if (component?.type === "SvgScene") snapshot.revision = this.sceneRevisions.get(key) ?? 0;
     const signature = JSON.stringify(snapshot);

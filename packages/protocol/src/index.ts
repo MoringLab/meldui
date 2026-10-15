@@ -1010,3 +1010,4 @@ export function defineComponent(input: {
   for (const example of definition.examples) schema.parse(example);
   return { name: definition.name, schema, definition };
 }
+export * from "./repair.js";

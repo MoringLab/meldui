@@ -118,3 +118,19 @@ describe("component salvage", () => {
     expect(items.map((i) => i.kind)).toEqual(["invalid", "json"]);
   });
 });
+
+describe("component salvage at the end of a batch", () => {
+  it("finishes the last component when a brace before the batch's closers was dropped", async () => {
+    const { salvageComponents } = await import("./answer.js");
+    const line =
+      '{"version":"v0.9","updateComponents":{"surfaceId":"main","components":[{"id":"a","component":"Text","text":"ok"},{"id":"chart","component":"Chart","title":"잔액","kind":"line","values":{"call":"computeArray","args":{"formula":"map(range(3), $index)"}}]}}';
+    const value = salvageComponents(line) as {
+      updateComponents: { components: { id: string; values?: unknown }[] };
+    };
+    expect(value.updateComponents.components.map((c) => c.id)).toEqual(["a", "chart"]);
+    expect(value.updateComponents.components[1]?.values).toEqual({
+      call: "computeArray",
+      args: { formula: "map(range(3), $index)" },
+    });
+  });
+});

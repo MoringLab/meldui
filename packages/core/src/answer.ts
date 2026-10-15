@@ -173,7 +173,15 @@ export function salvageComponents(line: string): Record<string, unknown> | null 
   opener.lastIndex = start;
   for (let match = opener.exec(line); match; match = opener.exec(line)) {
     const end = closingBrace(line, match.index);
-    if (end < 0) break;
+    if (end < 0 && /\{\s*"id"\s*:/.test(line.slice(match.index + 1))) continue; // broken, others follow
+    if (end < 0) {
+      // The last component never closes (a brace dropped before the batch's closers): strip the
+      // closers at the line's end and write the ones its open brackets need.
+      const value = closeOpen(line.slice(match.index).replace(/[\]}\s]+$/, ""));
+      if (value && typeof value.id === "string" && typeof value.component === "string")
+        components.push(value);
+      break;
+    }
     try {
       const value = JSON.parse(repairJsonSyntax(line.slice(match.index, end + 1)));
       if (value && typeof value.id === "string" && typeof value.component === "string") {
@@ -187,9 +195,32 @@ export function salvageComponents(line: string): Record<string, unknown> | null 
   return components.length ? { version, updateComponents: { surfaceId, components } } : null;
 }
 
+/** `text` with the closers its open brackets need, parsed; null if that does not parse. */
+function closeOpen(text: string): Record<string, any> | null {
+  const stack: string[] = [];
+  let inString = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") stack.push("}");
+    else if (c === "[") stack.push("]");
+    else if ((c === "}" || c === "]") && stack.pop() !== c) return null;
+  }
+  if (inString || !stack.length) return null;
+  try {
+    const value = JSON.parse(repairJsonSyntax(text + stack.reverse().join("")));
+    return value && typeof value === "object" && !Array.isArray(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Index of the brace closing the object that opens at `from` (outside strings), or -1. */
 function closingBrace(text: string, from: number): number {
-  let depth = 0;
+  const stack: string[] = [];
   let inString = false;
   for (let i = from; i < text.length; i++) {
     const c = text[i];
@@ -197,8 +228,13 @@ function closingBrace(text: string, from: number): number {
       if (c === "\\") i++;
       else if (c === '"') inString = false;
     } else if (c === '"') inString = true;
-    else if (c === "{") depth++;
-    else if (c === "}" && --depth === 0) return i;
+    else if (c === "{") stack.push("}");
+    else if (c === "[") stack.push("]");
+    else if (c === "}" || c === "]") {
+      // A closer that does not match: the object never closed (it ran into the batch's closers).
+      if (stack.pop() !== c) return -1;
+      if (!stack.length) return i;
+    }
   }
   return -1;
 }

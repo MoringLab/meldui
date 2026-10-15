@@ -162,7 +162,17 @@ Map<String, dynamic>? salvageComponents(String line) {
     if (match == null) break;
     final at = from + match.start;
     final end = _closingBrace(line, at);
-    if (end < 0) break;
+    if (end < 0 && RegExp(r'\{\s*"id"\s*:').hasMatch(line.substring(at + 1))) {
+      from = at + 1; // broken, others follow
+      continue;
+    }
+    if (end < 0) {
+      final value = _closeOpen(line.substring(at).replaceAll(RegExp(r'[\]}\s]+$'), ''));
+      if (value != null && value['id'] is String && value['component'] is String) {
+        components.add(value);
+      }
+      break;
+    }
     try {
       final value = jsonDecode(repairJsonSyntax(line.substring(at, end + 1)));
       if (value is Map && value['id'] is String && value['component'] is String) {
@@ -180,8 +190,38 @@ Map<String, dynamic>? salvageComponents(String line) {
   };
 }
 
+Map<String, dynamic>? _closeOpen(String text) {
+  final stack = <String>[];
+  var inString = false;
+  for (var i = 0; i < text.length; i++) {
+    final c = text[i];
+    if (inString) {
+      if (c == '\\') {
+        i++;
+      } else if (c == '"') {
+        inString = false;
+      }
+    } else if (c == '"') {
+      inString = true;
+    } else if (c == '{') {
+      stack.add('}');
+    } else if (c == '[') {
+      stack.add(']');
+    } else if (c == '}' || c == ']') {
+      if (stack.isEmpty || stack.removeLast() != c) return null;
+    }
+  }
+  if (inString || stack.isEmpty) return null;
+  try {
+    final value = jsonDecode(repairJsonSyntax(text + stack.reversed.join()));
+    return value is Map ? Map<String, dynamic>.from(value) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 int _closingBrace(String text, int from) {
-  var depth = 0;
+  final stack = <String>[];
   var inString = false;
   for (var i = from; i < text.length; i++) {
     final c = text[i];
@@ -194,10 +234,12 @@ int _closingBrace(String text, int from) {
     } else if (c == '"') {
       inString = true;
     } else if (c == '{') {
-      depth++;
-    } else if (c == '}') {
-      depth--;
-      if (depth == 0) return i;
+      stack.add('}');
+    } else if (c == '[') {
+      stack.add(']');
+    } else if (c == '}' || c == ']') {
+      if (stack.isEmpty || stack.removeLast() != c) return -1;
+      if (stack.isEmpty) return i;
     }
   }
   return -1;

@@ -121,6 +121,8 @@ const edgeTexts: Record<string, string> = {
   "broken-control-line": brokenLine,
   "broken-component-batch":
     '{"version":"v0.9","updateComponents":{"surfaceId":"main","components":[{"id":"a","component":"Text","text":"ok"},{"id":"b","component":"Text","text":{"call":"x"]}},{"id":"c","component":"Text","text":"ok 2"}]}}\n',
+  "unclosed-last-component":
+    '{"version":"v0.9","updateComponents":{"surfaceId":"main","components":[{"id":"a","component":"Text","text":"ok"},{"id":"b","component":"Text","text":{"call":"computeString","args":{"formula":"\'x\'"}}]}}\n',
   "half-quoted-key": `${decl("main", "따옴표 빠진 키").replace('"surfaceId"', 'surfaceId"')}\n`,
   "truncated-control-line": `${decl("main", "잘린 선언")}`.replace(/}\s*$/, "") + "\n",
   "blank-lines": "\n\n첫 문단\n\n\n둘째 문단\n",

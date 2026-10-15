@@ -62,6 +62,42 @@
    ]
   },
   {
+   "name": "unclosed-last-component",
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"formula\":\"'x'\"}}]}}\n",
+   "items": [
+    {
+     "kind": "invalid",
+     "line": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\""
+    },
+    {
+     "kind": "json",
+     "value": {
+      "version": "v0.9",
+      "updateComponents": {
+       "surfaceId": "main",
+       "components": [
+        {
+         "id": "a",
+         "component": "Text",
+         "text": "ok"
+        },
+        {
+         "id": "b",
+         "component": "Text",
+         "text": {
+          "call": "computeString",
+          "args": {
+           "formula": "'x'"
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
    "name": "half-quoted-key",
    "text": "{\"engine\":\"v1\",\"block\":\"surface\",surfaceId\":\"main\",\"fallbackText\":\"따옴표 빠진 키\"}\n",
    "items": [
@@ -1391,6 +1427,65 @@
     "maxSurfaces": 1
    },
    "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"x\"]}},{\"id\":\"c\",\"component\":\"Text\",\"text\":\"ok 2\"}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "unclosed-last-component/auto",
+   "policy": {},
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"formula\":\"'x'\"}}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "unclosed-last-component/markdown-only",
+   "policy": {
+    "mode": "markdown-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"formula\":\"'x'\"}}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "unclosed-last-component/engine-only",
+   "policy": {
+    "mode": "engine-only"
+   },
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"formula\":\"'x'\"}}]}}\n",
+   "blocks": [],
+   "surfaces": [],
+   "markdown": [],
+   "fallbackSources": [],
+   "diagnosticCodes": [
+    "INVALID_JSON",
+    "MISSING_ANSWER",
+    "UNKNOWN_SURFACE"
+   ]
+  },
+  {
+   "name": "unclosed-last-component/max-1",
+   "policy": {
+    "maxSurfaces": 1
+   },
+   "text": "{\"version\":\"v0.9\",\"updateComponents\":{\"surfaceId\":\"main\",\"components\":[{\"id\":\"a\",\"component\":\"Text\",\"text\":\"ok\"},{\"id\":\"b\",\"component\":\"Text\",\"text\":{\"call\":\"computeString\",\"args\":{\"formula\":\"'x'\"}}]}}\n",
    "blocks": [],
    "surfaces": [],
    "markdown": [],

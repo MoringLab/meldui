@@ -318,6 +318,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
   const containerWidth = useContainerWidth();
   const ink = useInk();
   const [dateOpen, setDateOpen] = useState(false);
+  // Tabs/Accordion with a literal value still switch: the choice is kept here when unbound.
+  const [localValue, setLocalValue] = useState<string | null>(null);
   const [showData, setShowData] = useState(false);
   const bound = node.raw?.value as { path?: string } | undefined;
   const write = (value: unknown) => {
@@ -787,7 +789,9 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         </View>,
       );
     case "Tabs": {
-      const selected = p.tabs.find((tab: any) => tab.id === value) ?? p.tabs[0];
+      const current = bound?.path ? value : (localValue ?? value);
+      const choose = (id: string) => (bound?.path ? write(id) : setLocalValue(id));
+      const selected = p.tabs.find((tab: any) => tab.id === current) ?? p.tabs[0];
       return (
         <View style={{ gap: 20 }}>
           <ScrollView horizontal contentContainerStyle={{ gap: 8 }}>
@@ -795,7 +799,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
               <View key={tab.id}>
                 {button(
                   String(runtime.resolve(surfaceId, tab.label, node.scope)),
-                  () => write(tab.id),
+                  () => choose(tab.id),
                   tab !== selected,
                   false,
                   "tab",

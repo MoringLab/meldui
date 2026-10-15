@@ -18,6 +18,7 @@ import React, {
   useCallback,
   useContext,
   useId,
+  useState,
   useSyncExternalStore,
 } from "react";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
@@ -283,6 +284,8 @@ function renderChildren(
 function DefaultView({ node, children, runtime, surfaceId, renderChild }: ComponentViewProps) {
   const { kit, assets } = useUI();
   const inputId = useId();
+  // Tabs with a literal value still switch: the choice is kept here when unbound.
+  const [localValue, setLocalValue] = useState<string | null>(null);
   const p = node.props;
   const text = (v: unknown) => String(v ?? "");
   const value = p.value ?? "";
@@ -653,7 +656,9 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
       );
     case "Tabs": {
       const tabs = p.tabs as { id: string; label: unknown; child: string }[];
-      const selected = tabs.find((tab) => tab.id === value) ?? tabs[0];
+      const current = bound?.path ? value : (localValue ?? value);
+      const choose = (id: string) => (bound?.path ? write(id) : setLocalValue(id));
+      const selected = tabs.find((tab) => tab.id === current) ?? tabs[0];
       return (
         <div className="ui-tabs">
           <div
@@ -669,7 +674,7 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
                   : event.key === "End"
                     ? tabs.length - 1
                     : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-              write(tabs[next].id);
+              choose(tabs[next].id);
               event.currentTarget
                 .querySelectorAll<HTMLButtonElement>('[role="tab"]')
                 [next]?.focus();
@@ -684,7 +689,7 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
                 aria-selected={tab === selected}
                 tabIndex={tab === selected ? 0 : -1}
                 key={tab.id}
-                onClick={() => write(tab.id)}
+                onClick={() => choose(tab.id)}
               >
                 {text(runtime.resolve(surfaceId, tab.label, node.scope))}
               </button>

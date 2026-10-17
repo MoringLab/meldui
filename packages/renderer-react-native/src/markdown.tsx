@@ -21,6 +21,15 @@ import { useMotion, useUI } from "./renderer.js";
  * so the link is not opened as a web page.
  */
 export const LinkHandlerContext = createContext<((url: string) => boolean) | null>(null);
+/**
+ * Extra entries for the selection menu of answer text (e.g. "select the whole answer"); the host
+ * gets the selected words. Copy and select-all stay the system's.
+ */
+export type TextMenuItem = {
+  text: string;
+  onPress: (event: { text: string; selection: { start: number; end: number } }) => void;
+};
+export const TextMenuContext = createContext<TextMenuItem[] | undefined>(undefined);
 export type CitationOptions = {
   /** Resolves cited ids; without it citation markers stay ordinary text. */
   source?: CitationSource;
@@ -106,6 +115,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
   );
   const text = useMemo(() => entityLinks(cited.text, streaming), [cited.text, streaming]);
   const handleLink = useContext(LinkHandlerContext);
+  const textMenu = useContext(TextMenuContext);
   const views = cited.ids
     .map((id) => citations.source?.resolve(id))
     .filter((v): v is CitationView => !!v);
@@ -154,6 +164,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
               );
             }}
             onLinkLongPress={() => {}}
+            contextMenuItems={textMenu}
             markdownStyle={{
               ...headings,
               paragraph: {

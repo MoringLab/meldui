@@ -9,12 +9,30 @@ import {
   splitMarkdownBlocks,
 } from "@engine/core";
 import { resolveTypography } from "@engine/kit-spec";
-import React, { createContext, memo, type ReactNode, useContext, useMemo, useState } from "react";
-import { Platform, Text, View } from "react-native";
+import {
+  type ComponentProps,
+  type ComponentType,
+  createContext,
+  memo,
+  type ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import { type NativeSyntheticEvent, Platform, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
+import { type CitationLine, citationPosition } from "./citation-layout.js";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
 import { withAlpha } from "./interactive.js";
 import { useMotion, useUI } from "./renderer.js";
+
+type LastLineLayout = CitationLine & { markdown: string };
+// Optional native extension; without it citations stay compact on the following line.
+const MeasuredMarkdownText = EnrichedMarkdownText as ComponentType<
+  ComponentProps<typeof EnrichedMarkdownText> & {
+    onLastLineLayout?: (event: NativeSyntheticEvent<LastLineLayout>) => void;
+  }
+>;
 
 /**
  * Links a host handles itself (an entity's [[name]], app routes): return true when handled,
@@ -108,6 +126,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
   streaming: boolean;
 }) {
   const citations = useContext(CitationContext);
+  const [lastLine, setLastLine] = useState<LastLineLayout | null>(null);
   const cited = useMemo(
     () =>
       citations.source ? extractCitations(raw, streaming) : { text: raw, ids: [] as string[] },
@@ -148,9 +167,12 @@ const MarkdownBlock = memo(function MarkdownBlock({
         "attachmentId" in part ? (
           <AttachmentMedia key={`image-${i}`} id={part.attachmentId} alt={part.alt} />
         ) : (
-          <EnrichedMarkdownText
+          <MeasuredMarkdownText
             key={`text-${i}-${kit.id}-${mode}`}
             markdown={part.markdown}
+            onLastLineLayout={
+              parts.length === 1 ? (event) => setLastLine(event.nativeEvent) : undefined
+            }
             flavor="github"
             streamingAnimation={streaming && !reduced}
             enableLinkPreview={false}
@@ -225,121 +247,43 @@ const MarkdownBlock = memo(function MarkdownBlock({
   );
   if (!views.length) return content;
   const cite = citations.render ? citations.render(views) : <DefaultCitations views={views} />;
-  const plain = plainParagraph(text);
-  if (plain == null) {
-    return (
-      <View style={{ gap: 8 }}>
-        {content}
-        {cite}
-      </View>
-    );
-  }
+  const part = parts.length === 1 ? parts[0] : null;
+  const line =
+    part &&
+    "markdown" in part &&
+    lastLine?.markdown === part.markdown &&
+    !/^\s*(```|~~~|\||>|#{1,6}\s)|\$\$/m.test(text)
+      ? lastLine
+      : null;
   return (
-    <TrailingCitation
-      plain={plain}
-      font={{
-        fontSize: ty.body.size,
-        lineHeight: ty.body.lineHeight,
-        fontFamily: ty.body.nativeFamily,
-      }}
-      cite={cite}
-    >
+    <TrailingCitation line={line} cite={cite}>
       {content}
     </TrailingCitation>
   );
 });
 
-/**
- * The words of a block that is one plain paragraph (no list, heading, table, quote, code or
- * display maths), as they read: inline markers and link targets removed. Null otherwise.
- */
-function plainParagraph(text: string): string | null {
-  const t = text.trim();
-  if (!t || /\n\s*\n/.test(t) || /\$\$|```|^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\|)/m.test(t))
-    return null;
-  return t
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/(\*\*|__|~~|==|\*|_|`)(?=\S)([^\n]*?\S)\1/g, "$2")
-    .replace(/\$([^$]+)\$/g, "$1")
-    .replace(/\s*\n\s*/g, " ");
-}
-
-/**
- * A paragraph with its citation right after the last word when there is room on that line,
- * else on the line below. The native markdown text reports no line layout, so an invisible RN
- * twin in the same font is measured. Its glyphs run a little wider than the native text's, so
- * its last line is scaled by the ratio of the two widest lines (the native view sizes to its
- * widest line); when it wraps to a different number of lines than the real paragraph (read
- * from its height), the pill goes below.
- */
+/** The native text view supplies the actual last line; no second text or font estimate. */
 function TrailingCitation({
-  plain,
-  font,
+  line,
   cite,
   children,
 }: {
-  plain: string;
-  font: { fontSize: number; lineHeight: number; fontFamily?: string };
+  line: CitationLine | null;
   cite: ReactNode;
   children: ReactNode;
 }) {
   const [width, setWidth] = useState(0);
-  const [last, setLast] = useState<{
-    width: number;
-    widest: number;
-    lines: number;
-    lineHeight: number;
-  } | null>(null);
-  const [real, setReal] = useState<{ width: number; height: number } | null>(null);
   const [citeSize, setCiteSize] = useState<{ width: number; height: number } | null>(null);
-  const gap = 6;
-  const sameLines = !!last && !!real && Math.round(real.height / last.lineHeight) === last.lines;
-  const end = last && real ? Math.ceil((last.width * real.width) / last.widest) : 0;
-  const inline = sameLines && !!citeSize && width > 0 && end + gap + citeSize.width <= width - 2;
+  const position = citationPosition(line, citeSize, width);
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {children}
       <View
-        style={{ alignItems: "flex-start" }}
-        onLayout={(e) =>
-          setReal({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
-        }
-      >
-        {children}
-      </View>
-      {width > 0 ? (
-        <Text
-          accessible={false}
-          importantForAccessibility="no-hide-descendants"
-          pointerEvents="none"
-          onTextLayout={(e) => {
-            const lines = e.nativeEvent.lines;
-            const tail = lines[lines.length - 1];
-            if (tail)
-              setLast({
-                width: tail.width,
-                widest: Math.max(...lines.map((l) => l.width)),
-                lines: lines.length,
-                lineHeight: tail.height,
-              });
-          }}
-          style={{ ...font, position: "absolute", left: 0, top: 0, width, opacity: 0 }}
-        >
-          {plain}
-        </Text>
-      ) : null}
-      <View
-        onLayout={(e) =>
-          setCiteSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
-        }
-        style={
-          inline && last && citeSize
-            ? {
-                position: "absolute",
-                left: end + gap,
-                bottom: Math.max(0, (last.lineHeight - citeSize.height) / 2),
-              }
-            : { alignSelf: "flex-start", marginTop: 8 }
-        }
+        onLayout={(e) => setCiteSize(e.nativeEvent.layout)}
+        style={[
+          { alignSelf: "flex-start", alignItems: "flex-start" },
+          position ? { position: "absolute", ...position } : { marginTop: 8 },
+        ]}
       >
         {cite}
       </View>

@@ -3,6 +3,7 @@
 // quizzes graded in place (QuizSet), and the richer input variants (switch, segmented, chips,
 // compact slider, ring progress). Everything is drawn from the kit's tokens, so each host keeps
 // its own look; state lives in the surface's data model when bound, otherwise in the widget.
+import { keyedRuns } from "@engine/core";
 import type { UIKit } from "@engine/kit-spec";
 import { resolveTypography } from "@engine/kit-spec";
 import Slider from "@react-native-community/slider";
@@ -1244,7 +1245,21 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
         ...(p.size === "display" ? { fontVariant: ["tabular-nums"], letterSpacing: -0.5 } : {}),
       }}
     >
-      {String(p.text ?? "")}
+      {keyedRuns(String(p.text ?? "")).map((run) =>
+        run.bold || run.mark ? (
+          <Text
+            key={run.at}
+            style={{
+              ...(run.bold ? { fontWeight: "700" as const } : {}),
+              ...(run.mark ? { backgroundColor: withAlpha(t.accent, 0.2) } : {}),
+            }}
+          >
+            {run.text}
+          </Text>
+        ) : (
+          run.text
+        ),
+      )}
     </Text>
   );
 }

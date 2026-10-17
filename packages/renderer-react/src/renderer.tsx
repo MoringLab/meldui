@@ -2,6 +2,7 @@ import { A2uiSurface, createBinderlessComponentImplementation } from "@a2ui/reac
 import type { ContentHost } from "@engine/core";
 import {
   createUIRuntime as createCoreRuntime,
+  keyedRuns,
   type NodeSnapshot,
   type RuntimeOptions,
   resolvePath,
@@ -415,7 +416,19 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
             color: p.tone === "accent" ? "var(--ui-accent)" : undefined,
           }}
         >
-          {text(p.text)}
+          {keyedRuns(text(p.text)).map((run) =>
+            run.bold || run.mark ? (
+              <span
+                key={run.at}
+                style={{ fontWeight: run.bold ? 700 : undefined }}
+                className={run.mark ? "ui-mark" : undefined}
+              >
+                {run.text}
+              </span>
+            ) : (
+              run.text
+            ),
+          )}
         </p>
       );
     case "Markdown":

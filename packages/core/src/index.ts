@@ -753,6 +753,7 @@ export function createUIRuntime(options?: RuntimeOptions) {
 }
 
 export * from "./host-bridge.js";
+export * from "./inline.js";
 export * from "./markdown.js";
 export * from "./markup.js";
 export * from "./sandbox.js";

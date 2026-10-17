@@ -340,7 +340,7 @@ export function AttachmentMedia({
             style={frame}
           >
             <Image
-              source={{ uri: state.value.url }}
+              source={{ uri: state.value.url, headers: state.value.headers }}
               resizeMode="cover"
               style={{ width: "100%", height: "100%", opacity: loaded ? 1 : 0 }}
               onLoad={(e) => {
@@ -408,7 +408,7 @@ export function AttachmentMedia({
                   contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
                 >
                   <Image
-                    source={{ uri: state.value.url }}
+                    source={{ uri: state.value.url, headers: state.value.headers }}
                     accessibilityLabel={label}
                     resizeMode="contain"
                     style={{ width: screen.width * zoom, height: (screen.width * zoom) / ratio }}

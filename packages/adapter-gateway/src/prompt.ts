@@ -48,7 +48,7 @@ const ROUTING = [
 ];
 
 /** Authoring notes, limited to components the host allows (a disallowed name is never advertised). */
-function surfaceGuidance(names: string[]) {
+function surfaceGuidance(names: string[], tags = false) {
   const has = (n: string) => names.includes(n);
   // Stat and Formula are general (a readout, maths); only learning components bring the learning guidance.
   const learning = ["ControlPanel", "Quiz", "Timeline"].filter(has);
@@ -61,7 +61,9 @@ function surfaceGuidance(names: string[]) {
     has("SvgScene") ? "SvgScene has at most 300 whitelisted shapes; no external URLs/styles." : "",
     has("Plot") ? "Plot accepts bounded generated arrays." : "",
     has("RouteMap") ? "RouteMap is approximate and requires host verification." : "",
-    'Array expressions bind $item/$index/$acc only within map/filter/reduce/scan/series; rng(seed,drawIndex) is deterministic. In a template row ({componentId,path}) relative paths ("done") are the row\'s fields and $row/$rowIndex the row itself.',
+    tags
+      ? "Array expressions bind $item/$index/$acc only within map/filter/reduce/scan/series; rng(seed,drawIndex) is deterministic."
+      : 'Array expressions bind $item/$index/$acc only within map/filter/reduce/scan/series; rng(seed,drawIndex) is deterministic. In a template row ({componentId,path}) relative paths ("done") are the row\'s fields and $row/$rowIndex the row itself.',
     has("Playback") ? "Native Playback is manual step/reset; no background autoplay." : "",
   ]
     .filter(Boolean)
@@ -171,13 +173,15 @@ export function buildSystemPrompt({
           "Provide units, labels, and compact responsive layouts. Prefer local interactions over agent calls.",
       );
     parts.push(
+      tags
+        ? "Chart values are rows such as [{x,y}] with xKey and yKey naming their fields."
+        : signatures
+          ? "Component properties are flat (never nested under props). Tabs.value is bound and matches one tab id. Chart values are rows such as [{x,y}] with xKey and yKey naming their fields."
+          : standard
+            ? `Tabs uses tabs:[{id,label,child}] and a bound value matching one tab id. Accordion uses items with the same shape. Chart uses kind:${capabilities.features?.advancedCharts ? '"line"|"bar"|"scatter"|"area"|"histogram"|"stacked"|"pie"' : '"line"|"bar"|"scatter"'}, title, values:[{x,y}], xKey and yKey. Table uses caption, columns:[{key,label}], rows. Use Heading.level and Text.text. A Form needs label, children and onSubmit. Never use props nesting: component properties are flat.`
+            : "This host supplies a custom catalog. Use only the components, functions and properties declared in that catalog. Component properties are flat.",
       signatures
-        ? "Component properties are flat (never nested under props). Tabs.value is bound and matches one tab id. Chart values are rows such as [{x,y}] with xKey and yKey naming their fields."
-        : standard
-          ? `Tabs uses tabs:[{id,label,child}] and a bound value matching one tab id. Accordion uses items with the same shape. Chart uses kind:${capabilities.features?.advancedCharts ? '"line"|"bar"|"scatter"|"area"|"histogram"|"stacked"|"pie"' : '"line"|"bar"|"scatter"'}, title, values:[{x,y}], xKey and yKey. Table uses caption, columns:[{key,label}], rows. Use Heading.level and Text.text. A Form needs label, children and onSubmit. Never use props nesting: component properties are flat.`
-          : "This host supplies a custom catalog. Use only the components, functions and properties declared in that catalog. Component properties are flat.",
-      signatures
-        ? `Platform: ${capabilities.platform}. Client actions: ${capabilities.clientActions.join(",") || "none"}. ${fallbackNote} Use only the components listed below. Never request full data model synchronization.`
+        ? `Platform: ${capabilities.platform}. ${fallbackNote} Use only the components listed below.${tags ? "" : ` Client actions: ${capabilities.clientActions.join(",") || "none"}. Never request full data model synchronization.`}`
         : `Capabilities: ${JSON.stringify({ platform: capabilities.platform, components: names, clientActions: capabilities.clientActions, features: capabilities.features })}. ${fallbackNote} Client actions are limited to the listed names. Never request full data model synchronization.`,
       `Design guide: ${kit.guide}`,
     );
@@ -198,13 +202,13 @@ export function buildSystemPrompt({
     }
     parts.push(
       variant === "signatures"
-        ? `Components:\n${catalogSignatures(filtered)}`
+        ? `Components:\n${catalogSignatures(filtered, syntax)}`
         : `Catalog: ${JSON.stringify(variant === "compact" ? compactCatalog(filtered) : filtered)}`,
     );
   }
 
   if (surfaces) {
-    parts.push(surfaceGuidance(names));
+    parts.push(surfaceGuidance(names, syntax === "markup"));
     const custom = kit.customComponents?.filter((d) => names.includes(d.name)) ?? [];
     // The signature list already describes custom components.
     if (custom.length && variant !== "signatures")
@@ -350,10 +354,13 @@ function objectOf(root: unknown, s: Schema, depth: number, omit = new Set<string
  * The catalog as one line per component, e.g. `Slider{label:T,value:N,min?:num}`, about a tenth
  * of the JSON schema. Runtime validation is unchanged; this only shortens the prompt.
  */
-export function catalogSignatures(catalog: {
-  components?: Record<string, unknown>;
-  [key: string]: unknown;
-}): string {
+export function catalogSignatures(
+  catalog: {
+    components?: Record<string, unknown>;
+    [key: string]: unknown;
+  },
+  syntax: "json" | "markup" = "json",
+): string {
   const lines = Object.entries(catalog.components ?? {}).map(([name, schema]) => {
     const s = schema as Schema;
     const description =
@@ -363,7 +370,9 @@ export function catalogSignatures(catalog: {
     return `${name}${objectOf(catalog, s, 0, OMIT)}${description}`;
   });
   return [
-    "Types: T = text or {path} or compute; N = number or {path} or compute; B = boolean or {path} or compute; A = array or {path} or compute; ids = child component ids, or {componentId,path} to repeat a template per array item; Action = {event:{name,context}} or {functionCall:{call,args}}; ? = optional. Every component also accepts visible:B.",
+    syntax === "markup"
+      ? "Types: T text, N number, B boolean, A list — each a literal or {expr}; ids = child tags; Action = an on* handler; ? = optional; [{…}] props take child tags named after them. Every component also accepts visible:B."
+      : "Types: T = text or {path} or compute; N = number or {path} or compute; B = boolean or {path} or compute; A = array or {path} or compute; ids = child component ids, or {componentId,path} to repeat a template per array item; Action = {event:{name,context}} or {functionCall:{call,args}}; ? = optional. Every component also accepts visible:B.",
     ...lines,
   ].join("\n");
 }

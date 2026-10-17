@@ -11,14 +11,32 @@ export const PLATFORM_SUPPORT: Record<
   Platform,
   { unsupported: string[]; fallbacks: Record<string, string>; unsupportedOps: string[] }
 > = {
-  web: { unsupported: [], fallbacks: {}, unsupportedOps: [] },
+  // Diagram, Collection, Quote and Converter are drawn by the React Native renderer (and hosts).
+  web: {
+    unsupported: ["Diagram", "Collection", "Quote", "Converter"],
+    fallbacks: { Diagram: "Text", Collection: "Text", Quote: "Text", Converter: "Text" },
+    unsupportedOps: [],
+  },
   "react-native": {
     unsupported: ["Simulation"],
     fallbacks: { Simulation: "Text" },
     unsupportedOps: [],
   },
   flutter: {
-    unsupported: ["Audio", "Simulation", "Box", "Pager", "Flip", "Menu", "Device", "QuizSet"],
+    unsupported: [
+      "Audio",
+      "Simulation",
+      "Box",
+      "Pager",
+      "Flip",
+      "Menu",
+      "Device",
+      "QuizSet",
+      "Diagram",
+      "Collection",
+      "Quote",
+      "Converter",
+    ],
     fallbacks: {
       Simulation: "Text",
       Audio: "FileCard",
@@ -29,6 +47,10 @@ export const PLATFORM_SUPPORT: Record<
       Menu: "Button",
       Device: "Card",
       QuizSet: "Quiz",
+      Diagram: "Text",
+      Collection: "Text",
+      Quote: "Text",
+      Converter: "Text",
     },
     // The Dart evaluator has not been ported these yet; prompts for Flutter do not offer them.
     unsupportedOps: ["concat", "set", "object", "slice", "join", "includes", "abs"],

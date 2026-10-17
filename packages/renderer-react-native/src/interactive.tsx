@@ -1222,6 +1222,14 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
         ...body,
         flexShrink: 1,
         color: tone,
+        ...(p.highlight
+          ? {
+              backgroundColor: withAlpha(t.accent, 0.2),
+              alignSelf: "flex-start",
+              paddingHorizontal: 2,
+              borderRadius: 4,
+            }
+          : {}),
         fontSize: size,
         lineHeight: size * (scale >= 1.4 ? 1.25 : 1.5),
         fontWeight:

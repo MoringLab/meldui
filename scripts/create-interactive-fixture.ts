@@ -15,7 +15,45 @@ const visibleWhen = (path: string, value: string) => ({
   returnType: "boolean",
 });
 const components = [
-  { id: "root", component: "Column", children: ["device", "todos", "deck", "quiz", "controls"] },
+  {
+    id: "root",
+    component: "Column",
+    children: [
+      "device",
+      "todos",
+      "deck",
+      "quiz",
+      "controls",
+      "relations",
+      "pictures",
+      "stock",
+      "fx",
+    ],
+  },
+  {
+    id: "relations",
+    component: "Diagram",
+    nodes: [
+      { id: "me", label: "나", sub: "주인공", detail: "순박하고 우직하다.", tone: "blue" },
+      { id: "elder", label: "장인", sub: "인색", tone: "red" },
+      { id: "bride", label: "점순이", sub: "결혼 상대", tone: "green" },
+    ],
+    edges: [
+      { from: "me", to: "elder", label: "갈등", style: "dashed" },
+      { from: "me", to: "bride", label: "혼인 약속", arrow: "none" },
+    ],
+  },
+  {
+    id: "pictures",
+    component: "Collection",
+    layout: "strip",
+    items: [
+      { image: "https://example.com/a.jpg", title: "Search", subtitle: "검색" },
+      { image: "https://example.com/b.jpg", title: "YouTube", subtitle: "동영상" },
+    ],
+  },
+  { id: "stock", component: "Quote", symbol: "AAPL", name: "Apple" },
+  { id: "fx", component: "Converter", from: "USD", to: "KRW", amount: 100 },
   // Phone mockup: app bar with a menu, a segmented switch between two screens.
   {
     id: "device",

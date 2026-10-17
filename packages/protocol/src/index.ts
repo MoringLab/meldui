@@ -482,9 +482,13 @@ export const componentSchemas = {
     size: z.enum(["sm", "md", "lg", "xl", "display"]).optional(),
     weight: z.enum(["regular", "medium", "bold"]).optional(),
     align: z.enum(["start", "center", "end"]).optional(),
+    /** A marker highlight behind the words (sweeps in once). */
+    highlight: z.boolean().optional(),
   }),
   Image: z.object({
     ...common,
+    /** A host-resolved image: a web URL, or a host id (a saved item, an entity image). */
+    src: z.string().min(1).max(2048).optional(),
     asset: z.string().min(1).max(128).optional(),
     attachmentId: z
       .string()
@@ -756,6 +760,114 @@ export const componentSchemas = {
       .min(1)
       .max(30),
     value: array.optional(),
+  }),
+  /** Nodes and edges: relationship maps, flows, org charts, mind maps (drawn natively, auto laid out). */
+  Diagram: z.object({
+    ...common,
+    title: text.optional(),
+    nodes: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1).max(64),
+            label: z.string().min(1).max(80),
+            sub: z.string().max(120).optional(),
+            /** Shown under the diagram when the node is tapped. */
+            detail: z.string().max(800).optional(),
+            tone: z
+              .enum([
+                "default",
+                "accent",
+                "blue",
+                "green",
+                "red",
+                "purple",
+                "orange",
+                "yellow",
+                "gray",
+              ])
+              .optional(),
+            emphasis: z.boolean().optional(),
+            /** Manual position, 0–100 across and down (layout "manual"). */
+            x: z.number().min(0).max(100).optional(),
+            y: z.number().min(0).max(100).optional(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(40),
+    edges: z
+      .array(
+        z
+          .object({
+            from: z.string().min(1).max(64),
+            to: z.string().min(1).max(64),
+            label: z.string().max(40).optional(),
+            style: z.enum(["solid", "dashed"]).optional(),
+            arrow: z.enum(["none", "end", "both"]).optional(),
+            tone: z
+              .enum([
+                "default",
+                "accent",
+                "blue",
+                "green",
+                "red",
+                "purple",
+                "orange",
+                "yellow",
+                "gray",
+              ])
+              .optional(),
+            /** Bend: -1 … 1 (0 straight). */
+            curve: z.number().min(-1).max(1).optional(),
+          })
+          .strict(),
+      )
+      .max(80)
+      .default([]),
+    layout: z.enum(["auto", "tree", "circle", "row", "manual"]).default("auto"),
+    direction: z.enum(["down", "right"]).default("down"),
+    /** The tapped node (two-way). */
+    value: text.optional(),
+    hint: text.optional(),
+  }),
+  /** Pictures from the web, the host's saved items or attachments: carousel, strip of cards, grid, hero. */
+  Collection: z.object({
+    ...common,
+    title: text.optional(),
+    items: z
+      .array(
+        z
+          .object({
+            image: z.string().min(1).max(2048),
+            title: z.string().max(120).optional(),
+            subtitle: z.string().max(160).optional(),
+            caption: z.string().max(600).optional(),
+            alt: z.string().max(300).optional(),
+            url: z.string().max(2048).optional(),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(30),
+    layout: z.enum(["carousel", "strip", "grid", "hero", "list"]).default("carousel"),
+    aspectRatio: z.number().min(0.25).max(4).optional(),
+  }),
+  /** A live market quote with a price chart and ranges (host-provided data). */
+  Quote: z.object({
+    ...common,
+    symbol: z.string().regex(/^[A-Za-z0-9.^=:-]{1,24}$/),
+    name: z.string().max(80).optional(),
+    range: z.enum(["1d", "5d", "1m", "6m", "ytd", "1y", "5y", "max"]).default("1d"),
+    compact: z.boolean().optional(),
+  }),
+  /** A currency converter between two ISO codes, live rate from the host (or a fixed rate). */
+  Converter: z.object({
+    ...common,
+    from: z.string().regex(/^[A-Za-z]{3}$/),
+    to: z.string().regex(/^[A-Za-z]{3}$/),
+    amount: number.optional(),
+    rate: z.number().positive().optional(),
   }),
   Chart: z.object({
     ...common,

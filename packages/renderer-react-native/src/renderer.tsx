@@ -48,6 +48,13 @@ import {
 } from "./interactive.js";
 import { LearningView, learningNames } from "./learning.js";
 import { SafeMarkdown } from "./markdown.js";
+import {
+  CollectionView,
+  ConverterView,
+  DiagramView,
+  QuoteView,
+  SourceImageView,
+} from "./visuals.js";
 
 export { createUIRuntime } from "@engine/core";
 
@@ -537,6 +544,14 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       );
     case "Text":
       return <SizedText {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Diagram":
+      return <DiagramView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Collection":
+      return <CollectionView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Quote":
+      return <QuoteView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Converter":
+      return <ConverterView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Markdown":
       return <SafeMarkdown text={String(p.text ?? "")} />;
     case "Gallery":
@@ -574,6 +589,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         />
       );
     case "Image":
+      if (typeof p.src === "string" && p.src)
+        return <SourceImageView {...{ node, runtime, surfaceId, children, renderChild }} />;
       return Object.hasOwn(assets, p.asset) && assets[p.asset] ? (
         <Image
           source={assets[p.asset]}

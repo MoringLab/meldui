@@ -10,6 +10,8 @@ const attachment = /^attachment:([A-Za-z0-9._:-]{1,128})$/;
 /** Only identifiers and approved external link schemes. Images never accept remote URLs. */
 export function markdownDestination(value: string, image = false): string | undefined {
   if (attachment.test(value)) return value;
+  // An entity link ([[name]] → entity:…) is opened by the host, never fetched.
+  if (!image && /^entity:[A-Za-z0-9%._~!*'()-]{1,2000}$/.test(value)) return value;
   if (image || [...value].some((c) => c.charCodeAt(0) <= 32 || c.charCodeAt(0) === 127)) return;
   try {
     const url = new URL(value);

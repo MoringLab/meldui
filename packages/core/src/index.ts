@@ -26,6 +26,7 @@ import { NDJSONDecoder } from "./stream.js";
 export * from "./answer.js";
 export * from "./attachments.js";
 export * from "./citations.js";
+export * from "./entities.js";
 export * from "./expression.js";
 export * from "./formula.js";
 export * from "./stream.js";
@@ -753,6 +754,7 @@ export function createUIRuntime(options?: RuntimeOptions) {
 
 export * from "./host-bridge.js";
 export * from "./markdown.js";
+export * from "./markup.js";
 export * from "./sandbox.js";
 export * from "./simulations.js";
 export * from "./svg.js";

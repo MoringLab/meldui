@@ -98,3 +98,20 @@ describe("routing", () => {
     );
   });
 });
+
+describe("markup syntax", () => {
+  const base = {
+    kit: neutral,
+    capabilities: capabilitiesFor("react-native"),
+    variant: "signatures" as const,
+  };
+  it("teaches tags instead of JSON lines, and is shorter", () => {
+    const json = buildSystemPrompt(base);
+    const tags = buildSystemPrompt({ ...base, syntax: "markup" });
+    expect(tags).toContain("{@state qty = 1}");
+    expect(tags).toContain('<Tab id="a"');
+    expect(tags).not.toContain('"createSurface"');
+    expect(tags).not.toContain("fallbackText");
+    expect(tags.length).toBeLessThan(json.length);
+  });
+});

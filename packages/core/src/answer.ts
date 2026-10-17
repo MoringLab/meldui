@@ -4,6 +4,7 @@ import {
   type AnswerEvent,
   type AnswerSnapshot,
   AnswerSnapshotSchema,
+  CATALOG_ID,
   ControlLineSchema,
   type Diagnostic,
   defaultHostPolicy,
@@ -17,11 +18,17 @@ import {
 } from "@engine/protocol";
 import { assertSafeJson, resolvePath } from "./expression.js";
 import { createUIRuntime, type UIModelEvent, type UIRuntime } from "./index.js";
+import { compileMarkup, isMarkupStart, markupOpen } from "./markup.js";
 
 export type AnswerItem =
   | { kind: "text"; text: string }
   | { kind: "json"; value: Record<string, unknown> }
-  | { kind: "invalid"; line: string };
+  | { kind: "invalid"; line: string }
+  /** A markup region (tags + statements) so far; `final` once a non-markup line ends it. */
+  | { kind: "markup"; region: number; source: string; final: boolean };
+
+/** Whether a line that has only started could still turn out to open markup. */
+const MAYBE_MARKUP = /^(<[A-Za-z]?[\w.-]*|\{[@#]?[a-z]*)$/;
 
 /**
  * Splits a mixed stream into Markdown text and one-line JSON control objects.
@@ -31,11 +38,24 @@ export type AnswerItem =
  */
 export class AnswerDecoder {
   private buffer = "";
-  private mode: "unknown" | "text" | "json" = "unknown";
+  private mode: "unknown" | "text" | "json" | "markup" = "unknown";
   private fence = false;
   private lineText = "";
   private utf8 = new TextDecoder("utf-8", { fatal: false });
+  private region?: { id: number; source: string };
+  private regions = 0;
   constructor(private maxLineBytes = 256 * 1024) {}
+  /** The markup region still streaming, with its unfinished last line. */
+  pendingMarkup(): { region: number; source: string } | null {
+    return this.region && this.mode === "markup"
+      ? { region: this.region.id, source: this.region.source + this.buffer }
+      : null;
+  }
+  private endRegion(out: AnswerItem[]) {
+    if (!this.region) return;
+    out.push({ kind: "markup", region: this.region.id, source: this.region.source, final: true });
+    this.region = undefined;
+  }
 
   /** Control lines completed so far (identifies the line `pending()` belongs to). */
   lines = 0;
@@ -64,6 +84,49 @@ export class AnswerDecoder {
   private drain(final: boolean): AnswerItem[] {
     const out: AnswerItem[] = [];
     while (this.buffer.length) {
+      if (this.mode === "unknown" && this.region && !this.fence) {
+        // In a markup region: an open element takes every line; at depth 0 the next line decides.
+        if (markupOpen(this.region.source)) this.mode = "markup";
+        else {
+          const first = this.buffer.search(/\S/);
+          const newline = this.buffer.indexOf("\n");
+          if (first === -1 || (newline !== -1 && newline < first)) {
+            if (newline === -1 && !final) break;
+            const end = newline === -1 ? this.buffer.length : newline + 1;
+            this.region.source += this.buffer.slice(0, end);
+            this.buffer = this.buffer.slice(end);
+            continue;
+          }
+          const rest = this.buffer.slice(first, newline === -1 ? undefined : newline);
+          if (isMarkupStart(rest)) this.mode = "markup";
+          else if (newline === -1 && !final && MAYBE_MARKUP.test(rest)) break;
+          else this.endRegion(out);
+        }
+      }
+      if (this.mode === "unknown" && !this.region && !this.fence) {
+        const first = this.buffer.search(/\S/);
+        if (first !== -1 && this.buffer[first] === "<") {
+          const newline = this.buffer.indexOf("\n");
+          const rest = this.buffer.slice(first, newline === -1 ? undefined : newline);
+          if (newline === -1 || newline > first) {
+            if (isMarkupStart(rest)) {
+              this.region = { id: ++this.regions, source: "" };
+              this.mode = "markup";
+            } else if (newline === -1 && !final && MAYBE_MARKUP.test(rest)) break;
+          }
+        }
+      }
+      if (this.mode === "markup") {
+        const newline = this.buffer.indexOf("\n");
+        if (newline === -1 && !final) break; // the unfinished line is in pendingMarkup()
+        const end = newline === -1 ? this.buffer.length : newline + 1;
+        const region = this.region as { id: number; source: string };
+        region.source += this.buffer.slice(0, end);
+        this.buffer = this.buffer.slice(end);
+        this.mode = "unknown";
+        out.push({ kind: "markup", region: region.id, source: region.source, final: false });
+        continue;
+      }
       if (this.mode === "unknown") {
         const first = this.buffer.search(/\S/);
         const newline = this.buffer.indexOf("\n");
@@ -107,10 +170,22 @@ export class AnswerDecoder {
       this.lineText = "";
       this.classify(line, newline !== -1, out);
     }
+    if (final) this.endRegion(out);
     return out;
   }
   private classify(line: string, hadNewline: boolean, out: AnswerItem[]) {
     this.lines++;
+    if (isMarkupStart(line)) {
+      // {@state …} / {#each …}: a statement line opens a markup region.
+      this.region = { id: ++this.regions, source: hadNewline ? `${line}\n` : line };
+      out.push({
+        kind: "markup",
+        region: this.region.id,
+        source: this.region.source,
+        final: false,
+      });
+      return;
+    }
     const raw = hadNewline ? `${line}\n` : line;
     try {
       const value = JSON.parse(line);
@@ -568,6 +643,14 @@ export class AnswerSession {
   private draft?: { line: number; applied: number };
   /** The placeholder block of a sandbox whose declaration is still streaming. */
   private draftSandbox?: string;
+  /** The markup region being built: its surface, the state already set, components sent. */
+  private markup?: {
+    region: number;
+    surfaceId: string;
+    data: Set<string>;
+    sent: Map<string, string>;
+  };
+  private markupCount = 0;
   readonly policy: HostPolicy;
   private snapshotCache?: AnswerState;
   constructor(
@@ -626,6 +709,8 @@ export class AnswerSession {
    * "building" placeholder that tracks how far its source has got.
    */
   private preview(): AnswerEvent[] {
+    const markup = this.decoder.pendingMarkup();
+    if (markup && !this.ended) return this.applyMarkup(markup.region, markup.source, false);
     const line = this.decoder.pending();
     if (!line || this.ended) return [];
     if (this.draft?.line !== this.decoder.lines)
@@ -681,6 +766,7 @@ export class AnswerSession {
   /** Start another assistant turn on the same answer: open text is closed, surfaces persist. */
   beginTurn() {
     this.closeMarkdown();
+    this.markup = undefined;
     this.decoder = new AnswerDecoder();
     this.ended = false;
   }
@@ -694,7 +780,87 @@ export class AnswerSession {
           message: "Expected one complete JSON object per line.",
           severity: "error",
         });
+      else if (item.kind === "markup")
+        events.push(...this.applyMarkup(item.region, item.source, item.final));
       else events.push(...this.control(item.value));
+    }
+    return events;
+  }
+  /**
+   * A markup region becomes one surface. Each time it grows it is compiled again; only the
+   * components that changed are sent (upserts), and state is set once, so what the person has
+   * already changed in the UI is kept.
+   */
+  private applyMarkup(region: number, source: string, final: boolean): AnswerEvent[] {
+    if (this.policy.mode === "markdown-only") {
+      this.warnOnce(
+        "POLICY_SURFACES_DISABLED",
+        "This host accepts Markdown only; interactive content was dropped.",
+      );
+      return [];
+    }
+    let compiled: ReturnType<typeof compileMarkup>;
+    try {
+      compiled = compileMarkup(source, { final });
+    } catch (error) {
+      this.report({
+        code: "MARKUP_INVALID",
+        message: String(error).slice(0, 200),
+        severity: "warning",
+      });
+      return [];
+    }
+    const events: AnswerEvent[] = [];
+    let m = this.markup;
+    if (!m || m.region !== region) {
+      if (compiled.components.length < 2) return events; // nothing to draw yet
+      const surfaceId = `ui${++this.markupCount}`;
+      m = { region, surfaceId, data: new Set(), sent: new Map() };
+      this.markup = m;
+      this.pendingDecl.set(surfaceId, {
+        engine: ANSWER_WIRE_VERSION,
+        block: "surface",
+        surfaceId,
+        fallbackText: compiled.text.slice(0, 4000) || "UI",
+      } as SurfaceDeclaration);
+      events.push(
+        ...this.a2ui({
+          version: "v0.9",
+          createSurface: { surfaceId, catalogId: this.runtime.options.catalogId ?? CATALOG_ID },
+        }),
+      );
+    }
+    for (const [path, value] of Object.entries(compiled.data)) {
+      if (m.data.has(path)) continue;
+      m.data.add(path);
+      events.push(
+        ...this.a2ui({ version: "v0.9", updateDataModel: { surfaceId: m.surfaceId, path, value } }),
+      );
+    }
+    const changed = compiled.components.filter((c) => {
+      const json = JSON.stringify(c);
+      if (m.sent.get(c.id) === json) return false;
+      m.sent.set(c.id, json);
+      return true;
+    });
+    if (changed.length)
+      events.push(
+        ...this.a2ui({
+          version: "v0.9",
+          updateComponents: { surfaceId: m.surfaceId, components: changed },
+        }),
+      );
+    if (final) {
+      const index = this._blocks.findIndex(
+        (b) => b.kind === "surface" && b.surfaceId === m.surfaceId,
+      );
+      const block = this._blocks[index];
+      if (block?.kind === "surface" && compiled.text) {
+        this._blocks[index] = { ...block, fallbackText: compiled.text.slice(0, 4000) };
+        this.touch();
+      }
+      for (const d of compiled.diagnostics)
+        this.report({ code: "MARKUP", message: d, severity: "warning" });
     }
     return events;
   }

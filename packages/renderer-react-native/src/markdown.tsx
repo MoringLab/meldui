@@ -2,6 +2,7 @@
 import {
   type CitationSource,
   type CitationView,
+  entityLinks,
   extractCitations,
   normalizeMathDelimiters,
   prepareMarkdown,
@@ -12,7 +13,14 @@ import React, { createContext, memo, type ReactNode, useContext, useMemo } from 
 import { Platform, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
+import { withAlpha } from "./interactive.js";
 import { useMotion, useUI } from "./renderer.js";
+
+/**
+ * Links a host handles itself (an entity's [[name]], app routes): return true when handled,
+ * so the link is not opened as a web page.
+ */
+export const LinkHandlerContext = createContext<((url: string) => boolean) | null>(null);
 export type CitationOptions = {
   /** Resolves cited ids; without it citation markers stay ordinary text. */
   source?: CitationSource;
@@ -96,7 +104,8 @@ const MarkdownBlock = memo(function MarkdownBlock({
       citations.source ? extractCitations(raw, streaming) : { text: raw, ids: [] as string[] },
     [raw, streaming, citations.source],
   );
-  const text = cited.text;
+  const text = useMemo(() => entityLinks(cited.text, streaming), [cited.text, streaming]);
+  const handleLink = useContext(LinkHandlerContext);
   const views = cited.ids
     .map((id) => citations.source?.resolve(id))
     .filter((v): v is CitationView => !!v);
@@ -136,11 +145,14 @@ const MarkdownBlock = memo(function MarkdownBlock({
             streamingAnimation={streaming && !reduced}
             enableLinkPreview={false}
             enableTaskListItemToggle={false}
-            onLinkPress={({ url }) =>
+            md4cFlags={{ highlight: true, underline: false, latexMath: true }}
+            onLinkPress={({ url }) => {
+              if (handleLink?.(url)) return;
+              if (url.startsWith("entity:")) return;
               void openContentLink(host, url).catch(() =>
                 host?.onDiagnostic?.("LINK_BLOCKED", "external"),
-              )
-            }
+              );
+            }}
             onLinkLongPress={() => {}}
             markdownStyle={{
               ...headings,
@@ -151,6 +163,12 @@ const MarkdownBlock = memo(function MarkdownBlock({
                 fontFamily: ty.body.nativeFamily,
               },
               link: { color: colors.accent },
+              // An entity reads as text with an underline; tapping it opens the host's sheet.
+              linkVariants: { "^entity:": { color: colors.foreground, underline: true } },
+              highlight: {
+                backgroundColor: withAlpha(colors.accent, mode === "dark" ? 0.32 : 0.18),
+                color: colors.foreground,
+              },
               list: {
                 color: colors.foreground,
                 bulletColor: colors.foreground,

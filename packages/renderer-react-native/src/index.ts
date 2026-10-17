@@ -4,3 +4,4 @@ export * from "./interactive.js";
 
 export * from "./markdown.js";
 export * from "./renderer.js";
+export * from "./visuals.js";

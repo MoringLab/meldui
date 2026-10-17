@@ -482,9 +482,12 @@ function baseKind(
 }
 function dynamic(schema: any): boolean {
   const s = unwrap(schema);
+  // A union of unions (Stat.value is text | number) is dynamic when any branch is.
   if (s?._def?.typeName === "ZodUnion")
     return s._def.options.some(
-      (o: any) => unwrap(o)?._def?.typeName === "ZodObject" && "path" in (unwrap(o).shape ?? {}),
+      (o: any) =>
+        (unwrap(o)?._def?.typeName === "ZodObject" && "path" in (unwrap(o).shape ?? {})) ||
+        (unwrap(o)?._def?.typeName === "ZodUnion" && dynamic(o)),
     );
   return String(s?.description ?? "").includes("DynamicValue");
 }

@@ -1299,18 +1299,18 @@ export function ConverterView({ node }: NativeViewProps) {
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let live = true;
-    if (p.rate && pair[0] === p.from.toUpperCase()) {
-      setRate({ rate: p.rate });
-      return;
-    }
+    // The model's rate shows at once (it may be dated); a live rate replaces it when the host
+    // has one, and the model's stays if the lookup fails.
+    const given = p.rate ? (pair[0] === p.from.toUpperCase() ? p.rate : 1 / p.rate) : undefined;
+    setRate(given ? { rate: given } : null);
     if (!market?.rate) {
-      setFailed(true);
+      setFailed(!given);
       return;
     }
     setFailed(false);
     market.rate(pair[0], pair[1]).then(
       (r) => live && setRate(r),
-      () => live && setFailed(true),
+      () => live && setFailed(!given),
     );
     return () => {
       live = false;

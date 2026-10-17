@@ -9,7 +9,7 @@ import {
   splitMarkdownBlocks,
 } from "@engine/core";
 import { resolveTypography } from "@engine/kit-spec";
-import React, { createContext, memo, type ReactNode, useContext, useMemo } from "react";
+import React, { createContext, memo, type ReactNode, useContext, useMemo, useState } from "react";
 import { Platform, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
@@ -213,10 +213,101 @@ const MarkdownBlock = memo(function MarkdownBlock({
     </View>
   );
   if (!views.length) return content;
+  const cite = citations.render ? citations.render(views) : <DefaultCitations views={views} />;
+  const plain = plainParagraph(text);
+  if (plain == null) {
+    return (
+      <View style={{ gap: 8 }}>
+        {content}
+        {cite}
+      </View>
+    );
+  }
   return (
-    <View style={{ gap: 8 }}>
+    <TrailingCitation
+      plain={plain}
+      font={{
+        fontSize: ty.body.size,
+        lineHeight: ty.body.lineHeight,
+        fontFamily: ty.body.nativeFamily,
+      }}
+      cite={cite}
+    >
       {content}
-      {citations.render ? citations.render(views) : <DefaultCitations views={views} />}
-    </View>
+    </TrailingCitation>
   );
 });
+
+/**
+ * The words of a block that is one plain paragraph (no list, heading, table, quote, code or
+ * display maths), as they read: inline markers and link targets removed. Null otherwise.
+ */
+function plainParagraph(text: string): string | null {
+  const t = text.trim();
+  if (!t || /\n\s*\n/.test(t) || /\$\$|```|^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\|)/m.test(t))
+    return null;
+  return t
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/(\*\*|__|~~|==|\*|_|`)(?=\S)([^\n]*?\S)\1/g, "$2")
+    .replace(/\$([^$]+)\$/g, "$1")
+    .replace(/\s*\n\s*/g, " ");
+}
+
+/**
+ * A paragraph with its citation right after the last word when there is room on that line
+ * (measured with the same font), else on the line below.
+ */
+function TrailingCitation({
+  plain,
+  font,
+  cite,
+  children,
+}: {
+  plain: string;
+  font: { fontSize: number; lineHeight: number; fontFamily?: string };
+  cite: ReactNode;
+  children: ReactNode;
+}) {
+  const [width, setWidth] = useState(0);
+  const [last, setLast] = useState<{ width: number; lines: number } | null>(null);
+  const [citeSize, setCiteSize] = useState<{ width: number; height: number } | null>(null);
+  const gap = 6;
+  const inline =
+    !!last && !!citeSize && width > 0 && last.width + gap + citeSize.width <= width - 2;
+  return (
+    <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {children}
+      {width > 0 ? (
+        <Text
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
+          onTextLayout={(e) => {
+            const lines = e.nativeEvent.lines;
+            const end = lines[lines.length - 1];
+            if (end) setLast({ width: end.width, lines: lines.length });
+          }}
+          style={{ ...font, position: "absolute", left: 0, top: 0, width, opacity: 0 }}
+        >
+          {plain}
+        </Text>
+      ) : null}
+      <View
+        onLayout={(e) =>
+          setCiteSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
+        }
+        style={
+          inline && last && citeSize
+            ? {
+                position: "absolute",
+                left: last.width + gap,
+                bottom: Math.max(0, (font.lineHeight - citeSize.height) / 2),
+              }
+            : { alignSelf: "flex-start", marginTop: 8 }
+        }
+      >
+        {cite}
+      </View>
+    </View>
+  );
+}

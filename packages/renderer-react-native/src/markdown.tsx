@@ -256,9 +256,10 @@ function plainParagraph(text: string): string | null {
 /**
  * A paragraph with its citation right after the last word when there is room on that line,
  * else on the line below. The native markdown text reports no line layout, so an invisible RN
- * twin in the same font is measured. It runs slightly wider than the native text, which keeps
- * the pill clear of the words; when it wraps to a different number of lines than the real
- * paragraph (read from its height), the pill goes below.
+ * twin in the same font is measured. Its glyphs run a little wider than the native text's, so
+ * its last line is scaled by the ratio of the two widest lines (the native view sizes to its
+ * widest line); when it wraps to a different number of lines than the real paragraph (read
+ * from its height), the pill goes below.
  */
 function TrailingCitation({
   plain,
@@ -272,22 +273,28 @@ function TrailingCitation({
   children: ReactNode;
 }) {
   const [width, setWidth] = useState(0);
-  const [last, setLast] = useState<{ width: number; lines: number; lineHeight: number } | null>(
-    null,
-  );
-  const [height, setHeight] = useState(0);
+  const [last, setLast] = useState<{
+    width: number;
+    widest: number;
+    lines: number;
+    lineHeight: number;
+  } | null>(null);
+  const [real, setReal] = useState<{ width: number; height: number } | null>(null);
   const [citeSize, setCiteSize] = useState<{ width: number; height: number } | null>(null);
   const gap = 6;
-  const sameLines = !!last && height > 0 && Math.round(height / last.lineHeight) === last.lines;
-  const inline =
-    sameLines &&
-    !!last &&
-    !!citeSize &&
-    width > 0 &&
-    last.width + gap + citeSize.width <= width - 2;
+  const sameLines = !!last && !!real && Math.round(real.height / last.lineHeight) === last.lines;
+  const end = last && real ? Math.ceil((last.width * real.width) / last.widest) : 0;
+  const inline = sameLines && !!citeSize && width > 0 && end + gap + citeSize.width <= width - 2;
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      <View onLayout={(e) => setHeight(e.nativeEvent.layout.height)}>{children}</View>
+      <View
+        style={{ alignItems: "flex-start" }}
+        onLayout={(e) =>
+          setReal({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
+        }
+      >
+        {children}
+      </View>
       {width > 0 ? (
         <Text
           accessible={false}
@@ -295,8 +302,14 @@ function TrailingCitation({
           pointerEvents="none"
           onTextLayout={(e) => {
             const lines = e.nativeEvent.lines;
-            const end = lines[lines.length - 1];
-            if (end) setLast({ width: end.width, lines: lines.length, lineHeight: end.height });
+            const tail = lines[lines.length - 1];
+            if (tail)
+              setLast({
+                width: tail.width,
+                widest: Math.max(...lines.map((l) => l.width)),
+                lines: lines.length,
+                lineHeight: tail.height,
+              });
           }}
           style={{ ...font, position: "absolute", left: 0, top: 0, width, opacity: 0 }}
         >
@@ -311,7 +324,7 @@ function TrailingCitation({
           inline && last && citeSize
             ? {
                 position: "absolute",
-                left: last.width + gap,
+                left: end + gap,
                 bottom: Math.max(0, (last.lineHeight - citeSize.height) / 2),
               }
             : { alignSelf: "flex-start", marginTop: 8 }

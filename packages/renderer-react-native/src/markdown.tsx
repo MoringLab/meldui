@@ -27,6 +27,10 @@ import { withAlpha } from "./interactive.js";
 import { useMotion, useUI } from "./renderer.js";
 
 type LastLineLayout = CitationLine & { markdown: string };
+
+// Cache lastLine by markdown string so re-renders and re-mounts start with the
+// correct position immediately, without waiting for the native event.
+const lastLineCache = new Map<string, CitationLine>();
 // Optional native extension; without it citations stay compact on the following line.
 const MeasuredMarkdownText = EnrichedMarkdownText as ComponentType<
   ComponentProps<typeof EnrichedMarkdownText> & {
@@ -126,7 +130,11 @@ const MarkdownBlock = memo(function MarkdownBlock({
   streaming: boolean;
 }) {
   const citations = useContext(CitationContext);
-  const [lastLine, setLastLine] = useState<LastLineLayout | null>(null);
+  // Initialise from cache so the very first render already has the correct position.
+  const [lastLine, setLastLine] = useState<LastLineLayout | null>(() => {
+    const cached = lastLineCache.get(raw);
+    return cached ? { ...cached, markdown: raw } : null;
+  });
   const cited = useMemo(
     () =>
       citations.source ? extractCitations(raw, streaming) : { text: raw, ids: [] as string[] },
@@ -171,7 +179,19 @@ const MarkdownBlock = memo(function MarkdownBlock({
             key={`text-${i}-${kit.id}-${mode}`}
             markdown={part.markdown}
             onLastLineLayout={
-              parts.length === 1 ? (event) => setLastLine(event.nativeEvent) : undefined
+              parts.length === 1
+                ? (event) => {
+                    const ll = event.nativeEvent;
+                    lastLineCache.set(raw, {
+                      x: ll.x,
+                      y: ll.y,
+                      width: ll.width,
+                      height: ll.height,
+                      rtl: ll.rtl,
+                    });
+                    setLastLine(ll);
+                  }
+                : undefined
             }
             flavor="github"
             streamingAnimation={streaming && !reduced}

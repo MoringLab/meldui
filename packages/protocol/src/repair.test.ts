@@ -119,7 +119,10 @@ describe("component repair never fails", () => {
   it("turns any props on any component into a valid component", async () => {
     const { COMPONENT_NAMES } = await import("./index.js");
     let seed = 7;
-    const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const rnd = () => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed / 2147483648;
+    };
     const junk = (depth = 0): unknown => {
       const r = rnd();
       if (depth > 2 || r < 0.15) return Math.round(rnd() * 2000) - 500;
@@ -163,5 +166,22 @@ describe("component repair never fails", () => {
         const { component } = repairComponent({ id: `n${i}`, component: name, ...props });
         expect(() => parseComponent(component), `${name} ${JSON.stringify(props)}`).not.toThrow();
       }
+  });
+});
+
+describe("list entries", () => {
+  it("drops a bad field inside an entry, not the whole entry", () => {
+    const { component, repairs } = repairComponent({
+      id: "d",
+      component: "Diagram",
+      nodes: [
+        { id: "a", label: "A" },
+        { id: "b", label: "B" },
+      ],
+      edges: [{ from: "a", to: "b", label: "인연", arrow: "dashed" }],
+    });
+    expect(() => parseComponent(component)).not.toThrow();
+    expect((component as any).edges).toEqual([{ from: "a", to: "b", label: "인연" }]);
+    expect(repairs.join(" ")).toContain("edges.0.arrow: dropped");
   });
 });

@@ -309,6 +309,7 @@ export function repairComponent(
       : { component: { id, component: "Box" } as Component, repairs };
   };
   const schema = schemas[name] as z.AnyZodObject;
+  const removedFields = new Set<string>();
   for (let attempt = 0; attempt < 24; attempt++) {
     const result = schema.strict().safeParse(props);
     if (result.success)
@@ -323,6 +324,24 @@ export function repairComponent(
     const key = String(path[0] ?? "");
     if (!key) return standIn();
     const inList = path.findLastIndex((p) => typeof p === "number");
+    // A bad field inside a list entry (an edge's arrow: "dashed") goes on its own first; the
+    // entry is dropped only if it still does not fit.
+    const fieldKey = path[inList + 1];
+    const entry = at(props, path.slice(0, inList + 1));
+    const fieldWhere = path.slice(0, inList + 2).join(".");
+    if (
+      inList > 0 &&
+      typeof fieldKey === "string" &&
+      entry &&
+      typeof entry === "object" &&
+      Object.hasOwn(entry, fieldKey) &&
+      !removedFields.has(fieldWhere)
+    ) {
+      removedFields.add(fieldWhere);
+      delete (entry as Record<string, unknown>)[fieldKey];
+      repairs.push(`${fieldWhere}: dropped`);
+      continue;
+    }
     if (inList > 0 && Array.isArray(at(props, path.slice(0, inList)))) {
       const list = at(props, path.slice(0, inList)) as unknown[];
       list.splice(path[inList] as number, 1);

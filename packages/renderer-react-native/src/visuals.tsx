@@ -690,6 +690,68 @@ function exitPoint(a: Placed, tx: number, ty: number) {
   return { x: a.cx + dx * s, y: a.cy + dy * s };
 }
 
+type Box = { x: number; y: number; w: number; h: number };
+const hits = (a: Box, b: Box) =>
+  a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+
+/** One edge's drawn shape: where it leaves and enters its boxes, and its bend's control point. */
+function edgeGeometry(a: Placed, b: Placed, e: DEdge, placed: Placed[]) {
+  const sameRow = Math.abs(a.cy - b.cy) < 4;
+  const between = sameRow
+    ? placed.filter((n) => Math.abs(n.cy - a.cy) < 4 && (n.cx - a.cx) * (n.cx - b.cx) < 0).length
+    : 0;
+  const bend = e.curve ?? (between ? -0.45 : 0);
+  const len = Math.hypot(b.cx - a.cx, b.cy - a.cy) || 1;
+  const nx = -(b.cy - a.cy) / len;
+  const ny = (b.cx - a.cx) / len;
+  const cx = (a.cx + b.cx) / 2 + nx * bend * len * 0.5;
+  const cy = (a.cy + b.cy) / 2 + ny * bend * len * 0.5;
+  return { bend, cx, cy, start: exitPoint(a, cx, cy), end: exitPoint(b, cx, cy) };
+}
+
+const LABEL_H = 22;
+const LABEL_MAX = 132;
+
+/**
+ * Where each edge label goes: the first spot along its own line that covers no box and no
+ * label placed before it. A label with no free spot is left out (its node's panel lists it).
+ */
+function placeLabels(edges: DEdge[], byId: Map<string, Placed>, placed: Placed[], width: number) {
+  const boxes: Box[] = placed.map((n) => ({
+    x: n.cx - n.w / 2 - 3,
+    y: n.cy - n.h / 2 - 3,
+    w: n.w + 6,
+    h: n.h + 6,
+  }));
+  const taken: Box[] = [];
+  return edges.map((e) => {
+    const a = byId.get(e.from);
+    const b = byId.get(e.to);
+    if (!a || !b || !e.label) return null;
+    const g = edgeGeometry(a, b, e, placed);
+    const w = Math.min(LABEL_MAX, textWidth(e.label, 13) + 14);
+    for (const t of [0.5, 0.38, 0.62, 0.28, 0.72, 0.2, 0.8]) {
+      const u = 1 - t;
+      const x = g.bend
+        ? u * u * g.start.x + 2 * u * t * g.cx + t * t * g.end.x
+        : u * g.start.x + t * g.end.x;
+      const y = g.bend
+        ? u * u * g.start.y + 2 * u * t * g.cy + t * t * g.end.y
+        : u * g.start.y + t * g.end.y;
+      const box = {
+        x: Math.max(0, Math.min(width - w, x - w / 2)),
+        y: y - LABEL_H / 2,
+        w,
+        h: LABEL_H,
+      };
+      if (boxes.some((n) => hits(n, box)) || taken.some((l) => hits(l, box))) continue;
+      taken.push(box);
+      return box;
+    }
+    return null;
+  });
+}
+
 export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
   const p = node.props as {
     title?: string;
@@ -729,7 +791,20 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
     [key],
   );
   const byId = new Map(placed.map((n) => [n.id, n]));
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `placed` changes with `key`
+  const labelBoxes = useMemo(() => placeLabels(edges, byId, placed, width), [placed]);
   const chosen = selected ? byId.get(selected) : undefined;
+  // A chosen node lights its own lines and dims the rest; its panel lists every relation.
+  const touches = (e: DEdge) => !selected || e.from === selected || e.to === selected;
+  const relations = chosen
+    ? edges
+        .filter((e) => e.label && (e.from === chosen.id || e.to === chosen.id))
+        .map((e) => {
+          const other = byId.get(e.from === chosen.id ? e.to : e.from);
+          return other ? `${other.label} · ${e.label}` : null;
+        })
+        .filter((r): r is string => !!r)
+    : [];
   const edgeColor = (e: DEdge) => {
     if (e.tone && e.tone !== "default") {
       if (e.tone === "accent") return t.accent;
@@ -750,23 +825,8 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
               const a = byId.get(e.from);
               const b = byId.get(e.to);
               if (!a || !b) return null;
-              const sameRow = Math.abs(a.cy - b.cy) < 4;
-              const between = sameRow
-                ? placed.filter(
-                    (n) => Math.abs(n.cy - a.cy) < 4 && (n.cx - a.cx) * (n.cx - b.cx) < 0,
-                  ).length
-                : 0;
-              const bend = e.curve ?? (between ? -0.45 : 0);
-              const mx = (a.cx + b.cx) / 2;
-              const my = (a.cy + b.cy) / 2;
-              const len = Math.hypot(b.cx - a.cx, b.cy - a.cy) || 1;
-              const nx = -(b.cy - a.cy) / len;
-              const ny = (b.cx - a.cx) / len;
-              const cx = mx + nx * bend * len * 0.5;
-              const cy = my + ny * bend * len * 0.5;
-              const start = exitPoint(a, cx, cy);
-              const end = exitPoint(b, cx, cy);
-              const color = edgeColor(e);
+              const { bend, cx, cy, start, end } = edgeGeometry(a, b, e, placed);
+              const color = touches(e) ? edgeColor(e) : withAlpha(t.muted, 0.22);
               const d = bend
                 ? `M${start.x},${start.y} Q${cx},${cy} ${end.x},${end.y}`
                 : `M${start.x},${start.y} L${end.x},${end.y}`;
@@ -813,36 +873,24 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
             })}
           </Svg>
           {edges.map((e, i) => {
-            const a = byId.get(e.from);
-            const b = byId.get(e.to);
-            if (!a || !b || !e.label) return null;
-            const sameRow = Math.abs(a.cy - b.cy) < 4;
-            const between = sameRow
-              ? placed.filter((n) => Math.abs(n.cy - a.cy) < 4 && (n.cx - a.cx) * (n.cx - b.cx) < 0)
-                  .length
-              : 0;
-            const bend = e.curve ?? (between ? -0.45 : 0);
-            const len = Math.hypot(b.cx - a.cx, b.cy - a.cy) || 1;
-            const nx = -(b.cy - a.cy) / len;
-            const ny = (b.cx - a.cx) / len;
-            // A quadratic's midpoint is halfway to its control point.
-            const x = (a.cx + b.cx) / 2 + nx * bend * len * 0.25;
-            const y = (a.cy + b.cy) / 2 + ny * bend * len * 0.25;
-            const w = textWidth(e.label, 13) + 12;
+            const box = labelBoxes[i];
+            if (!box || !e.label) return null;
             return (
               <View
                 key={`l-${e.from}-${e.to}-${i}`}
                 pointerEvents="none"
                 style={{
                   position: "absolute",
-                  left: x - w / 2 + (sameRow ? 0 : 14),
-                  top: y - 11,
-                  width: w,
-                  height: 22,
+                  left: box.x,
+                  top: box.y,
+                  width: box.w,
+                  height: box.h,
                   alignItems: "center",
                   justifyContent: "center",
-                  borderRadius: 11,
-                  backgroundColor: withAlpha(t.background, 0.9),
+                  paddingHorizontal: 6,
+                  borderRadius: box.h / 2,
+                  backgroundColor: t.background,
+                  opacity: touches(e) ? 1 : 0.35,
                 }}
               >
                 <Text
@@ -920,6 +968,9 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
             {chosen.sub ? ` · ${chosen.sub}` : ""}
           </Text>
           {chosen.detail ? <Text style={{ ...body, fontSize: 15 }}>{chosen.detail}</Text> : null}
+          {relations.length ? (
+            <Text style={{ ...body, fontSize: 14, color: t.muted }}>{relations.join("  ·  ")}</Text>
+          ) : null}
         </View>
       ) : nodes.some((n) => n.detail) ? (
         <Text style={{ ...body, fontSize: 13, color: t.muted, textAlign: "center" }}>

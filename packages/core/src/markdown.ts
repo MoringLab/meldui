@@ -5,6 +5,15 @@ import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 
 export type MarkdownPart = { markdown: string } | { attachmentId: string; alt: string };
+/**
+ * remark escapes "==" at the start of a line, list item or quote ("\\==핵심==") to keep it from
+ * reading as a setext heading underline; then the highlight shows as raw markers. A "==" opener
+ * with its closer on the same line is a highlight, never an underline, so it is restored.
+ */
+function keepHighlights(markdown: string): string {
+  return markdown.replace(/\\==(?=[^\s=][^\n]*?\S==)/g, "==");
+}
+
 const parser = unified().use(remarkParse).use(remarkGfm).use(remarkMath).use(remarkStringify);
 const attachment = /^attachment:([A-Za-z0-9._:-]{1,128})$/;
 /** Only identifiers and approved external link schemes. Images never accept remote URLs. */
@@ -124,7 +133,9 @@ export function prepareMarkdown(
   let segment: Node[] = [];
   const flush = () => {
     if (segment.length) {
-      parts.push({ markdown: parser.stringify({ type: "root", children: segment } as never) });
+      parts.push({
+        markdown: keepHighlights(parser.stringify({ type: "root", children: segment } as never)),
+      });
       segment = [];
     }
   };

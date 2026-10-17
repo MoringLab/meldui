@@ -98,8 +98,9 @@ describe("markup", () => {
     const { out } = render(`{@state n = 0}{@state on = false}
 <Button label="+" onPress={n++}/>
 <Button label="토글" onPress={() => { toggle(on); n = 0 }}/>
-<Button label="질문" onPress={ask("더 알려줘")}/>`);
-    const [inc, both, ask] = out.components.filter((x) => x.component === "Button") as any[];
+<Button label="질문" onPress={ask("더 알려줘")}/>
+<Button label="보내기" onPress={send("예시 더 보여줘")}/>`);
+    const [inc, both, ask, send] = out.components.filter((x) => x.component === "Button") as any[];
     expect(inc.action.functionCall).toEqual({
       call: "setValue",
       args: { path: "/n", formula: "/n + 1" },
@@ -109,6 +110,7 @@ describe("markup", () => {
       { path: "/n", value: 0 },
     ]);
     expect(ask.action).toEqual({ event: { name: "ask", context: { text: "더 알려줘" } } });
+    expect(send.action).toEqual({ event: { name: "send", context: { text: "예시 더 보여줘" } } });
   });
 
   it("keeps Markdown raw and text in the fallback", () => {

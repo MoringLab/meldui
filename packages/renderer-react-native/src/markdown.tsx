@@ -194,6 +194,9 @@ const MarkdownBlock = memo(function MarkdownBlock({
                 : undefined
             }
             flavor="github"
+            // Blocks (code, quotes, tables, math) are selected like the text around them, not
+            // through the library's own copy popup.
+            enableBlockContextMenu={false}
             streamingAnimation={streaming && !reduced}
             enableLinkPreview={false}
             enableTaskListItemToggle={false}
@@ -227,7 +230,12 @@ const MarkdownBlock = memo(function MarkdownBlock({
                 bulletColor: colors.foreground,
                 markerColor: colors.foreground,
               },
-              blockquote: { color: colors.foreground, borderColor: colors.border },
+              blockquote: {
+                color: colors.muted,
+                borderColor: colors.border,
+                borderWidth: 3,
+                gapWidth: 12,
+              },
               table: {
                 color: colors.foreground,
                 headerTextColor: colors.foreground,
@@ -235,17 +243,25 @@ const MarkdownBlock = memo(function MarkdownBlock({
                 rowEvenBackgroundColor: colors.background,
                 rowOddBackgroundColor: colors.surface,
                 borderColor: colors.border,
+                borderRadius: 12,
               },
-              math: { color: colors.foreground, backgroundColor: colors.surface },
+              // Math reads as part of the text: no panel behind it.
+              math: { color: colors.foreground, backgroundColor: "transparent", padding: 0 },
               inlineMath: { color: colors.foreground },
               code: {
                 color: colors.foreground,
                 backgroundColor: colors.surface,
-                borderColor: colors.border,
+                borderColor: "transparent",
               },
+              // A soft rounded panel like the app's containers (no border, roomy padding).
               codeBlock: {
                 color: colors.foreground,
                 backgroundColor: colors.surface,
+                borderColor: "transparent",
+                borderWidth: 0,
+                borderRadius: 16,
+                padding: 16,
+                fontSize: 13.5,
                 syntaxColors: {
                   keyword: colors.accent,
                   string: colors.success,

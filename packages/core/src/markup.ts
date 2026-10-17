@@ -562,11 +562,12 @@ function action(raw: string, ctx: Ctx, scope: Scope): unknown {
           ? lit.value
           : { call: "computeString", args: { formula: formula(parts[index] ?? "''", ctx, scope) } };
       };
+      // ask('…') puts a prompt in the person's input to edit and send; send('…') sends it now.
       if (/^(ask|send|issueNewTurn|followUp|prompt)$/.test(fn as string)) {
         const value = text();
         return {
           event: {
-            name: "ask",
+            name: /^(send|issueNewTurn)$/.test(fn as string) ? "send" : "ask",
             context: { text: typeof value === "string" ? value : String(parts[0] ?? "") },
           },
         };

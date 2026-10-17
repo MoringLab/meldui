@@ -7,6 +7,9 @@
  */
 export type EntityRef = { text: string; name: string; hints: string[] };
 
+// A "·" only separates hints when spaced ("3·1 운동 · 독립운동" keeps "3·1 운동" whole).
+const HINT_SEPARATOR = /\s+[·•]\s+|\s*[;|]\s*/;
+
 const LINK = /\[\[([^[\]|\n]{1,80})(?:\|([^[\]\n]{1,240}))?\]\]/g;
 
 export function entityUrl(ref: EntityRef): string {
@@ -33,7 +36,7 @@ export function entityLinks(markdown: string, streaming = false): string {
   if (!markdown.includes("[[")) return markdown;
   let out = markdown.replace(LINK, (_, text: string, about?: string) => {
     const parts = (about ?? "")
-      .split(/\s*[·;|]\s*/)
+      .split(HINT_SEPARATOR)
       .map((p) => p.trim())
       .filter(Boolean);
     const name = parts[0] ?? text.trim();
@@ -49,7 +52,7 @@ export function entitiesIn(markdown: string): EntityRef[] {
   const out: EntityRef[] = [];
   for (const m of markdown.matchAll(LINK)) {
     const parts = (m[2] ?? "")
-      .split(/\s*[·;|]\s*/)
+      .split(HINT_SEPARATOR)
       .map((p) => p.trim())
       .filter(Boolean);
     out.push({

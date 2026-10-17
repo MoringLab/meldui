@@ -23,3 +23,11 @@ describe("entity links", () => {
     expect(entityLinks("작가 [[황순원|황순원 · 작", true)).toBe("작가 황순원");
   });
 });
+
+describe("names with a middle dot", () => {
+  it("keeps 3·1 운동 whole and splits only on spaced dots", () => {
+    expect(entitiesIn("[[3·1 운동|3·1 운동 · 독립운동 · 1919]]")).toEqual([
+      { text: "3·1 운동", name: "3·1 운동", hints: ["독립운동", "1919"] },
+    ]);
+  });
+});

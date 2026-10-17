@@ -372,7 +372,7 @@ export class UIRuntime {
           ? (raw.attachmentIds as string[])
           : [];
     if (this.attachments.unknownIds(ids).length) throw new Error("UNKNOWN_ATTACHMENT");
-    if (raw.component === "Image" && !raw.attachmentId && !raw.asset)
+    if (raw.component === "Image" && !raw.attachmentId && !raw.asset && !raw.src)
       throw new Error("IMAGE_SOURCE_REQUIRED");
     if (raw.component === "ImageAnnotations") {
       const manifest = this.attachments.get(ids[0]);

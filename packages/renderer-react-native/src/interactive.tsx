@@ -17,7 +17,6 @@ import React, {
 } from "react";
 import {
   Animated,
-  Easing,
   Modal,
   Platform,
   Pressable,
@@ -29,6 +28,7 @@ import {
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import {
+  animateTo,
   NativeIcon,
   type NativeViewProps,
   useContainerWidth,
@@ -36,6 +36,20 @@ import {
   useMotion,
   useUI,
 } from "./renderer.js";
+
+/** Korean widget words, for hosts that pass `labels={KO_NATIVE_LABELS}`. */
+export const KO_NATIVE_LABELS = {
+  previous: "이전",
+  next: "다음",
+  results: "결과 보기",
+  retry: "다시 하기",
+  correct: "정답이에요",
+  incorrect: "아쉬워요",
+  score: "점수",
+  flip: "눌러서 뒤집기",
+  menu: "더 보기",
+  close: "닫기",
+};
 
 /** Words the widgets show; hosts pass their language through UIProvider `labels`. */
 export const DEFAULT_NATIVE_LABELS = {
@@ -422,18 +436,13 @@ export function FlipView(props: NativeViewProps) {
   const { node, renderChild } = props;
   const p = node.props as Record<string, any>;
   const { t, radius, space, labels, body } = useBase();
-  const { durationMs } = useMotion();
+  const motion = useMotion();
   const [flipped, setFlipped] = useBoundState<boolean>(props, false);
   const turn = useRef(new Animated.Value(flipped ? 1 : 0)).current;
   const [heights, setHeights] = useState<[number, number]>([0, 0]);
   useEffect(() => {
-    Animated.timing(turn, {
-      toValue: flipped ? 1 : 0,
-      duration: durationMs ? Math.max(260, durationMs * 2) : 0,
-      easing: Easing.inOut(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }, [flipped, durationMs, turn]);
+    animateTo(turn, flipped ? 1 : 0, motion, { useNativeDriver: true, minDurationMs: 260 });
+  }, [flipped, motion, turn]);
   const height = p.height ?? Math.max(160, heights[0], heights[1]);
   const face = (side: 0 | 1): ViewStyle => ({
     position: "absolute",
@@ -965,17 +974,13 @@ export function QuizSetView(props: NativeViewProps) {
 export function SwitchRow({ node, runtime, surfaceId }: NativeViewProps) {
   const p = node.props as Record<string, any>;
   const { t, body } = useBase();
-  const { durationMs } = useMotion();
+  const motion = useMotion();
   const path = boundPath(node);
   const on = Boolean(p.value);
   const knob = useRef(new Animated.Value(on ? 1 : 0)).current;
   useEffect(() => {
-    Animated.timing(knob, {
-      toValue: on ? 1 : 0,
-      duration: durationMs,
-      useNativeDriver: true,
-    }).start();
-  }, [on, durationMs, knob]);
+    animateTo(knob, on ? 1 : 0, motion, { useNativeDriver: true });
+  }, [on, motion, knob]);
   const disabled = Boolean(p.disabled) || !path;
   return (
     <Pressable

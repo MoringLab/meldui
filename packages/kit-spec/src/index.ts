@@ -58,6 +58,24 @@ export const KitSchema = z.object({
     }),
     radius: z.number().min(0),
     motionMs: z.number().min(0).max(300),
+    /**
+     * Optional physical motion. When `spring` is set, renderers animate state changes with
+     * this spring instead of a `motionMs` timing curve; `enterOffset` is how far (dp/px)
+     * new answer blocks rise while fading in (0 disables the rise). Reduced motion still
+     * disables both. Omitted: the previous timing behaviour.
+     */
+    motion: z
+      .object({
+        spring: z
+          .object({
+            damping: z.number().min(1).max(200),
+            stiffness: z.number().min(1).max(2000),
+            mass: z.number().min(0.1).max(10),
+          })
+          .optional(),
+        enterOffset: z.number().min(0).max(40).default(0),
+      })
+      .default({ enterOffset: 0 }),
   }),
   components: z.record(z.object({ implementation: z.string(), fallback: z.string().optional() })),
   /** Implementation names the host must register itself; each needs a fallback so an unregistered host still renders. */

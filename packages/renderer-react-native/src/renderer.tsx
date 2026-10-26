@@ -88,7 +88,10 @@ export const useContainerWidth = () => useContext(ContainerWidth);
 /** Hosts with a scrolling list implement this to stop the list scrolling while a control is dragged. */
 const GestureLock = createContext<(locked: boolean) => void>(() => {});
 export const useGestureLock = () => useContext(GestureLock);
-/** Motion duration from the kit token; 0 when the OS asks for reduced motion. */
+/**
+ * Motion from the kit tokens: a duration and, when the kit defines one, a physical spring.
+ * Everything is instant when the OS asks for reduced motion.
+ */
 export function useMotion() {
   const { kit } = useUI();
   const [reduced, setReduced] = useState(false);
@@ -101,30 +104,69 @@ export function useMotion() {
       sub.remove();
     };
   }, []);
-  return { reduced, durationMs: reduced ? 0 : kit.tokens.motionMs };
+  const { motionMs, motion } = kit.tokens;
+  // Stable identity, so effects can depend on the whole object.
+  return React.useMemo(
+    () => ({
+      reduced,
+      durationMs: reduced ? 0 : motionMs,
+      spring: reduced ? undefined : motion?.spring,
+      enterOffset: reduced ? 0 : (motion?.enterOffset ?? 0),
+    }),
+    [reduced, motionMs, motion],
+  );
 }
+export type MotionTokens = ReturnType<typeof useMotion>;
+
+/**
+ * Animates `value` to `toValue` with the kit's spring when it has one, otherwise with its
+ * timing curve; jumps when motion is off. Use the native driver for transforms/opacity.
+ */
+export function animateTo(
+  value: Animated.Value,
+  toValue: number,
+  motion: MotionTokens,
+  options: { useNativeDriver: boolean; minDurationMs?: number },
+) {
+  if (motion.durationMs === 0) {
+    value.setValue(toValue);
+    return;
+  }
+  if (motion.spring) {
+    Animated.spring(value, {
+      toValue,
+      ...motion.spring,
+      useNativeDriver: options.useNativeDriver,
+    }).start();
+    return;
+  }
+  Animated.timing(value, {
+    toValue,
+    duration: Math.max(options.minDurationMs ?? 0, motion.durationMs),
+    easing: Easing.out(Easing.quad),
+    useNativeDriver: options.useNativeDriver,
+  }).start();
+}
+
+/** Fills left to right with a transform (UI thread), not by animating width. */
 function AnimatedFill({ ratio, color }: { ratio: number; color: string }) {
-  const { durationMs } = useMotion();
+  const motion = useMotion();
   const value = React.useRef(new Animated.Value(ratio)).current;
   React.useEffect(() => {
-    if (durationMs === 0) value.setValue(ratio);
-    else
-      Animated.timing(value, {
-        toValue: ratio,
-        duration: durationMs,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: false,
-      }).start();
-  }, [ratio, durationMs, value]);
+    animateTo(value, Math.max(0, Math.min(1, ratio)), motion, { useNativeDriver: true });
+  }, [ratio, motion, value]);
   return (
-    <Animated.View
-      style={{
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: color,
-        width: value.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }),
-      }}
-    />
+    <View style={{ height: 8, borderRadius: 4, overflow: "hidden" }}>
+      <Animated.View
+        style={{
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: color,
+          transformOrigin: "left",
+          transform: [{ scaleX: value }],
+        }}
+      />
+    </View>
   );
 }
 export function useUI() {

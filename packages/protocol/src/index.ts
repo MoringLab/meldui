@@ -626,6 +626,12 @@ export const componentSchemas = {
     value: text,
     placeholder: z.string().optional(),
     multiline: z.boolean().optional(),
+    /** Masked entry (passwords, one-time codes). The value stays on the device: readable text
+     * and answer summaries show it as •••, and only a host event can carry it out. */
+    secure: z.boolean().optional(),
+    /** Lets the OS offer saved credentials or a code from SMS. */
+    autofill: z.enum(["username", "email", "password", "new-password", "one-time-code"]).optional(),
+    keyboard: z.enum(["default", "email", "number"]).optional(),
   }),
   Select: z.object({
     ...common,

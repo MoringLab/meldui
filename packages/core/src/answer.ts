@@ -496,8 +496,10 @@ export function describeSurface(runtime: UIRuntime, surfaceId: string, limit = 6
       case "Button":
         lines.push(`[${text(p.label)}]`);
         break;
-      case "Slider":
       case "TextField":
+        lines.push(`${text(p.label)}: ${p.secure ? "•••" : text(p.value)}`.trim());
+        break;
+      case "Slider":
       case "Select":
       case "Checkbox":
       case "DatePicker":

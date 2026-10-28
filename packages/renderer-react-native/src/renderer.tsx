@@ -794,9 +794,16 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           value={String(value)}
           onChangeText={write}
           editable={!disabled}
-          multiline={p.multiline}
+          multiline={p.multiline && !p.secure}
           placeholder={p.placeholder}
           placeholderTextColor={t.muted}
+          secureTextEntry={p.secure === true && p.autofill !== "one-time-code"}
+          autoComplete={p.autofill === "new-password" ? "new-password" : p.autofill === "one-time-code" ? "sms-otp" : p.autofill}
+          textContentType={({ username: "username", email: "emailAddress", password: "password", "new-password": "newPassword", "one-time-code": "oneTimeCode" } as const)[p.autofill as "username"]}
+          keyboardType={p.keyboard === "email" ? "email-address" : p.keyboard === "number" ? "number-pad" : "default"}
+          autoCapitalize={p.secure || p.autofill || p.keyboard === "email" ? "none" : undefined}
+          autoCorrect={p.secure || p.autofill ? false : undefined}
+          contextMenuHidden={p.secure === true}
         />,
       );
     case "Select":

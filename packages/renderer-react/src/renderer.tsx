@@ -580,7 +580,10 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
         ) : (
           <input
             {...inputProps}
-            type="text"
+            type={p.secure && p.autofill !== "one-time-code" ? "password" : p.keyboard === "email" ? "email" : "text"}
+            inputMode={p.keyboard === "number" ? "numeric" : undefined}
+            autoComplete={p.autofill}
+            spellCheck={p.secure || p.autofill ? false : undefined}
             value={text(value)}
             placeholder={p.placeholder}
             onChange={(e) => write(e.target.value)}

@@ -76,9 +76,10 @@ export function readableText(compiled: {
         return s(c.alt) || s(c.caption);
       case "Stat":
         return `${s(c.label)}: ${[s(c.value), s(c.unit)].filter(Boolean).join(" ")}`;
+      case "TextField":
+        return [s(c.label), c.secure ? (s(c.value) ? "•••" : "") : s(c.value)].filter(Boolean).join(": ");
       case "Progress":
       case "Slider":
-      case "TextField":
       case "Select":
       case "Checkbox":
       case "DatePicker":

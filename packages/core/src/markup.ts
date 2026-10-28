@@ -572,6 +572,23 @@ function action(raw: string, ctx: Ctx, scope: Scope): unknown {
           },
         };
       }
+      // host('name', a, b): an event for the app hosting the surface, carrying those states'
+      // current values (a host-written form handing its fields over). Model replies get no
+      // host handler, so a reply cannot trigger one.
+      if (fn === "host") {
+        const name = literal(parts[0] ?? "");
+        const values: Record<string, unknown> = {};
+        for (const part of parts.slice(1)) {
+          const path = reference(part, ctx, scope);
+          if (path) values[part.trim()] = { path };
+        }
+        return {
+          event: {
+            name: "host",
+            context: { action: name.ok ? String(name.value) : "", values },
+          },
+        };
+      }
       if (/^(open|openUrl|link)$/.test(fn as string))
         return { functionCall: { call: "openUrl", args: { url: text() } } };
       if (/^(copy|copyText)$/.test(fn as string))

@@ -113,6 +113,23 @@ describe("markup", () => {
     expect(send.action).toEqual({ event: { name: "send", context: { text: "예시 더 보여줘" } } });
   });
 
+  it("hands state values to the host with host()", async () => {
+    const { out, runtime } = render(`{@state id = ''}{@state pw = ''}
+<TextField label="아이디" value={id} autofill="username"/>
+<TextField label="비밀번호" value={pw} secure autofill="password"/>
+<Button label="로그인" onPress={host('login', id, pw)}/>`);
+    const button = out.components.find((x) => x.component === "Button") as any;
+    expect(button.action).toEqual({
+      event: {
+        name: "host",
+        context: { action: "login", values: { id: { path: "/id" }, pw: { path: "/pw" } } },
+      },
+    });
+    const pw = out.components.find((x) => x.component === "TextField" && (x as any).secure) as any;
+    expect(pw.autofill).toBe("password");
+    expect(runtime.diagnostics.filter((d) => d.severity === "error")).toEqual([]);
+  });
+
   it("keeps Markdown raw and text in the fallback", () => {
     const out = compileMarkup(
       `<Box direction="row">

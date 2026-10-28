@@ -147,7 +147,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
     .map((id) => citations.source?.resolve(id))
     .filter((v): v is CitationView => !!v);
   const host = useContentHost();
-  const { kit, mode } = useUI();
+  const { kit, mode, selectable } = useUI();
   const { reduced } = useMotion();
   const ty = resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android");
   const colors = kit.tokens[mode];
@@ -197,6 +197,7 @@ const MarkdownBlock = memo(function MarkdownBlock({
             // Blocks (code, quotes, tables, math) are selected like the text around them, not
             // through the library's own copy popup.
             enableBlockContextMenu={false}
+            selectable={selectable}
             streamingAnimation={streaming && !reduced}
             enableLinkPreview={false}
             enableTaskListItemToggle={false}

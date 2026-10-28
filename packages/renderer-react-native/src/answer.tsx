@@ -262,7 +262,7 @@ function SurfaceFrame({
   maxHeight?: number;
   onExpand?: (surfaceId: string) => void;
 }) {
-  const { kit, mode } = useUI();
+  const { kit, mode, selectable } = useUI();
   const t = kit.tokens[mode];
   const [asText, setAsText] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -286,7 +286,7 @@ function SurfaceFrame({
     </Pressable>
   );
   const body = asText ? (
-    <Text selectable style={{ color: t.foreground, fontSize: 16, lineHeight: 25 }}>
+    <Text selectable={selectable} style={{ color: t.foreground, fontSize: 16, lineHeight: 25 }}>
       {block.fallbackText}
     </Text>
   ) : (

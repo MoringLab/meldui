@@ -73,6 +73,8 @@ type NativeContext = {
   components: Record<string, React.ComponentType<NativeViewProps>>;
   icons?: IconRenderer;
   labels?: Partial<NativeLabels>;
+  /** Text can be selected with a long press (false when the host owns long press, e.g. a chat bubble menu). */
+  selectable: boolean;
 };
 /** Host icon set: draws a kit icon name, or returns null to use the built-in drawing. */
 export type IconRenderer = (props: {
@@ -186,6 +188,7 @@ export function UIProvider({
   content,
   icons,
   labels,
+  selectable = true,
   children,
 }: {
   runtime: UIRuntime;
@@ -199,14 +202,19 @@ export function UIProvider({
   labels?: Partial<NativeLabels>;
   /** Called with true while a control (slider) is being dragged and false when it ends. */
   onGestureLock?: (locked: boolean) => void;
+  /**
+   * Long press selects text (default). A host with its own long-press menu turns it off and
+   * offers selection itself; otherwise the system selection also starts and can scroll a list.
+   */
+  selectable?: boolean;
   children: ReactNode;
   content?: ContentHost;
 }) {
   validateKit(kit);
   // A stable value: every node reads this context, so a new object would re-render them all.
   const value = useMemo(
-    () => ({ runtime, kit, mode, assets, components, icons, labels }),
-    [runtime, kit, mode, assets, components, icons, labels],
+    () => ({ runtime, kit, mode, assets, components, icons, labels, selectable }),
+    [runtime, kit, mode, assets, components, icons, labels, selectable],
   );
   return (
     <Context.Provider value={value}>
@@ -242,7 +250,7 @@ const NativeNode = memo(function NativeNode({
   id: string;
   scope?: string;
 }) {
-  const { runtime, kit, mode, components } = useUI();
+  const { runtime, kit, mode, components, selectable } = useUI();
   const colors = kit.tokens[mode];
   const subscribe = useCallback(
     (listener: () => void) => runtime.subscribeNode(surfaceId, id, scope, listener),
@@ -263,7 +271,7 @@ const NativeNode = memo(function NativeNode({
     if (typeof field === "string" || typeof field === "number")
       return (
         <Text
-          selectable
+          selectable={selectable}
           style={{
             color: colors.foreground,
             fontSize: kit.tokens.typography.baseSize,
@@ -367,7 +375,7 @@ class NativeBoundary extends React.Component<
   }
 }
 function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeViewProps) {
-  const { kit, mode, assets } = useUI();
+  const { kit, mode, assets, selectable } = useUI();
   const t = kit.tokens[mode];
   const p = node.props;
   const ty = React.useMemo(
@@ -723,7 +731,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           }}
         >
           <Text
-            selectable
+            selectable={selectable}
             style={{
               color: t.foreground,
               fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",

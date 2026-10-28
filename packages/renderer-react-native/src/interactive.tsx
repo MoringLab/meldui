@@ -1207,6 +1207,7 @@ export const TEXT_SCALE = { sm: 0.87, md: 1, lg: 1.2, xl: 1.47, display: 2.1 } a
 export function SizedText({ node }: NativeViewProps): ReactNode {
   const p = node.props as Record<string, any>;
   const { t, body, ink } = useBase();
+  const { selectable } = useUI();
   const scale = TEXT_SCALE[(p.size as keyof typeof TEXT_SCALE) ?? "md"] ?? 1;
   const size = (body.fontSize as number) * scale;
   const tone =
@@ -1223,7 +1224,7 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
             : (ink ?? t.foreground);
   return (
     <Text
-      selectable
+      selectable={selectable}
       style={{
         ...body,
         flexShrink: 1,

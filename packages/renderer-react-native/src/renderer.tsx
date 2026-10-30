@@ -44,6 +44,7 @@ import {
   SizedText,
   SliderRow,
   SwitchRow,
+  useBackdrop,
   useInk,
 } from "./interactive.js";
 import { LearningView, learningNames } from "./learning.js";
@@ -377,6 +378,8 @@ class NativeBoundary extends React.Component<
 function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeViewProps) {
   const { kit, mode, assets, selectable } = useUI();
   const t = kit.tokens[mode];
+  // Fields, badges, callouts and code sit on their own fill instead of an outline.
+  const { fill } = useBackdrop();
   const p = node.props;
   const ty = React.useMemo(
     () => resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android"),
@@ -408,12 +411,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
   };
   const control = {
     minHeight: 48,
-    borderWidth: 1,
-    borderColor: t.border,
-    borderRadius: 6,
-    paddingHorizontal: 12,
+    borderRadius: 12,
+    paddingHorizontal: 14,
     color: t.foreground,
-    backgroundColor: t.surface,
+    backgroundColor: fill,
     fontSize: ty.body.size,
     ...family,
   };
@@ -434,14 +435,12 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       style={({ pressed }) => ({
         minHeight: 48,
         paddingVertical: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
         borderRadius:
           kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`
             ? 4
-            : 8,
-        backgroundColor: secondary ? t.surface : t.accent,
-        borderWidth: secondary ? 1 : 0,
-        borderColor: t.border,
+            : 24,
+        backgroundColor: secondary ? fill : t.accent,
         opacity: isDisabled ? 0.5 : pressed ? 0.75 : 1,
         justifyContent: "center",
       })}
@@ -531,12 +530,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       return (
         <View
           style={{
-            backgroundColor: t.surface,
-            borderWidth: 1,
-            borderColor: t.border,
-            borderRadius: kit.tokens.radius,
-            padding: 18,
-            gap: 16,
+            backgroundColor: fill,
+            borderRadius: kit.tokens.radius * 1.6,
+            padding: 14,
+            gap: 12,
           }}
         >
           {p.title && (
@@ -677,10 +674,9 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             flexDirection: "row",
             alignItems: "center",
             gap: 4,
-            paddingHorizontal: 12,
-            paddingVertical: 5,
-            borderWidth: 1,
-            borderColor: t.border,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+            backgroundColor: fill,
             borderRadius: 20,
           }}
         >
@@ -700,11 +696,9 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       return (
         <View
           style={{
-            padding: 18,
-            borderWidth: 1,
-            borderColor: t.border,
-            backgroundColor: t.surface,
-            borderRadius: kit.tokens.radius,
+            padding: 14,
+            backgroundColor: fill,
+            borderRadius: kit.tokens.radius * 1.2,
             gap: 6,
           }}
         >
@@ -724,10 +718,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
         <ScrollView
           horizontal
           style={{
-            backgroundColor: t.surface,
-            borderWidth: 1,
-            borderColor: t.border,
-            borderRadius: 6,
+            backgroundColor: fill,
+            borderRadius: 12,
           }}
         >
           <Text
@@ -798,9 +790,31 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           placeholder={p.placeholder}
           placeholderTextColor={t.muted}
           secureTextEntry={p.secure === true && p.autofill !== "one-time-code"}
-          autoComplete={p.autofill === "new-password" ? "new-password" : p.autofill === "one-time-code" ? "sms-otp" : p.autofill}
-          textContentType={({ username: "username", email: "emailAddress", password: "password", "new-password": "newPassword", "one-time-code": "oneTimeCode" } as const)[p.autofill as "username"]}
-          keyboardType={p.keyboard === "email" ? "email-address" : p.keyboard === "number" ? "number-pad" : "default"}
+          autoComplete={
+            p.autofill === "new-password"
+              ? "new-password"
+              : p.autofill === "one-time-code"
+                ? "sms-otp"
+                : p.autofill
+          }
+          textContentType={
+            (
+              {
+                username: "username",
+                email: "emailAddress",
+                password: "password",
+                "new-password": "newPassword",
+                "one-time-code": "oneTimeCode",
+              } as const
+            )[p.autofill as "username"]
+          }
+          keyboardType={
+            p.keyboard === "email"
+              ? "email-address"
+              : p.keyboard === "number"
+                ? "number-pad"
+                : "default"
+          }
           autoCapitalize={p.secure || p.autofill || p.keyboard === "email" ? "none" : undefined}
           autoCorrect={p.secure || p.autofill ? false : undefined}
           contextMenuHidden={p.secure === true}

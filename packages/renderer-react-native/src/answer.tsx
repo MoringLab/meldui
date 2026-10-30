@@ -3,6 +3,7 @@ import type { AnswerBlock } from "@engine/protocol";
 import React, { type ReactNode, useMemo, useState, useSyncExternalStore } from "react";
 import { Animated, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { ContentProvider, MediaContent, useContentHost } from "./content.js";
+import { FilledGround } from "./interactive.js";
 import { CitationProvider, SafeMarkdown } from "./markdown.js";
 import { animateTo, UISurface, useMotion, useUI } from "./renderer.js";
 
@@ -289,18 +290,29 @@ function SurfaceFrame({
     <Text selectable={selectable} style={{ color: t.foreground, fontSize: 16, lineHeight: 25 }}>
       {block.fallbackText}
     </Text>
+  ) : chrome ? (
+    <FilledGround>
+      <UISurface surfaceId={block.surfaceId} />
+    </FilledGround>
   ) : (
     <UISurface surfaceId={block.surfaceId} />
   );
+  // Without chrome the host draws the container (a chat reply, a card): the surface adds no
+  // frame, padding or ground of its own, so its boxes are the card. With chrome it is a filled
+  // panel with a toolbar, still without outlines.
+  const pad = chrome ? 16 : 0;
   return (
     <View
       accessible={false}
-      style={{
-        borderWidth: 1,
-        borderColor: t.border,
-        borderRadius: kit.tokens.radius,
-        backgroundColor: t.background,
-      }}
+      style={
+        chrome
+          ? {
+              borderRadius: kit.tokens.radius * 1.6,
+              backgroundColor: t.surface,
+              overflow: "hidden",
+            }
+          : undefined
+      }
     >
       {chrome && (
         <View
@@ -310,8 +322,6 @@ function SurfaceFrame({
             justifyContent: "space-between",
             paddingLeft: 14,
             paddingRight: 4,
-            borderBottomWidth: 1,
-            borderBottomColor: t.border,
           }}
         >
           <Text
@@ -341,12 +351,12 @@ function SurfaceFrame({
         <ScrollView
           nestedScrollEnabled
           style={{ maxHeight }}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ padding: pad }}
         >
           {body}
         </ScrollView>
       ) : (
-        <View style={{ padding: 16 }}>{body}</View>
+        <View style={{ padding: pad }}>{body}</View>
       )}
       {block.status === "error" && (
         <Text

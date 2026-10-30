@@ -72,6 +72,27 @@ type Colors = UIKit["tokens"]["light"] & { warning?: string };
 const Ink = createContext<string | null>(null);
 export const useInk = () => useContext(Ink);
 
+/** Whether what is behind sits on a filled Box (true) or on the answer's own background. */
+const Backdrop = createContext(false);
+
+/** Marks its children as sitting on a filled ground (a host card, a chrome panel). */
+export function FilledGround({ children }: { children: React.ReactNode }) {
+  return <Backdrop.Provider value>{children}</Backdrop.Provider>;
+}
+
+/**
+ * The fill for something that needs its own ground here (a field, a tile, a badge, a callout):
+ * the kit's surface on the answer's background, and a lighter tile on a filled Box, so a card's
+ * rows and inputs stand out from the card without borders.
+ */
+export function useBackdrop() {
+  const { kit, mode } = useUI();
+  const t = kit.tokens[mode];
+  const filled = useContext(Backdrop);
+  const tile = mode === "dark" ? withAlpha("#ffffff", 0.07) : t.background;
+  return { filled, fill: filled ? tile : t.surface, tile };
+}
+
 /** rgba() of a #rgb / #rrggbb / rgb(a) colour at an alpha; other strings are returned as is. */
 export function withAlpha(color: string, alpha: number): string {
   const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color)?.[1];
@@ -130,12 +151,14 @@ function useBoundState<T>(
 // Box
 
 type ToneLook = { bg?: string; ink?: string; border?: string; lift?: boolean };
-function toneLook(tone: unknown, t: Colors): ToneLook {
+function toneLook(tone: unknown, t: Colors, ground: { filled: boolean; tile: string }): ToneLook {
   switch (tone) {
+    // A subtle Box inside another filled Box is a lighter tile (a card's rows), not the same grey.
     case "subtle":
-      return { bg: t.surface };
+      return { bg: ground.filled ? ground.tile : t.surface };
+    // Lifted by a soft shadow on the page; on a card it is a tile like subtle. No outline.
     case "raised":
-      return { bg: t.background, border: withAlpha(t.border, 0.6), lift: true };
+      return ground.filled ? { bg: ground.tile } : { bg: t.background, lift: true };
     case "accent":
       return { bg: t.accent, ink: t.onAccent };
     case "accentSoft":
@@ -177,7 +200,8 @@ export function BoxView(props: NativeViewProps) {
   const inRow = useContext(InRow);
   // Row and Column with Box sizing (justify, flex, width, padding) are drawn as Boxes too.
   const row = p.direction === "row" || node.component === "Row";
-  const look = toneLook(p.tone, t);
+  const ground = useBackdrop();
+  const look = toneLook(p.tone, t, ground);
   const selected = Boolean(p.selected);
   const [height, setHeight] = useState(0);
   const corner =
@@ -210,7 +234,8 @@ export function BoxView(props: NativeViewProps) {
     alignItems: p.align ? ALIGN[p.align as keyof typeof ALIGN] : row ? "center" : "stretch",
     justifyContent: p.justify ? JUSTIFY[p.justify as keyof typeof JUSTIFY] : "flex-start",
     flexWrap: p.wrap ? "wrap" : "nowrap",
-    padding: space(p.padding, look.bg || p.border ? space("md") : 0),
+    // Filled boxes hug their content: 12 around, not a page margin.
+    padding: space(p.padding, look.bg || p.border ? space("sm") + space("xs") : 0),
     // Always a fill (transparent when none): a fill that appears later keeps its corners.
     backgroundColor: selected && !look.bg ? withAlpha(t.accent, 0.1) : (look.bg ?? "transparent"),
     borderRadius: corner,
@@ -220,8 +245,8 @@ export function BoxView(props: NativeViewProps) {
     ...(look.lift
       ? {
           shadowColor: "#000",
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
+          shadowOpacity: 0.06,
+          shadowRadius: 14,
           shadowOffset: { width: 0, height: 4 },
           elevation: 2,
         }
@@ -247,7 +272,9 @@ export function BoxView(props: NativeViewProps) {
       ? (e: { nativeEvent: { layout: { height: number } } }) =>
           setHeight(e.nativeEvent.layout.height)
       : undefined;
-  const body = look.ink ? <Ink.Provider value={look.ink}>{inner}</Ink.Provider> : inner;
+  const inked = look.ink ? <Ink.Provider value={look.ink}>{inner}</Ink.Provider> : inner;
+  const body =
+    look.bg && !ground.filled ? <Backdrop.Provider value>{inked}</Backdrop.Provider> : inked;
   if (!p.action)
     return (
       <View style={style} onLayout={onLayout} accessibilityLabel={p.accessibilityLabel}>

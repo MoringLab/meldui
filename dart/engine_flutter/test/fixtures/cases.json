@@ -4192,6 +4192,7 @@
               "children": [
                 "heading",
                 "intro",
+                "item",
                 "callout",
                 "accordion",
                 "divider",
@@ -4210,6 +4211,22 @@
               "component": "Text",
               "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
               "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "item",
+              "component": "ListItem",
+              "icon": "info",
+              "title": "구조와 상태",
+              "subtitle": "서로 분리됩니다",
+              "value": "2개"
             }
           ]
         }
@@ -4398,6 +4415,7 @@
               "children": [
                 "heading",
                 "intro",
+                "item",
                 "callout",
                 "accordion",
                 "divider",
@@ -4416,6 +4434,22 @@
               "component": "Text",
               "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
               "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "item",
+              "component": "ListItem",
+              "icon": "info",
+              "title": "구조와 상태",
+              "subtitle": "서로 분리됩니다",
+              "value": "2개"
             }
           ]
         }
@@ -4604,6 +4638,7 @@
               "children": [
                 "heading",
                 "intro",
+                "item",
                 "callout",
                 "accordion",
                 "divider",
@@ -4622,6 +4657,22 @@
               "component": "Text",
               "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
               "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "item",
+              "component": "ListItem",
+              "icon": "info",
+              "title": "구조와 상태",
+              "subtitle": "서로 분리됩니다",
+              "value": "2개"
             }
           ]
         }
@@ -4810,6 +4861,7 @@
               "children": [
                 "heading",
                 "intro",
+                "item",
                 "callout",
                 "accordion",
                 "divider",
@@ -4828,6 +4880,22 @@
               "component": "Text",
               "text": "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
               "tone": "muted"
+            }
+          ]
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "item",
+              "component": "ListItem",
+              "icon": "info",
+              "title": "구조와 상태",
+              "subtitle": "서로 분리됩니다",
+              "value": "2개"
             }
           ]
         }

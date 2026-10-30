@@ -372,6 +372,33 @@ function DefaultView({ node, children, runtime, surfaceId, renderChild }: Compon
           {children}
         </div>
       );
+    case "ListItem": {
+      const row = (
+        <>
+          {p.icon ? <Icon name={p.icon} /> : null}
+          <span className="ui-column" style={{ flex: 1, gap: 0 }}>
+            <strong>{text(p.title)}</strong>
+            {p.subtitle ? <small>{text(p.subtitle)}</small> : null}
+          </span>
+          {p.value ? <strong>{text(p.value)}</strong> : null}
+        </>
+      );
+      const style = { display: "flex", alignItems: "center", gap: 12, width: "100%" };
+      return p.action ? (
+        <button
+          type="button"
+          className="ui-list-item"
+          style={style}
+          onClick={() => void runtime.dispatch(surfaceId, node.id, p.action, node.scope)}
+        >
+          {row}
+        </button>
+      ) : (
+        <div className="ui-list-item" style={style}>
+          {row}
+        </div>
+      );
+    }
     case "Card":
       return kit.components[node.component ?? ""]?.implementation ===
         `Editorial${node.component}` ? (

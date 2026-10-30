@@ -349,6 +349,12 @@ for (const [id, title] of [
     "explanation",
     "설명을 펼쳐보고, 예제를 확인하며 개념을 이해하세요.",
     [
+      c("item", "ListItem", {
+        icon: "info",
+        title: "구조와 상태",
+        subtitle: "서로 분리됩니다",
+        value: "2개",
+      }),
       c("callout", "Callout", {
         title: "핵심 아이디어",
         text: "UI의 구조와 상태를 분리하면 같은 인터페이스를 여러 기기에서 사용할 수 있습니다.",

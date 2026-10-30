@@ -27,6 +27,7 @@ export const PLATFORM_SUPPORT: Record<
       "Audio",
       "Simulation",
       "Box",
+      "ListItem",
       "Pager",
       "Flip",
       "Menu",

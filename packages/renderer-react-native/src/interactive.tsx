@@ -4,10 +4,11 @@
 // compact slider, ring progress). Everything is drawn from the kit's tokens, so each host keeps
 // its own look; state lives in the surface's data model when bound, otherwise in the widget.
 import { keyedRuns } from "@engine/core";
-import type { UIKit } from "@engine/kit-spec";
+import type { ResolvedTypography, UIKit } from "@engine/kit-spec";
 import { resolveTypography } from "@engine/kit-spec";
 import Slider from "@react-native-community/slider";
 import React, {
+  Children,
   createContext,
   type ReactNode,
   useContext,
@@ -39,6 +40,10 @@ import {
 
 /** Korean widget words, for hosts that pass `labels={KO_NATIVE_LABELS}`. */
 export const KO_NATIVE_LABELS = {
+  numberUnits: [
+    [1e8, "억"],
+    [1e4, "만"],
+  ] as readonly (readonly [number, string])[],
   previous: "이전",
   next: "다음",
   results: "결과 보기",
@@ -53,6 +58,11 @@ export const KO_NATIVE_LABELS = {
 
 /** Words the widgets show; hosts pass their language through UIProvider `labels`. */
 export const DEFAULT_NATIVE_LABELS = {
+  numberUnits: [
+    [1e9, "B"],
+    [1e6, "M"],
+    [1e3, "k"],
+  ] as readonly (readonly [number, string])[],
   previous: "Previous",
   next: "Next",
   results: "See results",
@@ -107,6 +117,12 @@ export function withAlpha(color: string, alpha: number): string {
 
 const warningOf = (t: Colors) => t.warning ?? "#d97706";
 
+/** Heavier text in the kit's own font file when it ships one; the OS fakes the weight otherwise. */
+export function heavier(ty: ResolvedTypography, weight: 500 | 600 | 700): TextStyle {
+  const file = ty.weights?.[weight];
+  return file ? { fontFamily: file } : { fontWeight: String(weight) as TextStyle["fontWeight"] };
+}
+
 function useBase() {
   const ui = useUI();
   const t = ui.kit.tokens[ui.mode] as Colors;
@@ -124,7 +140,8 @@ function useBase() {
       ? 0
       : ((ui.kit.tokens.spacing as Record<string, number>)[String(key)] ?? fallback);
   const labels = { ...DEFAULT_NATIVE_LABELS, ...ui.labels };
-  return { ...ui, t, ty, family, body, ink, space, radius: ui.kit.tokens.radius, labels };
+  const weight = (value: 500 | 600 | 700) => heavier(ty, value);
+  return { ...ui, t, ty, family, body, ink, space, weight, radius: ui.kit.tokens.radius, labels };
 }
 
 function boundPath(node: NativeViewProps["node"], key = "value") {
@@ -192,6 +209,163 @@ const ALIGN = {
 
 /** Whether the parent lays its children in a row (a child's width then means flex basis). */
 const InRow = createContext(false);
+
+/**
+ * Inside a Card. Text and charts sit 14 from its edge; tiles (rows, stats) reach out to 8, where
+ * their corners stay concentric with the card's. They undo the inset with this margin.
+ */
+export const InCard = createContext(false);
+export const CARD_TILE_MARGIN = { marginHorizontal: -6, marginVertical: -4 } as const;
+
+/** The one container answers use: spacing and fill are fixed, so every card reads the same. */
+export function CardView({ node, runtime, surfaceId, children }: NativeViewProps) {
+  const p = node.props as Record<string, any>;
+  const { t, ty, kit, body, weight, radius } = useBase();
+  const { fill } = useBackdrop();
+  const editorial =
+    kit.components[node.component ?? ""]?.implementation === `Editorial${node.component}`;
+  const inset = { paddingHorizontal: 6, paddingVertical: 4 };
+  const more = p.more && p.action ? String(p.more) : "";
+  return (
+    <View style={{ backgroundColor: fill, borderRadius: radius * 1.5, padding: 8, gap: 4 }}>
+      {p.title || more ? (
+        <View
+          style={{
+            ...inset,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            minHeight: 36,
+            ...(editorial ? { borderBottomWidth: 1, borderColor: t.border } : {}),
+          }}
+        >
+          {p.icon ? <NativeIcon name={p.icon} size={18} color={t.foreground} /> : null}
+          <Text
+            accessibilityRole="header"
+            style={{
+              ...body,
+              ...weight(600),
+              flex: 1,
+              fontSize: ty.small.size + 1,
+              lineHeight: 21,
+              ...(editorial ? { fontFamily: Platform.OS === "ios" ? "Georgia" : "serif" } : {}),
+            }}
+          >
+            {String(p.title ?? "")}
+          </Text>
+          {more ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={more}
+              hitSlop={10}
+              onPress={() => void runtime.dispatch(surfaceId, node.id, p.action, node.scope)}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+                opacity: pressed ? 0.6 : 1,
+              })}
+            >
+              <Text style={{ ...body, color: t.muted, fontSize: 13, lineHeight: 18 }}>{more}</Text>
+              <NativeIcon name="chevron-right" size={14} color={t.muted} />
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+      <FilledGround>
+        <InCard.Provider value>
+          {Children.map(children, (child) => (child ? <View style={inset}>{child}</View> : child))}
+        </InCard.Provider>
+      </FilledGround>
+    </View>
+  );
+}
+
+/** The everyday row: icon chip, title and subtitle, a value at the end, a chevron when tappable. */
+export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
+  const p = node.props as Record<string, any>;
+  const { t, body, weight } = useBase();
+  const { fill } = useBackdrop();
+  const inCard = useContext(InCard);
+  const tint =
+    p.tone === "success"
+      ? t.success
+      : p.tone === "danger"
+        ? t.danger
+        : p.tone === "warning"
+          ? warningOf(t)
+          : undefined;
+  const title = String(p.title ?? "");
+  const subtitle = p.subtitle ? String(p.subtitle) : "";
+  const value = p.value === undefined || p.value === "" ? "" : String(p.value);
+  const style: ViewStyle = {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    minHeight: 56,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: fill,
+    ...(inCard ? CARD_TILE_MARGIN : {}),
+  };
+  const content = (
+    <>
+      {p.icon ? (
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 12,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: withAlpha(tint ?? t.foreground, tint ? 0.13 : 0.06),
+          }}
+        >
+          <NativeIcon name={p.icon} size={19} color={tint ?? t.foreground} />
+        </View>
+      ) : null}
+      <View style={{ flex: 1, gap: 1 }}>
+        <Text numberOfLines={2} style={{ ...body, ...weight(500), fontSize: 15, lineHeight: 21 }}>
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text numberOfLines={2} style={{ ...body, color: t.muted, fontSize: 13, lineHeight: 18 }}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      {value ? (
+        <Text
+          numberOfLines={1}
+          style={{
+            ...body,
+            ...weight(600),
+            maxWidth: "45%",
+            color: tint ?? t.foreground,
+            fontSize: 15,
+            lineHeight: 21,
+            fontVariant: ["tabular-nums"],
+          }}
+        >
+          {value}
+        </Text>
+      ) : null}
+      {p.action ? <NativeIcon name="chevron-right" size={16} color={t.muted} /> : null}
+    </>
+  );
+  if (!p.action) return <View style={style}>{content}</View>;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={[title, subtitle, value].filter(Boolean).join(", ")}
+      onPress={() => void runtime.dispatch(surfaceId, node.id, p.action, node.scope)}
+      style={({ pressed }) => ({ ...style, opacity: pressed ? 0.6 : 1 })}
+    >
+      {content}
+    </Pressable>
+  );
+}
 
 export function BoxView(props: NativeViewProps) {
   const { node, runtime, surfaceId, children } = props;
@@ -1233,7 +1407,7 @@ export const TEXT_SCALE = { sm: 0.87, md: 1, lg: 1.2, xl: 1.47, display: 2.1 } a
 /** Text with size / weight / alignment / tone, in the colour of the Box it sits on. */
 export function SizedText({ node }: NativeViewProps): ReactNode {
   const p = node.props as Record<string, any>;
-  const { t, body, ink } = useBase();
+  const { t, body, ink, weight } = useBase();
   const { selectable } = useUI();
   const scale = TEXT_SCALE[(p.size as keyof typeof TEXT_SCALE) ?? "md"] ?? 1;
   const size = (body.fontSize as number) * scale;
@@ -1266,14 +1440,12 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
           : {}),
         fontSize: size,
         lineHeight: size * (scale >= 1.4 ? 1.25 : 1.5),
-        fontWeight:
-          p.weight === "bold"
-            ? "700"
-            : p.weight === "medium"
-              ? "600"
-              : scale >= 1.4
-                ? "700"
-                : "400",
+        ...(p.weight === "bold" || (scale >= 1.4 && p.weight !== "medium")
+          ? weight(700)
+          : p.weight === "medium"
+            ? weight(600)
+            : {}),
+        ...(scale > 1 ? { letterSpacing: scale >= 1.4 ? -0.5 : -0.2 } : {}),
         textAlign: p.align === "center" ? "center" : p.align === "end" ? "right" : "left",
         ...(p.size === "display" ? { fontVariant: ["tabular-nums"], letterSpacing: -0.5 } : {}),
       }}
@@ -1283,7 +1455,7 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
           <Text
             key={run.at}
             style={{
-              ...(run.bold ? { fontWeight: "700" as const } : {}),
+              ...(run.bold ? weight(700) : {}),
               ...(run.mark ? { backgroundColor: withAlpha(t.accent, 0.2) } : {}),
             }}
           >

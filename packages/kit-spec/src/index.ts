@@ -38,7 +38,16 @@ const typographySchema = z.object({
     .array(z.number().min(0.75).max(4))
     .length(6)
     .default([2.25, 1.75, 1.375, 1.125, 1, 0.875]),
-  native: z.object({ body: nativeFamily.optional(), heading: nativeFamily.optional() }).default({}),
+  native: z
+    .object({
+      body: nativeFamily.optional(),
+      heading: nativeFamily.optional(),
+      /** Font files for heavier text: a synthetic bold smears small type, Hangul above all. */
+      medium: nativeFamily.optional(),
+      semibold: nativeFamily.optional(),
+      bold: nativeFamily.optional(),
+    })
+    .default({}),
 });
 export const KitSchema = z.object({
   id: z.string().min(1),
@@ -86,6 +95,11 @@ export const KitSchema = z.object({
     .array(z.string().regex(/^[a-z][a-z0-9-]{0,39}$/))
     .max(120)
     .default([]),
+  /**
+   * Instead of listing names: how the hosts' icon set is named, for a large open set the model
+   * already knows ("any Lucide icon name"). Shorter in the prompt than a list; wins over `icons`.
+   */
+  iconSet: z.string().min(4).max(240).optional(),
   generation: z.object({ designSkill: z.string().max(12000).default("") }).default({}),
   guide: z.string().min(20),
   examples: z.array(z.string()),
@@ -125,6 +139,8 @@ export function defineKit(kit: UIKitInput): UIKit {
 export type ResolvedTypography = {
   body: { family: string; nativeFamily?: string; size: number; weight: number; lineHeight: number };
   small: { size: number; lineHeight: number };
+  /** Registered font files for heavier text, when the kit ships them. */
+  weights?: { 500?: string; 600?: string; 700?: string };
   heading: {
     family: string;
     nativeFamily?: string;
@@ -154,6 +170,15 @@ export function resolveTypography(
       lineHeight: Math.round(t.baseSize * t.lineHeight),
     },
     small: { size: small, lineHeight: Math.round(small * t.lineHeight) },
+    ...(t.native.medium || t.native.semibold || t.native.bold
+      ? {
+          weights: {
+            500: pick(t.native.medium),
+            600: pick(t.native.semibold),
+            700: pick(t.native.bold),
+          },
+        }
+      : {}),
     heading: {
       family: t.heading,
       nativeFamily: pick(t.native.heading),

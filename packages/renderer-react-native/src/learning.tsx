@@ -1,8 +1,10 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: bounded stateless SVG vertices and fixed semantic entries use ordinal positions
-import { formatStat, routePoints, sceneShapes, Ticker } from "@engine/core";
+import { formatStat, type NodeSnapshot, routePoints, sceneShapes, Ticker } from "@engine/core";
+import { resolveTypography } from "@engine/kit-spec";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import type { ReactNode } from "react";
+import { Children, createContext, useContext, useEffect, useRef, useState } from "react";
+import { Platform, Pressable, Text, View } from "react-native";
 import Svg, {
   Circle,
   ClipPath,
@@ -18,6 +20,7 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from "react-native-svg";
+import { CARD_TILE_MARGIN, heavier, InCard, useBackdrop } from "./interactive.js";
 import { SafeMarkdown } from "./markdown.js";
 import type { NativeViewProps } from "./renderer.js";
 import { NativeIcon, useUI } from "./renderer.js";
@@ -99,29 +102,9 @@ export function LearningView({ node, children, runtime, surfaceId }: NativeViewP
         </View>
       );
     case "StatGroup":
-      return <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>{children}</View>;
+      return <StatGroupView>{children}</StatGroupView>;
     case "Stat":
-      // A label above a prominent value: the value is what changes when controls move.
-      return (
-        <View accessibilityLiveRegion="polite" style={{ gap: 2 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            {p.icon ? <NativeIcon name={p.icon} size={16} color={t.muted} /> : null}
-            <Text style={{ color: t.muted, fontSize: kit.tokens.typography.baseSize * 0.87 }}>
-              {String(p.label ?? "")}
-            </Text>
-          </View>
-          <Text
-            style={{
-              color: t.foreground,
-              fontSize: kit.tokens.typography.baseSize * 1.47,
-              fontWeight: "700",
-              fontVariant: ["tabular-nums"],
-            }}
-          >
-            {`${formatStat(p.value, p.precision)}${p.unit ? ` ${p.unit}` : ""}`}
-          </Text>
-        </View>
-      );
+      return <StatView node={node} />;
     case "Legend":
       return (
         <View>
@@ -418,6 +401,75 @@ function ManualClock({
       ))}
       <Text style={{ color: kit.tokens[mode].muted }}>
         Manual clock (continuous playback requires host visibility control)
+      </Text>
+    </View>
+  );
+}
+
+const InStatGroup = createContext(false);
+
+/** Tiles side by side, two to a row, reaching the card's rows' width. */
+function StatGroupView({ children }: { children: ReactNode }) {
+  const inCard = useContext(InCard);
+  return (
+    <InStatGroup.Provider value>
+      <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: 4,
+          ...(inCard ? CARD_TILE_MARGIN : {}),
+        }}
+      >
+        {Children.map(children, (child) => (
+          <View style={{ flexBasis: "47%", flexGrow: 1 }}>{child}</View>
+        ))}
+      </View>
+    </InStatGroup.Provider>
+  );
+}
+
+/** A label above a prominent value: the value is what changes when controls move. */
+function StatView({ node }: { node: NodeSnapshot }) {
+  const p = node.props;
+  const { kit, mode } = useUI();
+  const t = kit.tokens[mode];
+  const ty = resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android");
+  const body = { color: t.foreground, fontFamily: ty.body.nativeFamily };
+  const { fill } = useBackdrop();
+  const tile = useContext(InStatGroup);
+  return (
+    <View
+      accessibilityLiveRegion="polite"
+      style={{
+        gap: 2,
+        ...(tile ? { backgroundColor: fill, borderRadius: 16, padding: 12 } : {}),
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+        {p.icon ? <NativeIcon name={p.icon} size={14} color={t.muted} /> : null}
+        <Text numberOfLines={1} style={{ ...body, color: t.muted, fontSize: 13, lineHeight: 18 }}>
+          {String(p.label ?? "")}
+        </Text>
+      </View>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        style={{
+          ...body,
+          ...heavier(ty, 700),
+          fontSize: tile ? 22 : 28,
+          lineHeight: tile ? 29 : 36,
+          letterSpacing: -0.5,
+          fontVariant: ["tabular-nums"],
+        }}
+      >
+        {formatStat(p.value, p.precision)}
+        {p.unit ? (
+          <Text style={{ ...heavier(ty, 500), color: t.muted, fontSize: 14, letterSpacing: 0 }}>
+            {` ${String(p.unit)}`}
+          </Text>
+        ) : null}
       </Text>
     </View>
   );

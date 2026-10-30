@@ -143,11 +143,14 @@ export function buildSystemPrompt({
       .map(([from, to]) => `${from} is unavailable on this target; use ${to} instead.`)
       .join(" ");
     const formulaSyntax = `numbers, 'text', state names, row fields (item.x), x[i], + - * / % ^, == != < <= > >=, && || !, c ? a : b, and functions: ${(capabilities.expressionOps ?? []).filter((op) => !["add", "sub", "mul", "div", "mod", "eq", "ne", "lt", "lte", "gt", "gte", "and", "or", "not", "if", "array"].includes(op)).join(",")}. round(x,2); numberFormat(x,0,true) groups thousands; format('{0}개',x); map(list,$item.price); filter(list,$item.done); sum(list); count(list); concat(list,[object('text',draft,'done',false)]); filter(items,$index != i) removes row i`;
+    const [open, close] = names.includes("Card")
+      ? ["<Card>", "</Card>"]
+      : ['<Box tone="subtle" radius="lg" padding="md" gap="sm">', "</Box>"];
     if (tags)
       parts.push(
         [
           "UI is written as tags on their own lines between Markdown paragraphs; it renders while you write it. Never put it in a code fence; close every tag; one block of tags is one UI.",
-          '{@state qty = 1} declares state (number, \'text\', [..], {..}); {@let total = qty * 39900} a derived value. Example:\n{@state qty = 1}\n<Box tone="subtle" radius="lg" padding="md" gap="sm">\n  <Slider label="수량" min={1} max={5} value={qty}/>\n  <Text size="xl" weight="bold">{numberFormat(qty * 39900, 0, true)}원</Text>\n</Box>',
+          `{@state qty = 1} declares state (number, 'text', [..], {..}); {@let total = qty * 39900} a derived value. Example:\n{@state qty = 1}\n${open}\n  <Slider label="수량" min={1} max={5} value={qty}/>\n  <Text size="xl" weight="bold">{numberFormat(qty * 39900, 0, true)}원</Text>\n${close}`,
           'Tags and attributes are the components and props below. Attributes: name="text", name={3}, name={expr}, a bare name means true. {expr} is a literal ([..], {..}), a state name (inputs bind two-way: value={qty}) or a formula. Text inside Text, Heading, Badge, Button and Callout is their text and {expr} interpolates. <Markdown>…</Markdown> holds Markdown and $math$ inside a layout.',
           "Repeat with {#each items as item, i}…{/each} over a state list (item.field inside); show conditionally with {#if cond}…{:else}…{/if}.",
           'A prop that is a list of objects takes child tags named after it, its fields as attributes: <Tabs value={tab}><Tab id="a" label="개요">…</Tab></Tabs> with {@state tab = \'a\'}, <Table caption="…"><Column key="name" label="이름"/><Row name="A" price={1000}/></Table>, <Diagram><Node id="a" label="…" sub="…" detail="…"/><Edge from="a" to="b" label="…"/></Diagram>, <Collection layout="strip"><Item image="…" title="…" subtitle="…"/></Collection>, <QuizSet><Question prompt="…" choices={["…","…"]} correctIndex={0} explanation="…"/></QuizSet>, <Menu><Item label="…" icon="…" onPress={…}/></Menu>; Flip takes <Front>…</Front><Back>…</Back>.',
@@ -187,7 +190,9 @@ export function buildSystemPrompt({
     );
     if (["Icon", "Callout", "Stat", "Badge"].some((name) => names.includes(name)))
       parts.push(
-        `Icon names (Icon.name and the icon prop of Callout, Stat and Badge): ${(kit.icons?.length ? kit.icons : BUILTIN_ICONS).join(",")}. Use an icon only where it helps scanning, never on every row.`,
+        kit.iconSet
+          ? `Icons (every name and icon prop): ${kit.iconSet}`
+          : `Icon names (Icon.name and the icon prop of Callout, Stat and Badge): ${(kit.icons?.length ? kit.icons : BUILTIN_ICONS).join(",")}. Use an icon only where it helps scanning, never on every row.`,
       );
     if (variant !== "signatures")
       parts.push(`Authoring patterns: ${JSON.stringify(availablePatterns(names))}`);
@@ -350,6 +355,10 @@ function objectOf(root: unknown, s: Schema, depth: number, omit = new Set<string
   return `{${fields.join(",")}}`;
 }
 
+/** The layout props several components share, spelled out once in the markup prompt. */
+const LAYOUT_PROPS =
+  "gap?:xs|sm|md|lg|xl,align?:start|center|end|stretch,justify?:start|center|end|between|around,wrap?:bool,padding?:none|xs|sm|md|lg|xl,width?:fill|hug|num,flex?:num";
+
 /**
  * The catalog as one line per component, e.g. `Slider{label:T,value:N,min?:num}`, about a tenth
  * of the JSON schema. Runtime validation is unchanged; this only shortens the prompt.
@@ -367,11 +376,11 @@ export function catalogSignatures(
       typeof s.description === "string"
         ? ` — ${s.description.split(/(?<=\.)\s/)[0].slice(0, 100)}`
         : "";
-    return `${name}${objectOf(catalog, s, 0, OMIT)}${description}`;
+    return `${name}${objectOf(catalog, s, 0, OMIT)}${description}`.replace(LAYOUT_PROPS, "L");
   });
   return [
     syntax === "markup"
-      ? "Types: T text, N number, B boolean, A list — each a literal or {expr}; ids = child tags; Action = an on* handler; ? = optional; [{…}] props take child tags named after them. Every component also accepts visible:B."
+      ? `Types: T text, N number, B boolean, A list — each a literal or {expr}; ids = child tags; Action = an on* handler; ? = optional; [{…}] props take child tags named after them; L = ${LAYOUT_PROPS}. Every component also accepts visible:B.`
       : "Types: T = text or {path} or compute; N = number or {path} or compute; B = boolean or {path} or compute; A = array or {path} or compute; ids = child component ids, or {componentId,path} to repeat a template per array item; Action = {event:{name,context}} or {functionCall:{call,args}}; ? = optional. Every component also accepts visible:B.",
     ...lines,
   ].join("\n");

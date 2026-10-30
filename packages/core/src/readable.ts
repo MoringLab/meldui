@@ -68,6 +68,10 @@ export function readableText(compiled: {
         return s(c.text);
       case "Callout":
         return [s(c.title), s(c.text)].filter(Boolean).join(": ");
+      case "ListItem":
+        return [[s(c.title), s(c.subtitle)].filter(Boolean).join(" · "), s(c.value)]
+          .filter(Boolean)
+          .join(": ");
       case "Formula":
         return joined(s(c.latex), s(c.meaning));
       case "CodeBlock":

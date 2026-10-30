@@ -487,6 +487,9 @@ export function describeSurface(runtime: UIRuntime, surfaceId: string, limit = 6
       case "Callout":
         lines.push(`${text(p.title)}: ${text(p.text)}`.trim());
         break;
+      case "ListItem":
+        lines.push(`${text(p.title)}: ${text(p.value)}`.replace(/: $/, ""));
+        break;
       case "Chart":
         lines.push(`Chart: ${text(p.title)}`);
         break;

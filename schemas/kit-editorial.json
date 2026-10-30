@@ -57,7 +57,10 @@
       "xl": 36
     },
     "radius": 6,
-    "motionMs": 140
+    "motionMs": 140,
+    "motion": {
+      "enterOffset": 0
+    }
   },
   "components": {
     "Confirmation": {
@@ -119,6 +122,9 @@
     },
     "Card": {
       "implementation": "EditorialCard"
+    },
+    "ListItem": {
+      "implementation": "ListItem"
     },
     "Divider": {
       "implementation": "Divider"
@@ -207,12 +213,43 @@
     "DatePicker": {
       "implementation": "DatePicker"
     },
+    "Box": {
+      "implementation": "Box"
+    },
+    "Pager": {
+      "implementation": "Pager"
+    },
+    "Flip": {
+      "implementation": "Flip"
+    },
+    "Menu": {
+      "implementation": "Menu"
+    },
+    "Device": {
+      "implementation": "Device"
+    },
+    "QuizSet": {
+      "implementation": "QuizSet"
+    },
+    "Diagram": {
+      "implementation": "Diagram"
+    },
+    "Collection": {
+      "implementation": "Collection"
+    },
+    "Quote": {
+      "implementation": "Quote"
+    },
+    "Converter": {
+      "implementation": "Converter"
+    },
     "Chart": {
       "implementation": "Chart"
     }
   },
   "hostImplementations": [],
   "customComponents": [],
+  "icons": [],
   "generation": {
     "designSkill": ""
   },

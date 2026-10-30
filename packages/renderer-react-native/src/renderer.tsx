@@ -23,19 +23,35 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import Svg, { Circle, Line, Path, Polyline, Rect, Text as SvgText } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  Line,
+  LinearGradient,
+  Path,
+  Polygon,
+  Polyline,
+  Rect,
+  Stop,
+  Text as SvgText,
+} from "react-native-svg";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
 import { localCalendarDate } from "./date.js";
 import {
   ActionButton,
   BoxView,
+  CardView,
   ChoiceRow,
+  DEFAULT_NATIVE_LABELS,
   DeviceView,
   FlipView,
+  heavier,
+  ListItemView,
   MenuView,
   type NativeLabels,
   PagerView,
@@ -46,6 +62,7 @@ import {
   SwitchRow,
   useBackdrop,
   useInk,
+  withAlpha,
 } from "./interactive.js";
 import { LearningView, learningNames } from "./learning.js";
 import { SafeMarkdown } from "./markdown.js";
@@ -527,50 +544,19 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       );
     }
     case "Card":
+      return <CardView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "ListItem":
+      return <ListItemView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Divider":
       return (
         <View
           style={{
-            backgroundColor: fill,
-            borderRadius: kit.tokens.radius * 1.6,
-            padding: 14,
-            gap: 12,
+            height: StyleSheet.hairlineWidth,
+            backgroundColor: withAlpha(t.foreground, 0.14),
+            marginVertical: 4,
           }}
-        >
-          {p.title && (
-            <Text
-              accessibilityRole="header"
-              style={{
-                ...body,
-                fontWeight: "600",
-                fontSize: ty.heading.sizes[3],
-                fontFamily:
-                  kit.components[node.component ?? ""]?.implementation ===
-                  `Editorial${node.component}`
-                    ? Platform.OS === "ios"
-                      ? "Georgia"
-                      : "serif"
-                    : undefined,
-                paddingBottom:
-                  kit.components[node.component ?? ""]?.implementation ===
-                  `Editorial${node.component}`
-                    ? 12
-                    : 0,
-                borderBottomWidth:
-                  kit.components[node.component ?? ""]?.implementation ===
-                  `Editorial${node.component}`
-                    ? 1
-                    : 0,
-                borderColor: t.border,
-              }}
-            >
-              {String(p.title)}
-            </Text>
-          )}
-          {children}
-        </View>
+        />
       );
-    case "Divider":
-      return <View style={{ height: 1, backgroundColor: t.border, marginVertical: 8 }} />;
     case "Heading":
       return (
         <Text
@@ -583,6 +569,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             fontSize: ty.heading.sizes[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
             lineHeight: ty.heading.lineHeights[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
             fontWeight: String(ty.heading.weight) as "600",
+            letterSpacing: -0.3,
             ...(ty.heading.nativeFamily ? { fontFamily: ty.heading.nativeFamily } : {}),
           }}
         >
@@ -759,10 +746,28 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           accessibilityValue={{ min: 0, max: p.max, now: Number(value) || 0 }}
           style={{ gap: 8 }}
         >
-          <Text style={body}>
-            {label}: {String(value)} / {p.max}
-          </Text>
-          <View style={{ height: 8, borderRadius: 4, backgroundColor: t.border }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
+            <Text style={{ ...body, flexShrink: 1, fontSize: 14, lineHeight: 20 }}>{label}</Text>
+            <Text
+              style={{
+                ...body,
+                ...heavier(ty, 600),
+                fontSize: 14,
+                lineHeight: 20,
+                fontVariant: ["tabular-nums"],
+              }}
+            >
+              {p.max === 100 ? `${Math.round(Number(value) || 0)}%` : `${String(value)} / ${p.max}`}
+            </Text>
+          </View>
+          <View
+            style={{
+              height: 6,
+              borderRadius: 3,
+              overflow: "hidden",
+              backgroundColor: withAlpha(t.foreground, 0.1),
+            }}
+          >
             <AnimatedFill
               ratio={Math.min(1, Math.max(0, Number(value) / p.max))}
               color={t.accent}
@@ -894,20 +899,46 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       const choose = (id: string) => (bound?.path ? write(id) : setLocalValue(id));
       const selected = p.tabs.find((tab: any) => tab.id === current) ?? p.tabs[0];
       return (
-        <View style={{ gap: 20 }}>
-          <ScrollView horizontal contentContainerStyle={{ gap: 8 }}>
-            {p.tabs.map((tab: any) => (
-              <View key={tab.id}>
-                {button(
-                  String(runtime.resolve(surfaceId, tab.label, node.scope)),
-                  () => choose(tab.id),
-                  tab !== selected,
-                  false,
-                  "tab",
-                  tab === selected,
-                )}
-              </View>
-            ))}
+        <View style={{ gap: 12 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 6 }}
+          >
+            {p.tabs.map((tab: any) => {
+              const on = tab === selected;
+              const label = String(runtime.resolve(surfaceId, tab.label, node.scope));
+              return (
+                <Pressable
+                  key={tab.id}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected: on }}
+                  hitSlop={6}
+                  onPress={() => choose(tab.id)}
+                  style={({ pressed }) => ({
+                    height: 34,
+                    paddingHorizontal: 14,
+                    borderRadius: 17,
+                    justifyContent: "center",
+                    backgroundColor: on ? t.accent : fill,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text
+                    style={{
+                      ...body,
+                      ...heavier(ty, on ? 600 : 500),
+                      color: on ? t.onAccent : t.foreground,
+                      fontSize: 14,
+                      lineHeight: 20,
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </ScrollView>
           {renderChild(selected.child)}
         </View>
@@ -919,7 +950,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           {p.items.map((item: any) => (
             <View
               key={item.id}
-              style={{ borderBottomWidth: 1, borderColor: t.border, paddingVertical: 8 }}
+              style={{
+                borderBottomWidth: StyleSheet.hairlineWidth,
+                borderColor: withAlpha(t.foreground, 0.14),
+              }}
             >
               <Pressable
                 accessibilityRole="button"
@@ -933,13 +967,17 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
                   alignItems: "center",
                 }}
               >
-                <Text style={{ ...body, flex: 1 }}>
+                <Text style={{ ...body, ...heavier(ty, 500), flex: 1, fontSize: 15 }}>
                   {String(runtime.resolve(surfaceId, item.label, node.scope))}
                 </Text>
-                <NativeIcon name="plus" color={t.foreground} />
+                <NativeIcon
+                  name={value === item.id ? "chevron-up" : "chevron-down"}
+                  size={18}
+                  color={t.muted}
+                />
               </Pressable>
               {value === item.id && (
-                <View style={{ paddingVertical: 12 }}>{renderChild(item.child)}</View>
+                <View style={{ paddingBottom: 12 }}>{renderChild(item.child)}</View>
               )}
             </View>
           ))}
@@ -947,13 +985,18 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       );
     case "Chart":
       return (
-        <View style={{ gap: 12 }}>
+        <View style={{ gap: 6 }}>
           <NativeChart node={node} />
-          {button(
-            showData ? "데이터 표 닫기" : "데이터 표 보기",
-            () => setShowData(!showData),
-            true,
-          )}
+          <Pressable
+            accessibilityRole="button"
+            hitSlop={10}
+            onPress={() => setShowData(!showData)}
+            style={({ pressed }) => ({ alignSelf: "flex-end", opacity: pressed ? 0.6 : 1 })}
+          >
+            <Text style={{ ...body, color: t.muted, fontSize: 13, lineHeight: 18 }}>
+              {showData ? "표 닫기" : "표로 보기"}
+            </Text>
+          </Pressable>
           {showData && (
             <NativeTable
               title={String(p.title)}
@@ -983,6 +1026,8 @@ const BUILTIN_PATHS: Record<string, string> = {
   close: "m6 6 12 12M6 18 18 6",
   "chevron-left": "m15 18-6-6 6-6",
   "chevron-right": "m9 18 6-6-6-6",
+  "chevron-down": "m6 9 6 6 6-6",
+  "chevron-up": "m6 15 6-6 6 6",
   more: "M5 12h.01M12 12h.01M19 12h.01",
   "image-off":
     "M3 3l18 18M10.4 5H19a2 2 0 0 1 2 2v8.6M19 21H5a2 2 0 0 1-2-2V7c0-.8.5-1.5 1.1-1.8M3 16l4.5-4.5 3 3M14 14l1.5-1.5L21 18",
@@ -1039,123 +1084,270 @@ function NativeTable({
   const { kit, mode } = useUI();
   const t = kit.tokens[mode];
   const ty = resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android");
-  const cell = {
-    padding: 12,
-    width: 150,
+  const list: any[] = Array.isArray(rows) ? rows : [];
+  // Up to three columns share the width; more scroll sideways.
+  const fits = columns.length <= 3;
+  const numeric = (key: string) =>
+    list.length > 0 && list.every((row) => /^[-+₩$€]?\s?\d/.test(String(row[key] ?? "").trim()));
+  // Each column's share follows its longest text, so an amount stays on one line.
+  const measure = (value: unknown) =>
+    [...String(value ?? "")].reduce((sum, char) => sum + (char > "\u2E7F" ? 1.8 : 1), 0);
+  const width = (key: string, label: string) =>
+    Math.max(4, ...[label, ...list.map((row) => row[key])].map(measure));
+  const cells = columns.map((c, i) => ({
+    ...c,
+    style: {
+      ...(fits
+        ? { flex: width(c.key, c.label) }
+        : { width: Math.min(160, 18 + width(c.key, c.label) * 9) }),
+      textAlign: i && numeric(c.key) ? ("right" as const) : ("left" as const),
+    },
+  }));
+  const text = {
     color: t.foreground,
-    fontSize: ty.small.size,
-    lineHeight: ty.small.lineHeight,
+    fontSize: 14,
+    lineHeight: 20,
     ...(ty.body.nativeFamily ? { fontFamily: ty.body.nativeFamily } : {}),
   };
-  return (
-    <View style={{ gap: 8 }}>
-      <Text accessibilityRole="header" style={{ color: t.muted, fontSize: ty.small.size }}>
-        {title}
-      </Text>
-      <ScrollView horizontal>
-        <View>
-          <View style={{ flexDirection: "row", borderBottomWidth: 1, borderColor: t.border }}>
-            {columns.map((c) => (
-              <Text key={c.key} style={{ ...cell, fontWeight: "600" }}>
-                {c.label}
-              </Text>
-            ))}
-          </View>
-          {(Array.isArray(rows) ? rows : []).map((row: any, index: number) => (
-            <View
-              key={row.id ?? index}
-              style={{ flexDirection: "row", borderBottomWidth: 1, borderColor: t.border }}
+  const line = { borderColor: withAlpha(t.foreground, 0.1) };
+  const grid = (
+    <View style={fits ? { flex: 1 } : undefined}>
+      <View style={{ flexDirection: "row", gap: 12, paddingBottom: 6 }}>
+        {cells.map((c) => (
+          <Text
+            key={c.key}
+            numberOfLines={1}
+            style={{ ...text, ...c.style, color: t.muted, fontSize: 12, lineHeight: 16 }}
+          >
+            {c.label}
+          </Text>
+        ))}
+      </View>
+      {list.map((row: any, index: number) => (
+        <View
+          key={row.id ?? index}
+          style={{
+            ...line,
+            flexDirection: "row",
+            gap: 12,
+            paddingVertical: 9,
+            borderTopWidth: StyleSheet.hairlineWidth,
+          }}
+        >
+          {cells.map((c, i) => (
+            <Text
+              key={c.key}
+              style={{
+                ...text,
+                ...c.style,
+                ...(i ? { fontVariant: ["tabular-nums" as const] } : heavier(ty, 500)),
+              }}
             >
-              {columns.map((c) => (
-                <Text key={c.key} style={cell}>
-                  {String(row[c.key] ?? "")}
-                </Text>
-              ))}
-            </View>
+              {String(row[c.key] ?? "")}
+            </Text>
           ))}
         </View>
-      </ScrollView>
+      ))}
+    </View>
+  );
+  return (
+    <View style={{ gap: 8 }}>
+      {title ? (
+        <Text
+          accessibilityRole="header"
+          style={{ ...text, ...heavier(ty, 500), color: t.muted, fontSize: 13, lineHeight: 18 }}
+        >
+          {title}
+        </Text>
+      ) : null}
+      {fits ? (
+        <View style={{ flexDirection: "row" }}>{grid}</View>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {grid}
+        </ScrollView>
+      )}
     </View>
   );
 }
+/** A short axis or value number: 1,200 / 1.2만, or 1.2k without unit labels. */
+function compactNumber(value: number, units: readonly (readonly [number, string])[]) {
+  const abs = Math.abs(value);
+  for (const [size, unit] of units)
+    if (abs >= size) return `${Math.round((value / size) * 10) / 10}${unit}`;
+  return String(Math.round(value * 10) / 10);
+}
+/** The nearest 1, 2 or 5 × 10ⁿ at or above a span. */
+function roundStep(span: number) {
+  const size = 10 ** Math.floor(Math.log10(span || 1));
+  const n = (span || 1) / size;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * size;
+}
 function NativeChart({ node }: { node: NodeSnapshot }) {
-  const { kit, mode } = useUI();
+  const { kit, mode, labels } = useUI();
   const t = kit.tokens[mode];
+  const ty = resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android");
   const p = node.props;
   const points = (Array.isArray(p.values) ? p.values : []).filter(
     (v: any) => typeof v?.[p.yKey] === "number" && Number.isFinite(v[p.yKey]),
   );
-  const min = Math.min(0, ...points.map((v: any) => v[p.yKey]));
-  const max = Math.max(1, ...points.map((v: any) => v[p.yKey]));
+  const count = points.length;
+  const ys: number[] = points.map((v: any) => v[p.yKey]);
+  const line = p.kind === "line";
+  // Bars grow from zero; a line shows its own range, so a small change stays visible. Round ends
+  // keep the axis labels round.
+  const lo = line ? Math.min(...ys) : Math.min(0, ...ys);
+  const hi = line ? Math.max(...ys) : Math.max(1, ...ys);
+  const step = roundStep((hi - lo) / 2);
+  const min = count ? Math.floor(lo / step) * step : 0;
+  const top = count ? Math.ceil(hi / step) * step : 1;
+  const max = top > min ? top : min + step;
   const numericX =
     p.kind === "scatter" &&
     points.every((v: any) => typeof v[p.xKey] === "number" && Number.isFinite(v[p.xKey]));
   const minX = Math.min(...points.map((v: any) => v[p.xKey]));
   const maxX = Math.max(...points.map((v: any) => v[p.xKey]));
+  const WIDTH = 360;
+  const HEIGHT = 190;
+  const LEFT = 44;
+  const plotW = WIDTH - LEFT - 8;
+  const bar = p.kind === "bar";
+  const band = plotW / Math.max(count, 1);
   const x = (i: number) =>
-    38 +
-    (numericX
-      ? (points[i][p.xKey] - minX) / (maxX - minX || 1)
-      : i / Math.max(points.length - 1, 1)) *
-      276;
-  const y = (v: number) => 174 - ((v - min) / (max - min)) * 142;
+    LEFT +
+    (bar
+      ? (i + 0.5) * band
+      : (numericX ? (points[i][p.xKey] - minX) / (maxX - minX || 1) : i / Math.max(count - 1, 1)) *
+        plotW);
+  const y = (v: number) => 160 - ((v - min) / (max - min || 1)) * 144;
+  const barWidth = Math.min(30, band * 0.62);
+  const peak = ys.reduce((best, v, i) => (Math.abs(v) > Math.abs(ys[best] ?? 0) ? i : best), 0);
+  const every = Math.ceil(count / 6);
+  const fontFamily = ty.body.nativeFamily;
+  const short = (v: number) =>
+    compactNumber(v, labels?.numberUnits ?? DEFAULT_NATIVE_LABELS.numberUnits);
+  const path = points.map((v: any, i: number) => `${x(i)},${y(v[p.yKey])}`).join(" ");
   return (
-    <View style={{ gap: 8 }}>
-      <Text
-        accessibilityRole="header"
-        style={{
-          color: t.foreground,
-          fontSize: resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android").heading
-            .sizes[3],
-          fontWeight: "600",
-        }}
-      >
-        {String(p.title)}
-      </Text>
+    <View style={{ gap: 6 }}>
+      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
+        <Text
+          accessibilityRole="header"
+          style={{
+            color: t.foreground,
+            flex: 1,
+            fontSize: 15,
+            lineHeight: 21,
+            ...(fontFamily ? { fontFamily } : {}),
+            ...heavier(ty, 600),
+          }}
+        >
+          {String(p.title)}
+        </Text>
+        {p.yUnit ? (
+          <Text style={{ color: t.muted, fontSize: 12, lineHeight: 16, fontFamily }}>
+            {String(p.yUnit)}
+          </Text>
+        ) : null}
+      </View>
       <Svg
         width="100%"
-        height={220}
-        viewBox="0 0 360 220"
+        height={undefined}
+        style={{ aspectRatio: WIDTH / HEIGHT }}
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         accessibilityRole="image"
-        accessibilityLabel={`${p.title}. ${points.length}개 값. 최솟값 ${min}, 최댓값 ${max}`}
+        accessibilityLabel={`${p.title}. ${count}개 값. 최솟값 ${Math.min(...ys)}, 최댓값 ${Math.max(...ys)}`}
       >
+        <Defs>
+          <LinearGradient id={`area-${node.id}`} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={t.accent} stopOpacity={0.14} />
+            <Stop offset="1" stopColor={t.accent} stopOpacity={0} />
+          </LinearGradient>
+        </Defs>
         {[0, 0.5, 1].map((fraction) => {
           const val = min + (max - min) * fraction;
           return (
             <React.Fragment key={fraction}>
-              <Line x1={38} x2={336} y1={y(val)} y2={y(val)} stroke={t.border} />
-              <SvgText x={30} y={y(val) + 4} textAnchor="end" fill={t.muted} fontSize={12}>
-                {Math.round(val * 10) / 10}
+              <Line
+                x1={LEFT}
+                x2={WIDTH - 4}
+                y1={y(val)}
+                y2={y(val)}
+                stroke={withAlpha(t.foreground, fraction ? 0.07 : 0.16)}
+              />
+              <SvgText
+                x={LEFT - 8}
+                y={y(val) + 4}
+                textAnchor="end"
+                fill={t.muted}
+                fontSize={11}
+                fontFamily={fontFamily}
+              >
+                {short(val)}
               </SvgText>
             </React.Fragment>
           );
         })}
-        {p.kind === "line" && (
-          <Polyline
-            points={points.map((v: any, i: number) => `${x(i)},${y(v[p.yKey])}`).join(" ")}
-            fill="none"
-            stroke={t.accent}
-            strokeWidth={3}
-          />
-        )}
+        {line && count > 1 ? (
+          <>
+            <Polygon
+              points={`${x(0)},${y(min)} ${path} ${x(count - 1)},${y(min)}`}
+              fill={`url(#area-${node.id})`}
+            />
+            <Polyline
+              points={path}
+              fill="none"
+              stroke={t.accent}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </>
+        ) : null}
         {points.map((v: any, i: number) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: SVG marks have no local state and duplicate coordinates are valid.
           <React.Fragment key={i}>
-            {p.kind === "bar" ? (
+            {bar ? (
               <Rect
-                x={x(i) - 14}
+                x={x(i) - barWidth / 2}
                 y={Math.min(y(0), y(v[p.yKey]))}
-                width={28}
-                height={Math.max(1, Math.abs(y(v[p.yKey]) - y(0)))}
-                fill={t.accent}
-                rx={2}
+                width={barWidth}
+                height={Math.max(2, Math.abs(y(v[p.yKey]) - y(0)))}
+                fill={i === peak ? t.accent : withAlpha(t.accent, 0.26)}
+                rx={Math.min(7, barWidth / 2)}
               />
-            ) : (
-              <Circle cx={x(i)} cy={y(v[p.yKey])} r={4} fill={t.accent} />
+            ) : line && i < count - 1 ? null : (
+              <Circle
+                cx={x(i)}
+                cy={y(v[p.yKey])}
+                r={line ? 4.5 : 3.5}
+                fill={t.accent}
+                opacity={line ? 1 : 0.75}
+              />
             )}
-            <SvgText x={x(i)} y={202} textAnchor="middle" fill={t.muted} fontSize={12}>
-              {String(v[p.xKey] ?? i + 1).slice(0, 8)}
-            </SvgText>
+            {bar && i === peak ? (
+              <SvgText
+                x={x(i)}
+                y={y(v[p.yKey]) - 6}
+                textAnchor="middle"
+                fill={t.foreground}
+                fontSize={11}
+                fontFamily={ty.weights?.[600] ?? fontFamily}
+              >
+                {short(v[p.yKey])}
+              </SvgText>
+            ) : null}
+            {i % every === 0 ? (
+              <SvgText
+                x={x(i)}
+                y={182}
+                textAnchor={!bar && i === 0 ? "start" : "middle"}
+                fill={t.muted}
+                fontSize={11}
+                fontFamily={fontFamily}
+              >
+                {String(v[p.xKey] ?? i + 1).slice(0, 8)}
+              </SvgText>
+            ) : null}
           </React.Fragment>
         ))}
       </Svg>

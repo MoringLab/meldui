@@ -470,7 +470,25 @@ export const componentSchemas = {
   Row: z.object({ ...common, ...layout }),
   Column: z.object({ ...common, ...layout }),
   Grid: z.object({ ...common, ...layout, columns: z.number().int().min(1).max(6).default(2) }),
-  Card: z.object({ ...common, children: ChildListSchema, title: text.optional() }),
+  Card: z.object({
+    ...common,
+    children: ChildListSchema,
+    title: text.optional(),
+    icon: iconName.optional(),
+    /** A quiet link in the header ("모두 보기"); `action` runs it. */
+    more: text.optional(),
+    action: ActionSchema.optional(),
+  }),
+  /** One row of a list: an icon, a title and subtitle, a value at the end; tappable with `action`. */
+  ListItem: z.object({
+    ...common,
+    title: text,
+    subtitle: text.optional(),
+    value: text.optional(),
+    icon: iconName.optional(),
+    tone: z.enum(["default", "success", "warning", "danger"]).optional(),
+    action: ActionSchema.optional(),
+  }),
   Divider: z.object(common),
   Tabs: z.object({ ...common, tabs: z.array(item).min(1).max(20), value: text }),
   Accordion: z.object({ ...common, items: z.array(item).min(1).max(30), value: text }),

@@ -90,7 +90,8 @@ if(!document.body.textContent.includes('Host registered widget') || custom.diagn
 const originalError=console.error;console.error=()=>{};
 custom.accept({version:'v0.9',updateComponents:{surfaceId:'main',components:[{id:'root',component:'HostText',text:'explode'}]}});
 await new Promise(resolve=>setTimeout(resolve,50));
-if(!document.querySelector('[role="alert"]') || !custom.diagnostics.some(d=>d.code==='RENDER_ERROR'))throw Error('Host error isolation failed');
+// A failed host widget is reported, never drawn as an error card; the surface stays up.
+if(!document.querySelector('.ui-surface') || document.querySelector('[role="alert"]') || !custom.diagnostics.some(d=>d.code==='RENDER_ERROR'))throw Error('Host error isolation failed');
 custom.accept({version:'v0.9',updateComponents:{surfaceId:'main',components:[{id:'root',component:'HostText',text:'Recovered host widget'}]}});
 await new Promise(resolve=>setTimeout(resolve,50));console.error=originalError;
 if(!document.body.textContent.includes('Recovered host widget'))throw Error('Host renderer recovery failed');

@@ -221,6 +221,12 @@ function fixIssue(props: Record<string, any>, issue: z.ZodIssue, repairs: string
         }
         return false;
       }
+      // A token field that also takes numbers ("large" in padding) lands here, not as an enum.
+      if (typeof value === "string" && ENUM_SYNONYMS[value.toLowerCase()]) {
+        const next = ENUM_SYNONYMS[value.toLowerCase()];
+        note(`"${value}" → "${next}"`);
+        return put(props, path, next);
+      }
       for (const expected of ["number", "string", "boolean"]) {
         const next = coerce(value, expected);
         if (

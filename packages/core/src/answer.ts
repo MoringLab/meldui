@@ -806,7 +806,7 @@ export class AnswerSession {
     }
     let compiled: ReturnType<typeof compileMarkup>;
     try {
-      compiled = compileMarkup(source, { final });
+      compiled = compileMarkup(source, { final, frame: this.policy.frameSurfaces ?? false });
     } catch (error) {
       this.report({
         code: "MARKUP_INVALID",

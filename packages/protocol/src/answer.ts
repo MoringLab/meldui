@@ -81,6 +81,8 @@ export const HostPolicySchema = z
     allowedComponents: z.array(z.string()).optional(),
     allowMedia: z.boolean().default(true),
     allowSandbox: z.boolean().default(false),
+    /** Wraps a surface with no ground of its own in a Card (it sits in a chat bubble). */
+    frameSurfaces: z.boolean().default(false),
     maxOutputTokens: z.number().int().min(1).max(8192).optional(),
     latencyBudgetMs: z.number().int().min(1).max(120000).optional(),
     /** Content height policy: undefined grows with content; a number caps it with internal scroll. */

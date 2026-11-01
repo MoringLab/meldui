@@ -1,6 +1,7 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: collection items may repeat an image; their order is fixed
 // Diagrams, picture collections and market widgets, drawn natively. Pictures and market data
 // come from the host (ImageSourceContext, MarketContext): the engine never fetches by itself.
+import { DiagramKind, hasKind } from "./diagrams.js";
 import { resolveTypography } from "@engine/kit-spec";
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -516,6 +517,7 @@ type DNode = {
   label: string;
   sub?: string;
   detail?: string;
+  icon?: string;
   tone?: string;
   emphasis?: boolean;
   x?: number;
@@ -551,8 +553,11 @@ function layoutDiagram(
   const ids = new Set(nodes.map((n) => n.id));
   const live = edges.filter((e) => ids.has(e.from) && ids.has(e.to) && e.from !== e.to);
   const size = (n: DNode) => {
-    const w = Math.max(textWidth(n.label, 17), n.sub ? textWidth(n.sub, 13) : 0) + 36;
-    return { w: Math.min(Math.max(w, 84), width * 0.46), h: n.sub ? 64 : 46 };
+    // Long names take a second line instead of shrinking away.
+    const w = Math.max(textWidth(n.label, 15), n.sub ? textWidth(n.sub, 12) : 0) + 28;
+    const room = width * 0.46;
+    const lines = w > room ? 2 : 1;
+    return { w: Math.max(Math.min(w, room), 76), h: 26 + lines * 19 + (n.sub ? 16 : 0) };
   };
   const base = nodes.map((n, i) => ({
     ...n,
@@ -622,13 +627,22 @@ function layoutDiagram(
   }
   if (kind === "row") for (const n of base) rank.set(n.id, 0);
   const rows: Placed[][] = [];
+  // A rank too wide for the phone carries on in the next row instead of squeezing its boxes.
+  const fit = (width + 10) / 86;
   for (const n of base) {
     n.rank = rank.get(n.id) ?? 0;
-    const row = rows[n.rank] ?? [];
-    row.push(n);
-    rows[n.rank] = row;
   }
-  const across = direction === "right" ? 0 : 1;
+  const depth = Math.max(...base.map((n) => n.rank));
+  // Left to right only while the columns stay readable.
+  const across = direction === "right" && depth <= 2 ? 0 : 1;
+  for (let r = 0, out = 0; r <= depth; r++) {
+    const rank_ = base.filter((n) => n.rank === r);
+    for (let i = 0; i < rank_.length; i += Math.max(1, Math.floor(fit))) {
+      const row = rank_.slice(i, i + Math.max(1, Math.floor(fit)));
+      for (const n of row) n.rank = out;
+      rows[out++] = row;
+    }
+  }
   const gapMain = 64;
   if (across) {
     let y = 8;
@@ -761,6 +775,8 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
     direction?: string;
     value?: string;
     hint?: string;
+    kind?: string;
+    panel?: boolean;
   };
   const look = useLook();
   const { t, body, dark, labels } = look;
@@ -793,7 +809,7 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
   const byId = new Map(placed.map((n) => [n.id, n]));
   // biome-ignore lint/correctness/useExhaustiveDependencies: `placed` changes with `key`
   const labelBoxes = useMemo(() => placeLabels(edges, byId, placed, width), [placed]);
-  const chosen = selected ? byId.get(selected) : undefined;
+  const chosen = selected ? (byId.get(selected) ?? nodes.flatMap((n, i) => (n.id === selected ? [{ ...n, color: colorOf(n, i) }] : []))[0]) : undefined;
   // A chosen node lights its own lines and dims the rest; its panel lists every relation.
   const touches = (e: DEdge) => !selected || e.from === selected || e.to === selected;
   const relations = chosen
@@ -818,7 +834,17 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
       {p.title ? (
         <Text style={{ ...body, fontWeight: "700", fontSize: 17, ...look.heading }}>{p.title}</Text>
       ) : null}
-      {width ? (
+      {width && hasKind(p.kind) ? (
+        <DiagramKind
+          kind={p.kind as string}
+          nodes={nodes.map((n, i) => ({ ...n, color: colorOf(n, i) }))}
+          edges={edges}
+          width={width}
+          look={{ t, body, alpha: withAlpha }}
+          selected={selected}
+          onSelect={select}
+        />
+      ) : width ? (
         <View style={{ width, height }}>
           <Svg width={width} height={height} style={{ position: "absolute" }}>
             {edges.map((e, i) => {
@@ -926,14 +952,14 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
               }}
             >
               <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
+                numberOfLines={2}
                 style={{
                   ...body,
                   ...look.heading,
-                  fontSize: 17,
-                  lineHeight: 22,
+                  fontSize: 15,
+                  lineHeight: 19,
                   fontWeight: "700",
+                  textAlign: "center",
                   color: n.color,
                 }}
               >
@@ -942,8 +968,7 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
               {n.sub ? (
                 <Text
                   numberOfLines={1}
-                  adjustsFontSizeToFit
-                  style={{ ...body, fontSize: 13, lineHeight: 17, color: withAlpha(n.color, 0.85) }}
+                  style={{ ...body, fontSize: 12, lineHeight: 16, color: withAlpha(n.color, 0.85) }}
                 >
                   {n.sub}
                 </Text>
@@ -954,7 +979,7 @@ export function DiagramView({ node, runtime, surfaceId }: NativeViewProps) {
       ) : (
         <View style={{ height: 160 }} />
       )}
-      {chosen ? (
+      {p.panel === false ? null : chosen ? (
         <View
           style={{
             borderRadius: 16,

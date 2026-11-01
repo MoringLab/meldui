@@ -11,8 +11,8 @@ const fix = (value: Record<string, unknown>) => {
 describe("component repair", () => {
   it("fixes the three reported errors", () => {
     // too_big at width: a percentage or pixels where a fraction belongs
-    expect(fix({ id: "a", component: "Box", width: 50, children: [] }).component.width).toBe(0.5);
-    expect(fix({ id: "b", component: "Box", width: 320 }).component.width).toBe(1);
+    // Sizes are free: a model that asks for 320dp gets it (the renderer keeps it inside its parent).
+    expect(fix({ id: "b", component: "Box", width: 320 }).component.width).toBe(320);
     // invalid_union at action: actions in other shapes
     expect(
       fix({

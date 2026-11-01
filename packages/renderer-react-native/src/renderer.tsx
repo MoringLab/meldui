@@ -42,6 +42,7 @@ import Svg, {
 } from "react-native-svg";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
 import { localCalendarDate } from "./date.js";
+import { colorOf } from "./style.js";
 import {
   ActionButton,
   BoxView,
@@ -392,6 +393,14 @@ class NativeBoundary extends React.Component<
     return this.state.failed ? null : this.props.children;
   }
 }
+const ICON_SIZE: Record<string, number> = { xs: 14, sm: 16, md: 20, lg: 24, xl: 32 };
+
+/** Whether a Row or Column asks for a layout of its own, which BoxView draws. */
+const styled = (p: Record<string, unknown>, row = false) =>
+  Boolean(p.justify || p.flex || p.width || p.padding || p.background || p.radius || p.height || p.border || p.action) ||
+  p.wrap !== undefined ||
+  (row && (Boolean(p.align) || p.gap !== undefined));
+
 function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeViewProps) {
   const { kit, mode, assets, selectable } = useUI();
   const t = kit.tokens[mode];
@@ -424,8 +433,11 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
     ...family,
   } as const;
   const container = {
-    gap: kit.tokens.spacing[(p.gap ?? "md") as keyof UIKit["tokens"]["spacing"]],
+    gap: typeof p.gap === "number" ? p.gap * 4 : kit.tokens.spacing[(p.gap ?? "md") as keyof UIKit["tokens"]["spacing"]],
   };
+  const badgeColor = (b: Record<string, unknown>) =>
+    colorOf(b.color, t, mode === "dark") ??
+    (b.tone === "success" ? t.success : b.tone === "danger" ? t.danger : b.tone === "warning" ? (t.warning ?? "#D97706") : b.tone === "info" ? colorOf("info", t, mode === "dark") : undefined);
   const control = {
     minHeight: 48,
     borderRadius: 12,
@@ -514,8 +526,9 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
     case "Column":
       return <BoxView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Row":
-      if (p.justify || p.flex || p.width || p.padding || p.wrap !== undefined)
-        return <BoxView {...{ node, runtime, surfaceId, children, renderChild }} />;
+      // A row written with any intent of its own lays out as asked; only a bare <Row> spreads
+      // its children evenly and wraps them.
+      if (styled(p, true)) return <BoxView {...{ node, runtime, surfaceId, children, renderChild }} />;
       return (
         <View style={{ ...container, flexDirection: "row", flexWrap: "wrap" }}>
           {React.Children.map(children, (child) => (
@@ -565,7 +578,7 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
           lineBreakStrategyIOS="hangul-word"
           testID={`node-${node.id}`}
           style={{
-            color: ink ?? t.foreground,
+            color: colorOf(p.color, t, mode === "dark") ?? ink ?? t.foreground,
             fontSize: ty.heading.sizes[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
             lineHeight: ty.heading.lineHeights[Math.min(5, Math.max(0, Number(p.level ?? 2) - 1))],
             fontWeight: String(ty.heading.weight) as "600",
@@ -648,9 +661,10 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
     case "Icon":
       return (
         <NativeIcon
-          name={p.name}
+          name={String(p.name)}
           label={p.label}
-          color={!p.tone || p.tone === "default" ? (ink ?? t.foreground) : toneColor(t, p.tone)}
+          size={typeof p.size === "number" ? p.size : ICON_SIZE[String(p.size)]}
+          color={colorOf(p.color, t, mode === "dark") ?? (!p.tone || p.tone === "default" ? (ink ?? t.foreground) : toneColor(t, p.tone))}
         />
       );
     case "Badge":
@@ -663,18 +677,14 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
             gap: 4,
             paddingHorizontal: 10,
             paddingVertical: 4,
-            backgroundColor: fill,
+            backgroundColor: badgeColor(p) ? withAlpha(badgeColor(p) as string, 0.14) : fill,
             borderRadius: 20,
           }}
         >
           {p.icon ? (
-            <NativeIcon
-              name={p.icon}
-              size={14}
-              color={p.tone === "success" ? t.success : t.muted}
-            />
+            <NativeIcon name={p.icon} size={14} color={badgeColor(p) ?? t.muted} />
           ) : null}
-          <Text style={{ color: p.tone === "success" ? t.success : t.foreground, fontSize: 13 }}>
+          <Text style={{ ...family, color: badgeColor(p) ?? t.foreground, fontSize: 13, lineHeight: 18 }}>
             {String(p.text ?? "")}
           </Text>
         </View>

@@ -66,6 +66,12 @@ const RAW = new Set(["markdown", "codeblock"]);
 const NAMES = new Map(Object.keys(componentSchemas).map((n) => [n.toLowerCase(), n]));
 const ALIASES: Record<string, string> = {
   title: "Heading",
+  col: "Column",
+  pressable: "Box",
+  griditem: "Box",
+  "grid-item": "Box",
+  "segmented-control": "Select",
+  segmented: "Select",
   caption: "Text",
   bold: "Text",
   label: "Text",
@@ -823,11 +829,22 @@ function compileChildren(
       continue;
     }
     if (node.type === "each") {
+      if (!reference(node.list, ctx, scope) && (ctx.lets.has(node.list.split(/[.[(]/)[0] as string) || !/^[A-Za-z_]\w*$/.test(node.list.trim()))) {
+        ids.push(...expandEach(node, ctx, scope));
+        continue;
+      }
       const template = compileEach(node, ctx, scope);
       if (!template) continue;
       if (eachOnly) return template;
       const id = newId(ctx);
-      ctx.components.push({ id, component: "Column", gap: "sm", children: template });
+      // The repeated items lay out like their siblings: in a row they stay in the row.
+      const across = parentName === "Row" || (parentName === "Box" && props.direction === "row");
+      ctx.components.push({
+        id,
+        component: across ? "Row" : "Column",
+        ...(across ? { flex: 1, gap: props.gap ?? "sm" } : { gap: "sm" }),
+        children: template,
+      });
       ids.push(id);
       continue;
     }
@@ -841,6 +858,34 @@ function compileChildren(
     if (!id) continue;
     if (slotAttr && typeof slotAttr.value === "string") props[slotAttr.value] = id;
     else ids.push(id);
+  }
+  return ids;
+}
+
+/** Most rows a computed list can show (each is drawn in advance and hidden until it has a row). */
+const COMPUTED_ROWS = 16;
+
+/**
+ * A list that is a formula has no place in the data to template over, so one copy per place reads
+ * its own row of the formula, and copies past the end are hidden.
+ */
+function expandEach(node: Each, ctx: Ctx, scope: Scope): string[] {
+  const known = literal(node.list);
+  const places = known.ok && Array.isArray(known.value) ? Math.min(known.value.length, COMPUTED_ROWS * 4) : COMPUTED_ROWS;
+  const saved = [node.item, node.index].filter(Boolean).map((n) => [n as string, ctx.lets.get(n as string)] as const);
+  const ids: string[] = [];
+  for (let k = 0; k < places; k++) {
+    ctx.lets.set(node.item, `(${node.list})[${k}]`);
+    if (node.index) ctx.lets.set(node.index, String(k));
+    const id = wrap(node.children, ctx, scope);
+    if (!id) continue;
+    const made = ctx.components.find((c) => c.id === id) as Record<string, unknown> | undefined;
+    if (made && !known.ok) made.visible = { call: "computeBoolean", args: { formula: `count(${formula(node.list, ctx, scope)}) > ${k}` } };
+    ids.push(id);
+  }
+  for (const [n, v] of saved) {
+    if (v === undefined) ctx.lets.delete(n);
+    else ctx.lets.set(n, v);
   }
   return ids;
 }
@@ -951,9 +996,14 @@ function compileElement(el: El, ctx: Ctx, scope: Scope, visible: string | null):
   const props: Record<string, unknown> = {};
   const lower = el.name.toLowerCase();
   if (lower === "caption") Object.assign(props, { size: "sm", tone: "muted" });
+  if (lower === "segmented-control" || lower === "segmented") props.variant = "segmented";
   if (lower === "bold") props.weight = "bold";
   for (const attr of el.attrs) {
-    if (attr.name === "id" || attr.name === "slot") continue;
+    if (attr.name === "id" || attr.name === "slot" || attr.name === "key") continue;
+    if (name === "Button" && attr.name === "variant" && attr.value === "ghost") {
+      props.variant = "quiet";
+      continue;
+    }
     if (EVENT.test(attr.name)) {
       if (attr.name === "onChange" && el.attrs.some((a) => a.name === "value" || a.name === "bind"))
         continue;
@@ -975,11 +1025,37 @@ function compileElement(el: El, ctx: Ctx, scope: Scope, visible: string | null):
       if (ref) props.value = { path: ref };
       continue;
     }
+    if (attr.name === "tabularNums" && name === "Heading") continue;
     if (attr.name === "size" && name === "Heading" && typeof attr.value === "string") {
-      props.level = ({ xl: 2, lg: 3, md: 4, sm: 5 } as Record<string, number>)[attr.value] ?? 3;
+      props.level = ({ "3xl": 1, "2xl": 1, xl: 2, lg: 3, md: 4, sm: 5 } as Record<string, number>)[attr.value] ?? 3;
+      continue;
+    }
+    // Props a style-minded writer reaches for, under the names this catalog uses.
+    if (name === "Text" && attr.name === "tabular") {
+      props.tabularNums = true;
+      continue;
+    }
+    if (name === "Box" && (attr.name === "direction") && attr.value === "col") {
+      props.direction = "column";
       continue;
     }
     props[attr.name] = attrValue(attr, name, attr.name, ctx, scope);
+  }
+  if (typeof props.aspectRatio === "string") {
+    const [w, h] = props.aspectRatio.split(":").map(Number);
+    props.aspectRatio = w && h ? w / h : undefined;
+  }
+  // <Button><Icon name="heart"/></Button>: an icon button.
+  if (name === "Button") {
+    const glyph = el.children.find((c): c is El => c.type === "el" && c.name.toLowerCase() === "icon");
+    const icon = glyph?.attrs.find((a) => a.name === "name");
+    if (icon) {
+      props.icon = attrValue(icon, "Icon", "name", ctx, scope);
+      if (!el.children.some((c) => c.type === "text" && c.text.trim())) {
+        props.iconOnly = true;
+        props.label ??= props.accessibilityLabel ?? (typeof icon.value === "string" ? icon.value : "버튼");
+      }
+    }
   }
   const textProp = TEXT_PROP[name];
   if (el.raw) {
@@ -1047,7 +1123,7 @@ export type CompiledMarkup = {
 /** Compiles a markup region (complete, or the part streamed so far). The root is "root". */
 export function compileMarkup(
   source: string,
-  options: { final?: boolean; prefix?: string } = {},
+  options: { final?: boolean; prefix?: string; frame?: boolean } = {},
 ): CompiledMarkup {
   const parsed = parseMarkup(source, options.final ?? false);
   const ctx: Ctx = {
@@ -1065,7 +1141,12 @@ export function compileMarkup(
       if (n.type === "state") {
         const lit = literal(n.expr);
         ctx.states.set(n.name, lit.ok ? lit.value : n.expr.replace(/^['"]|['"]$/g, ""));
-      } else if (n.type === "let") ctx.lets.set(n.name, n.expr);
+      } else if (n.type === "let") {
+        // A constant (a table of data) lives with the state, where formulas can index it.
+        const lit = literal(n.expr);
+        if (lit.ok && lit.value !== null && typeof lit.value === "object") ctx.states.set(n.name, lit.value);
+        else ctx.lets.set(n.name, n.expr);
+      }
       else if (n.type === "el") collect(n.children);
       else if (n.type === "each") collect(n.children);
       else if (n.type === "if") collect([...n.yes, ...n.else]);
@@ -1075,9 +1156,15 @@ export function compileMarkup(
   const root: Record<string, unknown> = {};
   const children = compileChildren("Column", parsed.nodes, ctx, { nested: false }, root);
   const data = Object.fromEntries([...ctx.states].map(([k, v]) => [`/${k}`, v]));
+  // In a conversation everything sits in a bubble: what brought no surface of its own gets a Card.
+  const top = Array.isArray(children) ? children : [];
+  const only = top.length === 1 ? (ctx.components.find((c) => c.id === top[0]) as Record<string, unknown> | undefined) : undefined;
+  const framed = only && (only.component === "Card" || only.background || only.tone);
+  const frame = options.frame && top.length > 0 && !framed;
   return {
     components: [
-      { id: "root", component: "Column", gap: "md", ...root, children },
+      { id: "root", component: "Column", gap: "md", ...root, children: frame ? ["frame"] : children },
+      ...(frame ? [{ id: "frame", component: "Card", children } as Component] : []),
       ...ctx.components,
     ],
     data,

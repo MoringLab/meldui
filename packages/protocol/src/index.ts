@@ -182,6 +182,43 @@ export const functionDefinitions = [
   { name: "openUrl", returnType: "void", schema: z.object({ url: text }).strict(), pure: false },
 ];
 const gap = z.enum(["xs", "sm", "md", "lg", "xl"]).optional();
+/** Room between and around things: a token, or steps of 4dp (padding={3} is 12dp). */
+const spacing = z.union([z.enum(["none", "xs", "sm", "md", "lg", "xl"]), z.number().min(0).max(24)]);
+const inset = z.union([
+  spacing,
+  z.object({
+    x: spacing.optional(),
+    y: spacing.optional(),
+    top: spacing.optional(),
+    bottom: spacing.optional(),
+    left: spacing.optional(),
+    right: spacing.optional(),
+  }),
+]);
+/** A length: dp, a fraction up to 1, or "120px" / "50%" (may be computed). */
+const length = z.union([text, z.number().min(0).max(1200)]);
+const corner = z.union([z.enum(["none", "sm", "md", "lg", "xl", "2xl", "3xl", "full"]), z.number().min(0).max(64)]);
+/**
+ * How a container looks. Colours are roles (primary, secondary, tertiary, accent, info, success,
+ * warning, danger, surface, surface-secondary, background) or #hex / rgb(), and may be computed.
+ */
+const paint = {
+  background: text.optional(),
+  borderColor: text.optional(),
+  radius: z.union([corner, z.object({
+    topLeft: corner.optional(),
+    topRight: corner.optional(),
+    bottomLeft: corner.optional(),
+    bottomRight: corner.optional(),
+  })]).optional(),
+  /** The colour of the words on it; by default what reads on `background`. */
+  theme: z.enum(["light", "dark"]).optional(),
+  /** Keeps what is inside within the corners. */
+  clip: z.boolean().optional(),
+  height: length.optional(),
+  minHeight: length.optional(),
+  opacity: number.optional(),
+};
 /** Icon names are open: the kit lists the names its hosts draw (kit.icons); unknown names fall back. */
 export const iconName = z.string().regex(/^[a-z][a-z0-9-]{0,39}$/);
 /** Built-in icons every renderer draws without a host icon set. */
@@ -189,14 +226,17 @@ export const BUILTIN_ICONS = ["check", "info", "arrow", "plus", "star", "close"]
 const common = { visible: boolean.optional(), accessibilityLabel: z.string().max(256).optional() };
 const layout = {
   children: ChildListSchema,
-  gap,
+  gap: spacing.optional(),
   align: z.enum(["start", "center", "end", "stretch"]).optional(),
   // The sizing a Box has: models reach for it on rows and columns too.
   justify: z.enum(["start", "center", "end", "between", "around"]).optional(),
   wrap: z.boolean().optional(),
-  padding: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
-  width: z.union([z.enum(["fill", "hug"]), z.number().min(0.1).max(1)]).optional(),
-  flex: z.number().min(0).max(12).optional(),
+  padding: inset.optional(),
+  width: z.union([z.enum(["fill", "hug"]), length]).optional(),
+  flex: z.union([z.number().min(0).max(12), z.string().regex(/^\d+$/)]).optional(),
+  border: z.boolean().optional(),
+  action: ActionSchema.optional(),
+  ...paint,
 };
 const input = {
   label: text,
@@ -485,21 +525,29 @@ export const componentSchemas = {
     title: text,
     subtitle: text.optional(),
     value: text.optional(),
+    /** The colour of `value`, for an action word ("연결"). */
+    valueColor: text.optional(),
     icon: iconName.optional(),
+    /** The icon chip's colour. */
+    iconColor: text.optional(),
     tone: z.enum(["default", "success", "warning", "danger"]).optional(),
     action: ActionSchema.optional(),
   }),
   Divider: z.object(common),
   Tabs: z.object({ ...common, tabs: z.array(item).min(1).max(20), value: text }),
   Accordion: z.object({ ...common, items: z.array(item).min(1).max(30), value: text }),
-  Heading: z.object({ ...common, text, level: z.number().int().min(1).max(6).default(2) }),
+  Heading: z.object({ ...common, text, level: z.number().int().min(1).max(6).default(2), color: text.optional() }),
   Text: z.object({
     ...common,
     text,
     tone: z.enum(["default", "muted", "accent", "success", "danger"]).optional(),
-    size: z.enum(["sm", "md", "lg", "xl", "display"]).optional(),
-    weight: z.enum(["regular", "medium", "bold"]).optional(),
+    size: z.enum(["2xs", "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "display"]).optional(),
+    weight: z.enum(["regular", "medium", "semibold", "bold"]).optional(),
     align: z.enum(["start", "center", "end"]).optional(),
+    color: text.optional(),
+    /** Digits of equal width, for numbers that change. */
+    tabularNums: z.boolean().optional(),
+    lines: z.number().int().min(1).max(12).optional(),
     /** A marker highlight behind the words (sweeps in once). */
     highlight: z.boolean().optional(),
   }),
@@ -580,14 +628,17 @@ export const componentSchemas = {
   }),
   Icon: z.object({
     ...common,
-    name: iconName,
+    name: z.union([iconName, text]),
     label: z.string().optional(),
     tone: z.enum(["default", "muted", "accent", "success", "danger"]).optional(),
+    color: text.optional(),
+    size: z.union([z.enum(["xs", "sm", "md", "lg", "xl"]), z.number().min(8).max(96)]).optional(),
   }),
   Badge: z.object({
     ...common,
     text,
-    tone: z.enum(["default", "success", "warning"]).optional(),
+    tone: z.enum(["default", "success", "warning", "danger", "info"]).optional(),
+    color: text.optional(),
     icon: iconName.optional(),
   }),
   Callout: z.object({
@@ -632,10 +683,11 @@ export const componentSchemas = {
     action: ActionSchema,
     variant: z.enum(["primary", "secondary", "quiet"]).default("primary"),
     disabled: boolean.optional(),
-    icon: iconName.optional(),
+    icon: z.union([iconName, text]).optional(),
     /** Only the icon shows (the label stays the accessible name). */
     iconOnly: z.boolean().optional(),
-    size: z.enum(["sm", "md"]).optional(),
+    size: z.enum(["sm", "md", "lg"]).optional(),
+    color: text.optional(),
     fill: z.boolean().optional(),
   }),
   TextField: z.object({
@@ -693,11 +745,11 @@ export const componentSchemas = {
     // Optional: an empty Box is a spacer, a swatch or a placeholder.
     children: ChildListSchema.optional(),
     direction: z.enum(["column", "row"]).optional(),
-    gap: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
+    gap: spacing.optional(),
     align: z.enum(["start", "center", "end", "stretch"]).optional(),
     justify: z.enum(["start", "center", "end", "between", "around"]).optional(),
     wrap: z.boolean().optional(),
-    padding: z.enum(["none", "xs", "sm", "md", "lg", "xl"]).optional(),
+    padding: inset.optional(),
     tone: z
       .enum([
         "plain",
@@ -711,11 +763,10 @@ export const componentSchemas = {
         "danger",
       ])
       .optional(),
-    radius: z.enum(["none", "sm", "md", "lg", "full"]).optional(),
+    ...paint,
     border: z.boolean().optional(),
-    width: z.union([z.enum(["fill", "hug"]), z.number().min(0.1).max(1)]).optional(),
-    flex: z.number().min(0).max(12).optional(),
-    height: z.number().int().min(8).max(800).optional(),
+    width: z.union([z.enum(["fill", "hug"]), length]).optional(),
+    flex: z.union([z.number().min(0).max(12), z.string().regex(/^\d+$/)]).optional(),
     aspectRatio: z.number().positive().max(10).optional(),
     scroll: z.enum(["horizontal"]).optional(),
     action: ActionSchema.optional(),
@@ -798,6 +849,7 @@ export const componentSchemas = {
             sub: z.string().max(120).optional(),
             /** Shown under the diagram when the node is tapped. */
             detail: z.string().max(800).optional(),
+            icon: iconName.optional(),
             tone: z
               .enum([
                 "default",
@@ -851,8 +903,12 @@ export const componentSchemas = {
       .default([]),
     layout: z.enum(["auto", "tree", "circle", "row", "manual"]).default("auto"),
     direction: z.enum(["down", "right"]).default("down"),
-    /** The tapped node (two-way). */
+    /** The form: boxes and arrows, or a shape made for the content. */
+    kind: z.enum(["flow", "timeline", "layers", "funnel", "mindmap", "sequence", "quadrant"]).optional(),
+    /** The tapped node (two-way): anything else in the UI may react to it with {#if}. */
     value: text.optional(),
+    /** Whether a tap opens the panel with the node's detail (off when the UI answers the tap itself). */
+    panel: z.boolean().optional(),
     hint: text.optional(),
   }),
   /** Pictures from the web, the host's saved items or attachments: carousel, strip of cards, grid, hero. */

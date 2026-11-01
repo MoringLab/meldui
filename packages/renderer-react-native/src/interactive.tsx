@@ -28,6 +28,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import { colorOf, cornerOf, cornersOf, insetOf, isDark, lengthOf, spaceOf } from "./style.js";
 import {
   animateTo,
   NativeIcon,
@@ -284,7 +285,7 @@ export function CardView({ node, runtime, surfaceId, children }: NativeViewProps
 /** The everyday row: icon chip, title and subtitle, a value at the end, a chevron when tappable. */
 export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
   const p = node.props as Record<string, any>;
-  const { t, body, weight } = useBase();
+  const { t, body, weight, mode } = useBase();
   const { fill } = useBackdrop();
   const inCard = useContext(InCard);
   const tint =
@@ -298,6 +299,8 @@ export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
   const title = String(p.title ?? "");
   const subtitle = p.subtitle ? String(p.subtitle) : "";
   const value = p.value === undefined || p.value === "" ? "" : String(p.value);
+  const chip = colorOf(p.iconColor, t, mode === "dark");
+  const valueTint = colorOf(p.valueColor, t, mode === "dark");
   const style: ViewStyle = {
     flexDirection: "row",
     alignItems: "center",
@@ -319,10 +322,10 @@ export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
             borderRadius: 12,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: withAlpha(tint ?? t.foreground, tint ? 0.13 : 0.06),
+            backgroundColor: withAlpha(chip ?? tint ?? t.foreground, chip || tint ? 0.13 : 0.06),
           }}
         >
-          <NativeIcon name={p.icon} size={19} color={tint ?? t.foreground} />
+          <NativeIcon name={p.icon} size={19} color={chip ?? tint ?? t.foreground} />
         </View>
       ) : null}
       <View style={{ flex: 1, gap: 1 }}>
@@ -342,7 +345,7 @@ export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
             ...body,
             ...weight(600),
             maxWidth: "45%",
-            color: tint ?? t.foreground,
+            color: valueTint ?? tint ?? t.foreground,
             fontSize: 15,
             lineHeight: 21,
             fontVariant: ["tabular-nums"],
@@ -351,7 +354,7 @@ export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
           {value}
         </Text>
       ) : null}
-      {p.action ? <NativeIcon name="chevron-right" size={16} color={t.muted} /> : null}
+      {p.action && !valueTint ? <NativeIcon name="chevron-right" size={16} color={t.muted} /> : null}
     </>
   );
   if (!p.action) return <View style={style}>{content}</View>;
@@ -370,52 +373,63 @@ export function ListItemView({ node, runtime, surfaceId }: NativeViewProps) {
 export function BoxView(props: NativeViewProps) {
   const { node, runtime, surfaceId, children } = props;
   const p = node.props as Record<string, any>;
-  const { t, space, radius } = useBase();
+  const { t, space, radius, mode } = useBase();
   const inRow = useContext(InRow);
   // Row and Column with Box sizing (justify, flex, width, padding) are drawn as Boxes too.
   const row = p.direction === "row" || node.component === "Row";
   const ground = useBackdrop();
-  const look = toneLook(p.tone, t, ground);
+  const dark = mode === "dark";
+  const painted = colorOf(p.background, t, dark);
+  const look = painted
+    ? {
+        ...toneLook(p.tone, t, ground),
+        bg: painted,
+        // The words read on what was painted, or as the reply asked.
+        ink: p.theme === "dark" ? "#FFFFFF" : p.theme === "light" ? "#111114" : isDark(painted) === dark ? undefined : isDark(painted) ? "#FFFFFF" : "#111114",
+      }
+    : p.theme
+      ? { ...toneLook(p.tone, t, ground), ink: p.theme === "dark" ? "#FFFFFF" : "#111114" }
+      : toneLook(p.tone, t, ground);
   const selected = Boolean(p.selected);
   const [height, setHeight] = useState(0);
+  const filled = look.bg || p.border || p.borderColor || selected;
   const corner =
-    p.radius === "none"
-      ? 0
-      : p.radius === "sm"
-        ? radius * 0.5
-        : p.radius === "lg"
-          ? radius * 1.6
-          : p.radius === "full"
-            ? // A measured half height: Android drops a "999" radius when a fill appears later.
-              Math.max(8, height / 2)
-            : look.bg || p.border || selected
-              ? radius
-              : 0;
+    p.radius === "full"
+      ? // A measured half height: Android drops a "999" radius when a fill appears later.
+        Math.max(8, height / 2)
+      : (cornerOf(p.radius, radius) ?? (filled ? radius : 0));
   const size: Record<string, unknown> = {};
-  if (typeof p.width === "number") {
-    if (inRow) Object.assign(size, { flexBasis: `${p.width * 100}%`, flexGrow: 0, flexShrink: 1 });
-    else Object.assign(size, { width: `${p.width * 100}%` });
-  } else if (p.width === "fill")
+  const wide = p.width === "fill" || p.width === "hug" ? undefined : lengthOf(p.width);
+  // A size the reply chose stays inside what holds it: never past the bubble's edge.
+  if (typeof wide === "string")
+    Object.assign(size, inRow ? { flexBasis: wide, flexGrow: 0, flexShrink: 1 } : { width: wide });
+  else if (typeof wide === "number") Object.assign(size, { width: wide, maxWidth: "100%", flexShrink: 1 });
+  else if (p.width === "fill")
     Object.assign(size, inRow ? { flex: 1 } : { alignSelf: "stretch" });
   else if (p.width === "hug")
     Object.assign(size, inRow ? { flexGrow: 0 } : { alignSelf: "flex-start" });
-  if (typeof p.flex === "number") size.flex = p.flex;
-  if (typeof p.height === "number") size.height = p.height;
+  if (p.flex !== undefined && Number.isFinite(Number(p.flex))) size.flex = Number(p.flex);
+  const tall = lengthOf(typeof p.height === "number" && p.height <= 1 ? String(p.height) : p.height);
+  if (tall !== undefined) size.height = tall;
+  const least = lengthOf(p.minHeight);
+  if (least !== undefined) size.minHeight = least;
+  if (typeof p.opacity === "number") size.opacity = p.opacity;
   if (typeof p.aspectRatio === "number") size.aspectRatio = p.aspectRatio;
   const style: ViewStyle = {
     flexDirection: row ? "row" : "column",
-    gap: space(p.gap, row ? space("sm") : space("md")),
+    gap: spaceOf(p.gap, space, row ? space("sm") : space("md")),
     alignItems: p.align ? ALIGN[p.align as keyof typeof ALIGN] : row ? "center" : "stretch",
     justifyContent: p.justify ? JUSTIFY[p.justify as keyof typeof JUSTIFY] : "flex-start",
     flexWrap: p.wrap ? "wrap" : "nowrap",
     // Filled boxes hug their content: 12 around, not a page margin.
-    padding: space(p.padding, look.bg || p.border ? space("sm") + space("xs") : 0),
+    ...insetOf(p.padding, space, look.bg || p.border ? space("sm") + space("xs") : 0),
     // Always a fill (transparent when none): a fill that appears later keeps its corners.
     backgroundColor: selected && !look.bg ? withAlpha(t.accent, 0.1) : (look.bg ?? "transparent"),
     borderRadius: corner,
-    borderWidth: selected ? 1.5 : p.border || look.border ? 1 : 0,
-    borderColor: selected ? t.accent : (look.border ?? t.border),
-    overflow: corner ? "hidden" : undefined,
+    ...cornersOf(typeof p.radius === "object" ? p.radius : undefined, radius),
+    borderWidth: selected ? 1.5 : p.border || p.borderColor || look.border ? 1 : 0,
+    borderColor: selected ? t.accent : (colorOf(p.borderColor, t, dark) ?? look.border ?? t.border),
+    overflow: corner || p.clip || typeof p.radius === "object" ? "hidden" : undefined,
     ...(look.lift
       ? {
           shadowColor: "#000",
@@ -1402,12 +1416,12 @@ export function ProgressRing({ node }: NativeViewProps) {
 }
 
 /** Text sizes relative to the body size. */
-export const TEXT_SCALE = { sm: 0.87, md: 1, lg: 1.2, xl: 1.47, display: 2.1 } as const;
+export const TEXT_SCALE = { "2xs": 0.69, xs: 0.77, sm: 0.87, md: 1, lg: 1.2, xl: 1.47, "2xl": 1.75, "3xl": 2.1, display: 2.1 } as const;
 
 /** Text with size / weight / alignment / tone, in the colour of the Box it sits on. */
 export function SizedText({ node }: NativeViewProps): ReactNode {
   const p = node.props as Record<string, any>;
-  const { t, body, ink, weight } = useBase();
+  const { t, body, ink, weight, mode } = useBase();
   const { selectable } = useUI();
   const scale = TEXT_SCALE[(p.size as keyof typeof TEXT_SCALE) ?? "md"] ?? 1;
   const size = (body.fontSize as number) * scale;
@@ -1426,10 +1440,11 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
   return (
     <Text
       selectable={selectable}
+      {...(p.lines ? { numberOfLines: p.lines as number } : {})}
       style={{
         ...body,
         flexShrink: 1,
-        color: tone,
+        color: colorOf(p.color, t, mode === "dark") ?? tone,
         ...(p.highlight
           ? {
               backgroundColor: withAlpha(t.accent, 0.2),
@@ -1440,14 +1455,15 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
           : {}),
         fontSize: size,
         lineHeight: size * (scale >= 1.4 ? 1.25 : 1.5),
-        ...(p.weight === "bold" || (scale >= 1.4 && p.weight !== "medium")
+        ...(p.weight === "bold" || (scale >= 1.4 && p.weight !== "medium" && p.weight !== "regular")
           ? weight(700)
-          : p.weight === "medium"
+          : p.weight === "medium" || p.weight === "semibold"
             ? weight(600)
             : {}),
         ...(scale > 1 ? { letterSpacing: scale >= 1.4 ? -0.5 : -0.2 } : {}),
         textAlign: p.align === "center" ? "center" : p.align === "end" ? "right" : "left",
-        ...(p.size === "display" ? { fontVariant: ["tabular-nums"], letterSpacing: -0.5 } : {}),
+        ...(p.size === "display" || p.tabularNums ? { fontVariant: ["tabular-nums"] } : {}),
+        ...(p.size === "display" ? { letterSpacing: -0.5 } : {}),
       }}
     >
       {keyedRuns(String(p.text ?? "")).map((run) =>
@@ -1472,20 +1488,28 @@ export function SizedText({ node }: NativeViewProps): ReactNode {
 /** Buttons with an icon, icon-only, small, full width; on a coloured Box they take its ink. */
 export function ActionButton({ node, runtime, surfaceId }: NativeViewProps) {
   const p = node.props as Record<string, any>;
-  const { t, body, ink } = useBase();
+  const { t, body, ink, mode } = useBase();
   const label = String(p.label ?? "");
-  const variant = p.variant ?? "primary";
+  const variant = p.variant === "ghost" ? "quiet" : (p.variant ?? "primary");
+  const custom = colorOf(p.color, t, mode === "dark");
   const small = p.size === "sm";
+  const large = p.size === "lg";
   const primary = variant === "primary";
-  const fg = primary ? t.onAccent : variant === "quiet" ? (ink ?? t.accent) : (ink ?? t.foreground);
+  const fg = primary
+    ? custom
+      ? isDark(custom)
+        ? "#FFFFFF"
+        : "#111114"
+      : t.onAccent
+    : (custom ?? (variant === "quiet" ? (ink ?? t.accent) : (ink ?? t.foreground)));
   const bg = primary
-    ? t.accent
+    ? (custom ?? t.accent)
     : variant === "secondary"
       ? ink
         ? withAlpha(ink, 0.16)
         : t.surface
       : "transparent";
-  const height = p.iconOnly ? (small ? 36 : 44) : small ? 36 : 48;
+  const height = p.iconOnly ? (small ? 36 : large ? 56 : 44) : small ? 36 : large ? 56 : 48;
   return (
     <Pressable
       accessibilityRole="button"
@@ -1509,7 +1533,7 @@ export function ActionButton({ node, runtime, surfaceId }: NativeViewProps) {
         transform: [{ scale: pressed ? 0.97 : 1 }],
       })}
     >
-      {p.icon ? <NativeIcon name={p.icon} color={fg} size={small ? 16 : 18} /> : null}
+      {p.icon ? <NativeIcon name={String(p.icon)} color={fg} size={small ? 16 : large ? 24 : 18} /> : null}
       {p.iconOnly ? null : (
         <Text
           style={{

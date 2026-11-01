@@ -171,3 +171,12 @@ describe("markup", () => {
     expect(markupOpen("<Box>\n<Text>a</Text>\n</Box>")).toBe(false);
   });
 });
+
+describe("Tabs used as a picker", () => {
+  it("gives a whole answer's missing panels an empty column, not a loading bar", () => {
+    const src = `{@state plan = 'a'}\n<Tabs value={plan} tabs={[{"id":"a","label":"A","child":"pa"},{"id":"b","label":"B","child":"pb"}]}/>`;
+    const done = compileMarkup(src, { final: true });
+    expect(done.components.find((c) => c.id === "pa")).toMatchObject({ component: "Column", children: [] });
+    expect(compileMarkup(src, { final: false }).components.find((c) => c.id === "pa")).toBeUndefined();
+  });
+});

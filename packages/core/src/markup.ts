@@ -1161,11 +1161,27 @@ export function compileMarkup(
   const only = top.length === 1 ? (ctx.components.find((c) => c.id === top[0]) as Record<string, unknown> | undefined) : undefined;
   const framed = only && (only.component === "Card" || only.background || only.tone);
   const frame = options.frame && top.length > 0 && !framed;
+  // Once the answer is whole, a tab or section whose content never came is empty, not a
+  // "loading" bar: models use Tabs as a picker and leave the panels out.
+  const panels: Component[] = [];
+  if (ctx.final) {
+    const ids = new Set(ctx.components.map((c) => c.id));
+    for (const c of ctx.components as Record<string, unknown>[]) {
+      const items = (c.component === "Tabs" ? c.tabs : c.component === "Accordion" ? c.items : null) as { child?: unknown }[] | null;
+      for (const item of Array.isArray(items) ? items : []) {
+        if (typeof item?.child === "string" && !ids.has(item.child)) {
+          ids.add(item.child);
+          panels.push({ id: item.child, component: "Column", children: [] } as Component);
+        }
+      }
+    }
+  }
   return {
     components: [
       { id: "root", component: "Column", gap: "md", ...root, children: frame ? ["frame"] : children },
       ...(frame ? [{ id: "frame", component: "Card", children } as Component] : []),
       ...ctx.components,
+      ...panels,
     ],
     data,
     text: ctx.text.filter(Boolean).join("\n"),

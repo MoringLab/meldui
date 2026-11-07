@@ -77,7 +77,20 @@ export function readableText(compiled: {
       case "CodeBlock":
         return s(c.code);
       case "Image":
+      case "Media":
+      case "Svg":
         return s(c.alt) || s(c.caption);
+      case "Link":
+        return [s(c.title), s(c.subtitle)].filter(Boolean).join(" · ");
+      case "Calendar":
+        return [
+          s(c.title) || s(c.month),
+          ...list(c.events)
+            .filter(isRecord)
+            .map((e) => `- ${joined(str(e.date) + (str(e.end) ? `~${str(e.end)}` : ""), str(e.time), str(e.title))}`),
+        ]
+          .filter(Boolean)
+          .join("\n");
       case "Stat":
         return `${s(c.label)}: ${[s(c.value), s(c.unit)].filter(Boolean).join(" ")}`;
       case "TextField":

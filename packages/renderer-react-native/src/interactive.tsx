@@ -55,6 +55,10 @@ export const KO_NATIVE_LABELS = {
   flip: "눌러서 뒤집기",
   menu: "더 보기",
   close: "닫기",
+  weekdays: ["일", "월", "화", "수", "목", "금", "토"] as readonly string[],
+  months: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"] as readonly string[],
+  monthTitle: "{year}년 {month}",
+  noEvents: "일정이 없어요",
 };
 
 /** Words the widgets show; hosts pass their language through UIProvider `labels`. */
@@ -74,6 +78,10 @@ export const DEFAULT_NATIVE_LABELS = {
   flip: "Tap to flip",
   menu: "More",
   close: "Close",
+  weekdays: ["S", "M", "T", "W", "T", "F", "S"] as readonly string[],
+  months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] as readonly string[],
+  monthTitle: "{month} {year}",
+  noEvents: "Nothing on this day",
 };
 export type NativeLabels = typeof DEFAULT_NATIVE_LABELS;
 

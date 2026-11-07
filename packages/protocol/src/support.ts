@@ -11,10 +11,20 @@ export const PLATFORM_SUPPORT: Record<
   Platform,
   { unsupported: string[]; fallbacks: Record<string, string>; unsupportedOps: string[] }
 > = {
-  // Diagram, Collection, Quote and Converter are drawn by the React Native renderer (and hosts).
+  // Diagram, Collection, Quote, Converter, Svg, Media, Calendar and Link are drawn by the React
+  // Native renderer (and hosts).
   web: {
-    unsupported: ["Diagram", "Collection", "Quote", "Converter"],
-    fallbacks: { Diagram: "Text", Collection: "Text", Quote: "Text", Converter: "Text" },
+    unsupported: ["Diagram", "Collection", "Quote", "Converter", "Svg", "Media", "Calendar", "Link"],
+    fallbacks: {
+      Diagram: "Text",
+      Collection: "Text",
+      Quote: "Text",
+      Converter: "Text",
+      Svg: "Text",
+      Media: "Text",
+      Calendar: "Text",
+      Link: "Text",
+    },
     unsupportedOps: [],
   },
   "react-native": {
@@ -37,6 +47,10 @@ export const PLATFORM_SUPPORT: Record<
       "Collection",
       "Quote",
       "Converter",
+      "Svg",
+      "Media",
+      "Calendar",
+      "Link",
     ],
     fallbacks: {
       Simulation: "Text",
@@ -52,6 +66,10 @@ export const PLATFORM_SUPPORT: Record<
       Collection: "Text",
       Quote: "Text",
       Converter: "Text",
+      Svg: "Text",
+      Media: "Text",
+      Calendar: "Text",
+      Link: "Text",
     },
     // The Dart evaluator has not been ported these yet; prompts for Flutter do not offer them.
     unsupportedOps: ["concat", "set", "object", "slice", "join", "includes", "abs"],

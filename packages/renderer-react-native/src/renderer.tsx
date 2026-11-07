@@ -42,6 +42,7 @@ import Svg, {
 } from "react-native-svg";
 import { AttachmentMedia, ContentProvider, MediaContent } from "./content.js";
 import { localCalendarDate } from "./date.js";
+import { CalendarView, LinkView, MediaView, SvgMarkupView } from "./extras.js";
 import { colorOf } from "./style.js";
 import {
   ActionButton,
@@ -595,6 +596,14 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       return <DiagramView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Collection":
       return <CollectionView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Svg":
+      return <SvgMarkupView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Media":
+      return <MediaView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Calendar":
+      return <CalendarView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Link":
+      return <LinkView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Quote":
       return <QuoteView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Converter":
@@ -1031,6 +1040,7 @@ const BUILTIN_PATHS: Record<string, string> = {
   check: "m5 12 4 4L19 6",
   info: "M12 10v7m0-10v.1",
   arrow: "M4 12h15m-6-6 6 6-6 6",
+  play: "M7 4v16l13-8Z",
   plus: "M12 5v14M5 12h14",
   star: "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z",
   close: "m6 6 12 12M6 18 18 6",

@@ -365,6 +365,8 @@ const seriesSchema = z
   .object({ key: z.string().max(128), label: z.string().max(256), color: sceneColor.optional() })
   .strict();
 /** Semantic component props: no HTML, CSS, executable code, or remote URLs. */
+/** A calendar day, YYYY-MM-DD. */
+const calendarDay = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
 export const componentSchemas = {
   Confirmation: z.object({
     ...common,
@@ -932,6 +934,87 @@ export const componentSchemas = {
       .max(30),
     layout: z.enum(["carousel", "strip", "grid", "hero", "list"]).default("carousel"),
     aspectRatio: z.number().min(0.25).max(4).optional(),
+  }),
+  /**
+   * A drawing written as SVG markup (a logo, a symbol, a small illustration or diagram). Only shape,
+   * text and gradient tags are drawn; scripts, styles, links, images and external addresses are dropped.
+   */
+  Svg: z.object({
+    ...common,
+    markup: z.string().min(1).max(24000),
+    alt: z.string().max(300),
+    /** Width in points (an icon-sized drawing); without it the drawing spans the width. */
+    size: z.number().min(12).max(480).optional(),
+  }),
+  /**
+   * One picture or video by address: a web address (https) or a file the host knows. `corner`
+   * sits inside the card with rounded corners; `full` reaches the card's edges.
+   */
+  Media: z.object({
+    ...common,
+    src: z.string().min(1).max(2048),
+    /** Inferred from the address when left out (video files and video pages are videos). */
+    kind: z.enum(["image", "video"]).optional(),
+    /** A video's still picture. */
+    poster: z.string().max(2048).optional(),
+    fit: z.enum(["corner", "full"]).default("corner"),
+    aspectRatio: z.number().min(0.25).max(4).optional(),
+    caption: text.optional(),
+    alt: z.string().max(300).optional(),
+  }),
+  /**
+   * A month at a glance: events as chips (or dots) on their days, ranges shaded across days.
+   * Tapping a day selects it (two-way `value`, YYYY-MM-DD) and lists that day's events below.
+   */
+  Calendar: z.object({
+    ...common,
+    title: text.optional(),
+    month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+    events: z
+      .array(
+        z
+          .object({
+            date: calendarDay,
+            /** Last day of an event spanning several days. */
+            end: calendarDay.optional(),
+            title: z.string().min(1).max(80),
+            time: z.string().max(16).optional(),
+            color: z.string().max(32).optional(),
+          })
+          .strict(),
+      )
+      .max(120)
+      .default([]),
+    ranges: z
+      .array(
+        z
+          .object({
+            start: calendarDay,
+            end: calendarDay,
+            label: z.string().max(40).optional(),
+            color: z.string().max(32).optional(),
+          })
+          .strict(),
+      )
+      .max(12)
+      .default([]),
+    style: z.enum(["chips", "dots"]).default("chips"),
+    weekStart: z.enum(["sun", "mon"]).default("sun"),
+    /** The selected day (YYYY-MM-DD). */
+    value: text.optional(),
+    /** Today, marked on the grid (YYYY-MM-DD); the device's date when left out. */
+    today: calendarDay.optional(),
+  }),
+  /**
+   * A row that opens a page: one of the host's own pages (its app address, such as
+   * app://schedule) or a web page (https). Icon, title, an optional line under it, and a chevron.
+   */
+  Link: z.object({
+    ...common,
+    href: z.string().regex(/^(https:\/\/|[a-z][a-z0-9+.-]{1,30}:\/\/)\S{1,2000}$/),
+    title: text,
+    subtitle: text.optional(),
+    icon: iconName.optional(),
   }),
   /** A live market quote with a price chart and ranges (host-provided data). */
   Quote: z.object({

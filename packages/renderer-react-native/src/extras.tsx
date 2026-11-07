@@ -17,7 +17,13 @@ import {
   withAlpha,
 } from "./interactive.js";
 import { LinkHandlerContext } from "./markdown.js";
-import { type CalendarEvent, type CalendarRange, dayKey, monthWeeks } from "./month.js";
+import {
+  type CalendarEvent,
+  type CalendarRange,
+  dayKey,
+  type MonthDay,
+  monthWeeks,
+} from "./month.js";
 import { NativeIcon, type NativeViewProps, useUI } from "./renderer.js";
 import { colorOf } from "./style.js";
 import { sanitizeSvg, svgAspect } from "./svg-markup.js";
@@ -298,6 +304,33 @@ export function CalendarView({ node, runtime, surfaceId }: NativeViewProps) {
       </View>
       {weeks.map((week) => (
         <View key={week[0]!.date} style={{ flexDirection: "row" }}>
+          {/* Each range is one band across its days in this week (no joins between days). */}
+          {weekBands(week).map((b) => (
+            <View
+              key={b.range.start + b.range.end}
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: 3,
+                height: 24,
+                left: `${(b.from / 7) * 100}%`,
+                width: `${((b.to - b.from + 1) / 7) * 100}%`,
+                paddingLeft: b.first ? 4 : 0,
+                paddingRight: b.last ? 4 : 0,
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: withAlpha(colorFor(b.range.color), 0.16),
+                  borderTopLeftRadius: b.first ? 12 : 0,
+                  borderBottomLeftRadius: b.first ? 12 : 0,
+                  borderTopRightRadius: b.last ? 12 : 0,
+                  borderBottomRightRadius: b.last ? 12 : 0,
+                }}
+              />
+            </View>
+          ))}
           {week.map((d, i) => {
             const isToday = d.date === today;
             const isSelected = d.date === selected;
@@ -318,29 +351,15 @@ export function CalendarView({ node, runtime, surfaceId }: NativeViewProps) {
                   opacity: d.inMonth ? 1 : 0.35,
                 }}
               >
-                {d.ranges.slice(0, 1).map(({ range, first, last }) => (
-                  <View
-                    key={range.start + range.end}
-                    style={{
-                      position: "absolute",
-                      top: 3,
-                      height: 24,
-                      left: first ? 4 : 0,
-                      right: last ? 4 : 0,
-                      backgroundColor: withAlpha(colorFor(range.color), 0.16),
-                      borderTopLeftRadius: first ? 12 : 0,
-                      borderBottomLeftRadius: first ? 12 : 0,
-                      borderTopRightRadius: last ? 12 : 0,
-                      borderBottomRightRadius: last ? 12 : 0,
-                    }}
-                  />
-                ))}
                 <View
+                  // Remounted when picked: Android keeps a square background added to a view later.
+                  key={isSelected ? "picked" : "day"}
                   style={{
                     alignSelf: "center",
                     width: 24,
                     height: 24,
                     borderRadius: 12,
+                    overflow: "hidden",
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: isSelected
@@ -484,6 +503,22 @@ export function CalendarView({ node, runtime, surfaceId }: NativeViewProps) {
       ) : null}
     </View>
   );
+}
+
+/** The ranges in one week: the columns each covers and whether it starts or ends there. */
+function weekBands(week: MonthDay[]) {
+  const out: { range: CalendarRange; from: number; to: number; first: boolean; last: boolean }[] =
+    [];
+  week.forEach((d, i) => {
+    for (const r of d.ranges) {
+      const band = out.find((b) => b.range === r.range);
+      if (band) {
+        band.to = i;
+        band.last = r.last;
+      } else out.push({ range: r.range, from: i, to: i, first: r.first, last: r.last });
+    }
+  });
+  return out.slice(0, 2);
 }
 
 // ── Link ─────────────────────────────────────────────────────────────────────────────────────

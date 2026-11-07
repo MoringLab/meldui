@@ -231,6 +231,20 @@ function InlineVideo({
 
 // ── Calendar ─────────────────────────────────────────────────────────────────────────────────
 
+/** Colour names models write for events (light, dark). */
+const NAMED: Record<string, [string, string]> = {
+  red: ["#E5484D", "#FF6369"],
+  orange: ["#F76B15", "#FF8B3E"],
+  yellow: ["#D5A000", "#FFD60A"],
+  green: ["#30A46C", "#3DD68C"],
+  teal: ["#12A594", "#0BD8B6"],
+  blue: ["#0090FF", "#3B9EFF"],
+  purple: ["#8E4EC6", "#BF7AF0"],
+  pink: ["#D6409F", "#F76AC8"],
+  gray: ["#8B8D98", "#B0B4BA"],
+  grey: ["#8B8D98", "#B0B4BA"],
+};
+
 export function CalendarView({ node, runtime, surfaceId }: NativeViewProps) {
   const p = node.props as {
     title?: string;
@@ -260,7 +274,8 @@ export function CalendarView({ node, runtime, surfaceId }: NativeViewProps) {
   const [y, m] = p.month.split("-").map(Number);
   const names = labels.weekdays;
   const order = p.weekStart === "mon" ? [1, 2, 3, 4, 5, 6, 0] : [0, 1, 2, 3, 4, 5, 6];
-  const colorFor = (c?: string) => colorOf(c, t, dark) ?? t.accent;
+  const colorFor = (c?: string) =>
+    colorOf(c, t, dark) ?? NAMED[String(c).toLowerCase()]?.[dark ? 1 : 0] ?? t.accent;
   const day = weeks.flat().find((d) => d.date === selected);
   const small = { ...body, fontSize: 11, lineHeight: 14 };
   return (

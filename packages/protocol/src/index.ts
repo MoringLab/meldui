@@ -939,6 +939,17 @@ export const componentSchemas = {
    * A drawing written as SVG markup (a logo, a symbol, a small illustration or diagram). Only shape,
    * text and gradient tags are drawn; scripts, styles, links, images and external addresses are dropped.
    */
+  /**
+   * A UI written in Meld Live markup (elements, SVG, states, JS formulas), drawn by evaluating the
+   * source directly. `allow` limits the kit components it may use; `frame` puts it on a card.
+   */
+  Live: z.object({
+    ...common,
+    source: z.string().max(200_000),
+    final: z.boolean().optional(),
+    frame: z.boolean().optional(),
+    allow: z.array(z.string().max(40)).max(200).optional(),
+  }),
   Svg: z.object({
     ...common,
     markup: z.string().min(1).max(24000),

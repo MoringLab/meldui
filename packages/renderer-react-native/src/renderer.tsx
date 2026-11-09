@@ -67,6 +67,7 @@ import {
   withAlpha,
 } from "./interactive.js";
 import { LearningView, learningNames } from "./learning.js";
+import { LiveView } from "./live.js";
 import { SafeMarkdown } from "./markdown.js";
 import {
   CollectionView,
@@ -102,6 +103,9 @@ export type IconRenderer = (props: {
   size: number;
   color: string;
   label?: string;
+  /** A filled glyph (a liked heart): the fill colour. */
+  fill?: string;
+  strokeWidth?: number;
 }) => ReactNode;
 const Context = createContext<NativeContext | null>(null);
 /** Width of the surface's own container (a chat column), measured with onLayout. */
@@ -364,7 +368,7 @@ const NativeNode = memo(function NativeNode({
   );
 });
 
-class NativeBoundary extends React.Component<
+export class NativeBoundary extends React.Component<
   { children: ReactNode; resetKey?: unknown; kitKey?: unknown; onError?: () => void },
   { failed: boolean }
 > {
@@ -402,7 +406,7 @@ const styled = (p: Record<string, unknown>, row = false) =>
   p.wrap !== undefined ||
   (row && (Boolean(p.align) || p.gap !== undefined));
 
-function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeViewProps) {
+export function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeViewProps) {
   const { kit, mode, assets, selectable } = useUI();
   const t = kit.tokens[mode];
   // Fields, badges, callouts and code sit on their own fill instead of an outline.
@@ -596,6 +600,8 @@ function NativeView({ node, runtime, surfaceId, children, renderChild }: NativeV
       return <DiagramView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Collection":
       return <CollectionView {...{ node, runtime, surfaceId, children, renderChild }} />;
+    case "Live":
+      return <LiveView node={node} runtime={runtime} surfaceId={surfaceId} renderChild={renderChild}>{null}</LiveView>;
     case "Svg":
       return <SvgMarkupView {...{ node, runtime, surfaceId, children, renderChild }} />;
     case "Media":

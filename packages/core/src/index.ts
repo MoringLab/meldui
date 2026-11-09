@@ -21,6 +21,7 @@ import {
 } from "@engine/protocol";
 import { assertSafeJson, evaluateExpression, resolvePath } from "./expression.js";
 import { compileFormula } from "./formula.js";
+import { LiveState } from "./live/program.js";
 import { NDJSONDecoder } from "./stream.js";
 
 export * from "./answer.js";
@@ -187,6 +188,16 @@ export class UIRuntime {
   getRevision = () => this.revision;
   get surfaceIds() {
     return [...this.processor.getSurfaces().keys()];
+  }
+  private liveStates = new Map<string, LiveState>();
+  /** State of a Live surface: kept with the runtime, so it survives the drawing going away and back. */
+  liveStore(surfaceId: string): LiveState {
+    let store = this.liveStates.get(surfaceId);
+    if (!store) {
+      store = new LiveState();
+      this.liveStates.set(surfaceId, store);
+    }
+    return store;
   }
   getSurface(id: string) {
     return this.processor.getSurface(id);
@@ -732,6 +743,7 @@ export class UIRuntime {
     }
   }
   dispose() {
+    this.liveStates.clear();
     if (this.disposed) return;
     this.disposed = true;
     for (const run of this.runs.values()) run.abort();
@@ -754,6 +766,20 @@ export function createUIRuntime(options?: RuntimeOptions) {
 
 export * from "./host-bridge.js";
 export * from "./inline.js";
+export * from "./live/interp.js";
+export * from "./live/program.js";
+export {
+  type Expr,
+  type ObjProp,
+  type Pattern,
+  parseExpr,
+  parseStatements,
+  type Spread,
+  type Stmt as LiveStmt,
+  SyntaxErr,
+} from "./live/syntax.js";
+export * from "./live/svg.js";
+export * from "./live/tree.js";
 export * from "./markdown.js";
 export * from "./markup.js";
 export * from "./readable.js";

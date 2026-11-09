@@ -116,8 +116,17 @@ export function routePoints(points: { x: number; y: number; label: string }[]) {
   }));
 }
 
-export function formatStat(value: unknown, precision = 2): string {
+export function formatStat(value: unknown, precision?: number): string {
   return typeof value === "number" && Number.isFinite(value)
-    ? String(evaluateExpression({ op: "numberFormat", args: [value, precision, true] }, () => null))
+    ? String(
+        evaluateExpression(
+          // A count stays a count: 30, not 30.00.
+          {
+            op: "numberFormat",
+            args: [value, precision ?? (Number.isInteger(value) ? 0 : 2), true],
+          },
+          () => null,
+        ),
+      )
     : String(value ?? "");
 }

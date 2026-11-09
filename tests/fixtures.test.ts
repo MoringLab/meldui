@@ -30,7 +30,8 @@ describe("portable fixtures", () => {
         f.messages.flatMap((m) => m.updateComponents?.components.map((c) => c.component) ?? []),
       ),
     );
-    expect([...names].sort()).toEqual([...COMPONENT_NAMES].sort());
+    // Live has no fixture of its own: an answer session makes it from markup (see core/src/live).
+    expect([...names].sort()).toEqual(COMPONENT_NAMES.filter((n) => n !== "Live").sort());
     expect(COMPONENT_NAMES.length).toBeGreaterThan(35);
     expect(validateKit(neutral).catalogId).toBe(validateKit(editorial).catalogId);
   });

@@ -18,6 +18,7 @@ import {
 } from "@engine/protocol";
 import { assertSafeJson, resolvePath } from "./expression.js";
 import { createUIRuntime, type UIModelEvent, type UIRuntime } from "./index.js";
+import { declarationText } from "./live/tree.js";
 import { compileMarkup, isMarkupStart, markupOpen } from "./markup.js";
 
 export type AnswerItem =
@@ -657,6 +658,8 @@ export class AnswerSession {
   };
   private markupCount = 0;
   readonly policy: HostPolicy;
+  /** Live: `{@…}` declarations of the finished markup regions, carried into the next ones. */
+  private liveCarry = "";
   private snapshotCache?: AnswerState;
   constructor(
     readonly runtime: UIRuntime,
@@ -805,8 +808,16 @@ export class AnswerSession {
       return [];
     }
     let compiled: ReturnType<typeof compileMarkup>;
+    const live = this.policy.live ?? false;
     try {
-      compiled = compileMarkup(source, { final, frame: this.policy.frameSurfaces ?? false });
+      // Live: declarations of earlier regions carry over (state on top, the UI after some prose).
+      compiled = compileMarkup(live ? this.liveCarry + source : source, {
+        final,
+        frame: this.policy.frameSurfaces ?? false,
+        live,
+        ...(live && this.policy.allowedComponents ? { allow: this.policy.allowedComponents } : {}),
+      });
+      if (live && final) this.liveCarry += `${declarationText(source)}\n`;
     } catch (error) {
       this.report({
         code: "MARKUP_INVALID",
@@ -818,7 +829,7 @@ export class AnswerSession {
     const events: AnswerEvent[] = [];
     let m = this.markup;
     if (!m || m.region !== region) {
-      if (compiled.components.length < 2) return events; // nothing to draw yet
+      if (compiled.empty ?? compiled.components.length < 2) return events; // nothing to draw yet
       const surfaceId = `ui${++this.markupCount}`;
       m = { region, surfaceId, data: new Set(), sent: new Map() };
       this.markup = m;
@@ -1180,7 +1191,8 @@ export class AnswerSession {
           "DocumentPreview",
         ];
         if (
-          (!allowed || allowed.includes(c.component)) &&
+          // A Live surface checks the kit components it uses itself (its `allow`).
+          (!allowed || allowed.includes(c.component) || (c.component === "Live" && this.policy.live)) &&
           (this.policy.allowMedia || !media.includes(c.component))
         )
           return true;

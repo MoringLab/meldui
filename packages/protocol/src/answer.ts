@@ -83,6 +83,8 @@ export const HostPolicySchema = z
     allowSandbox: z.boolean().default(false),
     /** Wraps a surface with no ground of its own in a Card (it sits in a chat bubble). */
     frameSurfaces: z.boolean().default(false),
+    /** Markup regions are drawn as Live UI (evaluated directly) instead of compiled to components. */
+    live: z.boolean().default(false),
     maxOutputTokens: z.number().int().min(1).max(8192).optional(),
     latencyBudgetMs: z.number().int().min(1).max(120000).optional(),
     /** Content height policy: undefined grows with content; a number caps it with internal scroll. */

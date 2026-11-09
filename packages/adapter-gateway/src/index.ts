@@ -211,3 +211,4 @@ export * from "./presentation.js";
 export * from "./prompt.js";
 export * from "./quality.js";
 export * from "./vision.js";
+export * from "./live-prompt.js";

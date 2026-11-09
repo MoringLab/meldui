@@ -14,8 +14,9 @@ export const PLATFORM_SUPPORT: Record<
   // Diagram, Collection, Quote, Converter, Svg, Media, Calendar and Link are drawn by the React
   // Native renderer (and hosts).
   web: {
-    unsupported: ["Diagram", "Collection", "Quote", "Converter", "Svg", "Media", "Calendar", "Link"],
+    unsupported: ["Diagram", "Collection", "Quote", "Converter", "Svg", "Media", "Calendar", "Link", "Live"],
     fallbacks: {
+      Live: "Text",
       Diagram: "Text",
       Collection: "Text",
       Quote: "Text",
@@ -51,8 +52,10 @@ export const PLATFORM_SUPPORT: Record<
       "Media",
       "Calendar",
       "Link",
+      "Live",
     ],
     fallbacks: {
+      Live: "Text",
       Simulation: "Text",
       Audio: "FileCard",
       DocumentPreview: "FileCard",

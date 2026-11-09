@@ -4,6 +4,7 @@ import {
   type CitationView,
   entityLinks,
   extractCitations,
+  normalizeBold,
   normalizeMathDelimiters,
   prepareMarkdown,
   splitMarkdownBlocks,
@@ -106,7 +107,14 @@ function DefaultCitations({ views }: { views: CitationView[] }) {
  * split into top-level blocks; finished blocks are memoised, so a streaming answer re-parses
  * and re-lays-out only its last block instead of the whole text on every update.
  */
-export function SafeMarkdown({ text, streaming = false }: { text: string; streaming?: boolean }) {
+export function SafeMarkdown({
+  text: written,
+  streaming = false,
+}: {
+  text: string;
+  streaming?: boolean;
+}) {
+  const text = useMemo(() => normalizeBold(written), [written]);
   const blocks = useMemo(() => splitMarkdownBlocks(normalizeMathDelimiters(text)), [text]);
   if (blocks.length <= 1) return <MarkdownBlock text={text} streaming={streaming} />;
   return (

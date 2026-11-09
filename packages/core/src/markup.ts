@@ -30,9 +30,12 @@
 
 import type { Component } from "@engine/protocol";
 import { componentSchemas } from "@engine/protocol";
+import { liveText, parseLive } from "./live/tree.js";
 
-type Attr = { name: string; value: string | true; kind: "str" | "expr" | "bare" | "flag" };
-type El = {
+/** Where a node starts and ends in the source (the end is set once it is closed). */
+type Span = { at?: number; end?: number };
+export type Attr = { name: string; value: string | true; kind: "str" | "expr" | "bare" | "flag" };
+export type El = Span & {
   type: "el";
   name: string;
   attrs: Attr[];
@@ -40,17 +43,22 @@ type El = {
   open: boolean;
   raw?: boolean;
 };
-type TextNode = { type: "text"; text: string };
-type Stmt = { type: "state" | "let"; name: string; expr: string };
-type Each = {
+export type TextNode = Span & { type: "text"; text: string };
+/** A `{@…}` statement. `body` is its text; state/let are what the formula compiler understood of it. */
+export type Stmt = Span & { type: "state" | "let"; name: string; expr: string; body?: string };
+export type Decl = Span & { type: "decl"; body: string };
+export type Each = Span & {
   type: "each";
   list: string;
+  /** A name, or a pattern: [a, b] / {x, y}. */
   item: string;
   index?: string;
+  /** {#each list as item (key)} */
+  key?: string;
   children: Node[];
   open: boolean;
 };
-type If = {
+export type If = Span & {
   type: "if";
   cond: string;
   yes: Node[];
@@ -59,7 +67,7 @@ type If = {
   inElse: boolean;
   chained?: boolean;
 };
-type Node = El | TextNode | Stmt | Each | If;
+export type Node = El | TextNode | Stmt | Decl | Each | If;
 type Frame = { node: El | Each | If | null; list: Node[] };
 
 const RAW = new Set(["markdown", "codeblock"]);
@@ -148,8 +156,9 @@ function parseTag(src: string, at: number): { el: El; end: number; self: boolean
     if (c === '"' || c === "'") {
       let e = k + 1;
       let value = "";
+      // Like HTML: a backslash is kept (LaTeX, paths), except before the closing quote.
       for (; e < src.length && src[e] !== c; e++) {
-        if (src[e] === "\\" && e + 1 < src.length) e++;
+        if (src[e] === "\\" && src[e + 1] === c) e++;
         value += src[e];
       }
       if (e >= src.length) return null;
@@ -208,14 +217,27 @@ export function parseMarkup(
   const top = () => stack[stack.length - 1] as Frame;
   let truncated = false;
   let i = 0;
-  const pop = (test: (f: Frame) => boolean) => {
+  const pop = (test: (f: Frame) => boolean, end: number) => {
     for (let d = stack.length - 1; d > 0; d--)
       if (test(stack[d] as Frame)) {
-        for (const f of stack.splice(d)) if (f.node) f.node.open = false;
+        for (const f of stack.splice(d))
+          if (f.node) {
+            f.node.open = false;
+            f.node.end = end;
+          }
         return;
       }
   };
   while (i < src.length) {
+    if (src.startsWith("<!--", i)) {
+      const e = src.indexOf("-->", i + 4);
+      if (e < 0) {
+        truncated = true;
+        break;
+      }
+      i = e + 3;
+      continue;
+    }
     if (src.startsWith("</", i)) {
       const e = src.indexOf(">", i);
       if (e < 0) {
@@ -226,7 +248,7 @@ export function parseMarkup(
         .slice(i + 2, e)
         .trim()
         .toLowerCase();
-      pop((f) => f.node?.type === "el" && f.node.name.toLowerCase() === name);
+      pop((f) => f.node?.type === "el" && f.node.name.toLowerCase() === name, e + 1);
       i = e + 1;
       continue;
     }
@@ -236,19 +258,22 @@ export function parseMarkup(
         truncated = true;
         break;
       }
+      tag.el.at = i;
       top().list.push(tag.el);
       i = tag.end;
       if (tag.self) {
         tag.el.open = false;
+        tag.el.end = tag.end;
         continue;
       }
       if (RAW.has(tag.el.name.toLowerCase())) {
         tag.el.raw = true;
         const close = new RegExp(`</${tag.el.name}\\s*>`, "i").exec(src.slice(i));
         const body = close ? src.slice(i, i + close.index) : src.slice(i);
-        tag.el.children.push({ type: "text", text: body });
+        tag.el.children.push({ type: "text", text: body, at: i, end: i + body.length });
         tag.el.open = !close;
         i = close ? i + close.index + close[0].length : src.length;
+        if (close) tag.el.end = i;
         continue;
       }
       stack.push({ node: tag.el, list: tag.el.children });
@@ -262,12 +287,22 @@ export function parseMarkup(
       }
       const body = src.slice(i + 2, e).trim();
       const sigil = src[i + 1];
+      const at = i;
       i = e + 1;
-      if (sigil === "@") top().list.push(...statement(body));
-      else if (sigil === "#") {
-        const each = /^each\s+([\s\S]+?)\s+as\s+([A-Za-z_]\w*)(?:\s*,\s*([A-Za-z_]\w*))?$/.exec(
-          body,
+      if (sigil === "@") {
+        const stmts = statement(body);
+        top().list.push(
+          ...(stmts.length
+            ? stmts.map((s) => ({ ...s, body, at, end: i }))
+            : [{ type: "decl" as const, body, at, end: i }]),
         );
+      }
+      else if (sigil === "#") {
+        // {#each list as item, i}, {#each list as [a, b]}, {#each list as item (item.id)}
+        const each =
+          /^each\s+([\s\S]+?)\s+as\s+(\[[^\]]*\]|\{[^}]*\}|[A-Za-z_$][\w$]*)(?:\s*,\s*([A-Za-z_$][\w$]*))?(?:\s*\(([\s\S]*)\))?$/.exec(
+            body,
+          );
         const cond = /^if\s+([\s\S]+)$/.exec(body);
         if (each) {
           const node: Each = {
@@ -275,8 +310,10 @@ export function parseMarkup(
             list: (each[1] as string).trim(),
             item: each[2] as string,
             index: each[3],
+            ...(each[4] ? { key: each[4].trim() } : {}),
             children: [],
             open: true,
+            at,
           };
           top().list.push(node);
           stack.push({ node, list: node.children });
@@ -288,6 +325,7 @@ export function parseMarkup(
             else: [],
             open: true,
             inElse: false,
+            at,
           };
           top().list.push(node);
           stack.push({ node, list: node.yes });
@@ -308,13 +346,14 @@ export function parseMarkup(
               open: true,
               inElse: false,
               chained: true,
+              at,
             };
             node.else.push(chained);
             stack.push({ node: chained, list: chained.yes });
           }
         }
-      } else if (/^each\b/.test(body)) pop((f) => f.node?.type === "each");
-      else if (/^if\b/.test(body)) pop((f) => f.node?.type === "if" && !f.node.chained);
+      } else if (/^each\b/.test(body)) pop((f) => f.node?.type === "each", i);
+      else if (/^if\b/.test(body)) pop((f) => f.node?.type === "if" && !f.node.chained, i);
       continue;
     }
     const next = src.slice(i).search(/<\/?[A-Za-z]|\{[@#:/]/);
@@ -322,7 +361,7 @@ export function parseMarkup(
     let text = src.slice(i, end);
     // Still streaming: the start of a tag or block at the very end is not text yet.
     if (end === src.length && !final) text = text.replace(/(<\/?|\{[@#:/]?)$/, "");
-    if (text) top().list.push({ type: "text", text });
+    if (text) top().list.push({ type: "text", text, at: i, end: i + text.length });
     i = end;
   }
   return { nodes: root.list, open: stack.length - 1, truncated };
@@ -456,7 +495,7 @@ function unwrap(schema: any): any {
   }
   return s;
 }
-function shapeOf(component: string): Record<string, any> {
+export function shapeOf(component: string): Record<string, any> {
   const schema = unwrap((componentSchemas as Record<string, any>)[component]);
   return schema?.shape ?? schema?._def?.shape?.() ?? {};
 }
@@ -699,7 +738,7 @@ function dedent(s: string): string {
   );
   return lines.map((l) => l.slice(Number.isFinite(indent) ? indent : 0)).join("\n");
 }
-function resolveName(name: string): string | null {
+export function resolveName(name: string): string | null {
   const lower = name.toLowerCase();
   return NAMES.get(lower) ?? ALIASES[lower] ?? null;
 }
@@ -755,7 +794,7 @@ function singular(prop: string): string {
 }
 
 /** A child tag that fills an array-of-objects or child-id prop of `component`, if it is one. */
-function slotFor(
+export function slotFor(
   component: string,
   tag: string,
 ): { prop: string; kind: "objects" | "child" } | null {
@@ -791,7 +830,7 @@ function slotFor(
   return null;
 }
 
-function objectShape(component: string, prop: string): Record<string, any> {
+export function objectShape(component: string, prop: string): Record<string, any> {
   const s = unwrap(shapeOf(component)[prop]);
   const arr =
     s?._def?.typeName === "ZodArray"
@@ -1112,6 +1151,8 @@ function compileElement(el: El, ctx: Ctx, scope: Scope, visible: string | null):
 }
 
 export type CompiledMarkup = {
+  /** Nothing to draw yet (only declarations so far). */
+  empty?: boolean;
   components: Component[];
   /** Initial state: path → value (apply once; the person's changes win afterwards). */
   data: Record<string, unknown>;
@@ -1123,8 +1164,29 @@ export type CompiledMarkup = {
 /** Compiles a markup region (complete, or the part streamed so far). The root is "root". */
 export function compileMarkup(
   source: string,
-  options: { final?: boolean; prefix?: string; frame?: boolean } = {},
+  options: { final?: boolean; prefix?: string; frame?: boolean; live?: boolean; allow?: string[] } = {},
 ): CompiledMarkup {
+  if (options.live) {
+    // Drawn by evaluating the source: one Live component; its state lives with the runtime.
+    const final = options.final ?? false;
+    const doc = parseLive(source, final);
+    return {
+      empty: !doc.drawable,
+      components: [
+        {
+          id: "root",
+          component: "Live",
+          source,
+          ...(final ? { final: true } : {}),
+          ...(options.frame ? { frame: true } : {}),
+          ...(options.allow ? { allow: options.allow } : {}),
+        } as Component,
+      ],
+      data: {},
+      text: final ? liveText(doc) : "",
+      diagnostics: final ? doc.problems : [],
+    };
+  }
   const parsed = parseMarkup(source, options.final ?? false);
   const ctx: Ctx = {
     states: new Map(),

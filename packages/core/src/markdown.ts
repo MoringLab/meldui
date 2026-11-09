@@ -193,6 +193,31 @@ export function splitMarkdownBlocks(text: string): string[] {
 }
 
 /**
+ * Bold that Markdown would not close. By the CommonMark rules `**word)**가` stays literal: a closing
+ * `**` after punctuation must not be followed by a letter, which is everyday Korean (a particle
+ * right after a bracket). The punctuation moves just outside the bold, which reads the same.
+ */
+export function normalizeBold(text: string): string {
+  if (!text.includes("**")) return text;
+  return text
+    .split(/(^```[\s\S]*?^```|^~~~[\s\S]*?^~~~|`[^`\n]*`)/m)
+    .map((part, i) =>
+      i % 2
+        ? part
+        : part
+            .replace(
+              /\*\*([^*`\n]*?[^*`\n\p{P}\p{S}])([\p{P}\p{S}]+)\*\*(?=[\p{L}\p{N}])/gu,
+              "**$1**$2",
+            )
+            .replace(
+              /(?<=[\p{L}\p{N}])\*\*([\p{P}\p{S}]+)([^*`\n\p{P}\p{S}][^*`\n]*?)\*\*/gu,
+              "$1**$2**",
+            ),
+    )
+    .join("");
+}
+
+/**
  * Models often write LaTeX as \( … \) and \[ … \]; Markdown math only knows $ … $ and $$ … $$.
  * Rewrites the former outside code fences and inline code, so the formula renders instead of
  * showing its backslashes.

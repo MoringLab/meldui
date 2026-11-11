@@ -1368,6 +1368,12 @@ function drawEl(
     case "input":
     case "textfield":
     case "textarea":
+      // A model never asks for a password or a code in its own UI: the host has a secure form
+      // for that. One in an answer could be a page's instructions phishing through the agent.
+      if (asksForSecret(a)) {
+        ctx.report(`<${tag}>`, new LiveError("a password field is not drawn in an answer"));
+        return null;
+      }
       return (
         <Field a={{ ...a, multiline: a.multiline ?? tag === "textarea" }} on={on} write={write} />
       );
@@ -2061,6 +2067,17 @@ function IconChild({ node, env, look }: { node: El; env: Env; look: Look }) {
   const { a } = evalAttrs(node, env, ctx, deps);
   useWatch(ctx.program, deps);
   return <LiveIcon a={{ size: 18, ...a }} look={look} />;
+}
+
+/** A field that would take a password, a code or a card: secure entry or such an autofill. */
+function asksForSecret(a: Record<string, unknown>): boolean {
+  const kind =
+    `${a.type ?? ""} ${a.autofill ?? ""} ${a.autoComplete ?? ""} ${a.textContentType ?? ""}`.toLowerCase();
+  return (
+    a.secure === true ||
+    a.secureTextEntry === true ||
+    /password|one-time-code|otp|cc-number|credit-card/.test(kind)
+  );
 }
 
 /** A filled field; `label` sits above. */
@@ -3331,8 +3348,12 @@ function KitEl({
       </LookCtx.Provider>
     );
   };
-  // A kit component the host's policy leaves out draws nothing.
+  // A kit component the host's policy leaves out draws nothing; nor does a password field.
   if (ctx.allow && !ctx.allow.has(name)) return null;
+  if (asksForSecret(props)) {
+    ctx.report(`<${name}>`, new LiveError("a password field is not drawn in an answer"));
+    return null;
+  }
   if (!checked) {
     ctx.report(`<${name}>`, new LiveError("its props don't fit the component"));
     return null;

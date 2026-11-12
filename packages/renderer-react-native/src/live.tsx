@@ -51,6 +51,7 @@ import React, {
   useEffect,
   useMemo,
   useReducer,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -82,6 +83,8 @@ import {
   useUI,
 } from "./renderer.js";
 import { isDark } from "./style.js";
+import { LabelBoard, labelWidth } from "./label-board.js";
+import { LiveMap, readPins } from "./live-map.js";
 
 type Palette = UIKit["tokens"]["light"] & { warning?: string };
 /** Styles built up field by field (React Native's style types are read-only). */
@@ -95,6 +98,12 @@ type Ns = "view" | "inline" | "svg" | "labels";
 export type LiveHostServices = {
   copy?: (text: string) => void;
   haptic?: (kind: "light" | "selection") => void;
+  /** sheet({…}) from a tap: the host opens a bottom sheet and fills it. */
+  sheet?: (spec: Record<string, unknown>) => void;
+  /** A map tile's address (z/x/y), or null when the host has no map. */
+  mapTile?: (z: number, x: number, y: number) => string | null;
+  /** <file path="…"/>: the host draws the file the answer handed over at that place. */
+  renderFile?: (path: string, name?: string) => React.ReactNode;
 };
 export const LiveHost = createContext<LiveHostServices>({});
 
@@ -653,6 +662,7 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
           if (/^https:\/\//.test(url)) void Linking.openURL(url);
         },
         copy: (text) => actions.current.host.copy?.(text),
+        sheet: (spec) => actions.current.host.sheet?.(spec),
       }),
     // A new program only when the declarations change (they come first; the UI streams after).
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -733,6 +743,8 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
         only.attrs.some((x) => x.name === "plain" || (x.name === "frame" && x.value === "false")) ||
         (childEls(only).length > 0 && childEls(only).every(isCard))));
   const framed = Boolean(p.frame) && !selfFramed && drawn.length > 0;
+  // A UI that pads itself already: the frame adds its ground, not a second padding.
+  const padsItself = !!only && only.attrs.some((x) => /^(padding|p|px|py)$/.test(x.name));
   const framedLook = useMemo(() => lookFor(ui.kit, ui.mode === "dark", true), [ui.kit, ui.mode]);
   const body = (
     <LookCtx.Provider value={framed ? framedLook : base}>
@@ -749,7 +761,7 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
           style={{
             backgroundColor: base.fill,
             borderRadius: ui.kit.tokens.radius * 1.6,
-            padding: 16,
+            padding: padsItself ? 0 : 16,
           }}
         >
           <FilledGround>{body}</FilledGround>
@@ -1273,6 +1285,14 @@ function drawEl(
   switch (tag) {
     case "icon":
       return <LiveIcon a={a} look={look} />;
+    case "carousel":
+    case "slides":
+      return <Carousel node={node} a={a} env={env} />;
+    case "map":
+      return <MapEl a={a} write={write} on={on} look={look} />;
+    case "file":
+    case "attachment":
+      return <FileEl a={a} />;
     case "image":
     case "img":
     case "asyncimage":
@@ -1877,6 +1897,102 @@ function LiveImage({ a, look }: { a: Attrs; look: Look }) {
       )}
     </View>
   );
+}
+
+/**
+ * Pages swiped sideways (pictures, cards): each child is a page, `peek` shows the next one's edge
+ * (default for more than one page), dots under them say where you are.
+ */
+function Carousel({ node, a, env }: { node: El; a: Attrs; env: Env }) {
+  const look = useLook();
+  const [w, setW] = useState(0);
+  const [at, setAt] = useState(0);
+  const gap = (num(a.gap) ?? 2) * 4;
+  const kids = node.children.filter((c) => c.type !== "text" || c.text.trim());
+  const many = kids.length > 1 || kids.some((c) => c.type === "each");
+  const share = typeof a.itemWidth === "string" && a.itemWidth.endsWith("%") ? Number.parseFloat(a.itemWidth) / 100 : undefined;
+  const page = w ? Math.round(w * Math.max(0.4, Math.min(1, share ?? (a.peek === false || !many ? 1 : 0.86)))) : 0;
+  const style = boxStyle({ ...a, gap: undefined }, look, false, 0);
+  return (
+    <View style={[{ width: "100%" }, style]} onLayout={(e) => setW(Math.round(e.nativeEvent.layout.width))}>
+      {page ? (
+        <ScrollView
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={page + gap}
+          snapToAlignment="start"
+          disableIntervalMomentum
+          onScroll={(e) => setAt(Math.round(e.nativeEvent.contentOffset.x / (page + gap)))}
+          scrollEventThrottle={48}
+          contentContainerStyle={{ gap, paddingRight: w - page }}
+        >
+          <Kids nodes={node.children} env={env} ns="view" cell={{ width: page }} />
+        </ScrollView>
+      ) : null}
+      {a.dots !== false && many ? <Dots at={at} node={node} env={env} look={look} /> : null}
+    </View>
+  );
+}
+function Dots({ at, node, env, look }: { at: number; node: El; env: Env; look: Look }) {
+  const ctx = useCtx();
+  const deps = new Set<string>();
+  let n = 0;
+  for (const c of node.children) {
+    if (c.type === "el") n++;
+    else if (c.type === "each") {
+      try {
+        const v = ctx.program.read(c.list, env, deps);
+        n += Array.isArray(v) ? v.length : typeof v === "number" ? Math.min(v, MAX_EACH) : 0;
+      } catch {
+        /* drawn as nothing */
+      }
+    }
+  }
+  useWatch(ctx.program, deps);
+  if (n < 2) return null;
+  return (
+    <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 10 }}>
+      {Array.from({ length: Math.min(n, 12) }, (_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: one dot per page
+        <View key={i} style={{ width: i === at ? 14 : 6, height: 6, borderRadius: 3, backgroundColor: i === at ? look.ink : look.t.border }} />
+      ))}
+    </View>
+  );
+}
+
+/** <map pins={[{lat, lng, label}]} value={chosen} zoom height/>: see live-map.tsx. */
+function MapEl({ a, write, on, look }: { a: Attrs; write: ((v: unknown) => void) | undefined; on: Handlers; look: Look }) {
+  const host = useContext(LiveHost);
+  const pins = readPins(a.pins ?? a.markers ?? a.places).map((p) => (p.color ? { ...p, color: liveColor(p.color, look) ?? p.color } : p));
+  const picked = num(a.value ?? a.selected ?? a.focus);
+  const select = changer(write, on);
+  const c = a.center && typeof a.center === "object" ? readPins([a.center])[0] : undefined;
+  return (
+    <LiveMap
+      pins={pins}
+      selected={picked !== undefined && pins[picked] ? picked : null}
+      onSelect={select}
+      zoom={num(a.zoom)}
+      center={c ? { lat: c.lat, lng: c.lng } : undefined}
+      height={clampN(num(a.height), 120, 520) ?? 220}
+      tile={host.mapTile}
+      ink={look.ink}
+      accent={liveColor(a.color ?? "accent", look) ?? look.ink}
+      surface={look.t.surface ?? "#fff"}
+      muted={look.t.muted}
+      radius={RADIUS[String(a.radius ?? "lg")] ?? 16}
+    />
+  );
+}
+
+/** <file path="/work/report.pdf"/>: the file itself, as the host draws a sent file. */
+function FileEl({ a }: { a: Attrs }) {
+  const host = useContext(LiveHost);
+  const path = String(a.path ?? a.src ?? a.href ?? "").replace(/^sandbox:/, "");
+  if (!path || !host.renderFile) return null;
+  return <>{host.renderFile(path, typeof a.name === "string" ? a.name : undefined)}</>;
 }
 
 /** Where a picture would be: a quiet gradient of its own, so a mockup still looks finished. */
@@ -2756,7 +2872,7 @@ function LiveSvg({ node, a, env }: { node: El; a: Attrs; env: Env }) {
   const vh = box?.[3] ?? clampN(num(a.height), 1, 4000) ?? 100;
   // The view's size is the size of the picture the native side paints into, so it stays sane.
   const ratio = Math.max(0.2, Math.min(8, vw / vh));
-  const fixedW = String(a.width ?? "").endsWith("%") ? undefined : clampN(num(a.width), 1, 1600);
+  const fixedW = String(a.width ?? "").endsWith("%") ? undefined : clampN(num(a.width ?? a.size), 1, 1600);
   const fixedH = clampN(num(a.height), 1, 1600);
   const style: VS = fixedW
     ? { width: fixedW, height: fixedH ?? Math.min(1600, fixedW / ratio), maxWidth: "100%" }
@@ -2771,10 +2887,13 @@ function LiveSvg({ node, a, env }: { node: El; a: Attrs; env: Env }) {
   const rule = aspect?.preserveAspectRatio as string | undefined;
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const labelled = holdsLabels(node.children);
+  // Labels that would land on each other are moved clear (see label-board.ts).
+  const [board] = useState(() => new LabelBoard(0, 0));
+  if (size) board.resize(size.w, size.h);
   const labels = useMemo<LabelScope | null>(() => {
     if (!labelled || !size) return null;
     const m = viewBoxMatrix(box ?? [0, 0, vw, vh], size.w, size.h, rule);
-    return { m, vw, vh, inherited: labelStyle(a) };
+    return { m, vw, vh, inherited: labelStyle(a), board };
     // biome-ignore lint/correctness/useExhaustiveDependencies: the attributes are read through their text form below
   }, [labelled, size?.w, size?.h, box?.join(), vw, vh, rule, JSON.stringify(labelStyle(a))]);
   return (
@@ -2859,6 +2978,8 @@ type LabelScope = {
   vh: number;
   /** Text attributes set on a surrounding group. */
   inherited: Attrs;
+  /** Keeps this drawing's labels off each other. */
+  board?: LabelBoard;
 };
 const LabelCtx = createContext<LabelScope>({ m: IDENTITY, vw: 100, vh: 100, inherited: {} });
 
@@ -2992,15 +3113,47 @@ function SvgLabel({ node, env }: { node: El; env: Env }) {
     ...labelSpan(props, ctx),
     ...(opacity < 1 ? { opacity } : {}),
   };
+  const placed = lines.map((line) => {
+    const [px, py] = transformPoint(m, line.x, line.y);
+    const runs = line.runs.map((r, k, all) => {
+      const text = k === 0 ? r.text.trimStart() : r.text;
+      return { ...r, text: k === all.length - 1 ? text.trimEnd() : text };
+    });
+    return { px, py, runs };
+  });
+  // The box these words take, for the board (turned words keep their place).
+  const id = useId();
+  const [, redraw] = useReducer((n: number) => n + 1, 0);
+  const board = scope.board;
+  useEffect(() => board?.subscribe(id, redraw), [board, id]);
+  let box: { x: number; y: number; w: number; h: number } | null = null;
+  if (board && Math.abs(degrees) <= 0.01) {
+    for (const l of placed) {
+      if (!l.runs.length) continue;
+      const w = labelWidth(l.runs.map((r) => r.text).join(""), font);
+      const x = l.px - w * anchor;
+      const y = l.py - down;
+      if (!box) box = { x, y, w, h: lineHeight };
+      else {
+        const x1 = Math.max(box.x + box.w, x + w);
+        const y1 = Math.max(box.y + box.h, y + lineHeight);
+        box.x = Math.min(box.x, x);
+        box.y = Math.min(box.y, y);
+        box.w = x1 - box.x;
+        box.h = y1 - box.y;
+      }
+    }
+  }
+  const boxKey = box ? `${box.x.toFixed(1)},${box.y.toFixed(1)},${box.w.toFixed(1)},${box.h.toFixed(1)}` : "";
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the box is compared by its text form
+  useEffect(() => { board?.set(id, box); }, [board, id, boxKey]);
+  const shift = board?.shift(id) ?? { dx: 0, dy: 0 };
   return (
     <>
-      {lines.map((line, i) => {
-        if (!line.runs.length) return null;
-        const [px, py] = transformPoint(m, line.x, line.y);
-        const runs = line.runs.map((r, k, all) => {
-          const text = k === 0 ? r.text.trimStart() : r.text;
-          return { ...r, text: k === all.length - 1 ? text.trimEnd() : text };
-        });
+      {placed.map(({ px: x0, py: y0, runs }, i) => {
+        if (!runs.length) return null;
+        const px = x0 + shift.dx;
+        const py = y0 + shift.dy;
         return (
           <Text
             // biome-ignore lint/suspicious/noArrayIndexKey: lines are in a fixed order

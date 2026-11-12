@@ -57,6 +57,11 @@ export interface LiveActions {
   ask?(text: string): void;
   open?(url: string): void;
   copy?(text: string): void;
+  /**
+   * sheet({title, prompt, images, action}): opens a bottom sheet the host fills (an agent writes
+   * its body from `prompt` as it opens). Plain data only: what it gets is a JSON copy.
+   */
+  sheet?(spec: Record<string, unknown>): void;
 }
 
 const HOOK =
@@ -256,12 +261,24 @@ export class LiveProgram {
       this.unsubscribe.push(store.subscribe(name, () => this.changed(name)));
     const text = (v: unknown) =>
       typeof v === "string" ? v : v === undefined || v === null ? "" : String(v);
-    const act = (name: keyof LiveActions) =>
+    const act = (name: Exclude<keyof LiveActions, "sheet">) =>
       new Native(name, ([v]) => {
         if (!this.pending) throw new LiveError(`${name}() runs only when tapped`);
         this.actions[name]?.(text(v));
       });
+    const sheet = new Native("sheet", ([v]) => {
+      if (!this.pending) throw new LiveError("sheet() runs only when tapped");
+      const spec = v && typeof v === "object" && !Array.isArray(v) ? v : { title: text(v) };
+      let plain: Record<string, unknown>;
+      try {
+        plain = JSON.parse(JSON.stringify(spec)) as Record<string, unknown>;
+      } catch {
+        throw new LiveError("sheet() takes plain data");
+      }
+      this.actions.sheet?.(plain);
+    });
     this.actionFns = {
+      sheet,
       send: act("send"),
       ask: act("ask"),
       open: act("open"),

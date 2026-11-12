@@ -163,6 +163,15 @@ describe("Live program", () => {
     p.run(handlerCode("() => send(`${qty}개 주문`)"));
     expect(sent).toEqual(["3개 주문"]);
   });
+
+  it("opens a sheet with a plain copy of what it was given", () => {
+    const got: Record<string, unknown>[] = [];
+    const { decls } = declarations("state pics = [\"https://a/1.jpg\"]");
+    const p = new LiveProgram(decls, new LiveState(), { sheet: (s) => got.push(s) });
+    p.run(handlerCode('() => sheet({title: "온더테이블", prompt: "이 식당 정보", images: pics, action: {label: "예약하기", ask: "온더테이블 예약해 줘"}})'));
+    expect(got).toEqual([{ title: "온더테이블", prompt: "이 식당 정보", images: ["https://a/1.jpg"], action: { label: "예약하기", ask: "온더테이블 예약해 줘" } }]);
+    expect(() => p.read('sheet({title: "x"})')).toThrow(LiveError);
+  });
 });
 
 const here = dirname(fileURLToPath(import.meta.url));

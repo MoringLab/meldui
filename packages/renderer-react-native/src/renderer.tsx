@@ -69,6 +69,7 @@ import {
 import { LearningView, learningNames } from "./learning.js";
 import { LiveView } from "./live.js";
 import { SafeMarkdown } from "./markdown.js";
+import { FitTable } from "./table.js";
 import {
   CollectionView,
   ConverterView,
@@ -1107,94 +1108,13 @@ function NativeTable({
   columns: { key: string; label: string }[];
   rows: any;
 }) {
-  const { kit, mode } = useUI();
-  const t = kit.tokens[mode];
-  const ty = resolveTypography(kit, Platform.OS === "ios" ? "ios" : "android");
+  // The same table a Markdown reply draws: a grid when it fits, records when it does not.
   const list: any[] = Array.isArray(rows) ? rows : [];
-  // Up to three columns share the width; more scroll sideways.
-  const fits = columns.length <= 3;
-  const numeric = (key: string) =>
-    list.length > 0 && list.every((row) => /^[-+₩$€]?\s?\d/.test(String(row[key] ?? "").trim()));
-  // Each column's share follows its longest text, so an amount stays on one line.
-  const measure = (value: unknown) =>
-    [...String(value ?? "")].reduce((sum, char) => sum + (char > "\u2E7F" ? 1.8 : 1), 0);
-  const width = (key: string, label: string) =>
-    Math.max(4, ...[label, ...list.map((row) => row[key])].map(measure));
-  const cells = columns.map((c, i) => ({
-    ...c,
-    style: {
-      ...(fits
-        ? { flex: width(c.key, c.label) }
-        : { width: Math.min(160, 18 + width(c.key, c.label) * 9) }),
-      textAlign: i && numeric(c.key) ? ("right" as const) : ("left" as const),
-    },
-  }));
-  const text = {
-    color: t.foreground,
-    fontSize: 14,
-    lineHeight: 20,
-    ...(ty.body.nativeFamily ? { fontFamily: ty.body.nativeFamily } : {}),
+  const data = {
+    header: columns.map((c) => c.label),
+    rows: list.map((row) => columns.map((c) => String(row?.[c.key] ?? ""))),
   };
-  const line = { borderColor: withAlpha(t.foreground, 0.1) };
-  const grid = (
-    <View style={fits ? { flex: 1 } : undefined}>
-      <View style={{ flexDirection: "row", gap: 12, paddingBottom: 6 }}>
-        {cells.map((c) => (
-          <Text
-            key={c.key}
-            numberOfLines={1}
-            style={{ ...text, ...c.style, color: t.muted, fontSize: 12, lineHeight: 16 }}
-          >
-            {c.label}
-          </Text>
-        ))}
-      </View>
-      {list.map((row: any, index: number) => (
-        <View
-          key={row.id ?? index}
-          style={{
-            ...line,
-            flexDirection: "row",
-            gap: 12,
-            paddingVertical: 9,
-            borderTopWidth: StyleSheet.hairlineWidth,
-          }}
-        >
-          {cells.map((c, i) => (
-            <Text
-              key={c.key}
-              style={{
-                ...text,
-                ...c.style,
-                ...(i ? { fontVariant: ["tabular-nums" as const] } : heavier(ty, 500)),
-              }}
-            >
-              {String(row[c.key] ?? "")}
-            </Text>
-          ))}
-        </View>
-      ))}
-    </View>
-  );
-  return (
-    <View style={{ gap: 8 }}>
-      {title ? (
-        <Text
-          accessibilityRole="header"
-          style={{ ...text, ...heavier(ty, 500), color: t.muted, fontSize: 13, lineHeight: 18 }}
-        >
-          {title}
-        </Text>
-      ) : null}
-      {fits ? (
-        <View style={{ flexDirection: "row" }}>{grid}</View>
-      ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {grid}
-        </ScrollView>
-      )}
-    </View>
-  );
+  return <FitTable data={data} title={title || undefined} />;
 }
 /** A short axis or value number: 1,200 / 1.2만, or 1.2k without unit labels. */
 function compactNumber(value: number, units: readonly (readonly [number, string])[]) {

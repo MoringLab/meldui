@@ -26,6 +26,7 @@ import { type CitationLine, citationPosition } from "./citation-layout.js";
 import { AttachmentMedia, openContentLink, useContentHost } from "./content.js";
 import { withAlpha } from "./interactive.js";
 import { useMotion, useUI } from "./renderer.js";
+import { FitTable, splitTable, type TableData } from "./table.js";
 
 type LastLineLayout = CitationLine & { markdown: string };
 
@@ -116,18 +117,36 @@ export function SafeMarkdown({
 }) {
   const text = useMemo(() => normalizeBold(written), [written]);
   const blocks = useMemo(() => splitMarkdownBlocks(normalizeMathDelimiters(text)), [text]);
-  if (blocks.length <= 1) return <MarkdownBlock text={text} streaming={streaming} />;
+  // Tables are drawn by the app (they fit the width instead of scrolling sideways).
+  const pieces = useMemo(() => blocks.flatMap((block, i) => tablePieces(block, i)), [blocks]);
+  if (pieces.length === 1 && pieces[0]!.kind === "md") return <MarkdownBlock text={text} streaming={streaming} />;
   return (
     <View style={{ gap: 12 }}>
-      {blocks.map((block, i) => (
-        <MarkdownBlock
-          key={`block-${i}`}
-          text={block}
-          streaming={streaming && i === blocks.length - 1}
-        />
-      ))}
+      {pieces.map((p, i) =>
+        p.kind === "table" ? (
+          <FitTable key={p.key} data={p.table} />
+        ) : (
+          <MarkdownBlock key={p.key} text={p.text} streaming={streaming && i === pieces.length - 1} />
+        ),
+      )}
     </View>
   );
+}
+
+type Piece = { kind: "md"; key: string; text: string } | { kind: "table"; key: string; table: TableData };
+function tablePieces(block: string, i: number): Piece[] {
+  if (!block.includes("|")) return [{ kind: "md", key: `block-${i}`, text: block }];
+  const out: Piece[] = [];
+  let rest = block;
+  for (let n = 0; rest && n < 8; n++) {
+    const found = splitTable(rest);
+    if (!found) break;
+    if (found.before) out.push({ kind: "md", key: `block-${i}-${n}a`, text: found.before });
+    out.push({ kind: "table", key: `block-${i}-${n}t`, table: found.table });
+    rest = found.after;
+  }
+  if (rest) out.push({ kind: "md", key: `block-${i}-r`, text: rest });
+  return out.length ? out : [{ kind: "md", key: `block-${i}`, text: block }];
 }
 
 const MarkdownBlock = memo(function MarkdownBlock({

@@ -528,19 +528,24 @@ function useWatch(program: LiveProgram, deps: Set<string>) {
   }, [program, key]);
 }
 
-/** Evaluates an element's attributes; handlers become callbacks that run the code when called. */
+/**
+ * Evaluates an element's attributes; handlers become callbacks that run the code when called.
+ * `key` names a row of a list for drawing and is left out, except on a slot object
+ * (`<Column key="price"/>`), where it is the data itself.
+ */
 function evalAttrs(
   node: El,
   env: Env,
   ctx: Ctx,
   deps: Set<string>,
+  keepKey = false,
 ): { a: Attrs; on: Handlers; write?: (v: unknown) => void } {
   const a: Attrs = {};
   const on: Handlers = {};
   let write: ((v: unknown) => void) | undefined;
   for (const attr of node.attrs) {
     const name = attr.name;
-    if (name === "key") continue;
+    if (name === "key" && !keepKey) continue;
     if (EVENT.test(name) && attr.kind === "expr") {
       const src = String(attr.value);
       on[
@@ -750,9 +755,16 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
   // A UI that pads itself already: the frame adds its ground, not a second padding.
   const padsItself = !!only && only.attrs.some((x) => /^(padding|p|px|py)$/.test(x.name));
   const framedLook = useMemo(() => lookFor(ui.kit, ui.mode === "dark", true), [ui.kit, ui.mode]);
+  // Everything in it drew nothing (a widget whose props could not be used): no empty card is left.
+  const [blank, setBlank] = useState(false);
   const body = (
     <LookCtx.Provider value={framed ? framedLook : base}>
-      <View ref={rootView as never} style={{ gap: 12 }} collapsable={false}>
+      <View
+        ref={rootView as never}
+        style={{ gap: 12 }}
+        collapsable={false}
+        onLayout={(e) => setBlank(e.nativeEvent.layout.height < 1)}
+      >
         <Kids nodes={nodes} env={program.root} ns="view" />
       </View>
     </LookCtx.Provider>
@@ -762,11 +774,15 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
       <Timers program={program} report={ctx.report} root={rootView} />
       {framed ? (
         <View
-          style={{
-            backgroundColor: base.fill,
-            borderRadius: ui.kit.tokens.radius * 1.6,
-            padding: padsItself ? 0 : 16,
-          }}
+          style={
+            blank
+              ? null
+              : {
+                  backgroundColor: base.fill,
+                  borderRadius: ui.kit.tokens.radius * 1.6,
+                  padding: padsItself ? 0 : 16,
+                }
+          }
         >
           <FilledGround>{body}</FilledGround>
         </View>
@@ -3392,7 +3408,7 @@ function KitEl({
     }
     const fields = objectShape(name, slot.prop);
     const obj: Record<string, unknown> = {};
-    const own = evalAttrs(n, scope, ctx, deps);
+    const own = evalAttrs(n, scope, ctx, deps, true);
     Object.assign(obj, own.a);
     if (own.on.onPress) {
       const h = `h${handlers.size}`;

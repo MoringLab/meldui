@@ -735,7 +735,11 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
             : [],
     );
   // One ground of its own (a card, a coloured box), or a group of such cards: no extra frame.
-  const isCard = (el: El) => grounded(el) || resolveName(el.name) === "Card";
+  // Things with a ground of their own: a card, a coloured box, a picture, a map, a file.
+  const isCard = (el: El) =>
+    grounded(el) ||
+    resolveName(el.name) === "Card" ||
+    /^(image|img|photo|picture|carousel|slides|map|file|attachment)$/i.test(el.name);
   const selfFramed =
     (drawn.length > 1 && drawn.every((n) => n.type === "el" && isCard(n))) ||
     (!!only &&

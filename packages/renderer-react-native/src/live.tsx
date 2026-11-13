@@ -1289,6 +1289,9 @@ function drawEl(
   look: Look,
   deps: Set<string>,
 ): ReactNode {
+  // The catalog Link is a card; lowercase <link> remains an inline text link.
+  if (ns === "view" && node.name === "Link")
+    return <KitEl node={node} a={a} on={on} write={write} env={env} name="Link" />;
   // Inside text: spans.
   if (ns === "inline" || (INLINE.has(tag) && ns !== "view"))
     return inlineEl(tag, node, a, on, env, ctx, look);

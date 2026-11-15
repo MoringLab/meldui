@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import Svg, { Defs, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { LiveHost } from "./host.js";
+import { LinkHandlerContext } from "./markdown.js";
 import { useInk, withAlpha } from "./interactive.js";
 import { type NativeViewProps, useGestureLock, useUI } from "./renderer.js";
 
@@ -399,6 +400,8 @@ export function CollectionView({ node, runtime, surfaceId }: NativeViewProps) {
   const scroller = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const lock = useGestureLock();
   const host = useContext(LiveHost);
+  // The host decides how a page opens (it may ask first); without one only web pages open.
+  const linkHandler = useContext(LinkHandlerContext);
   const items = (Array.isArray(p.items) ? p.items : []).filter(
     (i) => i && (typeof i.image === "string" || typeof i.title === "string"),
   );
@@ -421,8 +424,9 @@ export function CollectionView({ node, runtime, surfaceId }: NativeViewProps) {
       });
       return;
     }
-    if (https(item.url)) void Linking.openURL(item.url);
-    else if (item.image) setZoom(item);
+    if (https(item.url)) {
+      if (!linkHandler?.(item.url)) void Linking.openURL(item.url);
+    } else if (item.image) setZoom(item);
   };
   // Cards to compare (a rating, a detail, a next step, or no picture at all): picture, title,
   // rating and one line on a card of their own, side by side.

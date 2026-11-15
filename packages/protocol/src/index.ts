@@ -913,7 +913,12 @@ export const componentSchemas = {
     panel: z.boolean().optional(),
     hint: text.optional(),
   }),
-  /** Pictures from the web, the host's saved items or attachments: carousel, strip of cards, grid, hero. */
+  /**
+   * Pictures from the web, the host's saved items or attachments: carousel, strip of cards, grid,
+   * hero. Also things to compare at a glance (places, products, films, books, stays, recipes): a
+   * card each with a picture, a title, a rating and one line; a tap opens its detail in a sheet
+   * with a next step (book, buy, ask more).
+   */
   Collection: z.object({
     ...common,
     title: text.optional(),
@@ -921,14 +926,30 @@ export const componentSchemas = {
       .array(
         z
           .object({
-            image: z.string().min(1).max(2048),
+            /** Left out (or failing to load): the card draws a quiet placeholder. */
+            image: z.string().min(1).max(2048).optional(),
             title: z.string().max(120).optional(),
+            /** One line under the title (kind · area · price). */
             subtitle: z.string().max(160).optional(),
             caption: z.string().max(600).optional(),
             alt: z.string().max(300).optional(),
             url: z.string().max(2048).optional(),
+            /** Stars out of 5 and how many reviews, as found (never guessed). */
+            rating: z.number().min(0).max(5).optional(),
+            reviews: z.number().int().min(0).max(1_000_000_000).optional(),
+            /** What its detail sheet should cover; more pictures for it. */
+            about: z.string().max(400).optional(),
+            images: z.array(z.string().min(1).max(2048)).max(8).optional(),
+            /** The next step in the detail sheet ({label, ask}: the ask is sent as the user's message), or a tap handler. */
+            action: z
+              .union([
+                z.object({ label: z.string().min(1).max(40), ask: z.string().min(1).max(400) }).strict(),
+                z.object({ event: z.unknown() }).passthrough(),
+              ])
+              .optional(),
           })
-          .strict(),
+          .strict()
+          .refine((i) => !!(i.image || i.title), { message: "an item needs a picture or a title" }),
       )
       .min(1)
       .max(30),

@@ -72,6 +72,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import * as S from "react-native-svg";
+import { LiveHost } from "./host.js";
 import { FilledGround, useBackdrop, withAlpha } from "./interactive.js";
 import { LinkHandlerContext } from "./markdown.js";
 import {
@@ -94,18 +95,7 @@ type TS = W<TextStyle>;
 /** Where a node is drawn: a layout, inside text, inside a drawing, or inside a drawing's text. */
 type Ns = "view" | "inline" | "svg" | "labels";
 
-/** What a host adds to Live UIs: copying text and touch feedback. */
-export type LiveHostServices = {
-  copy?: (text: string) => void;
-  haptic?: (kind: "light" | "selection") => void;
-  /** sheet({…}) from a tap: the host opens a bottom sheet and fills it. */
-  sheet?: (spec: Record<string, unknown>) => void;
-  /** A map tile's address (z/x/y), or null when the host has no map. */
-  mapTile?: (z: number, x: number, y: number) => string | null;
-  /** <file path="…"/>: the host draws the file the answer handed over at that place. */
-  renderFile?: (path: string, name?: string) => React.ReactNode;
-};
-export const LiveHost = createContext<LiveHostServices>({});
+export { LiveHost, type LiveHostServices } from "./host.js";
 
 type Ctx = {
   program: LiveProgram;
@@ -740,11 +730,12 @@ export function LiveView({ node, runtime, surfaceId, renderChild }: NativeViewPr
             : [],
     );
   // One ground of its own (a card, a coloured box), or a group of such cards: no extra frame.
-  // Things with a ground of their own: a card, a coloured box, a picture, a map, a file, a link card.
+  // Things with a ground of their own: a card, a coloured box, a picture, a map, a file, a link card,
+  // a set of cards (Collection).
   const isCard = (el: El) =>
     grounded(el) ||
     resolveName(el.name) === "Card" ||
-    /^(image|img|photo|picture|carousel|slides|map|file|attachment|link)$/i.test(el.name);
+    /^(image|img|photo|picture|carousel|slides|map|file|attachment|link|collection)$/i.test(el.name);
   const selfFramed =
     (drawn.length > 1 && drawn.every((n) => n.type === "el" && isCard(n))) ||
     (!!only &&

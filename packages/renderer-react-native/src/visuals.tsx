@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Defs, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
+import { LiveHost } from "./host.js";
 import { useInk, withAlpha } from "./interactive.js";
 import { type NativeViewProps, useGestureLock, useUI } from "./renderer.js";
 
@@ -102,12 +103,15 @@ export function HostImage({
   radius,
   alt,
   fit = "cover",
+  fallback,
 }: {
   src: string;
   ratio?: number;
   radius?: number;
   alt?: string;
   fit?: "cover" | "contain";
+  /** Drawn instead of the broken-picture glyph when there is no picture or it fails. */
+  fallback?: React.ReactNode;
 }) {
   const resolve = useContext(ImageSourceContext);
   const { t } = useLook();
@@ -143,6 +147,8 @@ export function HostImage({
           onError={() => setState("failed")}
           style={{ width: "100%", height: "100%", opacity: state === "ready" ? 1 : 0 }}
         />
+      ) : fallback ? (
+        <View style={{ flex: 1 }}>{fallback}</View>
       ) : (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <Svg width={28} height={28} viewBox="0 0 24 24">
@@ -220,14 +226,124 @@ function RoundArrow({
   );
 }
 
+type Ask = { label: string; ask: string };
 type CollectionItem = {
-  image: string;
+  image?: string;
   title?: string;
   subtitle?: string;
   caption?: string;
   alt?: string;
   url?: string;
+  rating?: number;
+  reviews?: number;
+  about?: string;
+  images?: string[];
+  action?: Ask | { event: unknown };
 };
+const isAsk = (a: CollectionItem["action"]): a is Ask => !!a && "label" in a && "ask" in a;
+const grouped = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+/** ★ 4.6 (1,234): only what the item says; nothing when it has no rating. */
+function Stars({ item, size = 13 }: { item: CollectionItem; size?: number }) {
+  const { t, body } = useLook();
+  if (typeof item.rating !== "number") return null;
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+      <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path
+          d="M12 2.8l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.6l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"
+          fill="#FFB400"
+          stroke="#FFB400"
+          strokeWidth={1.2}
+          strokeLinejoin="round"
+        />
+      </Svg>
+      <Text style={{ ...body, fontSize: size, lineHeight: size + 5, fontWeight: "600" }}>
+        {item.rating.toFixed(1)}
+      </Text>
+      {typeof item.reviews === "number" ? (
+        <Text style={{ ...body, fontSize: size, lineHeight: size + 5, color: t.muted }}>
+          ({grouped(item.reviews)})
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/** Where a picture is missing or fails: a quiet tint with the first letter of the title. */
+function NoPicture({ item }: { item: CollectionItem }) {
+  const { t, body } = useLook();
+  const letter = (item.title ?? "").trim().slice(0, 1);
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: withAlpha(t.accent, 0.1),
+      }}
+    >
+      {letter ? (
+        <Text style={{ ...body, fontSize: 28, fontWeight: "700", color: withAlpha(t.accent, 0.55) }}>
+          {letter}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/** One thing to look at and compare: picture flush on top, title, rating, one line. */
+function ThumbCard({
+  item,
+  width,
+  ratio,
+  onPress,
+}: {
+  item: CollectionItem;
+  width: number | `${number}%`;
+  ratio: number;
+  onPress: () => void;
+}) {
+  const look = useLook();
+  const { t, body } = look;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={[item.title, item.subtitle].filter(Boolean).join(", ")}
+      style={({ pressed }) => ({
+        width,
+        borderRadius: 18,
+        overflow: "hidden",
+        backgroundColor: t.surface,
+        borderWidth: 1,
+        borderColor: withAlpha(t.border, 0.55),
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
+    >
+      <HostImage
+        src={item.image ?? ""}
+        alt={item.alt ?? item.title}
+        ratio={ratio}
+        radius={0}
+        fallback={<NoPicture item={item} />}
+      />
+      <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 12, gap: 3 }}>
+        {item.title ? (
+          <Text numberOfLines={1} style={{ ...body, fontSize: 15, lineHeight: 21, fontWeight: "700", ...look.heading }}>
+            {item.title}
+          </Text>
+        ) : null}
+        <Stars item={item} />
+        {item.subtitle ? (
+          <Text numberOfLines={1} style={{ ...body, fontSize: 13, lineHeight: 18, color: t.muted }}>
+            {item.subtitle}
+          </Text>
+        ) : null}
+      </View>
+    </Pressable>
+  );
+}
 
 function Viewer({ item, onClose }: { item: CollectionItem | null; onClose: () => void }) {
   const { labels } = useLook();
@@ -251,7 +367,7 @@ function Viewer({ item, onClose }: { item: CollectionItem | null; onClose: () =>
       >
         {item ? (
           <HostImage
-            src={item.image}
+            src={item.image ?? ""}
             alt={item.alt ?? item.title}
             fit="contain"
             ratio={0.75}
@@ -268,7 +384,7 @@ function Viewer({ item, onClose }: { item: CollectionItem | null; onClose: () =>
   );
 }
 
-export function CollectionView({ node }: NativeViewProps) {
+export function CollectionView({ node, runtime, surfaceId }: NativeViewProps) {
   const p = node.props as {
     title?: string;
     items: CollectionItem[];
@@ -282,14 +398,37 @@ export function CollectionView({ node }: NativeViewProps) {
   const [zoom, setZoom] = useState<CollectionItem | null>(null);
   const scroller = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const lock = useGestureLock();
+  const host = useContext(LiveHost);
   const items = (Array.isArray(p.items) ? p.items : []).filter(
-    (i) => i && typeof i.image === "string",
+    (i) => i && (typeof i.image === "string" || typeof i.title === "string"),
   );
   if (!items.length) return null;
+  const https = (u?: string): u is string => !!u && /^https:\/\//.test(u);
   const open = (item: CollectionItem) => {
-    if (item.url && /^https:\/\//.test(item.url)) void Linking.openURL(item.url);
-    else setZoom(item);
+    if (item.action && !isAsk(item.action)) {
+      void runtime.dispatch(surfaceId, node.id, item.action as never, node.scope);
+      return;
+    }
+    // Things to compare open their detail (pictures, what to know, the next step) in a sheet.
+    if ((item.about || isAsk(item.action) || item.images?.length) && host.sheet && item.title) {
+      const stars = typeof item.rating === "number" ? `★ ${item.rating.toFixed(1)}` : "";
+      host.sheet({
+        title: item.title,
+        subtitle: [stars, item.subtitle].filter(Boolean).join(" · ") || undefined,
+        prompt: item.about ?? item.title,
+        images: [item.image, ...(item.images ?? [])].filter(https).slice(0, 8),
+        ...(isAsk(item.action) ? { action: item.action } : {}),
+      });
+      return;
+    }
+    if (https(item.url)) void Linking.openURL(item.url);
+    else if (item.image) setZoom(item);
   };
+  // Cards to compare (a rating, a detail, a next step, or no picture at all): picture, title,
+  // rating and one line on a card of their own, side by side.
+  const cards = items.some(
+    (i) => typeof i.rating === "number" || i.about || isAsk(i.action) || !i.image,
+  );
   const title = (item: CollectionItem, center = false) =>
     item.title || item.subtitle ? (
       <View style={{ marginTop: 8, gap: 2, alignItems: center ? "center" : "flex-start" }}>
@@ -316,6 +455,57 @@ export function CollectionView({ node }: NativeViewProps) {
     </Text>
   ) : null;
 
+  if (cards && layout !== "list") {
+    if (items.length === 1 || layout === "hero")
+      return (
+        <View onLayout={onLayout} style={{ gap: 10 }}>
+          {head}
+          {items.map((item, i) => (
+            <ThumbCard key={`${item.title}-${i}`} item={item} width="100%" ratio={p.aspectRatio ?? 2} onPress={() => open(item)} />
+          ))}
+        </View>
+      );
+    if (layout === "grid")
+      return (
+        <View onLayout={onLayout}>
+          {head}
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            {items.map((item, i) => (
+              <ThumbCard
+                key={`${item.title}-${i}`}
+                item={item}
+                width={width ? (width - 10) / 2 : "48%"}
+                ratio={p.aspectRatio ?? 4 / 3}
+                onPress={() => open(item)}
+              />
+            ))}
+          </View>
+        </View>
+      );
+    // A strip: the next card peeks in so it reads as more to swipe.
+    const cw = Math.max(170, Math.min(250, (width || 340) * 0.66));
+    return (
+      <View onLayout={onLayout}>
+        {head}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToInterval={cw + 10}
+          onTouchStart={() => lock(true)}
+          onTouchEnd={() => lock(false)}
+          onTouchCancel={() => lock(false)}
+          contentContainerStyle={{ gap: 10, paddingRight: 4 }}
+          style={{ marginRight: -4 }}
+        >
+          {items.map((item, i) => (
+            <ThumbCard key={`${item.title}-${i}`} item={item} width={cw} ratio={p.aspectRatio ?? 4 / 3} onPress={() => open(item)} />
+          ))}
+        </ScrollView>
+      </View>
+    );
+  }
+
   if (layout === "list")
     return (
       <View onLayout={onLayout} style={{ gap: 14 }}>
@@ -328,15 +518,17 @@ export function CollectionView({ node }: NativeViewProps) {
           >
             <View style={{ width: Math.min(132, (width || 320) * 0.38) }}>
               <HostImage
-                src={item.image}
+                src={item.image ?? ""}
                 alt={item.alt ?? item.title}
                 ratio={p.aspectRatio ?? 4 / 3}
+                fallback={<NoPicture item={item} />}
               />
             </View>
             <View style={{ flex: 1, gap: 4 }}>
               {item.title ? (
                 <Text style={{ ...body, fontWeight: "700", ...look.heading }}>{item.title}</Text>
               ) : null}
+              <Stars item={item} />
               {item.subtitle ? (
                 <Text style={{ ...body, fontSize: 13, color: t.muted }}>{item.subtitle}</Text>
               ) : null}
@@ -361,7 +553,7 @@ export function CollectionView({ node }: NativeViewProps) {
               onPress={() => open(item)}
               style={{ width: width ? (width - 10) / 2 : "48%" }}
             >
-              <HostImage src={item.image} alt={item.alt ?? item.title} ratio={p.aspectRatio ?? 1} />
+              <HostImage src={item.image ?? ""} alt={item.alt ?? item.title} ratio={p.aspectRatio ?? 1} />
               {title(item)}
             </Pressable>
           ))}
@@ -380,7 +572,7 @@ export function CollectionView({ node }: NativeViewProps) {
         {hero ? (
           <Pressable onPress={() => open(hero)}>
             <HostImage
-              src={hero.image}
+              src={hero.image ?? ""}
               alt={hero.alt ?? hero.title}
               ratio={p.aspectRatio ?? 16 / 10}
               radius={16}
@@ -410,7 +602,7 @@ export function CollectionView({ node }: NativeViewProps) {
                 style={{ width: card }}
               >
                 <HostImage
-                  src={item.image}
+                  src={item.image ?? ""}
                   alt={item.alt ?? item.title}
                   ratio={p.aspectRatio ?? 1}
                   radius={16}
@@ -451,7 +643,7 @@ export function CollectionView({ node }: NativeViewProps) {
           {items.map((item, i) => (
             <Pressable key={`${item.image}-${i}`} onPress={() => open(item)} style={{ width: w }}>
               <HostImage
-                src={item.image}
+                src={item.image ?? ""}
                 alt={item.alt ?? item.title}
                 ratio={p.aspectRatio ?? 4 / 3}
                 radius={16}

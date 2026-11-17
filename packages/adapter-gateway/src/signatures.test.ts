@@ -68,7 +68,11 @@ describe("kit icons", () => {
     const catalog = buildCatalogSchema() as {
       components: Record<string, { properties: Record<string, unknown> }>;
     };
-    expect(catalog.components.Icon.properties.name).toMatchObject({ type: "string" });
+    // A literal name (any well-formed one, not only the kit's) or a bound value, since computed
+    // lists pick icons from data (3c4eb24).
+    const name = catalog.components.Icon.properties.name as { anyOf: { type?: string; pattern?: string }[] };
+    expect(name.anyOf[0]).toMatchObject({ type: "string", pattern: "^[a-z][a-z0-9-]{0,39}$" });
+    expect(name.anyOf).toHaveLength(2);
     expect(catalog.components.Callout.properties).toHaveProperty("icon");
   });
 });
